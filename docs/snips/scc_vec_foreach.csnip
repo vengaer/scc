@@ -1,0 +1,11 @@
+int *vec = scc_vec_init();
+
+/* Insert an arbitrary number of elements */
+
+int *iter;
+puts("Vector contents:");
+scc_vec_foreach(iter, vec) {
+    printf("%d\n", *iter);
+}
+
+scc_vec_free(vec);
