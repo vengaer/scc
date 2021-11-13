@@ -10,11 +10,14 @@ _symmap = {
         'scc_vec_size',
         'scc_vec_reserve',
         'scc_vec_foreach'
+        'scc_vec_foreach_reversed'
+        'scc_vec_foreach_by'
     ],
     'stdio': [
         'fgets',
         'fputs',
         'puts',
+        'printf'
     ],
     'stdlib': [
         'exit',
@@ -27,11 +30,13 @@ _symmap = {
 
 def required_headers(snip):
     headers = set()
+    lines = snip.split('\n')
     for header in _symmap:
-        for func in header:
-            if func in snip:
-                headers.add(header)
-                break
+        for func in _symmap[header]:
+            for line in lines:
+                if f'{func}(' in line:
+                    headers.add(header)
+                    break
     return headers
 
 def genfile(outfile, headers, snip):
