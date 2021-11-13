@@ -136,6 +136,10 @@ if(!scc_vec_reserver((void *){ v }, 32)) {
 
 == Modifiers
 
+=== void scc_vec_clear(void *vec)
+
+Empties the vector by setting its size to 0. The capacity remains unchanged.
+
 === bool scc_vec_resize(void *vec, size_t size)
 
 Resizes the vector to contain `size` elements, allocating more memory if required. The following three cases may occur
