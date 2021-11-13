@@ -184,6 +184,19 @@ is performed. Requires that all elements located at addresses beyond `iter` are 
 include::snips/scc_vec_erase.csnip[tags=scc_vec_erase]
 ----
 
+=== void scc_vec_erase_range(void *vec, void *first, void *end)
+
+Erase the elements at addresses in range `[first,end)`. Elements in the range `[end,&vec[scc_vec_size(vec)])` are copied
+to replace the erased range. `first` must refer to a suitably aligned address in `vec`. `end` must be either an address in
+`vec` or `&vec[scc_vec_size(vec)]`. It is subject to the same alignment requirements as `first`.
+
+If `first <= end`, the function returns immediately.
+
+.Erasing 8 elements at offset 13
+----
+include::snips/scc_vec_erase_range.csnip[tags=scc_vec_erase]
+----
+
 == Accessors
 
 === T operator[](void *vec, size_t index)

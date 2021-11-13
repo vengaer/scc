@@ -1,0 +1,7 @@
+int *vec = scc_vec_init();
+
+/* Fill it up */
+
+scc_vec_erase_range(vec, &vec[13], &vec[21]);
+
+scc_vec_free(vec);
