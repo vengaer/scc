@@ -1,17 +1,22 @@
 CC         := gcc
 LD         := $(CC)
 AR         := ar
+RB         := ruby
+CMAKE      := cmake
 
 MKDIR      := mkdir
 LN         := ln
 RM         := rm
+TOUCH      := touch
 
 root       := $(abspath $(CURDIR))
 builddir   := $(root)/build
+dirs       += $(builddir)
 
 scc        := scc
 srcdir     := $(root)/src
-sccdir     := $(root)/$(scc)
+testdir    := $(root)/test
+unitdir    := $(testdir)/unit
 
 cext       := c
 oext       := o
@@ -27,18 +32,23 @@ alib       := lib$(scc).$(aext)
 CFLAGS     := -std=c99 -c -MD -MP -g -Wall -Wextra -Wpedantic -Waggregate-return   \
               -Wbad-function-cast -Wcast-qual -Wfloat-equal -Wmissing-include-dirs \
               -Wnested-externs -Wpointer-arith -Wshadow -Wunknown-pragmas -Wswitch \
-              -Wundef -Wunused -Wwrite-strings -fPIC
-CPPFLAGS   := -I$(sccdir)
-LDFLAGS    := -shared -Wl,-soname,lib$(scc).$(soext).$(socompat)
+              -Wundef -Wunused -Wwrite-strings
+CPPFLAGS   := -I$(root)
+LDFLAGS    :=
 LDLIBS     :=
 ARFLAGS    := -rcs
 
+so_CFLAGS  := -fPIC
+so_LDFLAGS := -shared -Wl,-soname,lib$(scc).$(soext).$(socompat)
 
 MKDIRFLAGS := -p
 LNFLAGS    := -sf
 RMFLAGS    := -rf
+TOUCHFLAGS :=
 
 obj        := $(patsubst $(srcdir)/%.$(cext),$(builddir)/%.$(oext),$(wildcard $(srcdir)/*.$(cext)))
+
+include scripts/unit.mk
 
 .PHONY: all
 all: $(alib) $(solink)
@@ -49,7 +59,7 @@ $(solink): $(solib)
 
 $(solib): $(obj)
 	$(info [LD] $(notdir $@))
-	$(LD) -o $@ $^ $(LDFLAGS) $(LDLIBS)
+	$(LD) -o $@ $^ $(LDFLAGS) $(so_LDFLAGS) $(LDLIBS)
 
 $(alib): $(obj)
 	$(info [AR] $(notdir $@))
@@ -57,13 +67,19 @@ $(alib): $(obj)
 
 $(builddir)/%.$(oext): $(srcdir)/%.$(cext) | $(builddir)
 	$(info [CC] $(notdir $@))
-	$(CC) $(CFLAGS) $(CPPFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $(so_CFLAGS) $(CPPFLAGS) $^ -o $@
 
-$(builddir):
+$(dirs):
 	$(MKDIR) $(MKDIRFLAGS) $@
+
+.PHONY: check
+check:
 
 .PHONY: clean
 clean:
 	$(RM) $(RMFLAGS) $(builddir) $(solink) $(solib) $(alib)
+
+.PHONY: distclean
+distclean: clean
 
 $(VERBOSE).SILENT:
