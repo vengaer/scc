@@ -173,8 +173,18 @@ The element at slot `index`
 
 Produces a scope executed `scc_vec_size(vec)` times with `iter` referring to each element in the vector, in order.
 
-.Iterating over a vector of integers
+.Printing a vector of integers
 [source]
 ----
 include::snips/scc_vec_foreach.csnip[tags=scc_vec_foreach]
+----
+
+=== scc_vec_foreach_reversed(void *iter, void *vec)
+
+Produces a scope executed `scc_vec_size(vec)` times with `iter` referring to each element in the vector in reverse order.
+
+.Printing a vector of doubles in reverse
+[source]
+----
+include::snips/scc_vec_foreach_reversed.csnip[tags=scc_vec_foreach_reversed]
 ----

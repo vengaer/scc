@@ -1,0 +1,10 @@
+double *vec = scc_vec_init();
+double *iter;
+
+/* Fill up the vector */
+
+scc_vec_foreach_reversed(iter, vec) {
+    printf("%f\n", *iter);
+}
+
+scc_vec_free(vec);
