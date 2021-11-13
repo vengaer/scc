@@ -1,6 +1,9 @@
 #include <scc/scc_macro.h>
 #include <scc/scc_vec.h>
 
+#include <errno.h>
+#include <stdio.h>
+
 #include <unity.h>
 
 void test_scc_vec_init(void) {
@@ -85,6 +88,24 @@ void test_scc_vec_pop(void) {
     for(int i = 399; i >= 0; i--) {
         TEST_ASSERT_EQUAL_INT32(i, vec[scc_vec_size(vec) - 1u]);
         scc_vec_pop(vec);
+        TEST_ASSERT_EQUAL_INT32(i, scc_vec_size(vec));
+    }
+
+    scc_vec_free(vec);
+}
+
+void test_scc_vec_pop_safe(void) {
+    int *vec = scc_vec_init();
+
+    TEST_ASSERT_TRUE(scc_vec_reserve(vec, 368u));
+    for(int i = 0; i < 368; i++) {
+        TEST_ASSERT_TRUE(scc_vec_push(vec, i));
+    }
+    TEST_ASSERT_EQUAL_UINT64(368u, scc_vec_size(vec));
+
+    for(int i = 367; i >= 0; i--) {
+        TEST_ASSERT_EQUAL_INT32(i, vec[scc_vec_size(vec) - 1]);
+        scc_vec_pop_safe(vec);
         TEST_ASSERT_EQUAL_INT32(i, scc_vec_size(vec));
     }
 
