@@ -20,6 +20,9 @@ testdir    := $(root)/test
 unitdir    := $(testdir)/unit
 docdir     := $(root)/docs
 
+scripts    := $(root)/scripts
+mkscripts  := $(scripts)/mk
+
 cext       := c
 oext       := o
 aext       := a
@@ -52,8 +55,8 @@ TOUCHFLAGS :=
 
 obj        := $(patsubst $(srcdir)/%.$(cext),$(builddir)/%.$(oext),$(wildcard $(srcdir)/*.$(cext)))
 
-include scripts/unit.mk
-include scripts/docs.mk
+include $(mkscripts)/unit.mk
+include $(mkscripts)/docs.mk
 
 .PHONY: all
 all: $(alib) $(solink)
