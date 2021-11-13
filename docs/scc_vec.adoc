@@ -143,3 +143,10 @@ Pop the last element from the vector.  No bounds checking is performed.
 == void scc_vec_pop_safe(void *vec)
 
 Like `scc_vec_pop` but with bounds checking. If attempting to pop from an empty vector, standard `exit` is called.
+
+== T scc_vec_at(void *vec, size_t index)
+
+Returns the element at slot `index` in the vector. If there are not enough elements in the vector, standard `exit` is called.
+
+=== Returns
+The element at slot `index`
