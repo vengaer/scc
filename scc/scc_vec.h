@@ -38,6 +38,7 @@ _Bool scc_vec_impl_resize(void *vec, size_t size, size_t elemsize);
 _Bool scc_vec_impl_push_ensure_capacity(void *vec, size_t elemsize);
 _Bool scc_vec_impl_reserve(void *vec, size_t capacity, size_t elemsize);
 void scc_vec_impl_erase(void *vec, void *iter, size_t elemsize);
+void scc_vec_impl_erase_range(void *vec, void *first, void *end, size_t elemsize);
 void scc_vec_impl_at_check(void *vec, size_t index);
 
 void scc_vec_pop_safe(void *vec);
@@ -50,6 +51,9 @@ void scc_vec_pop_safe(void *vec);
 
 #define scc_vec_erase(vec, iter)                    \
     scc_vec_impl_erase(vec, iter, sizeof(*(vec)))
+
+#define scc_vec_erase_range(vec, first, end)        \
+    scc_vec_impl_erase_range(vec, first, end, sizeof(*(vec)))
 
 #define scc_vec_push(vec, element)                  \
     (scc_vec_impl_push_ensure_capacity(&(vec), sizeof(*(vec))) && \

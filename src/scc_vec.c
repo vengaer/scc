@@ -118,6 +118,23 @@ void scc_vec_impl_erase(void *vec, void *iter, size_t elemsize) {
     memmove(iter, (unsigned char *)iter + elemsize, nbytes);
 }
 
+void scc_vec_impl_erase_range(void *vec, void *first, void *end, size_t elemsize) {
+    if(end <= first) {
+        return;
+    }
+
+    size_t nelems = ((unsigned char *)end - (unsigned char *)first) / elemsize;
+    size_t offset = ((unsigned char *)first - (unsigned char *)vec) / elemsize;
+    scc_vec_base(vec)->sc_size -= nelems;
+
+    if(offset == scc_vec_size(vec)) {
+        /* Last nelems elements */
+        return;
+    }
+    size_t nbytes = (scc_vec_size(vec) - offset) * elemsize;
+    memmove(first, (unsigned char *)first + nelems * elemsize, nbytes);
+}
+
 void scc_vec_pop_safe(void *vec) {
     if(!scc_vec_size(vec)) {
         scc_panic("Attempt to pop element from vector of size 0");
