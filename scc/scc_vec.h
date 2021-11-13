@@ -46,4 +46,7 @@ void scc_vec_impl_at_check(void *vec, size_t index);
 #define scc_vec_at(vec, index)                      \
     (scc_vec_impl_at_check(vec, index),vec[index])
 
+#define scc_vec_foreach(iter, vec)                  \
+    for(iter = vec; iter < &vec[scc_vec_size(vec)]; ++iter)
+
 #endif /* SCC_VEC_H */
