@@ -198,3 +198,13 @@ Iterates over `vec` with `iter` referring to every `by` element.
 ----
 include::snips/scc_vec_foreach_by.csnip[tags=scc_vec_foreach_by]
 ----
+
+=== scc_vec_foreach_reversed_by(void *iter, void *vec, size_t by)
+
+Iterator over `vec` in reverse order with `iter` referring to every `by` element.
+
+.Printing every sixth element in a vector in reverse order
+[source]
+----
+include::snips/scc_vec_foreach_reversed_by.csnip[tags=scc_vec_foreach_reversed_by]
+----
