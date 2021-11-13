@@ -34,3 +34,7 @@ struct point {
 
 struct point *vec = scc_vec_init();
 ----
+
+== size_t scc_vec_size(void const *vec)
+
+Return the number of elements currently held in the vector.
