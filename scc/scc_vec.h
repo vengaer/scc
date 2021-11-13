@@ -63,10 +63,10 @@ void scc_vec_pop_safe(void *vec);
     (scc_vec_impl_at_check(vec, index),vec[index])
 
 #define scc_vec_foreach(iter, vec)                  \
-    for(iter = vec; iter < &vec[scc_vec_size(vec)]; ++iter)
+    scc_vec_foreach_by(iter, vec, 1)
 
 #define scc_vec_foreach_reversed(iter, vec)         \
-    for(iter = &vec[scc_vec_size(vec) - 1u]; iter >= vec; --iter)
+    scc_vec_foreach_reversed_by(iter, vec, 1)
 
 #define scc_vec_foreach_by(iter, vec, by)           \
     for(iter = vec; iter < &vec[scc_vec_size(vec)]; iter += by)
