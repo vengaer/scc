@@ -1,5 +1,6 @@
 = scc_vec
 :toc:
+:toclevels: 1
 :source-highlighter: rouge
 :source-language: c
 
@@ -8,13 +9,23 @@ may be accessed using `[]` as if it were a regular array.
 
 == void *scc_vec_init(void)
 
-Initialize an `scc_vec` structure. The returned pointer must be deallocated using `scc_vec_free`.
-Passing the it to standard `free` will result in heap corruption.
+Initialize an empty `scc_vec` structure. The returned pointer must be deallocated
+using `scc_vec_free`.  Passing the it to standard `free` will result in heap corruption.
 
 The returned pointer should be assigned to a pointer to a
 non-incomplete type to enforce type safety.
 
-As an example, initializing a vector of integers is done as follows
+=== Returns
+
+Address of an empty, initialized vector structure.
+
+=== Initializing Arbitrary Vectors
+
+The type of the vector is determined by the pointer used to store it. If that pointer is a
+pointer to `int`, the vector is treated as a vector of `int`. If the pointer is instead
+a pointer to `double`, the vector is treated as a vector of `double`.
+
+As an example, initializing a vector of `int` is done as follows
 
 .Initializing a vector of integers
 [source]
@@ -26,6 +37,7 @@ The above pattern may be applied to any arbitrary type. Creating a vector of a u
 `struct point` is as simple as
 
 .Initializing a vector of a user-defined type
+[source]
 ----
 struct point {
     float x;
@@ -39,10 +51,64 @@ struct point *vec = scc_vec_init();
 
 Free the memory occupied by `vec`. May only be called on pointers initialized with `scc_vec_init`.
 
+Once the call to `scc_vec_free` returns, the memory reference by the `vec` parameter should be treated as
+invalid. If the variable is to be reused as another vector, it must be reinitialized using `scc_vec_init`.
+
 == size_t scc_vec_size(void const *vec)
 
-Return the number of elements currently held in the vector.
+Get the number of elements currently held in the vector. Must only be called on elements initialized using
+`scc_vec_init`.
+
+=== Returns
+
+The number of elements in the vector.
 
 == size_t scc_vec_capacity(void const *vec)
 
-Return the maximum number of elements the vector is currently able to store.
+Get the maximum number of elements the vector is currently able to store. Must only be called on elements
+initialized using `scc_vec_init`.
+
+=== Returns
+
+The maximum number of elements the vector can store at the time of the call.
+
+== bool scc_vec_reserve(void *vec, size_t capacity)
+
+Resizes the vector such that it is capable of storing at least `capacity` elements. The `vec` must be passed as a pointer
+to a non-incomplete type, see the listing below for details.
+
+`scc_vec_reserve` may relocate the vector in memory. As such, any other pointers to it, or its elements, should be
+considered invalid after a reserve call.
+
+If the capacity of the vector is already larger than the one requested as the `capacity` parameter, the call returns
+immediately.
+
+=== Returns
+
+* `true` if enough memory could be reserved, or the vector's capacity is already larger than the requested one.
+* `false` on allocation failure
+
+=== Argument Passing
+
+The `vec` argument passed to `scc_vec_reserve` must be a pointer to a non-incomplete type. Notably, it may *not* be
+passed as `void *` as there would be no way to determine the required size in bytes. Attempting to pass a pointer to
+an incomplete type will result in a compilation error.
+
+.Complete and incomplete parameter passing
+[source]
+----
+int *v = scc_vec_init();
+
+/* Valid, v is passed as a pointer to int */
+if(!scc_vec_reserve(v, 32)) {
+    exit(1);
+}
+/* ... */
+scc_vec_free(v);
+
+v = scc_vec_init();
+/* Compilation error, v passed as pointer to void */
+if(!scc_vec_reserve((void *)v, 32)){
+    exit(1);
+}
+----
