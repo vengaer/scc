@@ -1,6 +1,7 @@
 #include <scc/scc_vec.h>
 
 size_t scc_vec_size(void const *vec);
+size_t scc_vec_capacity(void const *vec);
 
 static void *scc_vec_null = (union {
     struct scc_vec vec;
