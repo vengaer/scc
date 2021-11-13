@@ -22,6 +22,10 @@ inline size_t scc_vec_capacity(void const *vec) {
     return scc_container_qual(vec, struct scc_vec, sc_buffer, const)->sc_capacity;
 }
 
+inline _Bool scc_vec_empty(void const *vec) {
+    return !scc_vec_size(vec);
+}
+
 _Bool scc_vec_impl_resize(void *vec, size_t size, size_t elemsize);
 _Bool scc_vec_impl_push_ensure_capacity(void *vec, size_t elemsize);
 _Bool scc_vec_impl_reserve(void *vec, size_t capacity, size_t elemsize);

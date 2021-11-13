@@ -10,6 +10,7 @@ enum { SCC_VEC_MAX_CAPACITY_INCREASE = 4096 };
 size_t scc_vec_size(void const *vec);
 size_t scc_vec_capacity(void const *vec);
 void scc_vec_pop(void *vec);
+bool scc_vec_empty(void const *vec);
 
 static size_t scc_vec_memsize(size_t capacity, size_t elemsize);
 static size_t scc_vec_calc_new_capacity(size_t current);
