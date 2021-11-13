@@ -29,6 +29,8 @@ inline void scc_vec_pop(void *vec) {
     --scc_container(vec, struct scc_vec, sc_buffer)->sc_size;
 }
 
+void scc_vec_pop_safe(void *vec);
+
 #define scc_vec_reserve(vec, capacity)              \
     scc_vec_impl_reserve(&(vec), capacity, sizeof(*(vec)))
 
