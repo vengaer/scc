@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 
 enum { SCC_VEC_MAX_CAPACITY_INCREASE = 4096 };
 
@@ -64,6 +65,29 @@ void scc_vec_free(void *vec) {
     if(scc_vec_capacity(vec)) {
         free(scc_vec_base(vec));
     }
+}
+
+bool scc_vec_impl_resize(void *vec, size_t size, size_t elemsize) {
+    size_t currsize = scc_vec_size(*(void **)vec);
+
+    if(!size || currsize == size) {
+        return true;
+    }
+    if(currsize > size) {
+        scc_vec_base(*(void **)vec)->sc_size = size;
+        return true;
+    }
+
+    if(!scc_vec_impl_reserve(vec, size, elemsize)) {
+        return false;
+    }
+
+    unsigned char *baseaddr = *(void **)vec;
+    size_t zsize = (size - currsize) * elemsize;
+
+    memset(baseaddr + currsize * elemsize, 0, zsize);
+    scc_vec_base(*(void **)vec)->sc_size = size;
+    return true;
 }
 
 bool scc_vec_impl_push_ensure_capacity(void *vec, size_t elemsize) {
