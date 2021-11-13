@@ -11,6 +11,9 @@ unitbuilddir := $(builddir)/unit
 dirs         += $(unitbuilddir)
 unitobj      := $(patsubst $(unitdir)/%.$(cext),$(unitbuilddir)/%.$(oext),$(wildcard $(unitdir)/*.$(cext)))
 
+unit_CFLAGS  := -fsanitize=address,undefined
+unit_LDFLAGS := -fsanitize=address,undefined
+
 .PHONY: all
 all:
 
@@ -33,11 +36,11 @@ $(runnerdir)/%$(runnersuffix).$(cext): $(unitdir)/%.$(cext) $(unitygen) | $(runn
 
 $(unitbuilddir)/%.$(oext): $(runnerdir)/%.$(cext) | $(unitbuilddir)
 	$(info [CC] $(notdir $@))
-	$(CC) $(filter-out -fPIC,$(CFLAGS)) $(CPPFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) $(unit_CFLAGS) $(CPPFLAGS) -o $@ $^
 
 $(unitbuilddir)/%.$(oext): $(unitdir)/%.$(cext) | $(unitbuilddir)
 	$(info [CC] $(notdir $@))
-	$(CC) $(CFLAGS) $(CPPFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) $(unit_CFLAGS) $(CPPFLAGS) -o $@ $^
 
 .PHONY: check
 check: CPPFLAGS += -I$(unityinc)
@@ -49,7 +52,7 @@ $(strip
             $(eval __bin := $(unitbuilddir)/$(basename $(notdir $(__o))))
             $(__bin): $(__o) $(patsubst %.$(oext),%$(runnersuffix).$(oext),$(__o)) $(unityalib) $(alib)
 	            $$(info [LD] $$(notdir $$@))
-	            $$(CC) -o $$@ $$^ $$(LDFLAGS) $$(LDLIBS)
+	            $$(LD) -o $$@ $$^ $$(LDFLAGS) $$(unit_LDFLAGS) $$(LDLIBS)
 
             __chk_$(notdir $(__bin)): $(__bin)
 	          $$^
