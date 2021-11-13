@@ -126,7 +126,7 @@ if(!scc_vec_reserver((void *){ v }, 32)) {
 == bool scc_vec_push(void *vec, T value)
 
 Push `value` onto the back of the vector, allocating more memory if required. `vec` is expected to be of type
-`T *`.
+pointer to `T`.
 
 If the vector had to be resized and memory allocation failed, the vector is left unchanged, its address, size,
 capacity and held values identical to what they were before the call. Regardless of whether a call to
@@ -135,3 +135,7 @@ capacity and held values identical to what they were before the call. Regardless
 === Returns
 * `true` if the value was successfully added to the vector
 * `false` on allocation failure
+
+== void scc_vec_pop(void *vec)
+
+Pop the last element from the vector.  No bounds checking is performed.
