@@ -170,3 +170,20 @@ void test_scc_vec_resize_sizeup_nonempty(void) {
 
     scc_vec_free(vec);
 }
+
+void test_scc_vec_foreach(void) {
+    int *iter;
+    int i;
+    int *vec = scc_vec_init();
+
+    for(i = 0; i < 2222; i++) {
+        TEST_ASSERT_TRUE(scc_vec_push(vec, i));
+    }
+
+    i = 0;
+    scc_vec_foreach(iter, vec) {
+        TEST_ASSERT_EQUAL_INT32(i++, *iter);
+    }
+
+    scc_vec_free(vec);
+}
