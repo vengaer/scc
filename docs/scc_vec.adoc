@@ -139,3 +139,7 @@ capacity and held values identical to what they were before the call. Regardless
 == void scc_vec_pop(void *vec)
 
 Pop the last element from the vector.  No bounds checking is performed.
+
+== void scc_vec_pop_safe(void *vec)
+
+Like `scc_vec_pop` but with bounds checking. If attempting to pop from an empty vector, standard `exit` is called.
