@@ -295,3 +295,19 @@ void test_scc_vec_erase_last(void) {
     scc_vec_free(vec);
 }
 
+void test_scc_vec_erase_range(void) {
+    int *vec = scc_vec_init();
+    for(int i = 0; i < 100; i++) {
+        TEST_ASSERT_TRUE(scc_vec_push(vec, i));
+    }
+
+    scc_vec_erase_range(vec, &vec[2], &vec[8]);
+    TEST_ASSERT_EQUAL_INT32(0, vec[0]);
+    TEST_ASSERT_EQUAL_INT32(1, vec[1]);
+    TEST_ASSERT_EQUAL_INT32(8, vec[2]);
+    for(int i = 2; i < 94; i++) {
+        TEST_ASSERT_EQUAL_INT32(i + 6, vec[i]);
+    }
+
+    scc_vec_free(vec);
+}
