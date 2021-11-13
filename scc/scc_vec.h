@@ -26,16 +26,20 @@ inline _Bool scc_vec_empty(void const *vec) {
     return !scc_vec_size(vec);
 }
 
-_Bool scc_vec_impl_resize(void *vec, size_t size, size_t elemsize);
-_Bool scc_vec_impl_push_ensure_capacity(void *vec, size_t elemsize);
-_Bool scc_vec_impl_reserve(void *vec, size_t capacity, size_t elemsize);
-
 inline void scc_vec_pop(void *vec) {
     --scc_container(vec, struct scc_vec, sc_buffer)->sc_size;
 }
 
-void scc_vec_pop_safe(void *vec);
+inline void scc_vec_clear(void *vec) {
+    scc_container(vec, struct scc_vec, sc_buffer)->sc_size = 0u;
+}
+
+_Bool scc_vec_impl_resize(void *vec, size_t size, size_t elemsize);
+_Bool scc_vec_impl_push_ensure_capacity(void *vec, size_t elemsize);
+_Bool scc_vec_impl_reserve(void *vec, size_t capacity, size_t elemsize);
 void scc_vec_impl_at_check(void *vec, size_t index);
+
+void scc_vec_pop_safe(void *vec);
 
 #define scc_vec_reserve(vec, capacity)              \
     scc_vec_impl_reserve(&(vec), capacity, sizeof(*(vec)))
