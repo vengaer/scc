@@ -3,10 +3,13 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+enum { SCC_VEC_MAX_CAPACITY_INCREASE = 4096 };
+
 size_t scc_vec_size(void const *vec);
 size_t scc_vec_capacity(void const *vec);
 
 static size_t scc_vec_memsize(size_t capacity, size_t elemsize);
+static size_t scc_vec_calc_new_capacity(size_t current);
 static bool scc_vec_grow(void **vec, size_t capacity, size_t elemsize);
 static struct scc_vec *scc_vec_base(void *vec);
 
@@ -17,6 +20,11 @@ static void *scc_vec_null = (union {
 
 static inline size_t scc_vec_memsize(size_t capacity, size_t elemsize) {
     return capacity * elemsize + sizeof(struct scc_vec);
+}
+
+static inline size_t scc_vec_calc_new_capacity(size_t current) {
+    return current + (current < SCC_VEC_MAX_CAPACITY_INCREASE ?
+                                (current | 1) : SCC_VEC_MAX_CAPACITY_INCREASE);
 }
 
 static inline struct scc_vec *scc_vec_base(void *vec) {
@@ -56,7 +64,15 @@ void scc_vec_free(void *vec) {
     }
 }
 
-bool scc_vec_reserve_impl(void *vec, size_t capacity, size_t elemsize) {
+bool scc_vec_impl_push_ensure_capacity(void *vec, size_t elemsize) {
+    size_t capacity = scc_vec_capacity(*(void **)vec);
+    if(scc_vec_size(*(void **)vec) < capacity) {
+        return true;
+    }
+    return scc_vec_grow(vec, scc_vec_calc_new_capacity(capacity), elemsize);
+}
+
+bool scc_vec_impl_reserve(void *vec, size_t capacity, size_t elemsize) {
     if(capacity <= scc_vec_capacity(*(void **)vec)) {
         return true;
     }
