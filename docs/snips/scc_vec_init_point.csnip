@@ -1,0 +1,6 @@
+struct point {
+    float x;
+    float y;
+};
+
+struct point *vec = scc_vec_init();

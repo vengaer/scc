@@ -1,0 +1,23 @@
+char buffer[32];
+char *endp;
+unsigned long parsed;
+
+unsigned long *vec = scc_vec_init();
+
+while(fgets(buffer, sizeof(buffer), stdin)) {
+    parsed = strtoul(buffer, &endp, 0);
+    if(!isspace(*endp)) {
+        continue;
+    }
+    if(!scc_vec_push(vec, parsed)) {
+        fputs("Allocation failure\n", stderr);
+        exit(1);
+    }
+}
+
+puts("You entered:");
+for(unsigned i = 0; i < scc_vec_size(vec); i++) {
+    printf("  %lu\n", vec[i]);
+}
+
+scc_vec_free(vec);

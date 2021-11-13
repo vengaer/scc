@@ -1,0 +1,8 @@
+int *v = scc_vec_init();
+
+/* Valid, v is passed as a pointer to int */
+if(!scc_vec_reserve(v, 32)) {
+    exit(1);
+}
+/* ... */
+scc_vec_free(v);

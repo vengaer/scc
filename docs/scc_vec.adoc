@@ -7,6 +7,14 @@
 `scc_vec` is a generic, dynamically allocated array. Individual elements of the vector
 may be accessed using `[]` as if it were a regular array.
 
+The following shows an example of how the vector may be used
+
+.Example usage
+[source]
+----
+include::snips/scc_vec_example.csnip[tags=scc_vec_example]
+----
+
 == void *scc_vec_init(void)
 
 Initialize an empty `scc_vec` structure. While the call itself never allocates, the
@@ -32,7 +40,7 @@ As an example, initializing a vector of `int` is done as follows
 .Initializing a vector of integers
 [source]
 ----
-int *vec = scc_vec_init();
+include::snips/scc_vec_init_int.csnip[tags=scc_vec_init_int]
 ----
 
 The above pattern may be applied to any arbitrary type. Creating a vector of a user-defined
@@ -41,12 +49,7 @@ The above pattern may be applied to any arbitrary type. Creating a vector of a u
 .Initializing a vector of a user-defined type
 [source]
 ----
-struct point {
-    float x;
-    float y;
-};
-
-struct point *vec = scc_vec_init();
+include::snips/scc_vec_init_point.csnip[tags=scc_vec_init_point]
 ----
 
 == void scc_vec_free(void *vec)
@@ -94,24 +97,20 @@ If memory allocation fails, the vector remains unchanged and must still be passe
 
 === Argument Passing
 
-The `vec` argument passed to `scc_vec_reserve` must be a pointer to a non-incomplete type. Notably, it may *not* be
-passed as `void *` as there would be no way to determine the required size in bytes. While attempting to pass a
-pointer to an incomplete type will usually result in either a compilation error or, at least, warnings, this should not
-be relied upon.
+The `vec` argument passed to `scc_vec_reserve` must be a pointer to a non-incomplete type, e.g.
 
-.Complete and incomplete parameter passing
+.Passing correct vector argument
+[source]
+----
+include::snips/scc_vec_reserve.csnip[tags=scc_vec_reserve]
+----
+
+Notably, the `vec` parameter may *not* be passed as `void *` as there would be no way to determine the required size in bytes. While attempting to pass a pointer to an incomplete type will usually result in either a compilation error or, at least, warnings, this should not be relied upon.
+
+.Passing incorrect vector arguments
 [source]
 ----
 int *v = scc_vec_init();
-
-/* Valid, v is passed as a pointer to int */
-if(!scc_vec_reserve(v, 32)) {
-    exit(1);
-}
-/* ... */
-scc_vec_free(v);
-
-v = scc_vec_init();
 /* Invalid, passing pointer to incomplete type. */
 if(!scc_vec_reserve((void *)v, 32)){
     exit(1);
