@@ -10,6 +10,7 @@ _symmap = {
         'scc_vec_size',
         'scc_vec_reserve',
         'scc_vec_erase',
+        'scc_vec_erase_range',
         'scc_vec_foreach'
         'scc_vec_foreach_reversed'
         'scc_vec_foreach_by'
