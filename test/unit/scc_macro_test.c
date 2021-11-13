@@ -2,6 +2,21 @@
 
 #include <unity.h>
 
+void test_scc_offset(void) {
+    struct foo {
+        unsigned dw;
+        short wd;
+        unsigned char b;
+        struct foo *f;
+    };
+
+    TEST_ASSERT_EQUAL_UINT64(0u, scc_offset(struct foo, dw));
+    /* Technically undefined behavior but good enough for the tests */
+    TEST_ASSERT_EQUAL_UINT64((size_t)&((struct foo *)4096)->f - 4096u, scc_offset(struct foo, f));
+    TEST_ASSERT_EQUAL_UINT64((size_t)&((struct foo *)4096)->b - 4096u, scc_offset(struct foo, b));
+    TEST_ASSERT_EQUAL_UINT64((size_t)&((struct foo *)4096)->wd - 4096u, scc_offset(struct foo, wd));
+}
+
 void test_scc_container(void) {
     struct foo {
         unsigned dw;
