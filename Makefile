@@ -22,6 +22,7 @@ docdir     := $(root)/docs
 
 scripts    := $(root)/scripts
 mkscripts  := $(scripts)/mk
+pyscripts  := $(scripts)/python
 
 cext       := c
 oext       := o
