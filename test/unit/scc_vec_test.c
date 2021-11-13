@@ -13,3 +13,8 @@ void test_scc_vec_size(void) {
     int *vec = scc_vec_init();
     TEST_ASSERT_EQUAL_UINT64(0u, (unsigned long long)scc_vec_size(vec));
 }
+
+void test_scc_vec_capacity(void) {
+    int *vec = scc_vec_init();
+    TEST_ASSERT_EQUAL_UINT64(0u, (unsigned long long)scc_vec_capacity(vec));
+}
