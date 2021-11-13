@@ -10,6 +10,7 @@ doc: $(patsubst $(docdir)/%.$(adocext),$(docbuilddir)/%.$(htmlext),$(wildcard $(
 
 .PHONY: docshow
 docshow: $(docindex) doc
+	$(if $(BROWSER),,$(error BROWSER environment variable not set))
 	$(BROWSER) $<
 
 $(docbuilddir)/%.$(htmlext): $(docdir)/%.$(adocext) | $(docbuilddir)
