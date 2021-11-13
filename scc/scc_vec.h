@@ -25,6 +25,10 @@ inline size_t scc_vec_capacity(void const *vec) {
 _Bool scc_vec_impl_push_ensure_capacity(void *vec, size_t elemsize);
 _Bool scc_vec_impl_reserve(void *vec, size_t capacity, size_t elemsize);
 
+inline void scc_vec_pop(void *vec) {
+    --scc_container(vec, struct scc_vec, sc_buffer)->sc_size;
+}
+
 #define scc_vec_reserve(vec, capacity)              \
     scc_vec_impl_reserve(&(vec), capacity, sizeof(*(vec)))
 
