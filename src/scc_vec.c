@@ -87,3 +87,9 @@ void scc_vec_pop_safe(void *vec) {
     }
     scc_vec_pop(vec);
 }
+
+void scc_vec_impl_at_check(void *vec, size_t index) {
+    if(scc_vec_size(vec) <= index) {
+        scc_panic("Attempt to access element %zu in vector of size %zu", index, scc_vec_size(vec));
+    }
+}

@@ -30,6 +30,7 @@ inline void scc_vec_pop(void *vec) {
 }
 
 void scc_vec_pop_safe(void *vec);
+void scc_vec_impl_at_check(void *vec, size_t index);
 
 #define scc_vec_reserve(vec, capacity)              \
     scc_vec_impl_reserve(&(vec), capacity, sizeof(*(vec)))
@@ -37,5 +38,8 @@ void scc_vec_pop_safe(void *vec);
 #define scc_vec_push(vec, element)                  \
     (scc_vec_impl_push_ensure_capacity(&(vec), sizeof(*(vec))) && \
     (vec[scc_container(vec, struct scc_vec, sc_buffer)->sc_size++] = element,1))
+
+#define scc_vec_at(vec, index)                      \
+    (scc_vec_impl_at_check(vec, index),vec[index])
 
 #endif /* SCC_VEC_H */
