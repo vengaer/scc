@@ -51,4 +51,8 @@ void scc_vec_impl_at_check(void *vec, size_t index);
 
 #define scc_vec_foreach_reversed(iter, vec)         \
     for(iter = &vec[scc_vec_size(vec) - 1u]; iter >= vec; --iter)
+
+#define scc_vec_foreach_by(iter, vec, by)           \
+    for(iter = vec; iter < &vec[scc_vec_size(vec)]; iter += by)
+
 #endif /* SCC_VEC_H */
