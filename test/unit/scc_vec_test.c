@@ -111,3 +111,13 @@ void test_scc_vec_pop_safe(void) {
 
     scc_vec_free(vec);
 }
+
+void test_scc_vec_at(void) {
+    int *vec = scc_vec_init();
+    for(int i = 0; i < 368; i++) {
+        TEST_ASSERT_TRUE(scc_vec_push(vec, i));
+        TEST_ASSERT_EQUAL_INT32(i, scc_vec_at(vec, i));
+    }
+
+    scc_vec_free(vec);
+}
