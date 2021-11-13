@@ -3,6 +3,7 @@ LD         := $(CC)
 AR         := ar
 RB         := ruby
 CMAKE      := cmake
+ADOC       := asciidoc
 
 MKDIR      := mkdir
 LN         := ln
@@ -17,6 +18,7 @@ scc        := scc
 srcdir     := $(root)/src
 testdir    := $(root)/test
 unitdir    := $(testdir)/unit
+docdir     := $(root)/docs
 
 cext       := c
 oext       := o
@@ -24,6 +26,8 @@ aext       := a
 soext      := so
 sover      := 0
 socompat   := 0
+adocext    := adoc
+htmlext    := html
 
 solink     := lib$(scc).$(soext)
 solib      := $(solink).$(sover)
@@ -49,6 +53,7 @@ TOUCHFLAGS :=
 obj        := $(patsubst $(srcdir)/%.$(cext),$(builddir)/%.$(oext),$(wildcard $(srcdir)/*.$(cext)))
 
 include scripts/unit.mk
+include scripts/docs.mk
 
 .PHONY: all
 all: $(alib) $(solink)

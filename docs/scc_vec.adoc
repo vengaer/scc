@@ -1,0 +1,36 @@
+= scc_vec
+:toc:
+:source-highlighter: rouge
+:source-language: c
+
+`scc_vec` is a generic, dynamically allocated array. Individual elements of the vector
+may be accessed using `[]` as if it were a regular array.
+
+== void *scc_vec_init(void)
+
+Initialize an `scc_vec` structure. The returned pointer must be deallocated using `scc_vec_free`.
+Passing the it to standard `free` will result in heap corruption.
+
+The returned pointer should be assigned to a pointer to a
+non-incomplete type to enforce type safety.
+
+As an example, initializing a vector of integers is done as follows
+
+.Initializing a vector of integers
+[source]
+----
+int *vec = scc_vec_init();
+----
+
+The above pattern may be applied to any arbitrary type. Creating a vector of a user-defined
+`struct point` is as simple as
+
+.Initializing a vector of a user-defined type
+----
+struct point {
+    float x;
+    float y;
+};
+
+struct point *vec = scc_vec_init();
+----
