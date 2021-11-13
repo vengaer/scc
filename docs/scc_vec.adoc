@@ -122,6 +122,18 @@ if(!scc_vec_reserver((void *){ v }, 32)) {
 }
 ----
 
+== bool scc_vec_resize(void *vec, size_t size)
+
+Resizes the vector to contain `size` elements, allocating more memory if required. The following three cases may occur
+
+* If `scc_vec_size(vec) == size` or if `size == 0`, the function returns immediately. No allocations are performed.
+* If `scc_vec_size(vec) > size`, the size of the vector is set to `size`. No allocations are performed.
+* If `scc_vec_size(vec) < size`, the vector is resized such that it can hold at least `size` elements. Newly inserted elements are zeroed.
+
+=== Returns
+* `true` if the vector was successfully resized
+* `false` on allocation error
+
 == bool scc_vec_push(void *vec, T value)
 
 Push `value` onto the back of the vector, allocating more memory if required. `vec` is expected to be of type
