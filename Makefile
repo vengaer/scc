@@ -27,6 +27,7 @@ pyscripts  := $(scripts)/python
 cext       := c
 oext       := o
 aext       := a
+dext       := d
 soext      := so
 sover      := 0
 socompat   := 0
@@ -76,7 +77,7 @@ $(alib): $(obj)
 
 $(builddir)/%.$(oext): $(srcdir)/%.$(cext) | $(builddir)
 	$(info [CC] $(notdir $@))
-	$(CC) $(CFLAGS) $(so_CFLAGS) $(CPPFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $(so_CFLAGS) $(CPPFLAGS) $< -o $@
 
 $(dirs):
 	$(MKDIR) $(MKDIRFLAGS) $@
@@ -92,3 +93,5 @@ clean:
 distclean: clean
 
 $(VERBOSE).SILENT:
+
+-include $(patsubst %.$(oext),%.$(dext),$(obj) $(unitobj))

@@ -36,11 +36,11 @@ $(runnerdir)/%$(runnersuffix).$(cext): $(unitdir)/%.$(cext) $(unitygen) | $(runn
 
 $(unitbuilddir)/%.$(oext): $(runnerdir)/%.$(cext) | $(unitbuilddir)
 	$(info [CC] $(notdir $@))
-	$(CC) $(CFLAGS) $(unit_CFLAGS) $(CPPFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) $(unit_CFLAGS) $(CPPFLAGS) -o $@ $<
 
 $(unitbuilddir)/%.$(oext): $(unitdir)/%.$(cext) | $(unitbuilddir)
 	$(info [CC] $(notdir $@))
-	$(CC) $(CFLAGS) $(unit_CFLAGS) $(CPPFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) $(unit_CFLAGS) $(CPPFLAGS) -o $@ $<
 
 .PHONY: check
 check: CPPFLAGS += -I$(unityinc)
