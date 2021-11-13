@@ -202,3 +202,21 @@ void test_scc_vec_foreach_reversed(void) {
     }
     scc_vec_free(vec);
 }
+
+void test_scc_vec_foreach_by(void) {
+    int *iter;
+    int i;
+    int *vec = scc_vec_init();
+
+    for(i = 0; i < 221; i++) {
+        TEST_ASSERT_TRUE(scc_vec_push(vec, i));
+    }
+
+    i = 0;
+    scc_vec_foreach_by(iter, vec, 3) {
+        TEST_ASSERT_EQUAL_INT32(i, *iter);
+        i += 3;
+    }
+    scc_vec_free(vec);
+
+}
