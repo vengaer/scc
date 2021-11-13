@@ -22,9 +22,9 @@ docshow: $(docindex) doc
 	$(if $(BROWSER),,$(error BROWSER environment variable not set))
 	$(BROWSER) $<
 
-$(docbuilddir)/%.$(htmlext): $(docdir)/%.$(adocext) | $(docbuilddir)
+$(docbuilddir)/%.$(htmlext): $(docdir)/%.$(adocext) $(docsnips) | $(docbuilddir)
 	$(info [ADOC] $(notdir $@))
-	$(ADOC) -o $@ $^
+	$(ADOC) -o $@ $<
 
 define snip-linker-rules
 $(strip
