@@ -218,5 +218,22 @@ void test_scc_vec_foreach_by(void) {
         i += 3;
     }
     scc_vec_free(vec);
+}
 
+void test_scc_vec_foreach_reversed_by(void) {
+    int *iter;
+    int i;
+    int *vec = scc_vec_init();
+
+    for(i = 0; i < 2211; i++) {
+        TEST_ASSERT_TRUE(scc_vec_push(vec, i));
+    }
+
+    --i;
+    scc_vec_foreach_reversed_by(iter, vec, 8) {
+        TEST_ASSERT_EQUAL_INT32(i, *iter);
+        i -= 8;
+    }
+    TEST_ASSERT_LESS_OR_EQUAL(0, i);
+    scc_vec_free(vec);
 }
