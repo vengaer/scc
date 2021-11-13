@@ -237,3 +237,13 @@ void test_scc_vec_foreach_reversed_by(void) {
     TEST_ASSERT_LESS_OR_EQUAL(0, i);
     scc_vec_free(vec);
 }
+
+void test_scc_vec_empty(void) {
+    int *vec = scc_vec_init();
+    TEST_ASSERT_TRUE(scc_vec_empty(vec));
+    TEST_ASSERT_TRUE(scc_vec_push(vec, 1));
+    TEST_ASSERT_FALSE(scc_vec_empty(vec));
+    scc_vec_pop(vec);
+    TEST_ASSERT_TRUE(scc_vec_empty(vec));
+    scc_vec_free(vec);
+}
