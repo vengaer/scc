@@ -38,3 +38,7 @@ struct point *vec = scc_vec_init();
 == size_t scc_vec_size(void const *vec)
 
 Return the number of elements currently held in the vector.
+
+== size_t scc_vec_capacity(void const *vec)
+
+Return the maximum number of elements the vector is currently able to store.
