@@ -247,3 +247,12 @@ void test_scc_vec_empty(void) {
     TEST_ASSERT_TRUE(scc_vec_empty(vec));
     scc_vec_free(vec);
 }
+
+void test_scc_vec_clear(void) {
+    int *vec = scc_vec_init();
+    TEST_ASSERT_TRUE(scc_vec_empty(vec));
+    TEST_ASSERT_TRUE(scc_vec_push(vec, 1));
+    scc_vec_clear(vec);
+    TEST_ASSERT_TRUE(scc_vec_empty(vec));
+    scc_vec_free(vec);
+}
