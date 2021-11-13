@@ -63,6 +63,14 @@ invalid. If the variable is to be reused as another vector, it must be reinitial
 
 == Capacity
 
+=== bool scc_vec_empty(void const *vec)
+
+Check whether the vector is empty.
+
+==== Returns
+* `true` if `scc_vec_size(vec) == 0`
+* `false` otherwise
+
 === size_t scc_vec_size(void const *vec)
 
 Get the number of elements currently held in the vector. Must only be called on elements initialized using
