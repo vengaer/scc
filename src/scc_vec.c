@@ -107,6 +107,17 @@ bool scc_vec_impl_reserve(void *vec, size_t capacity, size_t elemsize) {
     return scc_vec_grow(vec, capacity, elemsize);
 }
 
+void scc_vec_impl_erase(void *vec, void *iter, size_t elemsize) {
+    size_t offset = ((unsigned char *)iter - (unsigned char *)vec) / elemsize;
+    --scc_vec_base(vec)->sc_size;
+    if(offset == scc_vec_size(vec)) {
+        /* Last element */
+        return;
+    }
+    size_t nbytes = (scc_vec_size(vec) - offset) * elemsize;
+    memmove(iter, (unsigned char *)iter + elemsize, nbytes);
+}
+
 void scc_vec_pop_safe(void *vec) {
     if(!scc_vec_size(vec)) {
         scc_panic("Attempt to pop element from vector of size 0");
