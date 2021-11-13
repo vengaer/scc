@@ -9,8 +9,10 @@ may be accessed using `[]` as if it were a regular array.
 
 == void *scc_vec_init(void)
 
-Initialize an empty `scc_vec` structure. The returned pointer must be deallocated
-using `scc_vec_free`.  Passing the it to standard `free` will result in heap corruption.
+Initialize an empty `scc_vec` structure. While the call itself never allocates, the
+returned pointer should always be passed `scc_vec_free` to reclaim potential memory
+allocated as part of calls to other parts of the API. Passing the vector to standard
+`free` will result in heap corruption.
 
 The returned pointer should be assigned to a pointer to a
 non-incomplete type to enforce type safety.
@@ -83,6 +85,8 @@ considered invalid after a reserve call.
 If the capacity of the vector is already larger than the one requested as the `capacity` parameter, the call returns
 immediately.
 
+If memory allocation fails, the vector remains unchanged and must still be passed to `scc_vec_free` for deallocation.
+
 === Returns
 
 * `true` if enough memory could be reserved, or the vector's capacity is already larger than the requested one.
@@ -91,8 +95,9 @@ immediately.
 === Argument Passing
 
 The `vec` argument passed to `scc_vec_reserve` must be a pointer to a non-incomplete type. Notably, it may *not* be
-passed as `void *` as there would be no way to determine the required size in bytes. Attempting to pass a pointer to
-an incomplete type will result in a compilation error.
+passed as `void *` as there would be no way to determine the required size in bytes. While attempting to pass a
+pointer to an incomplete type will usually result in either a compilation error or, at least, warnings, this should not
+be relied upon.
 
 .Complete and incomplete parameter passing
 [source]
@@ -107,8 +112,26 @@ if(!scc_vec_reserve(v, 32)) {
 scc_vec_free(v);
 
 v = scc_vec_init();
-/* Compilation error, v passed as pointer to void */
+/* Invalid, passing pointer to incomplete type. */
 if(!scc_vec_reserve((void *)v, 32)){
     exit(1);
 }
+
+/* Invalid, results in sizeof(void). Typically a warning, but not guaranteed */
+if(!scc_vec_reserver((void *){ v }, 32)) {
+    exit(1);
+}
 ----
+
+== bool scc_vec_push(void *vec, T value)
+
+Push `value` onto the back of the vector, allocating more memory if required. `vec` is expected to be of type
+`T *`.
+
+If the vector had to be resized and memory allocation failed, the vector is left unchanged, its address, size,
+capacity and held values identical to what they were before the call. Regardless of whether a call to
+`scc_vec_push` succeeds or not, the vector must be passed to `scc_vec_free` to reclaim the allocated memory.
+
+=== Returns
+* `true` if the value was successfully added to the vector
+* `false` on allocation failure
