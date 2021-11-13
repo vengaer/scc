@@ -173,6 +173,27 @@ Pop the last element from the vector.  No bounds checking is performed.
 
 Like `scc_vec_pop` but with bounds checking. If attempting to pop from an empty vector, standard `exit` is called.
 
+=== void scc_vec_erase(void *vec, void *iter)
+
+Erase the element at address `iter`, the latter must refer to a suitably aligned address in `vec`. No bounds checking
+is performed. Requires that all elements located at addresses beyond `iter` are copied to replace it.
+
+.Erasing the 10th element in a vector
+[source]
+----
+include::snips/scc_vec_erase.csnip[tags=scc_vec_erase]
+----
+
+== Accessors
+
+=== T operator[](void *vec, size_t index)
+
+Returns the element at slot `index` in the vector. No bounds checking is performed.
+
+==== Returns
+
+The element at slot `index`
+
 === T scc_vec_at(void *vec, size_t index)
 
 Returns the element at slot `index` in the vector. If there are not enough elements in the vector, standard `exit` is called.

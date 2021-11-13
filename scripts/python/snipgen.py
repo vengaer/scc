@@ -9,9 +9,11 @@ _symmap = {
         'scc_vec_free',
         'scc_vec_size',
         'scc_vec_reserve',
+        'scc_vec_erase',
         'scc_vec_foreach'
         'scc_vec_foreach_reversed'
         'scc_vec_foreach_by'
+        'scc_vec_foreach_reversed_by'
     ],
     'stdio': [
         'fgets',
