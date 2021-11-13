@@ -341,3 +341,19 @@ void test_scc_vec_erase_range_end_eq_first(void) {
     }
     scc_vec_free(vec);
 }
+
+void test_scc_vec_erase_range_end(void) {
+    int *vec = scc_vec_init();
+
+    for(int i = 0; i < 100; i++) {
+        TEST_ASSERT_TRUE(scc_vec_push(vec, i));
+    }
+
+    scc_vec_erase_range(vec, &vec[50], &vec[100]);
+    TEST_ASSERT_EQUAL_UINT64(50, scc_vec_size(vec));
+    for(int i = 0; i < 50; i++) {
+        TEST_ASSERT_EQUAL_INT32(i, vec[i]);
+    }
+
+    scc_vec_free(vec);
+}
