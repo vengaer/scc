@@ -3,24 +3,35 @@
 import argparse
 
 _symmap = {
-    'scc_vec_init': 'scc/scc_vec',
-    'scc_vec_push': 'scc/scc_vec',
-    'scc_vec_free': 'scc/scc_vec',
-    'scc_vec_size': 'scc/scc_vec',
-    'scc_vec_reserve': 'scc/scc_vec',
-    'fgets': 'stdio',
-    'fputs': 'stdio',
-    'puts': 'stdio',
-    'exit': 'stdlib',
-    'strtoul': 'stdlib',
-    'isspace': 'ctype'
+    'scc/scc_vec': [
+        'scc_vec_init',
+        'scc_vec_push',
+        'scc_vec_free',
+        'scc_vec_size',
+        'scc_vec_reserve',
+        'scc_vec_foreach'
+    ],
+    'stdio': [
+        'fgets',
+        'fputs',
+        'puts',
+    ],
+    'stdlib': [
+        'exit',
+        'strtoul'
+    ],
+    'ctype': [
+        'isspace'
+    ]
 }
 
 def required_headers(snip):
     headers = set()
-    for func, header in _symmap.items():
-        if func in snip:
-            headers.add(header)
+    for header in _symmap:
+        for func in header:
+            if func in snip:
+                headers.add(header)
+                break
     return headers
 
 def genfile(outfile, headers, snip):
