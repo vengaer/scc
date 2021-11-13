@@ -256,3 +256,28 @@ void test_scc_vec_clear(void) {
     TEST_ASSERT_TRUE(scc_vec_empty(vec));
     scc_vec_free(vec);
 }
+
+void test_scc_vec_erase(void) {
+    int *vec = scc_vec_init();
+
+    for(int i = 0; i < 212; i++) {
+        TEST_ASSERT_TRUE(scc_vec_push(vec, i));
+    }
+
+    scc_vec_erase(vec, &vec[118]);
+    for(int i = 118; i < 211; i++) {
+        TEST_ASSERT_EQUAL_INT32(i + 1, vec[i]);
+    }
+
+    scc_vec_erase(vec, &vec[1]);
+    TEST_ASSERT_EQUAL_INT32(0, vec[0]);
+    for(int i = 1; i < 117; i++) {
+        TEST_ASSERT_EQUAL_INT32(i + 1, vec[i]);
+    }
+
+    for(int i = 118; i < 210; i++) {
+        TEST_ASSERT_EQUAL_INT32(i + 2, vec[i]);
+    }
+
+    scc_vec_free(vec);
+}
