@@ -146,6 +146,29 @@ void scc_svec_impl_erase(void *svec, void *iter, size_t elemsize) {
     memmove(iter, (unsigned char *)iter + elemsize, nbytes);
 }
 
+void scc_svec_impl_erase_range( void *svec,
+    void *first,
+    void const *end,
+    size_t elemsize
+) {
+    if(end <= first) {
+        return;
+    }
+
+    size_t nelems = ((unsigned char const *)end - (unsigned char *)first) / elemsize;
+
+    size_t offset = ((unsigned char *)first - (unsigned char *)svec) / elemsize;
+
+    scc_svec_impl_base(svec)->sc_size -= nelems;
+
+    if(offset == scc_svec_size(svec)) {
+        /* Last nelems elements */
+        return;
+    }
+    size_t nbytes = (scc_svec_size(svec) - offset) * elemsize;
+    memmove(first, (unsigned char *)first + nelems * elemsize, nbytes);
+}
+
 
 void scc_svec_pop_safe(void *svec) {
     if(!scc_svec_size(svec)) {
