@@ -89,6 +89,29 @@ void *scc_svec_impl_from(
     return vec;
 }
 
+bool scc_svec_impl_resize(void *svec, size_t size, size_t elemsize) {
+    size_t const currsize = scc_svec_size(*(void **)svec);
+
+    if(!size || currsize == size) {
+        return true;
+    }
+    if(currsize > size) {
+        scc_svec_impl_base(*(void **)svec)->sc_size = size;
+        return true;
+    }
+
+    if(!scc_svec_impl_reserve(svec, size, elemsize)) {
+        return false;
+    }
+
+    unsigned char *baseaddr = *(void **)svec;
+    size_t zsize = (size - currsize) * elemsize;
+
+    memset(baseaddr + currsize * elemsize, 0, zsize);
+    scc_svec_impl_base(*(void **)svec)->sc_size = size;
+    return true;
+}
+
 void scc_svec_free(void *svec) {
     if(scc_svec_is_allocd(svec)) {
         free(scc_svec_impl_base(svec));
