@@ -4,8 +4,9 @@
 :source-highlighter: rouge
 :source-language: c
 
-`scc_vec` is a generic, dynamically allocated array. Individual elements of the vector
-may be accessed using `[]`.
+`scc_vec` is a generic, dynamically allocated array. Individual elements of the vector may be accessed using `[]`.
+
+Note that `scc_svec` should generally preferred over `scc_svec`. It reference is found link:scc_svec.html[here].
 
 Note that, despite the similarities between their APIs, `scc_vec` and `scc_svec` cannot be used interchangeably. Each must used with its own
 associated functions.
