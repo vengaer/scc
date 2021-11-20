@@ -86,3 +86,32 @@ void test_scc_svec_push(void) {
     }
     scc_svec_free(svec);
 }
+
+void test_scc_vec_from(void) {
+    int *svec = scc_svec_from(int, 1, 2, 3, 4, 5);
+
+    TEST_ASSERT_NOT_EQUAL_UINT64(0, (unsigned long long)svec);
+    TEST_ASSERT_EQUAL_UINT64(5ull, scc_svec_size(svec));
+    TEST_ASSERT_EQUAL_UINT64(SCC_SVEC_STATIC_CAPACITY, scc_svec_capacity(svec));
+
+    for(int i = 0; i < (int)scc_svec_size(svec); i++) {
+        TEST_ASSERT_EQUAL_INT32(i + 1, svec[i]);
+    }
+
+    scc_svec_free(svec);
+
+    svec = scc_svec_from(int, 1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
+                              11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+                              21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
+                              31, 32, 33, 34, 35, 36, 37, 38, 39, 40);
+
+    TEST_ASSERT_NOT_EQUAL_UINT64(0, (unsigned long long)svec);
+    TEST_ASSERT_EQUAL_UINT64(40, scc_svec_size(svec));
+    TEST_ASSERT_EQUAL_UINT64(40, scc_svec_capacity(svec));
+    TEST_ASSERT_GREATER_THAN_UINT64(SCC_SVEC_STATIC_CAPACITY, scc_svec_size(svec));
+    for(int i = 0; i < (int)scc_svec_size(svec); i++) {
+        TEST_ASSERT_EQUAL_INT32(i + 1, svec[i]);
+    }
+    TEST_ASSERT_EQUAL_UINT8(1, ((unsigned char *)svec)[-1]);
+    scc_svec_free(svec);
+}
