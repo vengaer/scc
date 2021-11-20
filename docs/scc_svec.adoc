@@ -119,6 +119,10 @@ The `svec` argument passed to `scc_svec_reserve` must be a pointer to a complete
 
 == Modifiers
 
+=== scc_svec_clear(void *svec)
+
+Empties the vector by setting its size to 0 while leaving its capacity unchanged.
+
 === bool scc_svec_push(void *svec, type value)
 
 Push `value` onto the back of the vector, allocating more memory if required. `svec` is expected to be of type pointer to `type` (i.e. `type *`).
