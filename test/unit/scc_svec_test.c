@@ -131,3 +131,52 @@ void test_scc_svec_clear(void) {
     TEST_ASSERT_TRUE(scc_svec_empty(svec));
     scc_svec_free(svec);
 }
+
+void test_scc_svec_resize_sizeup(void) {
+    int *svec = scc_svec_init(int);
+    TEST_ASSERT_TRUE(scc_svec_resize(svec, 38));
+    TEST_ASSERT_EQUAL_UINT64(38u, scc_svec_size(svec));
+    for(unsigned i = 0u; i < scc_svec_size(svec); i++) {
+        TEST_ASSERT_EQUAL_INT32(0, svec[i]);
+    }
+    scc_svec_free(svec);
+}
+
+void test_scc_svec_resize_sizedown(void) {
+    int *svec = scc_svec_init(int);
+    for(int i = 0; i < 288; i++) {
+        TEST_ASSERT_TRUE(scc_svec_push(svec, i));
+    }
+    TEST_ASSERT_TRUE(scc_svec_resize(svec, 10));
+    for(int i = 0; i < (int)scc_svec_size(svec); i++) {
+        TEST_ASSERT_EQUAL_INT32(i, svec[i]);
+    }
+    scc_svec_free(svec);
+}
+
+void test_scc_svec_resize_sizeup_sizedown(void) {
+    int *svec = scc_svec_init(int);
+    TEST_ASSERT_TRUE(scc_svec_resize(svec, 28));
+    TEST_ASSERT_TRUE(scc_svec_resize(svec, 12));
+    TEST_ASSERT_EQUAL_UINT64(12u, scc_svec_size(svec));
+    for(unsigned i = 0u; i < scc_svec_size(svec); i++) {
+        TEST_ASSERT_EQUAL_INT32(0, svec[i]);
+    }
+    scc_svec_free(svec);
+}
+
+void test_scc_svec_resize_sizeup_nonempty(void) {
+    int *svec = scc_svec_init(int);
+    for(int i = 0; i < 212; i++) {
+        TEST_ASSERT_TRUE(scc_svec_push(svec, i));
+    }
+    TEST_ASSERT_TRUE(scc_svec_resize(svec, 318));
+    for(int i = 0; i < 212; i++) {
+        TEST_ASSERT_EQUAL_INT32(i, svec[i]);
+    }
+    for(unsigned i = 212; i < scc_svec_size(svec); i++) {
+        TEST_ASSERT_EQUAL_INT32(0, svec[i]);
+    }
+
+    scc_svec_free(svec);
+}
