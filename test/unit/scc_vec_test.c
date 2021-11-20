@@ -357,3 +357,17 @@ void test_scc_vec_erase_range_end(void) {
 
     scc_vec_free(vec);
 }
+
+void test_scc_vec_from(void) {
+    int *vec = scc_vec_from(int, 1, 2, 3, 4, 5);
+
+    TEST_ASSERT_NOT_EQUAL_UINT64(0, (unsigned long long)vec);
+    TEST_ASSERT_EQUAL_UINT64(5ull, scc_vec_size(vec));
+    TEST_ASSERT_EQUAL_UINT64(5ull, scc_vec_capacity(vec));
+
+    for(int i = 0; i < (int)scc_vec_size(vec); i++) {
+        TEST_ASSERT_EQUAL_INT32(i + 1, vec[i]);
+    }
+
+    scc_vec_free(vec);
+}
