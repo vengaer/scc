@@ -16,9 +16,10 @@ while(fgets(buffer, sizeof(buffer), stdin)) {
     }
 }
 
-puts("You entered:");
+fputs("You entered: ", stdout);
 for(unsigned i = 0; i < scc_vec_size(vec); i++) {
-    printf("  %lu\n", vec[i]);
+    printf("%lu ", vec[i]);
 }
+puts("");
 
 scc_vec_free(vec);
