@@ -55,12 +55,47 @@ The above pattern may be applied to any arbitrary type. Creating a vector of a u
 include::snips/scc_vec_init_point.csnip[tags=scc_vec_init_point]
 ----
 
+=== void *scc_vec_from(type, type... args)
+
+Initialize an `scc_vec` for storing instance of `type` initialized with `args`. At least one argument must be passed in `args`.
+Failure to do so will usually result in warnings but does compile. The call allocates exactly enough space to store the
+passed `args`. The returned pointer must be passed to `scc_vec_free` for the memory to be released.
+
+==== Returns
+
+- `NULL` on allocation failure
+- Address of a dynamically allocated `scc_vec` containing `args` otherwise
+
+When possible, `scc_vec_from` should always be preferred to combinations of `scc_vec_init`, `scc_vec_reserve` and `scc_vec_push` as
+it both allows for more optimizations and saves on stack space.
+
+While the following two snippets produce the same observable result. Initializing the vector all in one go using
+
+.Initializing the vector all at once
+[source]
+----
+include::snips/scc_vec_from.csnip[tags=scc_vec_from]
+----
+
+is more efficient than
+
+.Hand-rolled vector initialization
+[source]
+----
+include::snips/scc_vec_from_emulation.csnip[tags=scc_vec_from_emulation]
+----
+
+==== Implementation Limitations
+
+The `args` parameter can contain up to at least 126 parameters (not counting the initial `type`) when scc is compiled with a standard-compliant compiler. The number may be even larger in practice.
+
 === void scc_vec_free(void *vec)
 
-Free the memory used by `vec`. May only be called on pointers returned from `scc_vec_init`.
+Free the memory used by `vec`. May only be called on pointers returned from either `scc_vec_init` or `scc_vec_from`.
 
 Once the call to `scc_vec_free` returns, the memory referenced by the `vec` parameter should be treated as
-invalid. If the variable is to be reused as another vector, it must be reinitialized using `scc_vec_init`.
+invalid. If the variable is to be reused as another vector, it must be reinitialized using `scc_vec_init` or
+`scc_vec_from`.
 
 == Capacity
 
@@ -75,7 +110,7 @@ Check whether the vector is empty.
 === size_t scc_vec_size(void const *vec)
 
 Get the number of elements currently held in the vector. Must only be called on elements initialized using
-`scc_vec_init`.
+`scc_vec_init` or `scc_vec_from`.
 
 ==== Returns
 
@@ -84,7 +119,7 @@ The number of elements in the vector.
 === size_t scc_vec_capacity(void const *vec)
 
 Get the maximum number of elements the vector is currently able to store. Must only be called on elements
-initialized using `scc_vec_init`.
+initialized using `scc_vec_init` or `scc_vec_from`.
 
 ==== Returns
 
@@ -123,7 +158,7 @@ Notably, the `vec` parameter may *not* be passed as `void *` as there would be n
 .Passing incorrect vector arguments
 [source]
 ----
-int *v = scc_vec_init();
+int *v = scc_vec_init(int);
 /* Invalid, passing pointer to incomplete type. */
 if(!scc_vec_reserve((void *)v, 32)){
     exit(1);
