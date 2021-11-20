@@ -87,7 +87,7 @@ void test_scc_svec_push(void) {
     scc_svec_free(svec);
 }
 
-void test_scc_vec_from(void) {
+void test_scc_svec_from(void) {
     int *svec = scc_svec_from(int, 1, 2, 3, 4, 5);
 
     TEST_ASSERT_NOT_EQUAL_UINT64(0, (unsigned long long)svec);
@@ -113,5 +113,13 @@ void test_scc_vec_from(void) {
         TEST_ASSERT_EQUAL_INT32(i + 1, svec[i]);
     }
     TEST_ASSERT_EQUAL_UINT8(1, ((unsigned char *)svec)[-1]);
+    scc_svec_free(svec);
+}
+
+void test_scc_svec_empty(void) {
+    int *svec = scc_svec_init(int);
+    TEST_ASSERT_TRUE(scc_svec_empty(svec));
+    TEST_ASSERT_TRUE(scc_svec_push(svec, 1));
+    TEST_ASSERT_FALSE(scc_svec_empty(svec));
     scc_svec_free(svec);
 }
