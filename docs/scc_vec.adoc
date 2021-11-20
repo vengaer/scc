@@ -5,7 +5,7 @@
 :source-language: c
 
 `scc_vec` is a generic, dynamically allocated array. Individual elements of the vector
-may be accessed using `[]` as if it were a regular array.
+may be accessed using `[]`.
 
 The following shows an example of how the vector may be used
 
@@ -17,25 +17,26 @@ include::snips/scc_vec_example.csnip[tags=scc_vec_example]
 
 == Construction and Dellocation
 
-=== void *scc_vec_init(void)
+=== void *scc_vec_init(type)
 
-Initialize an empty `scc_vec` structure. While the call itself never allocates, the
-returned pointer should always be passed `scc_vec_free` to reclaim potential memory
-allocated as part of calls to other parts of the API. Passing the vector to standard
-`free` will result in heap corruption.
+Initialize an empty `scc_vec` structure for storing objects of `type`. While the call
+itself never allocates, the returned pointer should always be passed `scc_vec_free` to
+reclaim potential memory allocated during calls to other parts of the API. Passing the
+vector to standard `free` will result in heap corruption.
 
-The returned pointer should be assigned to a pointer to a
-non-incomplete type to enforce type safety.
+The returned pointer should be assigned to a pointer to `type`.
 
 ==== Returns
 
-Address of an empty, initialized vector structure.
+Address of an empty, initialized vector structure with automatic storage duration.
 
 ==== Initializing Arbitrary Vectors
 
-The type of the vector is determined by the pointer used to store it. If that pointer is a
-pointer to `int`, the vector is treated as a vector of `int`. If the pointer is instead
-a pointer to `double`, the vector is treated as a vector of `double`.
+The type of the vector is determined by the pointer used to refer to it. If that pointer is a
+pointer to `int`, the vector is treated as a vector of `int` If the pointer is instead
+a pointer to `double`, the vector is treated as a vector of `double`. This is the case
+regardless of what `type` was passed to `scc_vec_init`. It is therefore vital that the two
+are kept consistent.
 
 As an example, initializing a vector of `int` is done as follows
 
@@ -56,9 +57,9 @@ include::snips/scc_vec_init_point.csnip[tags=scc_vec_init_point]
 
 === void scc_vec_free(void *vec)
 
-Free the memory occupied by `vec`. May only be called on pointers initialized with `scc_vec_init`.
+Free the memory used by `vec`. May only be called on pointers returned from `scc_vec_init`.
 
-Once the call to `scc_vec_free` returns, the memory reference by the `vec` parameter should be treated as
+Once the call to `scc_vec_free` returns, the memory referenced by the `vec` parameter should be treated as
 invalid. If the variable is to be reused as another vector, it must be reinitialized using `scc_vec_init`.
 
 == Capacity
@@ -92,24 +93,24 @@ The maximum number of elements the vector can store at the time of the call.
 === bool scc_vec_reserve(void *vec, size_t capacity)
 
 Resizes the vector such that it is capable of storing at least `capacity` elements. The `vec` must be passed as a pointer
-to a non-incomplete type, see the listing below for details.
+to a complete type, see the listing below for details.
 
 `scc_vec_reserve` may relocate the vector in memory. As such, any other pointers to it, or its elements, should be
 considered invalid after a reserve call.
 
-If the capacity of the vector is already larger than the one requested as the `capacity` parameter, the call returns
+If the capacity of the vector is already greater than the one requested as the `capacity` parameter, the call returns
 immediately.
 
 If memory allocation fails, the vector remains unchanged and must still be passed to `scc_vec_free` for deallocation.
 
 ==== Returns
 
-* `true` if enough memory could be reserved, or the vector's capacity is already larger than the requested one.
+* `true` if enough memory could be reserved, or the vector's capacity is already larger than requested
 * `false` on allocation failure
 
 ==== Argument Passing
 
-The `vec` argument passed to `scc_vec_reserve` must be a pointer to a non-incomplete type, e.g.
+The `vec` argument passed to `scc_vec_reserve` must be a pointer to a complete type, e.g.
 
 .Passing correct vector argument
 [source]
@@ -144,18 +145,18 @@ Empties the vector by setting its size to 0. The capacity remains unchanged.
 
 Resizes the vector to contain `size` elements, allocating more memory if required. The following three cases may occur
 
-* If `scc_vec_size(vec) == size` or if `size == 0`, the function returns immediately. No allocations are performed.
-* If `scc_vec_size(vec) > size`, the size of the vector is set to `size`. No allocations are performed.
-* If `scc_vec_size(vec) < size`, the vector is resized such that it can hold at least `size` elements. Newly inserted elements are zeroed.
+* If `scc_vec_size(vec) == size` or `size == 0`, the function returns immediately. No allocations are performed.
+* If `scc_vec_size(vec) > size`, the size of the vector is truncated to `size`. No allocations are performed.
+* If `scc_vec_size(vec) < size`, the vector is resized such that it can hold at least `size` elements. Newly inserted elements are zeroed. Subsequent calls to `scc_vec_size` not preceded by other calls that may alter the vector return `size`.
 
 ==== Returns
 * `true` if the vector was successfully resized
 * `false` on allocation error
 
-=== bool scc_vec_push(void *vec, T value)
+=== bool scc_vec_push(void *vec, type value)
 
 Push `value` onto the back of the vector, allocating more memory if required. `vec` is expected to be of type
-pointer to `T`.
+pointer to `type`.
 
 If the vector had to be resized and memory allocation failed, the vector is left unchanged, its address, size,
 capacity and held values identical to what they were before the call. Regardless of whether a call to
@@ -167,7 +168,7 @@ capacity and held values identical to what they were before the call. Regardless
 
 === void scc_vec_pop(void *vec)
 
-Pop the last element from the vector.  No bounds checking is performed.
+Pop the last element from the vector (i.e. decrement the size of the vector by one).  No bounds checking is performed.
 
 === void scc_vec_pop_safe(void *vec)
 
@@ -199,7 +200,7 @@ include::snips/scc_vec_erase_range.csnip[tags=scc_vec_erase]
 
 == Accessors
 
-=== T operator[](void *vec, size_t index)
+=== type operator[](void *vec, size_t index)
 
 Returns the element at slot `index` in the vector. No bounds checking is performed.
 
@@ -207,7 +208,7 @@ Returns the element at slot `index` in the vector. No bounds checking is perform
 
 The element at slot `index`
 
-=== T scc_vec_at(void *vec, size_t index)
+=== type scc_vec_at(void *vec, size_t index)
 
 Returns the element at slot `index` in the vector. If there are not enough elements in the vector, standard `exit` is called.
 
