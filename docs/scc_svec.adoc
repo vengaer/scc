@@ -80,3 +80,16 @@ If memory allocation fails, the vector remains unchanged and must still be passe
 ==== Argument Passing
 
 The `svec` argument passed to `scc_svec_reserve` must be a pointer to a complete type. See the examples under `scc_vec_reserve` link:scc_vec.html[here].
+
+== Modifiers
+
+=== bool scc_svec_push(void *svec, type value)
+
+Push `value` onto the back of the vector, allocating more memory if required. `svec` is expected to be of type pointer to `type` (i.e. `type *`).
+
+In the event of memory allocation failure, `false` is returned and the vector is left in the state it was before the call to `scc_svec_reserve`. Regardless of whether the call succeeds or not, the vector must be freed using `scc_svec_free`.
+
+==== Returns
+
+* `true` if the value was successfully added to the vector
+* `false` on allocation failure
