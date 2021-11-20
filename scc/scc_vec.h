@@ -35,12 +35,22 @@ struct scc_vec {
     scc_vec_impl_base_qual(vec,)
 
 void *scc_vec_impl_init(void *nullvec, size_t offset);
-void *scc_vec_impl_from(size_t offset, void const *data, size_t size, size_t elemsize);
+void *scc_vec_impl_from(
+    size_t offset,
+    void const *data,
+    size_t size,
+    size_t elemsize
+);
 _Bool scc_vec_impl_resize(void *vec, size_t size, size_t elemsize);
 _Bool scc_vec_impl_push_ensure_capacity(void *vec, size_t elemsize);
 _Bool scc_vec_impl_reserve(void *vec, size_t capacity, size_t elemsize);
 void scc_vec_impl_erase(void *vec, void *iter, size_t elemsize);
-void scc_vec_impl_erase_range(void *vec, void *first, void *end, size_t elemsize);
+void scc_vec_impl_erase_range(
+    void *vec,
+    void *first,
+    void const *end,
+    size_t elemsize
+);
 void scc_vec_impl_at_check(void *vec, size_t index);
 
 inline size_t scc_vec_impl_npad(void const *vec) {

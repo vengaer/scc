@@ -133,12 +133,12 @@ void scc_vec_impl_erase(void *vec, void *iter, size_t elemsize) {
     memmove(iter, (unsigned char *)iter + elemsize, nbytes);
 }
 
-void scc_vec_impl_erase_range(void *vec, void *first, void *end, size_t elemsize) {
+void scc_vec_impl_erase_range(void *vec, void *first, void const *end, size_t elemsize) {
     if(end <= first) {
         return;
     }
 
-    size_t nelems = ((unsigned char *)end - (unsigned char *)first) / elemsize;
+    size_t nelems = ((unsigned char const *)end - (unsigned char *)first) / elemsize;
     size_t offset = ((unsigned char *)first - (unsigned char *)vec) / elemsize;
     scc_vec_impl_base(vec)->sc_size -= nelems;
 
