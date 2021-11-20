@@ -29,7 +29,7 @@ struct scc_vec {
     }){ 0 }.sc_vec
 
 #define scc_vec_impl_base_qual(vec, qual)                           \
-    ((struct scc_vec qual*)(scc_container_qual(vec - scc_vec_impl_npad(vec), struct scc_vec, sc_buffer, qual)))
+    scc_container_qual(vec - scc_vec_impl_npad(vec), struct scc_vec, sc_buffer, qual)
 
 #define scc_vec_impl_base(vec)                                      \
     scc_vec_impl_base_qual(vec,)
