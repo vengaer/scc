@@ -1,8 +1,12 @@
 int *vec = scc_vec_init(int);
-
-/* Fill it up */
-
 int *iter;
+int i = 0;
+
+scc_vec_resize(vec, 12);
+scc_vec_foreach(iter, vec) {
+    *iter = i++;
+}
+
 scc_vec_foreach_reversed_by(iter, vec, 6) {
     printf("%d\n", *iter);
 }

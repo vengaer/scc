@@ -1,6 +1,9 @@
 int *vec = scc_vec_init(int);
 
-/* Fill it up */
+scc_vec_push(vec, 8);
+scc_vec_push(vec, 3);
+scc_vec_push(vec, 7);
+scc_vec_push(vec, 62);
 
 int *iter;
 scc_vec_foreach_by(iter, vec, 2) {
