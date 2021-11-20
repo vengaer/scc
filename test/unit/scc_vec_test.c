@@ -39,6 +39,14 @@ void test_scc_vec_reserve(void) {
     scc_vec_free(vec);
 }
 
+void test_scc_vec_reserve_zero(void) {
+    int *vec = scc_vec_init(int);
+    TEST_ASSERT_TRUE(scc_vec_reserve(vec, 0u));
+    TEST_ASSERT_EQUAL_UINT64(0u, scc_vec_size(vec));
+    TEST_ASSERT_EQUAL_UINT64(0u, scc_vec_capacity(vec));
+    scc_vec_free(vec);
+}
+
 void test_scc_vec_push(void) {
     int *vec = scc_vec_init(int);
     TEST_ASSERT_TRUE(scc_vec_push(vec, 1));
