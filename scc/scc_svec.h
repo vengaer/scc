@@ -40,6 +40,7 @@ struct scc_svec {
     scc_svec_impl_base_qual(svec,)
 
 void *scc_svec_impl_init(void *initvec, size_t offset, size_t capacity);
+_Bool scc_svec_impl_reserve(void *vec, size_t capacity, size_t elemsize);
 
 inline size_t scc_svec_impl_npad(void const *svec) {
     return ((unsigned char const *)svec)[-2] + 2 * sizeof(unsigned char);
@@ -57,5 +58,8 @@ inline size_t scc_svec_size(void const *svec) {
 inline size_t scc_svec_capacity(void const *svec) {
     return scc_svec_impl_base_qual(svec, const)->sc_capacity;
 }
+
+#define scc_svec_reserve(svec, capacity)                    \
+    scc_svec_impl_reserve(&(svec), capacity, sizeof(*(svec)))
 
 #endif /* SCC_SVEC_H */
