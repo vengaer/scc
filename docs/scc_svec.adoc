@@ -93,3 +93,13 @@ In the event of memory allocation failure, `false` is returned and the vector is
 
 * `true` if the value was successfully added to the vector
 * `false` on allocation failure
+
+== Accessors
+
+=== type operator[](void *svec, size_t index)
+
+Returns the element at slot `index` in the vector. No bounds checking is performed. `svec` is expected to be passed as a pointer to `type`, i.e. `type *`.
+
+==== Returns
+
+The element at slot `index`.
