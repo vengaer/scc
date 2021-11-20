@@ -22,6 +22,9 @@ docshow: $(docindex) doc
 	$(if $(BROWSER),,$(error BROWSER environment variable not set))
 	$(BROWSER) $<
 
+.PHONY: snips
+snips:
+
 $(docbuilddir)/%.$(htmlext): $(docdir)/%.$(adocext) $(docsnips) | $(docbuilddir)
 	$(info [ADOC] $(notdir $@))
 	$(ADOC) -o $@ $<
@@ -32,13 +35,18 @@ $(strip
         $(eval
             $(__t): $(__t).$(cext) $(alib)
 	            $$(info [CC] $$(notdir $$@))
-	            $$(CC) $$(CPPFLAGS) -o $$@ $$^
+	            $$(CC) $$(CPPFLAGS) -g -o $$@ $$^
 
             $(__t).$(cext): $(snipdir)/$(notdir $(__t)).$(snipext) $(snipgen) | $(snipbuilddir)
 	            $$(info [PY] $$(notdir $$@))
 	            $$(snipgen) -o $$@ $$<
 
-        check: $(__t))))
+            __run_$(notdir $(__t)): $(__t)
+	            $$<
+
+        check: $(__t)
+
+        snips: __run_$(notdir $(__t)))))
 endef
 
 $(call snip-linker-rules)

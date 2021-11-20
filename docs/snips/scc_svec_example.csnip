@@ -1,8 +1,9 @@
 char buffer[32];
 char *endp;
 
-int *svec = scc_svec_init(char);
+char *svec = scc_svec_init(char);
 
+puts("Enter a string with spaces");
 fgets(buffer, sizeof(buffer), stdin);
 for(unsigned i = 0; i < strlen(buffer); i++) {
     if(!isspace(buffer[i])) {

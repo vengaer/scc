@@ -21,7 +21,10 @@ _symmap = {
         'scc_svec_init',
         'scc_svec_free',
         'scc_svec_reserve',
-        'scc_vec_push'
+        'scc_svec_push',
+        'scc_svec_from',
+        'scc_svec_erase',
+        'scc_svec_erase_range'
     ],
     'stdio': [
         'fgets',
@@ -56,8 +59,8 @@ def genfile(outfile, headers, snip):
     with open(outfile, 'w') as fp:
         fp.write('{}\n\n'.format('\n'.join([f'#include <{h}.h>' for h in headers])))
         fp.write('int main(void) {\n')
-        fp.write('\n'.join(f'{4*" "}{line}' for line in snip.split('\n')))
-        fp.write('\r}\n')
+        fp.write('\n'.join(f'{4*" "}{line}' for line in snip.split('\n')[:-1]))
+        fp.write('\n}\n')
 
 def main(infile, outfile):
     outfile = outfile if outfile is not None else 'a.c'

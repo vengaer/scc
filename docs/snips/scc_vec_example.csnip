@@ -4,6 +4,7 @@ unsigned long parsed;
 
 unsigned long *vec = scc_vec_init(unsigned long);
 
+puts("Enter digits. CTRL-D to exit");
 while(fgets(buffer, sizeof(buffer), stdin)) {
     parsed = strtoul(buffer, &endp, 0);
     if(endp == buffer || !isspace(*endp)) {
