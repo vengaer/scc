@@ -180,3 +180,15 @@ void test_scc_svec_resize_sizeup_nonempty(void) {
 
     scc_svec_free(svec);
 }
+
+void test_scc_svec_pop(void) {
+    int *svec = scc_svec_from(int, 1, 2, 3);
+    TEST_ASSERT_EQUAL_UINT64(3ull, scc_svec_size(svec));
+    scc_svec_pop(svec);
+    TEST_ASSERT_EQUAL_UINT64(2ull, scc_svec_size(svec));
+    scc_svec_pop(svec);
+    TEST_ASSERT_EQUAL_UINT64(1ull, scc_svec_size(svec));
+    scc_svec_pop(svec);
+    TEST_ASSERT_EQUAL_UINT64(0ull, scc_svec_size(svec));
+    scc_svec_free(svec);
+}
