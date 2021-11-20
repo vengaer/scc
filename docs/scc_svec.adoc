@@ -37,3 +37,21 @@ Reclaim memory allocated for `vec`. Should be passed only pointers returned by `
 
 Once the call to `scc_svec_free` returns, the memory referenced by the `svec` parameter should be treated as
 invalid. If the variable is to be reused as another vector, it must be reinitialized using `scc_svec_init`.
+
+== Capacity
+
+=== size_t scc_svec_size(void const *svec)
+
+Get the number of elements currently held in the vector. Must only be called on pointers initialized using `scc_svec_init`.
+
+==== Returns
+
+The number of elements in the vector.
+
+=== size_t scc_svec_capacity(void const *svec)
+
+Get the maximum number of elements the vector is currently able to store. Must only be called on pointers initialized using `scc_svec_init`.
+
+==== Returns
+
+The maximum number of elements the vector can store at the time of the call.
