@@ -28,9 +28,6 @@ __chk_docs:
 
 check: __chk_docs
 
-.PHONY: snips
-snips:
-
 $(docbuilddir)/%.$(htmlext): $(docdir)/%.$(adocext) $(docsnips) | $(docbuilddir)
 	$(info [ADOC] $(notdir $@))
 	$(ADOC) -o $@ $<
@@ -47,12 +44,9 @@ $(strip
 	            $$(info [PY] $$(notdir $$@))
 	            $$(PYTHON) $$(snipgen) -o $$@ $$<
 
-            __run_$(notdir $(__t)): $(__t)
-	            $$<
-
             __chk_docs: $(__t)
 
-            snips: __run_$(notdir $(__t)))))
+            )))
 endef
 
 $(call snip-linker-rules)
