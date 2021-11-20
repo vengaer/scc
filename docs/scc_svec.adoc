@@ -150,6 +150,10 @@ In the event of memory allocation failure, `false` is returned and the vector is
 
 Pop the last element from the vector (i.e. decrement the size of the vector by one).  No bounds checking is performed.
 
+=== void scc_svec_pop_safe(void *svec)
+
+Like `scc_svec_pop` but with bounds checking. If attempting to pop from an empty vector, standard `exit` is called.
+
 == Accessors
 
 === type operator[](void *svec, size_t index)
