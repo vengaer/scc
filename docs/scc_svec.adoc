@@ -57,3 +57,26 @@ Get the maximum number of elements the vector is currently able to store. Must o
 ==== Returns
 
 The maximum number of elements the vector can store at the time of the call.
+
+
+=== bool scc_svec_reserve(void *svec, size_t capacity)
+
+Resizes the vector such that it is capable of storing at least `capacity` elements. The `svec` must be passed as a pointer
+to a complete type, see the listing below for details.
+
+`scc_svec_reserve` may relocate the vector in memory. As such, any other pointers to it, or its elements, should be
+considered invalid after a reserve call.
+
+If the capacity of the vector is already greater than the one requested as the `capacity` parameter, the call returns
+immediately.
+
+If memory allocation fails, the vector remains unchanged and must still be passed to `scc_svec_free` for deallocation.
+
+==== Returns
+
+* `true` if enough memory could be reserved, or the vector's capacity is already larger than requested
+* `false` on allocation failure
+
+==== Argument Passing
+
+The `svec` argument passed to `scc_svec_reserve` must be a pointer to a complete type. See the examples under `scc_vec_reserve` link:scc_vec.html[here].

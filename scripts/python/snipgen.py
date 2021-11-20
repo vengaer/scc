@@ -19,7 +19,9 @@ _symmap = {
     ],
     'scc/scc_svec': [
         'scc_svec_init',
-        'scc_svec_free'
+        'scc_svec_free',
+        'scc_svec_reserve',
+        'scc_vec_push'
     ],
     'stdio': [
         'fgets',
