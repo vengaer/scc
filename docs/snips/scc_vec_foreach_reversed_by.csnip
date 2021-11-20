@@ -8,7 +8,8 @@ scc_vec_foreach(iter, vec) {
 }
 
 scc_vec_foreach_reversed_by(iter, vec, 6) {
-    printf("%d\n", *iter);
+    printf("%d ", *iter);
 }
+puts("");
 
 scc_vec_free(vec);

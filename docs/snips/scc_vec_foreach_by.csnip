@@ -2,7 +2,8 @@ int *vec = scc_vec_from(int, 8, 3, 7, 62);
 
 int *iter;
 scc_vec_foreach_by(iter, vec, 2) {
-    printf("%d\n", *iter);
+    printf("%d ", *iter);
 }
+puts("");
 
 scc_vec_free(vec);

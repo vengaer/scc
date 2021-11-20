@@ -280,10 +280,7 @@ The above snippet produces the following output.
 .Example output
 [source]
 ----
-Vector contents:
-1
-2
-3
+1 2 3
 ----
 
 
@@ -300,9 +297,7 @@ include::snips/scc_vec_foreach_reversed.csnip[tags=scc_vec_foreach_reversed]
 .Example output
 [source]
 ----
-0.000000
-12.800000
-2.300000
+0.000000 12.800000 2.300000
 ----
 
 === scc_vec_foreach_by(void *iter, void *vec, size_t by)
@@ -318,8 +313,7 @@ include::snips/scc_vec_foreach_by.csnip[tags=scc_vec_foreach_by]
 .Example output
 [source]
 ----
-8
-7
+8 7
 ----
 
 === scc_vec_foreach_reversed_by(void *iter, void *vec, size_t by)
@@ -335,6 +329,5 @@ include::snips/scc_vec_foreach_reversed_by.csnip[tags=scc_vec_foreach_reversed_b
 .Example output
 [source]
 ----
-11
-5
+11 5
 ----
