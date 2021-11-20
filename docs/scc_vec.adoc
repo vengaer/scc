@@ -7,6 +7,9 @@
 `scc_vec` is a generic, dynamically allocated array. Individual elements of the vector
 may be accessed using `[]`.
 
+Note that, despite the similarities between their APIs, `scc_vec` and `scc_svec` cannot be used interchangeably. Each must used with its own
+associated functions.
+
 The following shows an example of how the vector may be used
 
 .Example usage
@@ -109,7 +112,7 @@ Check whether the vector is empty.
 
 === size_t scc_vec_size(void const *vec)
 
-Get the number of elements currently held in the vector. Must only be called on elements initialized using
+Get the number of elements currently held in the vector. Must only be called on pointers initialized using
 `scc_vec_init` or `scc_vec_from`.
 
 ==== Returns
@@ -118,7 +121,7 @@ The number of elements in the vector.
 
 === size_t scc_vec_capacity(void const *vec)
 
-Get the maximum number of elements the vector is currently able to store. Must only be called on elements
+Get the maximum number of elements the vector is currently able to store. Must only be called on pointers
 initialized using `scc_vec_init` or `scc_vec_from`.
 
 ==== Returns

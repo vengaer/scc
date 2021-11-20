@@ -7,10 +7,12 @@
 `scc_svec` provides a generic "short" vector particularly suitable for working with smaller sets of elements. The initial structure is
 allocated with automatic storage duration, allowing smaller vectors do avoid dynamic allocation altogether. Should more space than what
 is allocated in the initial structure be required, the vector is moved to the heap.
-Unless having a specific
-reason for avoiding placing data on the stack, `scc_svec` should almost always be preferred to `scc_vec`.
+Unless having a specific reason for avoiding placing data on the stack, `scc_svec` should almost always be preferred to `scc_vec`.
 
 Overall, the interface is similar to that provided by `scc_vec`. Notably, individual elements may be accessed using regular indexing with `[]`.
+
+Note that, despite the similarities between their APIs, `scc_svec` and `scc_vec` cannot be used interchangeably. Each must used with its own
+associated functions.
 
 .Example usage
 [source]
