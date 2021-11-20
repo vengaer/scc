@@ -86,6 +86,10 @@ inline size_t scc_svec_capacity(void const *svec) {
     return scc_svec_impl_base_qual(svec, const)->sc_capacity;
 }
 
+inline _Bool scc_svec_empty(void const *svec) {
+    return !scc_svec_size(svec);
+}
+
 #define scc_svec_reserve(svec, capacity)                                \
     scc_svec_impl_reserve(&(svec), capacity, sizeof(*(svec)))
 
