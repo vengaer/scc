@@ -11,6 +11,7 @@ size_t scc_svec_impl_npad(void const *svec);
 size_t scc_svec_capacity(void const *svec);
 bool scc_svec_empty(void const *svec);
 void scc_svec_clear(void *vec);
+void scc_svec_pop(void *svec);
 
 static bool scc_svec_is_allocd(void const *svec);
 static size_t scc_svec_memsize(size_t capacity, size_t elemsize, size_t npad);
