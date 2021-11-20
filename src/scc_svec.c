@@ -14,7 +14,7 @@ static bool scc_svec_is_allocd(void const *svec);
 static size_t scc_svec_memsize(size_t capacity, size_t elemsize, size_t npad);
 static size_t scc_svec_calc_new_capacity(size_t current);
 static struct scc_svec *scc_svec_alloc(size_t nbytes, size_t nelems, size_t npad);
-static bool scc_svec_grow(void **svec, size_t capacity, size_t elemsize);
+static bool scc_svec_grow(void *restrict *svec, size_t capacity, size_t elemsize);
 
 static inline bool scc_svec_is_allocd(void const *svec) {
     return ((unsigned char const*)svec)[-1];
@@ -41,7 +41,7 @@ static struct scc_svec *scc_svec_alloc(size_t nbytes, size_t nelems, size_t npad
     return v;
 }
 
-static bool scc_svec_grow(void **svec, size_t capacity, size_t elemsize) {
+static bool scc_svec_grow(void *restrict *svec, size_t capacity, size_t elemsize) {
     struct scc_svec *v;
     size_t const npad = scc_svec_impl_npad(*svec);
     size_t const nbytes = scc_svec_memsize(capacity, elemsize, npad);
@@ -71,6 +71,20 @@ void *scc_svec_impl_init(void *initvec, size_t offset, size_t capacity) {
     unsigned char *buffer = (unsigned char *)initvec + offset;
     buffer[-2] = offset - sizeof(*svec) - 2 * sizeof(*buffer);
     return buffer;
+}
+
+void *scc_svec_impl_from(
+    void *restrict vec,
+    void const *restrict data,
+    size_t size,
+    size_t elemsize
+) {
+    if(size > scc_svec_capacity(vec) && !scc_svec_grow(&vec, size, elemsize)) {
+        return 0;
+    }
+    memcpy(vec, data, size * elemsize);
+    scc_svec_impl_base(vec)->sc_size = size;
+    return vec;
 }
 
 void scc_svec_free(void *svec) {
