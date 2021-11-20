@@ -1,0 +1,39 @@
+= scc_svec
+:toc:
+:toclevels: 2
+:source-highlighter: rouge
+:source-language: c
+
+`scc_svec` provides a generic "short" vector particularly suitable for working with smaller sets of elements. The initial structure is
+allocated with automatic storage duration, allowing smaller vectors do avoid dynamic allocation altogether. Should more space than what
+is allocated in the initial structure be required, the vector is moved to the heap.
+Unless having a specific
+reason for avoiding placing data on the stack, `scc_svec` should almost always be preferred to `scc_vec`.
+
+Overall, the interface is similar to that provided by `scc_vec`. Notably, individual elements may be accessed using regular indexing with `[]`.
+
+.Example usage
+[source]
+----
+include::snips/scc_svec_example.csnip[tags=scc_svec_example]
+----
+
+== Construction and Deallocation
+
+=== void *scc_svec_init(type)
+
+Returns address of an empty `scc_svec` structure with automatic storage duration. `type` is the type of the elements to be stored in the vector.
+The initial capacity of the `scc_svec` is `SCC_SVEC_STATIC_CAPACITY` elements. This capacity  may be altered by defining `SCC_SVEC_STATIC_CAPACITY` before including `scc_svec.h`.
+
+The returned pointer should be assigned to a pointer to `type`. Furthermore, while `scc_svec_init` never performs any dynamic allocations, this pointer should always be passed to `scc_svec_free` once done with the structure.
+
+==== Returns
+
+Address of an empty `scc_svec` instance with automatic storage duration.
+
+=== void scc_svec_free(void *svec)
+
+Reclaim memory allocated for `vec`. Should be passed only pointers returned by `scc_svec_init`.
+
+Once the call to `scc_svec_free` returns, the memory referenced by the `svec` parameter should be treated as
+invalid. If the variable is to be reused as another vector, it must be reinitialized using `scc_svec_init`.

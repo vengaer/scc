@@ -5,6 +5,7 @@ import argparse
 _symmap = {
     'scc/scc_vec': [
         'scc_vec_init',
+        'scc_vec_from',
         'scc_vec_push',
         'scc_vec_free',
         'scc_vec_size',
@@ -16,6 +17,10 @@ _symmap = {
         'scc_vec_foreach_by'
         'scc_vec_foreach_reversed_by'
     ],
+    'scc/scc_svec': [
+        'scc_svec_init',
+        'scc_svec_free'
+    ],
     'stdio': [
         'fgets',
         'fputs',
@@ -25,6 +30,9 @@ _symmap = {
     'stdlib': [
         'exit',
         'strtoul'
+    ],
+    'string': [
+        'strlen'
     ],
     'ctype': [
         'isspace'

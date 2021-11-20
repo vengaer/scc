@@ -1,8 +1,14 @@
 = SCC - Small C Collections
 
+== scc_svec
+
+Generic array allocated on the stack up to a certain size.
+
+link:scc_svec.html[reference]
+
 == scc_vec
 
-A generic, dynamic array in the vein of namesakes provided by C++ and Rust.
-
+A generic, dynamic array in the vein of namesakes provided by C++ and Rust. Note that
+`scc_svec` is almost always a better choice than `scc_vec`.
 
 link:scc_vec.html[reference]
