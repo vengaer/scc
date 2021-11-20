@@ -17,8 +17,8 @@ all:
 .PHONY: doc
 doc: $(htmlpgs)
 
-.PHONY: docshow
-docshow: $(docindex) doc
+.PHONY: show
+show: $(docindex) doc
 	$(if $(BROWSER),,$(error BROWSER environment variable not set))
 	$(BROWSER) $<
 
