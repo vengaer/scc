@@ -85,7 +85,7 @@ void scc_vec_free(void *vec) {
 }
 
 bool scc_vec_impl_resize(void *vec, size_t size, size_t elemsize) {
-    size_t currsize = scc_vec_size(*(void **)vec);
+    size_t const currsize = scc_vec_size(*(void **)vec);
 
     if(!size || currsize == size) {
         return true;
