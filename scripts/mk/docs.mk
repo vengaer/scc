@@ -22,6 +22,12 @@ docshow: $(docindex) doc
 	$(if $(BROWSER),,$(error BROWSER environment variable not set))
 	$(BROWSER) $<
 
+.PHONY: __chk_docs
+__chk_docs:
+	$(PYTEST) $(PYTESTFLAGS) --builddir=$(snipbuilddir) $(doctestdir)
+
+check: __chk_docs
+
 .PHONY: snips
 snips:
 
@@ -39,14 +45,14 @@ $(strip
 
             $(__t).$(cext): $(snipdir)/$(notdir $(__t)).$(snipext) $(snipgen) | $(snipbuilddir)
 	            $$(info [PY] $$(notdir $$@))
-	            $$(snipgen) -o $$@ $$<
+	            $$(PYTHON) $$(snipgen) -o $$@ $$<
 
             __run_$(notdir $(__t)): $(__t)
 	            $$<
 
-        check: $(__t)
+            __chk_docs: $(__t)
 
-        snips: __run_$(notdir $(__t)))))
+            snips: __run_$(notdir $(__t)))))
 endef
 
 $(call snip-linker-rules)
