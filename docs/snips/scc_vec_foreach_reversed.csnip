@@ -1,8 +1,8 @@
-double *vec = scc_vec_from(double, 2.3, 12.8, 0.0);
-double *iter;
+short *vec = scc_vec_from(short, 2, 12, 0);
+short *iter;
 
 scc_vec_foreach_reversed(iter, vec) {
-    printf("%f ", *iter);
+    printf("%hd ", *iter);
 }
 puts("");
 

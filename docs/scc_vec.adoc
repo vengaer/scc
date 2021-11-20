@@ -298,7 +298,7 @@ include::snips/scc_vec_foreach_reversed.csnip[tags=scc_vec_foreach_reversed]
 .Example output
 [source]
 ----
-0.000000 12.800000 2.300000
+0 12 2
 ----
 
 === scc_vec_foreach_by(void *iter, void *vec, size_t by)
