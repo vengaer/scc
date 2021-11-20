@@ -50,4 +50,8 @@ inline size_t scc_svec_impl_npad(void const *svec) {
 
 void scc_svec_free(void *svec);
 
+inline size_t scc_svec_size(void const *svec) {
+    return scc_svec_impl_base_qual(svec, const)->sc_size;
+}
+
 #endif /* SCC_SVEC_H */

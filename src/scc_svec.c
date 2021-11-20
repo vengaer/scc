@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+size_t scc_svec_size(void const *svec);
 size_t scc_svec_impl_npad(void const *svec);
 
 static bool scc_svec_is_allocd(void const *svec);
