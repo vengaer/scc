@@ -23,7 +23,7 @@ show: $(docindex) doc
 	$(BROWSER) $<
 
 .PHONY: __chk_docs
-__chk_docs:
+check:
 	$(PYTEST) $(PYTESTFLAGS) --builddir=$(snipbuilddir) $(doctestdir)
 
 check: __chk_docs
@@ -44,9 +44,7 @@ $(strip
 	            $$(info [PY] $$(notdir $$@))
 	            $$(PYTHON) $$(snipgen) -o $$@ $$<
 
-            __chk_docs: $(__t)
-
-            )))
+            __chk_docs: $(__t))))
 endef
 
 $(call snip-linker-rules)
