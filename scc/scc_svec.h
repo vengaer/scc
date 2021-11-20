@@ -90,6 +90,10 @@ inline _Bool scc_svec_empty(void const *svec) {
     return !scc_svec_size(svec);
 }
 
+inline void scc_svec_clear(void *vec) {
+    scc_svec_impl_base(vec)->sc_size = 0u;
+}
+
 #define scc_svec_reserve(svec, capacity)                                \
     scc_svec_impl_reserve(&(svec), capacity, sizeof(*(svec)))
 
