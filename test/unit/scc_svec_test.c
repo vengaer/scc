@@ -47,3 +47,14 @@ void test_scc_svec_reserve(void) {
     TEST_ASSERT_EQUAL_UINT64(1024ull, scc_svec_capacity(svec));
     scc_svec_free(svec);
 }
+
+void test_scc_svec_push(void) {
+    int *svec = scc_svec_init(int);
+
+    for(int i = 0; i < 2 * SCC_SVEC_STATIC_CAPACITY; i++) {
+        TEST_ASSERT_EQUAL_UINT64((unsigned long long)i, scc_svec_size(svec));
+        TEST_ASSERT_TRUE(scc_svec_push(svec, i));
+        TEST_ASSERT_EQUAL_INT32(i, svec[i]);
+    }
+    scc_svec_free(svec);
+}
