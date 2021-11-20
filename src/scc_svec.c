@@ -135,6 +135,18 @@ bool scc_svec_impl_reserve(void *svec, size_t capacity, size_t elemsize) {
     return scc_svec_grow(svec, capacity, elemsize);
 }
 
+void scc_svec_impl_erase(void *svec, void *iter, size_t elemsize) {
+    size_t offset = ((unsigned char *)iter - (unsigned char *)svec) / elemsize;
+    --scc_svec_impl_base(svec)->sc_size;
+    if(offset == scc_svec_size(svec)) {
+        /* Last element */
+        return;
+    }
+    size_t nbytes = (scc_svec_size(svec) - offset) * elemsize;
+    memmove(iter, (unsigned char *)iter + elemsize, nbytes);
+}
+
+
 void scc_svec_pop_safe(void *svec) {
     if(!scc_svec_size(svec)) {
         scc_panic("Attempt to pop element from vector of size 0");
