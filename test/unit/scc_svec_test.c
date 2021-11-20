@@ -204,3 +204,42 @@ void test_scc_svec_pop_safe(void) {
     TEST_ASSERT_EQUAL_UINT64(0ull, scc_svec_size(svec));
     scc_svec_free(svec);
 }
+
+void test_scc_svec_erase(void) {
+    int *svec = scc_svec_init(int);
+
+    for(int i = 0; i < 212; i++) {
+        TEST_ASSERT_TRUE(scc_svec_push(svec, i));
+    }
+
+    scc_svec_erase(svec, &svec[118]);
+    for(int i = 118; i < 211; i++) {
+        TEST_ASSERT_EQUAL_INT32(i + 1, svec[i]);
+    }
+
+    scc_svec_erase(svec, &svec[1]);
+    TEST_ASSERT_EQUAL_INT32(0, svec[0]);
+    for(int i = 1; i < 117; i++) {
+        TEST_ASSERT_EQUAL_INT32(i + 1, svec[i]);
+    }
+
+    for(int i = 118; i < 210; i++) {
+        TEST_ASSERT_EQUAL_INT32(i + 2, svec[i]);
+    }
+
+    scc_svec_free(svec);
+}
+
+void test_scc_svec_erase_last(void) {
+    int *svec = scc_svec_init(int);
+    for(int i = 0; i < 300; i++) {
+        TEST_ASSERT_TRUE(scc_svec_push(svec, i));
+    }
+
+    scc_svec_erase(svec, &svec[299]);
+    for(int i = 0; i < 299; i++) {
+        TEST_ASSERT_EQUAL_INT32(i, svec[i]);
+    }
+    scc_svec_free(svec);
+}
+
