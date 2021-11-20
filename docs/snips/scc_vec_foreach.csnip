@@ -1,9 +1,4 @@
-int *vec = scc_vec_init(int);
-
-/* Insert an arbitrary number of elements */
-scc_vec_push(vec, 1);
-scc_vec_push(vec, 2);
-scc_vec_push(vec, 3);
+int *vec = scc_vec_from(int, 1, 2, 3);
 
 int *iter;
 puts("Vector contents:");
