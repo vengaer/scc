@@ -6,7 +6,7 @@ unsigned long *vec = scc_vec_init(unsigned long);
 
 while(fgets(buffer, sizeof(buffer), stdin)) {
     parsed = strtoul(buffer, &endp, 0);
-    if(!isspace(*endp)) {
+    if(endp == buffer || !isspace(*endp)) {
         continue;
     }
     if(!scc_vec_push(vec, parsed)) {
