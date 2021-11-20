@@ -168,7 +168,7 @@ if(!scc_vec_reserve((void *)v, 32)){
 }
 
 /* Invalid, results in sizeof(void). Typically a warning, but not guaranteed */
-if(!scc_vec_reserver((void *){ v }, 32)) {
+if(!scc_vec_reserve((void *){ v }, 32)) {
     exit(1);
 }
 ----
