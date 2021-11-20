@@ -60,7 +60,7 @@ include::snips/scc_vec_init_point.csnip[tags=scc_vec_init_point]
 
 === void *scc_vec_from(type, type... args)
 
-Initialize an `scc_vec` for storing instance of `type` initialized with `args`. At least one argument must be passed in `args`.
+Initialize an `scc_vec` for storing instances of `type` initialized with `args`. At least one argument must be passed in `args`.
 Failure to do so will usually result in warnings but does compile. The call allocates exactly enough space to store the
 passed `args`. The returned pointer must be passed to `scc_vec_free` for the memory to be released.
 
@@ -90,7 +90,7 @@ include::snips/scc_vec_from_emulation.csnip[tags=scc_vec_from_emulation]
 
 ==== Implementation Limitations
 
-The `args` parameter can contain up to at least 126 parameters (not counting the initial `type`) when scc is compiled with a standard-compliant compiler. The number may be even larger in practice.
+The `args` parameter can contain at least 126 parameters (not counting the initial `type`) when scc is compiled with a standard-compliant compiler. The number may be even larger in practice.
 
 === void scc_vec_free(void *vec)
 
