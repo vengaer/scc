@@ -24,3 +24,9 @@ void test_scc_container(void) {
     TEST_ASSERT_EQUAL_INT16(2, scc_container(s, struct foo, wd)->wd);
     TEST_ASSERT_EQUAL_UINT8(3, scc_container(s, struct foo, wd)->b);
 }
+
+void test_scc_arrsize(void) {
+    TEST_ASSERT_EQUAL_UINT64(3ull, scc_arrsize(((int[]){ 1,2,3 })));
+    TEST_ASSERT_EQUAL_UINT64(5ull, scc_arrsize(((int[]){ 1,2,3,4,5 })));
+    TEST_ASSERT_EQUAL_UINT64(10ull, scc_arrsize(((int[]){ 1,2,3,4,5,6,7,8,9,10 })));
+}
