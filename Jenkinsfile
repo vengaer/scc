@@ -19,7 +19,7 @@ pipeline {
                 sh "docker build -f Dockerfile -t ${IMG} ."
             }
         }
-        stage('Build') {
+        stage('Dynamic Build') {
             agent {
                 docker {
                     image "${IMG}"
@@ -28,8 +28,10 @@ pipeline {
             steps {
                 script {
                     ccs.each { cc ->
-                        echo "-- Starting ${cc} Build --"
-                        sh "CC=${cc} make -B -j\$(nproc)"
+                        stage("Build ${cc}") {
+                            echo "-- Starting ${cc} Build --"
+                            sh "CC=${cc} make -B -j\$(nproc)"
+                        }
                     }
                 }
             }
