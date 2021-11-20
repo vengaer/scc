@@ -17,7 +17,10 @@ enum scc_rbcolor {
     scc_rbcolor_red
 };
 
+struct scc_rbnode;
+
 typedef unsigned char scc_rbnode_flags;
+typedef int(*scc_rbcompare)(struct scc_rbnode const *, struct scc_rbnode const *);
 
 struct scc_rbnode {
     struct scc_rbnode *sc_left;
@@ -27,12 +30,14 @@ struct scc_rbnode {
 };
 
 struct scc_rbtree {
-    struct scc_rbnode sentinel;
     size_t size;
+    struct scc_rbnode sentinel;
+    scc_rbcompare sc_compare;
 };
 
-inline struct scc_rbtree *scc_rbtree_impl_init(struct scc_rbtree *tree) {
+inline struct scc_rbtree *scc_rbtree_impl_init(struct scc_rbtree *tree, scc_rbcompare compare) {
     tree->sentinel.sc_flags = SCC_RBTHRD_LEAF;
+    tree->sc_compare = compare;
     return tree;
 }
 
@@ -40,8 +45,9 @@ inline struct scc_rbnode *scc_rbtree_impl_root(struct scc_rbtree *tree) {
     return tree->sentinel.sc_left;
 }
 
-#define scc_rbtree_init()   \
-    scc_rbtree_impl_init(&(struct scc_rbtree){ 0 })
+#define scc_rbtree_init(compare)                                \
+    scc_rbtree_impl_init(&(struct scc_rbtree){ 0 }, compare)
+
 
 
 #endif /* SCC_RBTREE_H */
