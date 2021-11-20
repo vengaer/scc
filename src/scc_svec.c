@@ -155,9 +155,8 @@ void scc_svec_impl_erase_range( void *svec,
         return;
     }
 
-    size_t nelems = ((unsigned char const *)end - (unsigned char *)first) / elemsize;
-
-    size_t offset = ((unsigned char *)first - (unsigned char *)svec) / elemsize;
+    size_t const nelems = ((unsigned char const *)end - (unsigned char *)first) / elemsize;
+    size_t const offset = ((unsigned char *)first - (unsigned char *)svec) / elemsize;
 
     scc_svec_impl_base(svec)->sc_size -= nelems;
 
