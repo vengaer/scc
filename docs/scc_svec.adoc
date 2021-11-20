@@ -119,9 +119,21 @@ The `svec` argument passed to `scc_svec_reserve` must be a pointer to a complete
 
 == Modifiers
 
-=== scc_svec_clear(void *svec)
+=== void scc_svec_clear(void *svec)
 
 Empties the vector by setting its size to 0 while leaving its capacity unchanged.
+
+=== bool scc_svec_resize(void *svec, size_t size)
+
+Resizes the vector to contain `size` elements, allocating more memory if required. The following three cases may occur
+
+* If `scc_svec_size(vec) == size` or `size == 0`, the function returns immediately. No allocations are performed.
+* If `scc_svec_size(vec) > size`, the size of the vector is truncated to `size`. No allocations are performed.
+* If `scc_svec_size(vec) < size`, the vector is resized such that it can hold at least `size` elements. Newly inserted elements are zeroed. Subsequent calls to `scc_svec_size` not preceded by other calls that may alter the vector return `size`. Memory is allocated dynamically only if `size` is larger than `SCC_SVEC_STATIC_CAPACITY`.
+
+==== Returns
+* `true` if the vector was successfully resized
+* `false` on allocation error
 
 === bool scc_svec_push(void *svec, type value)
 
