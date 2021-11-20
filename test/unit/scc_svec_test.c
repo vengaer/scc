@@ -305,3 +305,13 @@ void test_scc_svec_erase_range_end(void) {
 
     scc_svec_free(svec);
 }
+
+void test_scc_svec_at(void) {
+    int *svec = scc_svec_init(int);
+    for(int i = 0; i < 368; i++) {
+        TEST_ASSERT_TRUE(scc_svec_push(svec, i));
+        TEST_ASSERT_EQUAL_INT32(i, scc_svec_at(svec, i));
+    }
+    scc_svec_free(svec);
+}
+
