@@ -4,12 +4,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+enum { SCC_SVEC_MAX_CAPACITY_INCREASE = 4096 };
+
 size_t scc_svec_size(void const *svec);
 size_t scc_svec_impl_npad(void const *svec);
 size_t scc_svec_capacity(void const *svec);
 
 static bool scc_svec_is_allocd(void const *svec);
 static size_t scc_svec_memsize(size_t capacity, size_t elemsize, size_t npad);
+static size_t scc_svec_calc_new_capacity(size_t current);
 static struct scc_svec *scc_svec_alloc(size_t nbytes, size_t nelems, size_t npad);
 static bool scc_svec_grow(void **svec, size_t capacity, size_t elemsize);
 
@@ -20,6 +23,12 @@ static inline bool scc_svec_is_allocd(void const *svec) {
 static inline size_t scc_svec_memsize(size_t capacity, size_t elemsize, size_t npad) {
     return capacity * elemsize + sizeof(struct scc_svec) + npad;
 }
+
+static inline size_t scc_svec_calc_new_capacity(size_t current) {
+    return current + (current < SCC_SVEC_MAX_CAPACITY_INCREASE ?
+                                current : SCC_SVEC_MAX_CAPACITY_INCREASE);
+}
+
 
 static struct scc_svec *scc_svec_alloc(size_t nbytes, size_t nelems, size_t npad) {
     struct scc_svec *v = malloc(nbytes);
@@ -70,9 +79,18 @@ void scc_svec_free(void *svec) {
     }
 }
 
+bool scc_svec_impl_push_ensure_capacity(void *svec, size_t elemsize) {
+    size_t const capacity = scc_svec_capacity(*(void **)svec);
+    if(scc_svec_size(*(void **)svec) < capacity) {
+        return true;
+    }
+    return scc_svec_grow(svec, scc_svec_calc_new_capacity(capacity), elemsize);
+}
+
 bool scc_svec_impl_reserve(void *svec, size_t capacity, size_t elemsize) {
     if(capacity <= scc_svec_capacity(*(void **)svec)) {
         return true;
     }
     return scc_svec_grow(svec, capacity, elemsize);
 }
+
