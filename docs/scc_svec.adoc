@@ -33,6 +33,34 @@ The returned pointer should be assigned to a pointer to `type`. Furthermore, whi
 
 Address of an empty `scc_svec` instance with automatic storage duration.
 
+=== void *scc_svec_from(type, type... args)
+
+Initialize an `scc_svec` for storing instances of `type` initialized with `args`. At least one argument must be passed in `args`.
+Failure to do so will usually result in warnings but does compile. If more arguments than fit in the static buffer are passed, the
+call results in exactly enough space to store the passed `args` being allocated. The returned pointer must be passed to
+`scc_svec_free` for the memory to be released.
+
+If the number of elements passed in `args` is smaller than `SCC_SVEC_STATIC_CAPACITY`, the call always succeeds.
+
+==== Returns
+
+- `NULL` on allocation failure
+- Address of an `scc_svec` containing `args` otherwise.
+
+`scc_svec_from` is to be preferred over combinations of `scc_svec_init`, `scc_svec_reserve` and `scc_svec_push` as
+it allows for more optimizations. The difference between the two approaches is smaller than the difference when
+using `scc_vec`, though.
+
+.Example usage
+[source]
+----
+include::snips/scc_svec_from.csnip[tags=scc_vec_from]
+----
+
+==== Implementation Limitations
+
+The `args` parameter can contain at least 126 parameters (not counting the initial `type`) when scc is compiled with a standard-compliant compiler. The number may be even larger in practice.
+
 === void scc_svec_free(void *svec)
 
 Reclaim memory allocated for `vec`. Should be passed only pointers returned by `scc_svec_init`.
