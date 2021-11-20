@@ -1,0 +1,9 @@
+double *svec = scc_svec_from(double, 2.3, 12.8, 0.0, 1.7, 0.0001);
+double *iter;
+
+scc_svec_foreach_reversed(iter, svec) {
+    printf("%f ", *iter);
+}
+puts("");
+
+scc_svec_free(svec);

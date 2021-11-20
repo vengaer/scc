@@ -1,0 +1,15 @@
+int *svec = scc_svec_init(int);
+int *iter;
+int i = 0;
+
+scc_svec_resize(svec, 12);
+scc_svec_foreach(iter, svec) {
+    *iter = i++;
+}
+
+scc_svec_foreach_reversed_by(iter, svec, 6) {
+    printf("%d ", *iter);
+}
+puts("");
+
+scc_svec_free(svec);

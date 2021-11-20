@@ -208,3 +208,70 @@ Returns the element at slot `index` in the vector. If there are not enough eleme
 ==== Returns
 The element at slot `index`
 
+== Convenience Macros
+=== scc_svec_foreach(void *iter, void *svec)
+
+Produces a scope executed `scc_svec_size(vec)` times with `iter` referring to each element in the vector, in order.
+
+.Printing a vector of integers
+[source]
+----
+include::snips/scc_svec_foreach.csnip[tags=scc_svec_foreach]
+----
+
+The above snippet produces the following output.
+
+.Example output
+[source]
+----
+1 2 3 4
+----
+
+
+=== scc_svec_foreach_reversed(void *iter, void *svec)
+
+Produces a scope executed `scc_svec_size(svec)` times with `iter` referring to each element in the vector in reverse order.
+
+.Printing a vector of doubles in reverse
+[source]
+----
+include::snips/scc_svec_foreach_reversed.csnip[tags=scc_svec_foreach_reversed]
+----
+
+.Example output
+[source]
+----
+0.000100 1.700000 0.000000 12.800000 2.300000
+----
+
+=== scc_svec_foreach_by(void *iter, void *svec, size_t by)
+
+Iterates over `svec` with `iter` referring to every `by` element.
+
+.Printing every other element in a vector of integers
+[source]
+----
+include::snips/scc_svec_foreach_by.csnip[tags=scc_svec_foreach_by]
+----
+
+.Example output
+[source]
+----
+8 62
+----
+
+=== scc_svec_foreach_reversed_by(void *iter, void *svec, size_t by)
+
+Iterator over `svec` in reverse order with `iter` referring to every `by` element.
+
+.Printing every sixth element in a vector in reverse order
+[source]
+----
+include::snips/scc_svec_foreach_reversed_by.csnip[tags=scc_svec_foreach_reversed_by]
+----
+
+.Example output
+[source]
+----
+11 5
+----
