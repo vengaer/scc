@@ -63,18 +63,6 @@ pipeline {
                 }
             }
         }
-        stage('Doc Snippets') {
-            agent {
-                docker {
-                    image "${IMG}"
-                }
-            }
-            steps {
-                script {
-                    sh "make snips <<< "1 2 3"
-                }
-            }
-        }
         stage('Gitlab Success') {
             steps {
                 echo '-- Notifying Gitlab --'
