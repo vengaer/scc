@@ -1,7 +1,7 @@
 #ifndef SCC_VEC_H
 #define SCC_VEC_H
 
-#include "scc_macro.h"
+#include "scc_mem.h"
 
 #include <stddef.h>
 

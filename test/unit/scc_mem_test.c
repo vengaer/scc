@@ -1,4 +1,4 @@
-#include <scc/scc_macro.h>
+#include <scc/scc_mem.h>
 
 #include <unity.h>
 
