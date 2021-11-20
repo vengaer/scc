@@ -315,3 +315,63 @@ void test_scc_svec_at(void) {
     scc_svec_free(svec);
 }
 
+void test_scc_svec_foreach(void) {
+    int *iter;
+    int i = 0;
+    int *svec = scc_svec_from(int, 0, 1, 2, 3, 4, 5);
+    scc_svec_foreach(iter, svec) {
+        TEST_ASSERT_EQUAL_INT32(i++, *iter);
+    }
+
+    scc_svec_free(svec);
+}
+
+void test_scc_svec_foreach_reversed(void) {
+    int *iter;
+    int i;
+    int *svec = scc_svec_init(int);
+
+    for(i = 0; i < 2827; i++) {
+        TEST_ASSERT_TRUE(scc_svec_push(svec, i));
+    }
+
+    scc_svec_foreach_reversed(iter, svec) {
+        TEST_ASSERT_EQUAL_INT32(--i, *iter);
+    }
+    scc_svec_free(svec);
+}
+
+void test_scc_svec_foreach_by(void) {
+    int *iter;
+    int i;
+    int *svec = scc_svec_init(int);
+
+    for(i = 0; i < 221; i++) {
+        TEST_ASSERT_TRUE(scc_svec_push(svec, i));
+    }
+
+    i = 0;
+    scc_svec_foreach_by(iter, svec, 3) {
+        TEST_ASSERT_EQUAL_INT32(i, *iter);
+        i += 3;
+    }
+    scc_svec_free(svec);
+}
+
+void test_scc_svec_foreach_reversed_by(void) {
+    int *iter;
+    int i;
+    int *svec = scc_svec_init(int);
+
+    for(i = 0; i < 2211; i++) {
+        TEST_ASSERT_TRUE(scc_svec_push(svec, i));
+    }
+
+    --i;
+    scc_svec_foreach_reversed_by(iter, svec, 8) {
+        TEST_ASSERT_EQUAL_INT32(i, *iter);
+        i -= 8;
+    }
+    TEST_ASSERT_LESS_OR_EQUAL(0, i);
+    scc_svec_free(svec);
+}
