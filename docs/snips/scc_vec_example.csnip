@@ -2,7 +2,7 @@ char buffer[32];
 char *endp;
 unsigned long parsed;
 
-unsigned long *vec = scc_vec_init();
+unsigned long *vec = scc_vec_init(unsigned long);
 
 while(fgets(buffer, sizeof(buffer), stdin)) {
     parsed = strtoul(buffer, &endp, 0);

@@ -12,19 +12,14 @@ size_t scc_vec_capacity(void const *vec);
 void scc_vec_pop(void *vec);
 bool scc_vec_empty(void const *vec);
 void scc_vec_clear(void *vec);
+size_t scc_vec_impl_npad(void const*vec);
 
-static size_t scc_vec_memsize(size_t capacity, size_t elemsize);
+static size_t scc_vec_memsize(size_t capacity, size_t elemsize, size_t npad);
 static size_t scc_vec_calc_new_capacity(size_t current);
 static bool scc_vec_grow(void **vec, size_t capacity, size_t elemsize);
-static struct scc_vec *scc_vec_base(void *vec);
 
-static void *scc_vec_null = (union {
-    struct scc_vec vec;
-    unsigned char bytes[sizeof(struct scc_vec)];
-}){ 0 }.vec.sc_buffer;
-
-static inline size_t scc_vec_memsize(size_t capacity, size_t elemsize) {
-    return capacity * elemsize + sizeof(struct scc_vec);
+static inline size_t scc_vec_memsize(size_t capacity, size_t elemsize, size_t npad) {
+    return capacity * elemsize + sizeof(struct scc_vec) + npad;
 }
 
 static inline size_t scc_vec_calc_new_capacity(size_t current) {
@@ -32,13 +27,11 @@ static inline size_t scc_vec_calc_new_capacity(size_t current) {
                                 (current | 1) : SCC_VEC_MAX_CAPACITY_INCREASE);
 }
 
-static inline struct scc_vec *scc_vec_base(void *vec) {
-    return scc_container(vec, struct scc_vec, sc_buffer);
-}
 
 static bool scc_vec_grow(void **vec, size_t capacity, size_t elemsize) {
     struct scc_vec *v;
-    size_t nbytes = scc_vec_memsize(capacity, elemsize);
+    size_t const npad = scc_vec_impl_npad(*vec);
+    size_t const nbytes = scc_vec_memsize(capacity, elemsize, npad);
     if(!scc_vec_capacity(*vec)) {
         v = malloc(nbytes);
 
@@ -46,26 +39,29 @@ static bool scc_vec_grow(void **vec, size_t capacity, size_t elemsize) {
             return false;
         }
         v->sc_size = 0;
+        v->sc_buffer[npad - 1u] = npad - sizeof(unsigned char);
     }
     else {
-        v = realloc(scc_vec_base(*vec), nbytes);
+        v = realloc(scc_vec_impl_base(*vec), nbytes);
         if(!v) {
             return false;
         }
     }
 
     v->sc_capacity = capacity;
-    *vec = v->sc_buffer;
+    *vec = v->sc_buffer + npad;
     return true;
 }
 
-void *scc_vec_init(void) {
-    return scc_vec_null;
+void *scc_vec_impl_init(void *nullvec, size_t offset) {
+    unsigned char *vec = (unsigned char *)nullvec + offset;
+    vec[-1] = offset - sizeof(struct scc_vec) - sizeof(*vec);
+    return vec;
 }
 
 void scc_vec_free(void *vec) {
     if(scc_vec_capacity(vec)) {
-        free(scc_vec_base(vec));
+        free(scc_vec_impl_base(vec));
     }
 }
 
@@ -76,7 +72,7 @@ bool scc_vec_impl_resize(void *vec, size_t size, size_t elemsize) {
         return true;
     }
     if(currsize > size) {
-        scc_vec_base(*(void **)vec)->sc_size = size;
+        scc_vec_impl_base(*(void **)vec)->sc_size = size;
         return true;
     }
 
@@ -88,7 +84,7 @@ bool scc_vec_impl_resize(void *vec, size_t size, size_t elemsize) {
     size_t zsize = (size - currsize) * elemsize;
 
     memset(baseaddr + currsize * elemsize, 0, zsize);
-    scc_vec_base(*(void **)vec)->sc_size = size;
+    scc_vec_impl_base(*(void **)vec)->sc_size = size;
     return true;
 }
 
@@ -109,7 +105,7 @@ bool scc_vec_impl_reserve(void *vec, size_t capacity, size_t elemsize) {
 
 void scc_vec_impl_erase(void *vec, void *iter, size_t elemsize) {
     size_t offset = ((unsigned char *)iter - (unsigned char *)vec) / elemsize;
-    --scc_vec_base(vec)->sc_size;
+    --scc_vec_impl_base(vec)->sc_size;
     if(offset == scc_vec_size(vec)) {
         /* Last element */
         return;
@@ -125,7 +121,7 @@ void scc_vec_impl_erase_range(void *vec, void *first, void *end, size_t elemsize
 
     size_t nelems = ((unsigned char *)end - (unsigned char *)first) / elemsize;
     size_t offset = ((unsigned char *)first - (unsigned char *)vec) / elemsize;
-    scc_vec_base(vec)->sc_size -= nelems;
+    scc_vec_impl_base(vec)->sc_size -= nelems;
 
     if(offset == scc_vec_size(vec)) {
         /* Last nelems elements */

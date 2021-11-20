@@ -1,4 +1,4 @@
-double *vec = scc_vec_init();
+double *vec = scc_vec_init(int);
 double *iter;
 
 /* Fill up the vector */

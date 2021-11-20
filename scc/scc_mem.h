@@ -3,11 +3,8 @@
 
 #include <stddef.h>
 
-#define scc_offset(type, member)                        \
-    (sizeof(unsigned char[(size_t)&(((type *)4096)->member)]) - 4096)
-
 #define scc_container_qual(addr, type, member, qual)    \
-    ((type qual *)((unsigned char qual *)addr - scc_offset(type, member)))
+    ((type qual *)((unsigned char qual *)addr - offsetof(type, member)))
 
 #define scc_container(addr, type, member)               \
     scc_container_qual(addr, type, member,)

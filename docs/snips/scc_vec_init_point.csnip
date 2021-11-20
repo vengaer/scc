@@ -3,4 +3,4 @@ struct point {
     float y;
 };
 
-struct point *vec = scc_vec_init();
+struct point *vec = scc_vec_init(struct point);

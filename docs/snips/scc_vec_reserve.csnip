@@ -1,4 +1,4 @@
-int *v = scc_vec_init();
+int *v = scc_vec_init(int);
 
 /* Valid, v is passed as a pointer to int */
 if(!scc_vec_reserve(v, 32)) {
