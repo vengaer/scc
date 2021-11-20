@@ -154,6 +154,30 @@ Pop the last element from the vector (i.e. decrement the size of the vector by o
 
 Like `scc_svec_pop` but with bounds checking. If attempting to pop from an empty vector, standard `exit` is called.
 
+=== void scc_svec_erase(void *svec, void *iter)
+
+Erase the element at address `iter`, the latter must refer to a suitably aligned address in `svec`. No bounds checking
+is performed. Requires that all elements located at addresses beyond `iter` are copied to replace it.
+
+.Erasing the 3rd element in a vector
+[source]
+----
+include::snips/scc_svec_erase.csnip[tags=scc_vec_erase]
+----
+
+=== void scc_svec_erase_range(void *svec, void *first, void const *end)
+
+Erase the elements at addresses in range `[first,end)`. Elements in the range `[end,&svec[scc_svec_size(svec)])` are copied
+to replace the erased range. `first` must refer to a suitably aligned address in `svec`. `end` must be either an address in
+`svec` or `&svec[scc_svec_size(vec)]`. It is subject to the same alignment requirements as `first`.
+
+If `first <= end`, the function returns immediately.
+
+.Erasing 3 elements at offset 8
+----
+include::snips/scc_svec_erase_range.csnip[tags=scc_vec_erase]
+----
+
 == Accessors
 
 === type operator[](void *svec, size_t index)
