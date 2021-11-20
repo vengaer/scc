@@ -62,6 +62,7 @@ void scc_svec_impl_erase_range(
         void const *end,
         size_t elemsize
     );
+void scc_svec_impl_at_check(void *svec, size_t index);
 _Bool scc_svec_impl_push_ensure_capacity(void *vec, size_t elemsize);
 _Bool scc_svec_impl_reserve(void *vec, size_t capacity, size_t elemsize);
 
@@ -123,5 +124,9 @@ inline void scc_svec_clear(void *vec) {
 #define scc_svec_push(svec, element)                                    \
     (scc_svec_impl_push_ensure_capacity(&(svec), sizeof(*(svec))) &&    \
     (svec[scc_svec_impl_base(svec)->sc_size++] = element,1))
+
+#define scc_svec_at(svec, index)                                        \
+    (scc_svec_impl_at_check(svec, index),svec[index])
+
 
 #endif /* SCC_SVEC_H */
