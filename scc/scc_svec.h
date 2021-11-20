@@ -95,6 +95,8 @@ inline void scc_svec_pop(void *svec) {
     --scc_svec_impl_base(svec)->sc_size;
 }
 
+void scc_svec_pop_safe(void *vec);
+
 inline void scc_svec_clear(void *vec) {
     scc_svec_impl_base(vec)->sc_size = 0u;
 }

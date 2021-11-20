@@ -1,3 +1,4 @@
+#include <scc/scc_panic.h>
 #include <scc/scc_svec.h>
 
 #include <stdbool.h>
@@ -132,5 +133,12 @@ bool scc_svec_impl_reserve(void *svec, size_t capacity, size_t elemsize) {
         return true;
     }
     return scc_svec_grow(svec, capacity, elemsize);
+}
+
+void scc_svec_pop_safe(void *svec) {
+    if(!scc_svec_size(svec)) {
+        scc_panic("Attempt to pop element from vector of size 0");
+    }
+    scc_svec_pop(svec);
 }
 
