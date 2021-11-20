@@ -54,4 +54,8 @@ inline size_t scc_svec_size(void const *svec) {
     return scc_svec_impl_base_qual(svec, const)->sc_size;
 }
 
+inline size_t scc_svec_capacity(void const *svec) {
+    return scc_svec_impl_base_qual(svec, const)->sc_capacity;
+}
+
 #endif /* SCC_SVEC_H */
