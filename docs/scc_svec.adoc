@@ -159,10 +159,16 @@ Like `scc_svec_pop` but with bounds checking. If attempting to pop from an empty
 Erase the element at address `iter`, the latter must refer to a suitably aligned address in `svec`. No bounds checking
 is performed. Requires that all elements located at addresses beyond `iter` are copied to replace it.
 
-.Erasing the 3rd element in a vector
+.Erasing the 0th element in a vector
 [source]
 ----
 include::snips/scc_svec_erase.csnip[tags=scc_vec_erase]
+----
+
+.Example output
+[source]
+----
+1 2 3 4 5 6 7 8 9 10
 ----
 
 === void scc_svec_erase_range(void *svec, void *first, void const *end)
@@ -174,8 +180,15 @@ to replace the erased range. `first` must refer to a suitably aligned address in
 If `first <= end`, the function returns immediately.
 
 .Erasing 3 elements at offset 8
+[source]
 ----
 include::snips/scc_svec_erase_range.csnip[tags=scc_vec_erase]
+----
+
+.Example output
+[source]
+----
+0 1 2 3 4 5 6 7
 ----
 
 == Accessors
