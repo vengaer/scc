@@ -48,6 +48,34 @@ void test_scc_svec_reserve(void) {
     scc_svec_free(svec);
 }
 
+void test_scc_svec_allocation_behavior(void) {
+    unsigned *svec = scc_svec_init(unsigned);
+    unsigned i = 0u;
+    for(i = 0; i < SCC_SVEC_STATIC_CAPACITY; i++) {
+        TEST_ASSERT_TRUE(scc_svec_push(svec, i));
+        TEST_ASSERT_EQUAL_UINT8(0, ((unsigned char *)svec)[-1]);
+    }
+
+    for(unsigned cap = i; i < 4096u; i++) {
+        if(i >= cap) {
+            cap <<= 1u;
+        }
+        TEST_ASSERT_TRUE(scc_svec_push(svec, i));
+        TEST_ASSERT_EQUAL_UINT8(1, ((unsigned char *)svec)[-1]);
+        TEST_ASSERT_EQUAL_UINT64(cap, scc_svec_capacity(svec));
+    }
+
+    for(unsigned cap = i; i < 16384; i++) {
+        if(i >= cap) {
+            cap += 4096;
+        }
+        TEST_ASSERT_TRUE(scc_svec_push(svec, i));
+        TEST_ASSERT_EQUAL_UINT8(1, ((unsigned char *)svec)[-1]);
+        TEST_ASSERT_EQUAL_UINT64(cap, scc_svec_capacity(svec));
+    }
+    scc_svec_free(svec);
+}
+
 void test_scc_svec_push(void) {
     int *svec = scc_svec_init(int);
 
