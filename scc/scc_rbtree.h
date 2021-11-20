@@ -36,6 +36,10 @@ inline struct scc_rbtree *scc_rbtree_impl_init(struct scc_rbtree *tree) {
     return tree;
 }
 
+inline struct scc_rbnode *scc_rbtree_impl_root(struct scc_rbtree *tree) {
+    return tree->sentinel.sc_left;
+}
+
 #define scc_rbtree_init()   \
     scc_rbtree_impl_init(&(struct scc_rbtree){ 0 })
 
