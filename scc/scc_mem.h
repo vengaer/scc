@@ -9,4 +9,7 @@
 #define scc_container(addr, type, member)               \
     scc_container_qual(addr, type, member,)
 
+#define scc_arrsize(addr)                               \
+    (sizeof(addr) / sizeof((addr)[0]))
+
 #endif /* SCC_MEM_H */

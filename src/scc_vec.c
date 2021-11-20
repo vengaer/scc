@@ -16,6 +16,7 @@ size_t scc_vec_impl_npad(void const*vec);
 
 static size_t scc_vec_memsize(size_t capacity, size_t elemsize, size_t npad);
 static size_t scc_vec_calc_new_capacity(size_t current);
+static struct scc_vec *scc_vec_alloc(size_t nbytes, size_t nelems, size_t npad);
 static bool scc_vec_grow(void **vec, size_t capacity, size_t elemsize);
 
 static inline size_t scc_vec_memsize(size_t capacity, size_t elemsize, size_t npad) {
@@ -27,25 +28,30 @@ static inline size_t scc_vec_calc_new_capacity(size_t current) {
                                 (current | 1) : SCC_VEC_MAX_CAPACITY_INCREASE);
 }
 
+static struct scc_vec *scc_vec_alloc(size_t nbytes, size_t nelems, size_t npad) {
+    struct scc_vec *v = malloc(nbytes);
+    if(!v) {
+        return 0;
+    }
+    v->sc_size = nelems;
+    v->sc_buffer[npad - 1u] = npad - sizeof(unsigned char);
+    return v;
+}
 
 static bool scc_vec_grow(void **vec, size_t capacity, size_t elemsize) {
     struct scc_vec *v;
     size_t const npad = scc_vec_impl_npad(*vec);
     size_t const nbytes = scc_vec_memsize(capacity, elemsize, npad);
-    if(!scc_vec_capacity(*vec)) {
-        v = malloc(nbytes);
 
-        if(!v) {
-            return false;
-        }
-        v->sc_size = 0;
-        v->sc_buffer[npad - 1u] = npad - sizeof(unsigned char);
+    if(!scc_vec_capacity(*vec)) {
+        v = scc_vec_alloc(nbytes, 0u, npad);
     }
     else {
         v = realloc(scc_vec_impl_base(*vec), nbytes);
-        if(!v) {
-            return false;
-        }
+    }
+
+    if(!v) {
+        return false;
     }
 
     v->sc_capacity = capacity;
@@ -57,6 +63,19 @@ void *scc_vec_impl_init(void *nullvec, size_t offset) {
     unsigned char *vec = (unsigned char *)nullvec + offset;
     vec[-1] = offset - sizeof(struct scc_vec) - sizeof(*vec);
     return vec;
+}
+
+void *scc_vec_impl_from(size_t offset, void const *data, size_t size, size_t elemsize) {
+    size_t const npad = offset - sizeof(struct scc_vec);
+    size_t const nbytes = scc_vec_memsize(size, elemsize, npad);
+    struct scc_vec *v = scc_vec_alloc(nbytes, size, npad);
+    if (!v) {
+        return 0;
+    }
+    v->sc_capacity = size;
+    void *buffer = v->sc_buffer + npad;
+    memcpy(buffer, data, size * elemsize);
+    return buffer;
 }
 
 void scc_vec_free(void *vec) {

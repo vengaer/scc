@@ -35,6 +35,7 @@ struct scc_vec {
     scc_vec_impl_base_qual(vec,)
 
 void *scc_vec_impl_init(void *nullvec, size_t offset);
+void *scc_vec_impl_from(size_t offset, void const *data, size_t size, size_t elemsize);
 _Bool scc_vec_impl_resize(void *vec, size_t size, size_t elemsize);
 _Bool scc_vec_impl_push_ensure_capacity(void *vec, size_t elemsize);
 _Bool scc_vec_impl_reserve(void *vec, size_t capacity, size_t elemsize);
@@ -72,6 +73,9 @@ void scc_vec_pop_safe(void *vec);
 
 #define scc_vec_init(type)                                          \
     scc_vec_impl_init(&scc_vec_impl_nullvec(type), scc_vec_impl_nullsize(type))
+
+#define scc_vec_from(type, ...)                                     \
+    scc_vec_impl_from(scc_vec_impl_nullsize(type), (type[]){ __VA_ARGS__ }, scc_arrsize(((type[]){ __VA_ARGS__ })), sizeof(type))
 
 #define scc_vec_reserve(vec, capacity)                              \
     scc_vec_impl_reserve(&(vec), capacity, sizeof(*(vec)))
