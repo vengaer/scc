@@ -123,3 +123,11 @@ void test_scc_svec_empty(void) {
     TEST_ASSERT_FALSE(scc_svec_empty(svec));
     scc_svec_free(svec);
 }
+
+void test_scc_svec_clear(void) {
+    int *svec = scc_svec_from(int, 1, 2, 3);
+    TEST_ASSERT_FALSE(scc_svec_empty(svec));
+    scc_svec_clear(svec);
+    TEST_ASSERT_TRUE(scc_svec_empty(svec));
+    scc_svec_free(svec);
+}
