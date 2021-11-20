@@ -10,5 +10,5 @@ int compare(struct scc_rbnode const *left, struct scc_rbnode const *right) {
 
 void test_scc_rbtree_init(void) {
     struct scc_rbtree *tree = scc_rbtree_init(compare);
-    TEST_ASSERT_EQUAL_UINT64(0, tree->size);
+    TEST_ASSERT_EQUAL_UINT64(0, tree->rt_size);
 }

@@ -23,31 +23,35 @@ typedef unsigned char scc_rbnode_flags;
 typedef int(*scc_rbcompare)(struct scc_rbnode const *, struct scc_rbnode const *);
 
 struct scc_rbnode {
-    struct scc_rbnode *sc_left;
-    struct scc_rbnode *sc_right;
-    enum scc_rbcolor sc_color;
-    scc_rbnode_flags sc_flags;
+    struct scc_rbnode *rn_left;
+    struct scc_rbnode *rn_right;
+    enum scc_rbcolor rn_color;
+    scc_rbnode_flags rn_flags;
 };
 
 struct scc_rbtree {
-    size_t size;
-    struct scc_rbnode sentinel;
-    scc_rbcompare sc_compare;
+    size_t rt_size;
+    struct scc_rbnode rt_sentinel;
+    scc_rbcompare rt_compare;
 };
 
 inline struct scc_rbtree *scc_rbtree_impl_init(struct scc_rbtree *tree, scc_rbcompare compare) {
-    tree->sentinel.sc_flags = SCC_RBTHRD_LEAF;
-    tree->sc_compare = compare;
+    tree->rt_sentinel.rn_flags = SCC_RBTHRD_LEAF;
+    tree->rt_compare = compare;
     return tree;
 }
 
-inline struct scc_rbnode *scc_rbtree_impl_root(struct scc_rbtree *tree) {
-    return tree->sentinel.sc_left;
+#define scc_rbtree_impl_root(tree)                              \
+    ((tree)->rt_sentinel.rn_left)
+
+inline _Bool scc_rbtree_empty(struct scc_rbtree const *tree) {
+    return !tree->rt_size;
 }
 
 #define scc_rbtree_init(compare)                                \
     scc_rbtree_impl_init(&(struct scc_rbtree){ 0 }, compare)
 
+_Bool scc_rbtree_insert(struct scc_rbtree *restrict tree, struct scc_rbnode *restrict node);
 
 
 #endif /* SCC_RBTREE_H */
