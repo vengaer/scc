@@ -12,3 +12,9 @@ A generic, dynamic array in the vein of namesakes provided by C++ and Rust. Note
 `scc_svec` is almost always a better choice than `scc_vec`.
 
 link:scc_vec.html[reference]
+
+== scc_rbtree
+
+Generic red-black tree utilizing arena allocation.
+
+link:scc_rbtree.html[reference]
