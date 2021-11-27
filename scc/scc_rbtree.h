@@ -53,7 +53,7 @@ struct scc_rbtree {
 
 void *scc_rbtree_impl_init(struct scc_rbtree *restrict tree);
 _Bool scc_rbtree_impl_insert(void *handle);
-void const *scc_rbtree_impl_find(void *handle);
+void const *scc_rbtree_impl_find(void const *handle);
 _Bool scc_rbtree_impl_remove(void *handle);
 void const *scc_rbtree_impl_leftmost(void const *handle);
 void const *scc_rbtree_impl_rightmost(void const *handle);
@@ -68,7 +68,7 @@ void const *scc_rbtree_impl_sentinel(void const *handle);
         .rb_compare = compare                                       \
     })
 
-void scc_rbtree_free(void *addr);
+void scc_rbtree_free(void *handle);
 size_t scc_rbtree_size(void const *handle);
 
 inline _Bool scc_rbtree_empty(void const *handle) {
