@@ -4,7 +4,7 @@
 :source-highlighter: rouge
 :source-language: c
 
-`scc_svec` provides a generic "short" vector particularly suitable for working with smaller sets of elements. The initial structure is
+`scc_svec` provides a generic "small" vector particularly suitable for working with smaller sets of elements. The initial structure is
 allocated with automatic storage duration, allowing smaller vectors do avoid dynamic allocation altogether. Should more space than what
 is allocated in the initial structure be required, the vector is moved to the heap.
 Unless having a specific reason for avoiding placing data on the stack, `scc_svec` should almost always be preferred to `scc_vec`.
