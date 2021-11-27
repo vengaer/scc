@@ -88,4 +88,32 @@ void test_scc_arena_free_single_chunk(void) {
     /* No chunks in arena */
     TEST_ASSERT_EQUAL_PTR(0, arena.ar_current);
     TEST_ASSERT_EQUAL_PTR(0, arena.ar_first);
+    /* No release required */
+}
+
+void test_scc_arena_free_multiple_chunks(void) {
+    struct scc_arena arena = scc_arena_init(int);
+    /* Use up entire first chunk */
+    int *first = scc_arena_alloc(&arena);
+    for(unsigned i = 0u; i < arena.ar_chunksize - 1u; i++) {
+        scc_arena_alloc(&arena);
+    }
+    /* Chunk should be full */
+    TEST_ASSERT_EQUAL_UINT32(arena.ar_chunksize, arena.ar_current->ch_refcount);
+
+    /* First element in second chunk */
+    int *second = scc_arena_alloc(&arena);
+
+    struct scc_chunk *chunk = (struct scc_chunk *)((unsigned char *)second - arena.ar_baseoff);
+
+    /* Free elements in first chunk */
+    for(unsigned i = 0u; i < arena.ar_chunksize; i++) {
+        TEST_ASSERT_EQUAL_UINT32(arena.ar_chunksize - i, arena.ar_first->ch_refcount);
+        scc_arena_free(&arena, first + i);
+    }
+    /* Only second chunk should remain in arena */
+    TEST_ASSERT_EQUAL_PTR(arena.ar_current, arena.ar_first);
+    TEST_ASSERT_EQUAL_PTR(arena.ar_current, chunk);
+
+    scc_arena_release(&arena);
 }
