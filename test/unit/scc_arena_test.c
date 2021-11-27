@@ -29,3 +29,41 @@ void test_scc_arena_alloc_single_chunk(void) {
 
     scc_arena_release(&arena);
 }
+
+void test_scc_arena_alloc_multiple_chunks(void) {
+    struct scc_arena arena = scc_arena_init(int);
+
+    int *prev = scc_arena_alloc(&arena);
+    int *curr;
+    /* Fill up entire chunk */
+    for(unsigned i = 0u; i < arena.ar_chunksize - 1u; i++) {
+        curr = scc_arena_alloc(&arena);
+        /* Verify refcount */
+        TEST_ASSERT_EQUAL_UINT32(i + 2u, arena.ar_current->ch_refcount);
+        /* Elements should be contiguous */
+        TEST_ASSERT_EQUAL_PTR((unsigned char *)prev + sizeof(*prev), curr);
+        /* Single chunk in arena */
+        TEST_ASSERT_EQUAL_PTR(0, arena.ar_first->ch_next);
+        TEST_ASSERT_EQUAL_PTR(arena.ar_first, arena.ar_current);
+        prev = curr;
+    }
+
+    /* Push new chunk into arena */
+    prev = scc_arena_alloc(&arena);
+    /* Refcount of new chunk */
+    TEST_ASSERT_EQUAL_UINT32(1u, arena.ar_current->ch_refcount);
+    for(unsigned i = 0u; i < arena.ar_chunksize - 1u; i++) {
+        curr = scc_arena_alloc(&arena);
+        /* Verify refcount */
+        TEST_ASSERT_EQUAL_UINT32(i + 2u, arena.ar_current->ch_refcount);
+        /* Contiguous addresses */
+        TEST_ASSERT_EQUAL_PTR((unsigned char *)prev + sizeof(*prev), curr);
+        /* Expect two chunks in arena */
+        TEST_ASSERT_EQUAL_PTR(arena.ar_current, arena.ar_first->ch_next);
+        /* No chunk following ar_current */
+        TEST_ASSERT_EQUAL_PTR(0, arena.ar_current->ch_next);
+        prev = curr;
+    }
+
+    scc_arena_release(&arena);
+}
