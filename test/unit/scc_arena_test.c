@@ -1,4 +1,5 @@
 #include <scc/scc_arena.h>
+#include <scc/scc_mem.h>
 
 #include <unity.h>
 
@@ -114,6 +115,57 @@ void test_scc_arena_free_multiple_chunks(void) {
     /* Only second chunk should remain in arena */
     TEST_ASSERT_EQUAL_PTR(arena.ar_current, arena.ar_first);
     TEST_ASSERT_EQUAL_PTR(arena.ar_current, chunk);
+
+    scc_arena_release(&arena);
+}
+
+void test_scc_arena_free_middle_chunks(void) {
+    struct scc_arena arena = scc_arena_init(int);
+
+    int *chks[5];
+    /* Allocate elements corresponding to 5 chunks */
+    for(unsigned i = 0u; i < scc_arrsize(chks); i++) {
+        /* First element of chunk i in chks[i] */
+        chks[i] = scc_arena_alloc(&arena);
+        /* Verify refcount */
+        TEST_ASSERT_EQUAL_UINT32(1u, arena.ar_current->ch_refcount);
+        for(unsigned j = 0u; j < arena.ar_chunksize - 1u; j++) {
+            /* Throw away remaining allocations */
+            scc_arena_alloc(&arena);
+        }
+    }
+
+    struct scc_chunk *chunk;
+    struct scc_chunk *iter = arena.ar_first;
+    /* Verify that the respective elements were allocated in the
+     * expected chunks */
+    for(unsigned i = 0u; i < scc_arrsize(chks); i++) {
+        chunk = (struct scc_chunk *)((unsigned char *)chks[i] - arena.ar_baseoff);
+        TEST_ASSERT_EQUAL_PTR(chunk, iter);
+        TEST_ASSERT_EQUAL_UINT32(arena.ar_chunksize, chunk->ch_refcount);
+        iter = iter->ch_next;
+    }
+
+    /* Free all elements in chunks 1 and 2 */
+    for(unsigned i = 1u; i < 3u; i++) {
+        for(unsigned j = 0u; j < arena.ar_chunksize; j++) {
+            chunk = (struct scc_chunk *)((unsigned char *)chks[i] - arena.ar_baseoff);
+            /* Verify refcount */
+            TEST_ASSERT_EQUAL_UINT32(arena.ar_chunksize - j, chunk->ch_refcount);
+            scc_arena_free(&arena, chks[i] + j);
+        }
+    }
+
+    /* First chunk should be origin chunk 0 */
+    TEST_ASSERT_EQUAL_PTR((struct scc_chunk *)((unsigned char *)chks[0] - arena.ar_baseoff), arena.ar_first);
+    /* Second chunk should be original chunk 3 */
+    TEST_ASSERT_EQUAL_PTR((struct scc_chunk *)((unsigned char *)chks[3] - arena.ar_baseoff), arena.ar_first->ch_next);
+    /* Third chunk should be original chunk 4 */
+    TEST_ASSERT_EQUAL_PTR((struct scc_chunk *)((unsigned char *)chks[4] - arena.ar_baseoff), arena.ar_first->ch_next->ch_next);
+    /* Verify list */
+    TEST_ASSERT_EQUAL_PTR(arena.ar_current, arena.ar_first->ch_next->ch_next);
+    /* Verify end of list */
+    TEST_ASSERT_EQUAL_PTR(0, arena.ar_first->ch_next->ch_next->ch_next);
 
     scc_arena_release(&arena);
 }
