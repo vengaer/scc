@@ -12,11 +12,13 @@ enum scc_rbcolor {
     scc_rbcolor_red
 };
 
+struct scc_rbnode;
+
 struct scc_rbnode_bare {
     union {
         struct {
-            struct scc_rbnode_bare *left;   /* Left link */
-            struct scc_rbnode_bare *right;  /* Right link */
+            struct scc_rbnode *left;        /* Left link */
+            struct scc_rbnode *right;       /* Right link */
         } node;
         struct {
             struct scc_rbtree *parent;      /* Address of tree */
