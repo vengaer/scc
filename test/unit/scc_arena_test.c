@@ -174,3 +174,31 @@ void test_scc_arena_free_middle_chunks(void) {
 
     scc_arena_release(&arena);
 }
+
+void test_scc_arena_free_first_chunk(void) {
+    struct foo {
+        char c[32];
+        long long lld;
+    };
+
+    struct scc_arena arena = scc_arena_init(struct foo);
+    /* Allocate 4 chunks' worth of elements */
+    struct foo *first = scc_arena_alloc(&arena);
+    for(unsigned i = 0; i < arena.ar_chunksize * 4u - 1u; i++) {
+        scc_arena_alloc(&arena);
+    }
+
+    struct scc_chunk *chunk = (struct scc_chunk *)((unsigned char *)first - arena.ar_baseoff);
+    /* Verify head pointer */
+    TEST_ASSERT_EQUAL_PTR(arena.ar_first, chunk);
+    struct scc_chunk *next = chunk->ch_next;
+    /* Free all elements in first chunk */
+    for(unsigned i = 0; i < arena.ar_chunksize; i++) {
+        TEST_ASSERT_EQUAL_UINT32(arena.ar_chunksize - i, chunk->ch_refcount);
+        scc_arena_free(&arena, first + i);
+    }
+    /* First chunk should no longer be in arena */
+    TEST_ASSERT_EQUAL_PTR(arena.ar_first, next);
+
+    scc_arena_release(&arena);
+}
