@@ -30,7 +30,7 @@ def generate_runners(funcs, outdir):
 
         sfile = os.path.join(outdir, f'{func}.c')
         with open(sfile, 'w') as fp:
-            fp.write('\n'.join(contents))
+            fp.write('{}\n'.format('\n'.join(contents)))
 
         written_files.append(sfile)
 
