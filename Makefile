@@ -46,7 +46,7 @@ CFLAGS       := -std=c99 -c -MD -MP -g -Wall -Wextra -Wpedantic -Waggregate-retu
                 -Wbad-function-cast -Wcast-qual -Wfloat-equal -Wmissing-include-dirs \
                 -Wnested-externs -Wpointer-arith -Wshadow -Wunknown-pragmas -Wswitch \
                 -Wundef -Wunused -Wwrite-strings
-CPPFLAGS     := -I$(root)
+CPPFLAGS     := -I$(root) -DNDEBUG
 LDFLAGS      :=
 LDLIBS       :=
 ARFLAGS      := -rcs
@@ -89,7 +89,7 @@ $(dirs):
 	$(MKDIR) $(MKDIRFLAGS) $@
 
 .PHONY: check
-check:
+check: CPPFLAGS := $(filter-out -DNDEBUG,$(CPPFLAGS))
 
 .PHONY: clean
 clean:
