@@ -15,12 +15,26 @@ def required_headers(snip, syms):
                     break
     return headers
 
+def name_parameters(decl, params):
+    named = []
+    params = params.split(',')
+    pre = re.compile(r'^(\s*\w+(\s+(const|volatile|const volatile|volatile const))?(\s+\*))?(.*)')
+    for i, param in enumerate(params):
+        m = pre.search(param)
+        if len(m.group(5).replace(' ', '')) == 0:
+            named.append(f'{m.group(1)} param{i}')
+        else:
+            named.append(param)
+
+    m = re.search(r'^([^(]+)\(.*\)(.*)', decl)
+    return f'{m.group(1)}(' + ','.join(named) + f'){m.group(2)}'
+
 def define_externs(func_lines):
     lines = []
-    exre = re.compile(r'^\s*extern\s+((\w+)\s+[^;]+);')
+    exre = re.compile(r'^\s*extern\s+((\w+)\s+.+\((.+)\)).*;')
     for line in func_lines:
         if (m := exre.search(line)):
-            lines.append(f'{m.group(1)} {{')
+            lines.append('{} {{'.format(name_parameters(m.group(1), m.group(3))))
             lines.append(' ' * 4 + f'return ({m.group(2)}){{ 0 }};')
             lines.append('}')
         else:
