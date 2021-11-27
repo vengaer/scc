@@ -23,8 +23,8 @@ struct scc_rbnode_bare {
         } temp;
     } un_link;
     enum scc_rbcolor color;
-    unsigned char flags;
-    unsigned char npad;
+    unsigned char flags;                    /* Thread flags */
+    unsigned char pad;                      /* Explicit padding */
 };
 
 struct scc_rbnode {
@@ -50,6 +50,7 @@ struct scc_rbtree {
 };
 
 void *scc_rbtree_impl_init(struct scc_rbtree *restrict tree);
+_Bool scc_rbtree_impl_insert(void *handle);
 
 #define scc_rbtree_init(type, compare)                              \
     scc_rbtree_impl_init(&(struct scc_rbtree) {                     \
@@ -59,7 +60,13 @@ void *scc_rbtree_impl_init(struct scc_rbtree *restrict tree);
     })
 
 void scc_rbtree_free(void *addr);
+size_t scc_rbtree_size(void const *handle);
 
-size_t scc_rbtree_size(void const *addr);
+inline _Bool scc_rbtree_empty(void const *handle) {
+    return !scc_rbtree_size(handle);
+}
+
+#define scc_rbtree_insert(handle, value)                            \
+    scc_rbtree_impl_insert((*handle = value, &handle))
 
 #endif /* SCC_RBTREE_H */
