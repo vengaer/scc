@@ -26,6 +26,15 @@ _symmap = {
         'scc_svec_erase',
         'scc_svec_erase_range'
     ],
+    'scc/scc_rbtree': [
+        'scc_rbtree_init',
+        'scc_rbtree_free',
+        'scc_rbtree_insert',
+        'scc_rbtree_find',
+        'scc_rbtree_remove',
+        'scc_rbtree_foreach',
+        'scc_rbtree_foreach_reversed'
+    ],
     'stdio': [
         'fgets',
         'fputs',
