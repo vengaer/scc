@@ -52,6 +52,7 @@ struct scc_rbtree {
 void *scc_rbtree_impl_init(struct scc_rbtree *restrict tree);
 _Bool scc_rbtree_impl_insert(void *handle);
 void const *scc_rbtree_impl_find(void *handle);
+_Bool scc_rbtree_impl_remove(void *handle);
 
 #define scc_rbtree_init(type, compare)                              \
     scc_rbtree_impl_init(&(struct scc_rbtree) {                     \
@@ -72,5 +73,8 @@ inline _Bool scc_rbtree_empty(void const *handle) {
 
 #define scc_rbtree_find(handle, value)                              \
     scc_rbtree_impl_find((*handle = value, handle))
+
+#define scc_rbtree_remove(handle, value)                            \
+    scc_rbtree_impl_remove((*handle = value, handle))
 
 #endif /* SCC_RBTREE_H */

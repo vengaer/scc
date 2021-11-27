@@ -60,24 +60,49 @@ static void scc_rbnode_mkblack(void *node);
 static void scc_rbnode_mkleaf(void *node);
 static void scc_rbnode_set(void *node, enum scc_rbdir dir);
 static void scc_rbnode_unset(void *node, enum scc_rbdir dir);
-static bool scc_rbnode_thread(struct scc_rbnode const *node, enum scc_rbdir dir);
+static bool scc_rbnode_thread(void const *node, enum scc_rbdir dir);
+static void scc_rbnode_threadcpy(
+    struct scc_rbnode *restrict dst,
+    struct scc_rbnode const *restrict src,
+    enum scc_rbdir dir
+);
 static bool scc_rbnode_red(struct scc_rbnode const *node);
 static bool scc_rbnode_red_safe(struct scc_rbnode const *node, enum scc_rbdir dir);
 static bool scc_rbnode_children_red_safe(struct scc_rbnode const *node);
+static bool scc_rbnode_has_red_child(struct scc_rbnode const *node);
 static bool scc_rbnode_has_thread_link(struct scc_rbnode const *node);
 static int scc_rbtree_compare(
     struct scc_rbtree const *restrict tree,
     struct scc_rbnode const *restrict left,
     struct scc_rbnode const *restrict right
 );
+static struct scc_rbnode *scc_rbtree_rotate_single(struct scc_rbnode *root, enum scc_rbdir dir);
+static struct scc_rbnode *scc_rbtree_rotate_double(struct scc_rbnode *root, enum scc_rbdir dir);
+static void scc_rbtree_balance_insertion(
+    struct scc_rbnode *n,
+    struct scc_rbnode *p,
+    struct scc_rbnode *gp,
+    struct scc_rbnode *ggp
+);
+static void scc_rbtree_balance_removal(
+    struct scc_rbnode *n,
+    struct scc_rbnode **p,
+    struct scc_rbnode *gp,
+    enum scc_rbdir dir
+);
 
 static void *scc_rbnode_value(struct scc_rbtree *restrict tree, struct scc_rbnode *restrict node);
 static bool scc_rbtree_replace_handle(void **handle, struct scc_rbtree *tree);
 static bool scc_rbtree_insert_empty(void **handle, struct scc_rbtree *tree, struct scc_rbnode *n);
-
-static struct scc_rbnode *scc_rbtree_rotate_single(struct scc_rbnode *root, enum scc_rbdir dir);
-static struct scc_rbnode *scc_rbtree_rotate_double(struct scc_rbnode *root, enum scc_rbdir dir);
 static bool scc_rbtree_insert_nonempty(void **handle, struct scc_rbtree *tree, struct scc_rbnode *node);
+static struct scc_rbnode *scc_rbtree_find_parent(struct scc_rbtree *tree, struct scc_rbnode const *needle);
+static void scc_rbnode_swap(
+    struct scc_rbtree *tree,
+    struct scc_rbnode *found,
+    struct scc_rbnode *n,
+    struct scc_rbnode *p,
+    enum scc_rbdir dir
+);
 
 static inline void scc_rbnode_set_npad(
     struct scc_rbnode *restrict node,
@@ -127,8 +152,16 @@ static inline void scc_rbnode_unset(void *node, enum scc_rbdir dir) {
     ((struct scc_rbnode *)node)->rn_flags &= ~(1 << dir);
 }
 
-static inline bool scc_rbnode_thread(struct scc_rbnode const *node, enum scc_rbdir dir) {
-    return node->rn_flags & (1 << dir);
+static inline bool scc_rbnode_thread(void const *node, enum scc_rbdir dir) {
+    return ((struct scc_rbnode const *)node)->rn_flags & (1 << dir);
+}
+
+static void scc_rbnode_threadcpy(
+    struct scc_rbnode *restrict dst,
+    struct scc_rbnode const *restrict src,
+    enum scc_rbdir dir
+) {
+    dst->rn_flags = (dst->rn_flags & ~(1 << dir)) | (src->rn_flags & (1 << dir));
 }
 
 static inline bool scc_rbnode_red(struct scc_rbnode const *node) {
@@ -145,6 +178,11 @@ static inline bool scc_rbnode_children_red_safe(struct scc_rbnode const *node) {
            scc_rbnode_red_safe(node, scc_rbdir_right);
 }
 
+static inline bool scc_rbnode_has_red_child(struct scc_rbnode const *node) {
+    return scc_rbnode_red_safe(node, scc_rbdir_left) ||
+           scc_rbnode_red_safe(node, scc_rbdir_right);
+}
+
 static inline bool scc_rbnode_has_thread_link(struct scc_rbnode const *node) {
     return scc_rbnode_thread(node, scc_rbdir_left) ||
            scc_rbnode_thread(node, scc_rbdir_right);
@@ -158,34 +196,6 @@ static inline int scc_rbtree_compare(
     void const *laddr = (unsigned char const *)left + tree->rb_baseoff;
     void const *raddr = (unsigned char const *)right + tree->rb_baseoff;
     return tree->rb_compare(laddr, raddr);
-}
-
-static inline void *scc_rbnode_value(struct scc_rbtree *restrict tree, struct scc_rbnode *restrict node) {
-    return (unsigned char *)node + tree->rb_baseoff;
-}
-
-static bool scc_rbtree_replace_handle(void **handle, struct scc_rbtree *tree) {
-    void *new_handle = scc_rbtree_new_handle(tree);
-    if(!new_handle) {
-        return false;
-    }
-    *(void **)handle = new_handle;
-    return true;
-}
-
-static bool scc_rbtree_insert_empty(void **handle, struct scc_rbtree *tree, struct scc_rbnode *node) {
-    if(!scc_rbtree_replace_handle(handle, tree)) {
-        return false;
-    }
-    node->rn_left = &tree->rb_sentinel;
-    node->rn_right = &tree->rb_sentinel;
-    scc_rbnode_mkblack(node);
-    scc_rbnode_mkleaf(node);
-
-    scc_rbtree_root(tree) = (struct scc_rbnode_bare *)node;
-    scc_rbnode_unset(&tree->rb_sentinel, scc_rbdir_left);
-    tree->rb_size = 1u;
-    return true;
 }
 
 static struct scc_rbnode *scc_rbtree_rotate_single(struct scc_rbnode *root, enum scc_rbdir dir) {
@@ -232,15 +242,80 @@ static void scc_rbtree_balance_insertion(
         enum scc_rbdir ggpdir = ggp->rn_right == (void *)gp;
 
         if(pdir != gpdir) {
-            /* No straight line, double rotate */
+            /* No straight line, make leaf root */
             scc_rbnode_link(ggp, ggpdir) = scc_rbtree_rotate_double(gp, !gpdir);
             scc_rbnode_mkblack(n);
         }
         else {
+            /* Straight line, make p root */
             scc_rbnode_link(ggp, ggpdir) = scc_rbtree_rotate_single(gp, !gpdir);
             scc_rbnode_mkblack(p);
         }
     }
+}
+
+static void scc_rbtree_balance_removal(
+    struct scc_rbnode *n,
+    struct scc_rbnode **p,
+    struct scc_rbnode *gp,
+    enum scc_rbdir dir
+) {
+    enum scc_rbdir pdir = (*p)->rn_right == (void *)n;
+    enum scc_rbdir gpdir = gp->rn_right == (void *)*p;
+
+    if(scc_rbnode_red_safe(n, !dir)) {
+        scc_rbnode_link(*p, dir) = scc_rbtree_rotate_single(n, dir);
+        *p = scc_rbnode_link(*p, pdir);
+    }
+    else if(!scc_rbnode_thread(*p, !pdir)) {
+        struct scc_rbnode *sibling = scc_rbnode_link(*p, !pdir);
+        if(scc_rbnode_has_red_child(sibling)) {
+            if(scc_rbnode_red_safe(sibling, pdir)) {
+                scc_rbnode_link(gp, gpdir) = scc_rbtree_rotate_double(*p, dir);
+            }
+            else {
+                scc_rbnode_link(gp, gpdir) = scc_rbtree_rotate_single(*p, pdir);
+            }
+
+            scc_rbnode_mkred(n);
+            scc_rbnode_mkred(scc_rbnode_link(gp, gpdir));
+            scc_rbnode_mkblack(scc_rbnode_link(gp, gpdir)->rn_left);
+            scc_rbnode_mkblack(scc_rbnode_link(gp, gpdir)->rn_right);
+        }
+        else {
+            scc_rbnode_mkred(n);
+            scc_rbnode_mkred(sibling);
+            scc_rbnode_mkblack(*p);
+        }
+    }
+}
+
+static inline void *scc_rbnode_value(struct scc_rbtree *restrict tree, struct scc_rbnode *restrict node) {
+    return (unsigned char *)node + tree->rb_baseoff;
+}
+
+static bool scc_rbtree_replace_handle(void **handle, struct scc_rbtree *tree) {
+    void *new_handle = scc_rbtree_new_handle(tree);
+    if(!new_handle) {
+        return false;
+    }
+    *handle = new_handle;
+    return true;
+}
+
+static bool scc_rbtree_insert_empty(void **handle, struct scc_rbtree *tree, struct scc_rbnode *node) {
+    if(!scc_rbtree_replace_handle(handle, tree)) {
+        return false;
+    }
+    node->rn_left = &tree->rb_sentinel;
+    node->rn_right = &tree->rb_sentinel;
+    scc_rbnode_mkblack(node);
+    scc_rbnode_mkleaf(node);
+
+    scc_rbtree_root(tree) = (struct scc_rbnode_bare *)node;
+    scc_rbnode_unset(&tree->rb_sentinel, scc_rbdir_left);
+    tree->rb_size = 1u;
+    return true;
 }
 
 static bool scc_rbtree_insert_nonempty(void **handle, struct scc_rbtree *tree, struct scc_rbnode *node) {
@@ -295,6 +370,54 @@ static bool scc_rbtree_insert_nonempty(void **handle, struct scc_rbtree *tree, s
     return true;
 }
 
+static struct scc_rbnode *scc_rbtree_find_parent(
+    struct scc_rbtree *tree,
+    struct scc_rbnode const *needle
+) {
+    int rel;
+    struct scc_rbnode *p = (void *)&tree->rb_sentinel;
+    struct scc_rbnode *n = (void *)scc_rbtree_root(tree);
+    enum scc_rbdir dir = scc_rbdir_left;
+    while(!scc_rbnode_thread(p, dir) && n != needle) {
+        rel = scc_rbtree_compare(tree, n, needle);
+        dir = rel > 0;
+        p = n;
+        n = scc_rbnode_link(n, dir);
+    }
+    assert(p);
+    return p;
+}
+
+static void scc_rbnode_swap(
+    struct scc_rbtree *tree,
+    struct scc_rbnode *found,
+    struct scc_rbnode *n,
+    struct scc_rbnode *p,
+    enum scc_rbdir dir
+) {
+    struct scc_rbnode *fparent = scc_rbtree_find_parent(tree, found);
+    enum scc_rbdir fdir = fparent->rn_right == (void *)found;
+    enum scc_rbdir pdir = p->rn_right == (void *)n;
+
+    /* Adopt n's flag in direction pdir */
+    scc_rbnode_threadcpy(p, n, pdir);
+
+    /* Replace found with p */
+    if(found->rn_left == (void *)n) {
+        n->rn_left = (void *)&tree->rb_sentinel;
+        n->rn_right = (void *)&tree->rb_sentinel;
+    }
+    else {
+        n->rn_left = found->rn_left;
+        n->rn_right = found->rn_right;
+    }
+    n->rn_color = found->rn_color;
+    n->rn_flags = found->rn_flags;
+
+    scc_rbnode_link(fparent, fdir) = n;
+    scc_rbnode_link(p, pdir) = scc_rbnode_link(n, dir);
+}
+
 void *scc_rbtree_impl_init(struct scc_rbtree *tree) {
     tree->rb_size = 0u;
     tree->rb_sentinel.un_link.node.left = &tree->rb_sentinel;
@@ -343,4 +466,52 @@ void const *scc_rbtree_impl_find(void *handle) {
     }
 
     return 0;
+}
+
+bool scc_rbtree_impl_remove(void *handle) {
+    if(scc_rbtree_empty(handle)) {
+        return false;
+    }
+
+    struct scc_rbtree *tree = scc_rbtree_from_handle(handle);
+    struct scc_rbnode *needle = scc_rbnode_baseaddr(handle);
+
+    struct scc_rbnode *gp = &(struct scc_rbnode) {
+        .rn_left = (void *)&tree->rb_sentinel
+    };
+    struct scc_rbnode *p = (void *)&tree->rb_sentinel;
+    struct scc_rbnode *n = (void *)scc_rbtree_root(tree);
+
+    struct scc_rbnode *found = 0;
+
+    enum scc_rbdir dir = scc_rbdir_left;
+    int rel;
+
+    while(!scc_rbnode_thread(p, dir)) {
+        rel = scc_rbtree_compare(tree, n, needle);
+        if(!rel) {
+            found = n;
+        }
+
+        dir = rel > 0;
+
+        if(!scc_rbnode_red(n) && !scc_rbnode_red_safe(n, dir)) {
+            scc_rbtree_balance_removal(n, &p, gp, dir);
+        }
+
+        gp = p;
+        p = n;
+        n = scc_rbnode_link(n, dir);
+    }
+
+    if(found) {
+        scc_rbnode_swap(tree, found, p, gp, dir);
+        scc_arena_free(&tree->rb_arena, found);
+        --tree->rb_size;
+    }
+    if(!scc_rbnode_thread(&tree->rb_sentinel, scc_rbdir_left)) {
+        scc_rbnode_mkblack(scc_rbtree_root(tree));
+    }
+
+    return found;
 }
