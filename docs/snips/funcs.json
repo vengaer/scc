@@ -1,0 +1,12 @@
+{
+    "compare": {
+        "return": "int",
+        "params": [
+            "void const *left",
+            "void const *right"
+        ],
+        "body": [
+            "return *(int const *)right - *(int const *)left;"
+        ]
+    }
+}

@@ -8,6 +8,7 @@ snipgen      := $(pyscripts)/snipgen.py
 snipext      := csnip
 snipdir      := $(docdir)/snips
 symmap       := $(snipdir)/symmap.$(jsonext)
+funcdefs     := $(snipdir)/funcs.$(jsonext)
 docsnips     := $(wildcard $(snipdir)/*.$(snipext))
 snips        := $(patsubst $(snipdir)/%.$(snipext),$(snipbuilddir)/%,$(docsnips))
 htmlpgs      := $(patsubst $(docdir)%.$(adocext),$(docbuilddir)/%.$(htmlext),$(wildcard $(docdir)/*.$(adocext)))
@@ -43,7 +44,7 @@ $(strip
 
             $(__t).$(cext): $(snipdir)/$(notdir $(__t)).$(snipext) $(snipgen) | $(snipbuilddir)
 	            $$(info [PY] $$(notdir $$@))
-	            $$(PYTHON) $$(snipgen) -o $$@ -s $$(symmap) $$<
+	            $$(PYTHON) $$(snipgen) -o $$@ -s $$(symmap) -f $$(funcdefs) $$<
 
             __chk_docs: $(__t))))
 endef
