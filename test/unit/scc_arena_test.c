@@ -3,6 +3,11 @@
 
 #include <unity.h>
 
+void test_scc_arena_release_empty(void) {
+    struct scc_arena arena = scc_arena_init(int);
+    scc_arena_release(&arena);
+}
+
 void test_scc_arena_alloc_single_chunk(void) {
     struct scc_arena arena = scc_arena_init(int);
     /* No memory should have been allocated yet */
