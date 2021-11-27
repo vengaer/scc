@@ -15,6 +15,18 @@ def required_headers(snip, syms):
                     break
     return headers
 
+def define_externs(func_lines):
+    lines = []
+    exre = re.compile(r'^\s*extern\s+((\w+)\s+[^;]+);')
+    for line in func_lines:
+        if (m := exre.search(line)):
+            lines.append(f'{m.group(1)} {{')
+            lines.append(' ' * 4 + f'return ({m.group(2)}){{ 0 }};')
+            lines.append('}')
+        else:
+            lines.append(line)
+    return lines
+
 def genfile(outfile, headers, snip):
     func_re = re.compile(r'^\s*((extern|static)\s+)?\w+\s+[a-zA-Z_][a-zA-Z_0-9]*\([^)]+\)')
     func_lines = []
@@ -32,6 +44,8 @@ def genfile(outfile, headers, snip):
             func_lines.append(line)
         else:
             nonfunc_lines.append(line)
+
+    func_lines = define_externs(func_lines)
 
     with open(outfile, 'w') as fp:
         fp.write('{}\n\n'.format('\n'.join([f'#include <{h}.h>' for h in headers])))
