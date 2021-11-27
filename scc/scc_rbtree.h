@@ -56,7 +56,9 @@ _Bool scc_rbtree_impl_insert(void *handle);
 void const *scc_rbtree_impl_find(void *handle);
 _Bool scc_rbtree_impl_remove(void *handle);
 void const *scc_rbtree_impl_leftmost(void const *handle);
+void const *scc_rbtree_impl_rightmost(void const *handle);
 void const *scc_rbtree_impl_successor(void const *iter);
+void const *scc_rbtree_impl_predecessor(void const *iter);
 void const *scc_rbtree_impl_sentinel(void const *handle);
 
 #define scc_rbtree_init(type, compare)                              \
@@ -87,5 +89,9 @@ inline _Bool scc_rbtree_empty(void const *handle) {
         iter != scc_rbtree_impl_sentinel(handle);                   \
         iter = scc_rbtree_impl_successor(iter))
 
+#define scc_rbtree_foreach_reversed(iter, handle)                   \
+    for(iter = scc_rbtree_impl_rightmost(handle);                   \
+        iter != scc_rbtree_impl_sentinel(handle);                   \
+        iter = scc_rbtree_impl_predecessor(iter))
 
 #endif /* SCC_RBTREE_H */

@@ -89,6 +89,7 @@ static int scc_rbtree_compare(
     struct scc_rbnode const *restrict right
 );
 static void const *scc_rbnode_leftmost(struct scc_rbnode const *node);
+static void const *scc_rbnode_rightmost(struct scc_rbnode const *node);
 static struct scc_rbnode *scc_rbtree_rotate_single(struct scc_rbnode *root, enum scc_rbdir dir);
 static struct scc_rbnode *scc_rbtree_rotate_double(struct scc_rbnode *root, enum scc_rbdir dir);
 static void scc_rbtree_balance_insertion(
@@ -213,6 +214,13 @@ static inline int scc_rbtree_compare(
 static void const *scc_rbnode_leftmost(struct scc_rbnode const *node) {
     while(!scc_rbnode_thread(node, scc_rbdir_left)) {
         node = node->rn_left;
+    }
+    return node;
+}
+
+static void const *scc_rbnode_rightmost(struct scc_rbnode const *node) {
+    while(!scc_rbnode_thread(node, scc_rbdir_right)) {
+        node = node->rn_right;
     }
     return node;
 }
@@ -537,6 +545,12 @@ void const *scc_rbtree_impl_leftmost(void const *handle) {
     return scc_rbnode_value_qual(tree, leftmost, const);
 }
 
+void const *scc_rbtree_impl_rightmost(void const *handle) {
+    struct scc_rbtree const *tree = scc_rbtree_from_handle_qual(handle, const);
+    struct scc_rbnode const *rightmost = scc_rbnode_rightmost(scc_rbtree_root(tree));
+    return scc_rbnode_value_qual(tree, rightmost, const);
+}
+
 void const *scc_rbtree_impl_successor(void const *iter) {
     struct scc_rbnode const *node = scc_rbnode_baseaddr_qual(iter, const);
     size_t const offset = (unsigned char const *)iter - (unsigned char const *)node;
@@ -545,6 +559,18 @@ void const *scc_rbtree_impl_successor(void const *iter) {
     }
     else {
         node = scc_rbnode_leftmost(node->rn_right);
+    }
+    return (unsigned char const *)node + offset;
+}
+
+void const *scc_rbtree_impl_predecessor(void const *iter) {
+    struct scc_rbnode const *node = scc_rbnode_baseaddr_qual(iter, const);
+    size_t const offset = (unsigned char const *)iter - (unsigned char const *)node;
+    if(scc_rbnode_thread(node, scc_rbdir_left)) {
+        node = node->rn_left;
+    }
+    else {
+        node = scc_rbnode_rightmost(node->rn_left);
     }
     return (unsigned char const *)node + offset;
 }
