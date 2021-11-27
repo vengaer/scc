@@ -1,0 +1,139 @@
+= scc_rbtree
+:toc:
+:toclevels: 2
+:source-highlighter: rouge
+:source-language: c
+
+`scc_rbtree` is a generic red-black tree backed by a region-based arena allocator. Instances are accessed through
+opaque pointers to the type stored in the tree. These pointers may not be operated on through any means other than
+the facilities provided by `scc`. This includes direct dereferencing.
+
+How to compare the values stored in the tree is specified by passing a function pointer to `scc_rbtree_init` at construction.
+
+.Example usage
+[source]
+----
+include::snips/scc_rbtree_example.csnip[tags=scc_rbtree_example]
+----
+
+.Possible output
+----
+Sorted pseudo-random numbers:
+35005211 233665123 278722862 294702567 304089172 336465782 424238335 468703135 521595368 596516649 719885386 783368690 846930886 861021530 1025202362 1102520059 1189641421 1303455736 1350490027 1365180540 1540383426 1649760492 1681692777 1714636915 1726956429 1804289383 1957747793 1967513926 2044897763 2145174067
+----
+
+== typedefs
+
+=== scc_rbcompare
+
+Signature of function used by `scc_rbtree` for comparing nodes. The return value is similar to that of `strcmp` and friends in that it is
+
+* 0 if the parameters are equal
+* < 0 if `left` is less than `right`
+* > 0 if `left` is greater than `right`
+
+[source]
+----
+typedef int(*scc_rbcompare)(void const *left, void const *right);
+----
+
+== Construction and Deallocation
+
+=== void *scc_rbtree_init(type, scc_rbcompare compare)
+
+Constructs an `scc_rbtree` with automatic storage duration and returns a handle referring to it. This handle is _not_ a part of the tree itself.  `type` is the type of the elements to be stored in the tree. The returned address must be assigned to an instance of `type *`.
+
+The handle returned by `scc_rbtree_init` is volatile (not as in `volatile`-qualified, but rather that it changes when operating on the tree). As such, it is recommended to keep only a single "active" handle at a time. Any copied ones are more than likely invalid after performing _any_ operation on another referring to the same tree.
+
+The returned handle should be passed to `scc_rbtree_free` to free the memory allocated for the tree.
+
+==== Returns
+
+Address of a handle used for referring to an empty, automatic `scc_rbtree` instance.
+
+=== void scc_rbtree_free(void *handle)
+
+Release memory allocated for the tree identified by `handle` by completely retiring the underlying arena.
+
+== Capacity
+
+=== bool scc_rbtree_empty(void const *handle)
+
+Check if the `scc_rbtree` instance identified by `handle` is empty.
+
+==== Returns
+* `true` if `scc_rbtree_size(handle) == 0`
+* `false` otherwise
+
+=== size_t scc_rbtree_size(void const *handle)
+
+Return the number of nodes currently stored in the `scc_rbtree` instance identified by `handle`.
+
+==== Returns
+The number of nodes (elements) in the tree
+
+== Modifiers
+
+=== bool scc_rbtree_insert(void *handle, type value)
+
+Attempt to insert `value` in the `scc_rbtree` instance identified by `handle`. Despite being having the type `void *` in the signature, `handle` must be passed as `type *` where `type` is a complete type.
+
+Any copies of `handle` are invalidated by the call (but `handle` itself remains valid).
+
+The `scc_rbtree` instance remains valid even on insertion failure caused by lack of memory. As such, `handle` must be passed to `scc_rbtree_free` even if an insertion has failed.
+
+==== Returns
+* `false` if the value was already in the tree or on allocation failure
+* `true` otherwise
+
+=== bool scc_rbtree_remove(void *handle, type value)
+
+Remove `value` from the `scc_rbtree` instance identified by `handle`. `handle` must be a passed as a pointer to the complete type `type`, not as `void *`.
+
+==== Returns
+* `false` is the value was not found in the tree
+* `true` otherwise
+
+== Lookup
+
+=== void const *scc_rbtree_find(void const *handle, type value)
+
+Find and return element with value `value`. `handle` must be passed as a pointer to `type` (i.e. `type *`).
+
+==== Returns
+* Address of the value field of the node containing `value` if such a node was found
+* `NULL` otherwise
+
+== Convenience Macros
+
+=== scc_rbtree_foreach(void const *iter, void *handle)
+
+Produces a scope executed `scc_rbtree_size(handle)` times with `iter` referring to each element in the `scc_rbtree` instance identified by `handle` in order.
+
+.Printing a tree
+[source]
+----
+include::snips/scc_rbtree_foreach.csnip[tags=scc_rbtree_foreach]
+----
+
+.Output
+[source]
+----
+0 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38
+----
+
+=== scc_rbtree_foreach_reversed(void const *iter, void *handle)
+
+Like `scc_rbtree_foreach` except that the tree is iterated from right to left.
+
+.Printing a tree in reverse
+[source]
+----
+include::snips/scc_rbtree_foreach_reversed.csnip[tags=scc_rbtree_foreach_reversed]
+----
+
+.Possible output
+[source]
+----
+1804289383 846930886 1681692777 1714636915 1957747793 424238335 719885386 1649760492 596516649 1189641421
+----

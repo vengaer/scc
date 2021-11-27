@@ -39,6 +39,7 @@
     ],
     "stdlib": [
         "exit",
+        "rand",
         "strtoul"
     ],
     "string": [
