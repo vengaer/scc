@@ -88,6 +88,7 @@ static int scc_rbtree_compare(
     struct scc_rbnode const *restrict left,
     struct scc_rbnode const *restrict right
 );
+static void const *scc_rbnode_leftmost(struct scc_rbnode const *node);
 static struct scc_rbnode *scc_rbtree_rotate_single(struct scc_rbnode *root, enum scc_rbdir dir);
 static struct scc_rbnode *scc_rbtree_rotate_double(struct scc_rbnode *root, enum scc_rbdir dir);
 static void scc_rbtree_balance_insertion(
@@ -207,6 +208,13 @@ static inline int scc_rbtree_compare(
     void const *laddr = scc_rbnode_value_qual(tree, left, const);
     void const *raddr = scc_rbnode_value_qual(tree, right, const);
     return tree->rb_compare(laddr, raddr);
+}
+
+static void const *scc_rbnode_leftmost(struct scc_rbnode const *node) {
+    while(!scc_rbnode_thread(node, scc_rbdir_left)) {
+        node = node->rn_left;
+    }
+    return node;
 }
 
 static struct scc_rbnode *scc_rbtree_rotate_single(struct scc_rbnode *root, enum scc_rbdir dir) {
@@ -521,4 +529,28 @@ bool scc_rbtree_impl_remove(void *handle) {
     }
 
     return found;
+}
+
+void const *scc_rbtree_impl_leftmost(void const *handle) {
+    struct scc_rbtree const *tree = scc_rbtree_from_handle_qual(handle, const);
+    struct scc_rbnode const *leftmost = scc_rbnode_leftmost(scc_rbtree_root(tree));
+    return scc_rbnode_value_qual(tree, leftmost, const);
+}
+
+void const *scc_rbtree_impl_successor(void const *iter) {
+    struct scc_rbnode const *node = scc_rbnode_baseaddr_qual(iter, const);
+    size_t const offset = (unsigned char const *)iter - (unsigned char const *)node;
+    if(scc_rbnode_thread(node, scc_rbdir_right)) {
+        node = node->rn_right;
+    }
+    else {
+        node = scc_rbnode_leftmost(node->rn_right);
+    }
+    return (unsigned char const *)node + offset;
+}
+
+void const *scc_rbtree_impl_sentinel(void const *handle) {
+    struct scc_rbtree const *tree = scc_rbtree_from_handle_qual(handle, const);
+    struct scc_rbnode const *sentinel = scc_rbtree_sentinel_qual(tree, const);
+    return scc_rbnode_value_qual(tree, sentinel, const);
 }
