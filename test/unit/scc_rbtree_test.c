@@ -70,3 +70,16 @@ void test_scc_rbtree_foreach(void) {
     }
     scc_rbtree_free(handle);
 }
+
+void test_scc_rbtree_foreach_reversed(void) {
+    int *handle = scc_rbtree_init(int, compare);
+    for(int i = 0; i < 600; i++) {
+        TEST_ASSERT_TRUE(scc_rbtree_insert(handle, i));
+    }
+    int i = 599;
+    int const *iter;
+    scc_rbtree_foreach_reversed(iter, handle) {
+        TEST_ASSERT_EQUAL_INT32(i--, *iter);
+    }
+    scc_rbtree_free(handle);
+}
