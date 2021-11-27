@@ -71,6 +71,7 @@ static int scc_rbtree_compare(
     struct scc_rbnode const *restrict right
 );
 
+static void *scc_rbnode_value(struct scc_rbtree *restrict tree, struct scc_rbnode *restrict node);
 static bool scc_rbtree_replace_handle(void **handle, struct scc_rbtree *tree);
 static bool scc_rbtree_insert_empty(void **handle, struct scc_rbtree *tree, struct scc_rbnode *n);
 
@@ -157,6 +158,10 @@ static inline int scc_rbtree_compare(
     void const *laddr = (unsigned char const *)left + tree->rb_baseoff;
     void const *raddr = (unsigned char const *)right + tree->rb_baseoff;
     return tree->rb_compare(laddr, raddr);
+}
+
+static inline void *scc_rbnode_value(struct scc_rbtree *restrict tree, struct scc_rbnode *restrict node) {
+    return (unsigned char *)node + tree->rb_baseoff;
 }
 
 static bool scc_rbtree_replace_handle(void **handle, struct scc_rbtree *tree) {
@@ -316,4 +321,26 @@ bool scc_rbtree_impl_insert(void *handle) {
     }
 
     return scc_rbtree_insert_nonempty(handle, tree, node);
+}
+
+void const *scc_rbtree_impl_find(void *handle) {
+    struct scc_rbtree *tree = scc_rbtree_from_handle(handle);
+    struct scc_rbnode *p = (struct scc_rbnode *)&tree->rb_sentinel;
+    struct scc_rbnode *n = (struct scc_rbnode *)scc_rbtree_root(tree);
+    struct scc_rbnode *needle = scc_rbnode_baseaddr(handle);
+    enum scc_rbdir dir = scc_rbdir_left;
+    int rel;
+
+    while(!scc_rbnode_thread(p, dir)) {
+        rel = scc_rbtree_compare(tree, n, needle);
+        if(!rel) {
+            return scc_rbnode_value(tree, n);
+        }
+
+        dir = rel > 0;
+        p = n;
+        n = scc_rbnode_link(n, dir);
+    }
+
+    return 0;
 }
