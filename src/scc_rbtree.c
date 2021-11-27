@@ -7,7 +7,7 @@
 
 #define rn_left     rn_bare.un_link.node.left
 #define rn_right    rn_bare.un_link.node.right
-#define rn_parent   rn_bare.un_link.temp.parent
+#define rn_parent   rn_bare.un_link.parent
 #define rn_color    rn_bare.color
 #define rn_flags    rn_bare.flags
 
