@@ -37,6 +37,7 @@ sover        := 0
 socompat     := 0
 adocext      := adoc
 htmlext      := html
+jsonext      := json
 
 solink       := lib$(scc).$(soext)
 solib        := $(solink).$(sover)
