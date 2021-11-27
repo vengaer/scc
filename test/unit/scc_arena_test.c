@@ -202,3 +202,57 @@ void test_scc_arena_free_first_chunk(void) {
 
     scc_arena_release(&arena);
 }
+
+void test_scc_arena_free_last_chunk(void) {
+    struct scc_arena arena = scc_arena_init(int);
+    /* Push 4 chunks to arena */
+    for(unsigned i = 0u; i < arena.ar_chunksize * 4u; i++) {
+        scc_arena_alloc(&arena);
+    }
+    /* Check list */
+    TEST_ASSERT_EQUAL_PTR(arena.ar_first->ch_next->ch_next->ch_next, arena.ar_current);
+
+    /* Current last chunk */
+    struct scc_chunk *chunk = arena.ar_current;
+
+    /* Push new chunk to arena */
+    int *p = scc_arena_alloc(&arena);
+    /* Previous last should hold address of new last */
+    TEST_ASSERT_EQUAL_PTR(chunk->ch_next, arena.ar_current);
+    /* Refcount of last chunk */
+    TEST_ASSERT_EQUAL_UINT32(1u, arena.ar_current->ch_refcount);
+
+    /* Current last chunk */
+    chunk = (struct scc_chunk *)((unsigned char *)p - arena.ar_baseoff);
+    /* Reduce refcount to 0, chunk should not be freed as there is
+     * still plenty of memory available in it */
+    scc_arena_free(&arena, p);
+    /* Check refcount */
+    TEST_ASSERT_EQUAL_UINT32(0u, arena.ar_current->ch_refcount);
+    /* Chunk not released */
+    TEST_ASSERT_EQUAL_PTR(chunk, arena.ar_current);
+
+    /* Allocate and free single element until only one free
+     * slot remains in chunk */
+    for(unsigned i = 0; i < arena.ar_chunksize - 2u; i++) {
+        p = scc_arena_alloc(&arena);
+        TEST_ASSERT_EQUAL_UINT32(1u, arena.ar_current->ch_refcount);
+        scc_arena_free(&arena, p);
+        TEST_ASSERT_EQUAL_UINT32(0u, arena.ar_current->ch_refcount);
+        /* Chunk not released */
+        TEST_ASSERT_EQUAL_PTR(chunk, arena.ar_current);
+    }
+
+    /* Allocate last element in chunk */
+    p = scc_arena_alloc(&arena);
+    /* Still not released */
+    TEST_ASSERT_EQUAL_PTR(chunk, arena.ar_current);
+    /* Check list layout to force check for chunk being released to be correct */
+    TEST_ASSERT_EQUAL_PTR(arena.ar_first->ch_next->ch_next->ch_next->ch_next, chunk);
+    /* Free last element */
+    scc_arena_free(&arena, p);
+    /* Chunk should now have been released */
+    TEST_ASSERT_EQUAL_PTR(arena.ar_first->ch_next->ch_next->ch_next, arena.ar_current);
+
+    scc_arena_release(&arena);
+}
