@@ -67,3 +67,25 @@ void test_scc_arena_alloc_multiple_chunks(void) {
 
     scc_arena_release(&arena);
 }
+
+void test_scc_arena_free_single_chunk(void) {
+    struct scc_arena arena = scc_arena_init(int);
+    int *elem;
+    for(unsigned i = 0; i < arena.ar_chunksize - 1u; i++) {
+        /* Allocate and verify refcount */
+        elem = scc_arena_alloc(&arena);
+        TEST_ASSERT_EQUAL_UINT32(1u, arena.ar_current->ch_refcount);
+
+        /* Free and verify refcount */
+        scc_arena_free(&arena, elem);
+        TEST_ASSERT_EQUAL_UINT32(0u, arena.ar_current->ch_refcount);
+    }
+    /* Allocate and free last element in chunk */
+    elem = scc_arena_alloc(&arena);
+    TEST_ASSERT_EQUAL_UINT32(1u, arena.ar_current->ch_refcount);
+    scc_arena_free(&arena, elem);
+
+    /* No chunks in arena */
+    TEST_ASSERT_EQUAL_PTR(0, arena.ar_current);
+    TEST_ASSERT_EQUAL_PTR(0, arena.ar_first);
+}
