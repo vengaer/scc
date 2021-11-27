@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import re
 
 def required_headers(snip, syms):
     headers = set()
@@ -15,10 +16,28 @@ def required_headers(snip, syms):
     return headers
 
 def genfile(outfile, headers, snip):
+    func_re = re.compile(r'^\s*((extern|static)\s+)?\w+\s+[a-zA-Z_][a-zA-Z_0-9]*\([^)]+\)')
+    func_lines = []
+    nonfunc_lines = []
+
+    in_function = False
+    balance = 0
+    for line in snip.split('\n'):
+        if func_re.search(line):
+            in_function = True
+        if in_function:
+            balance += line.count('{') - line.count('}')
+            if balance <= 0:
+                in_function = False
+            func_lines.append(line)
+        else:
+            nonfunc_lines.append(line)
+
     with open(outfile, 'w') as fp:
         fp.write('{}\n\n'.format('\n'.join([f'#include <{h}.h>' for h in headers])))
-        fp.write('int main(void) {\n')
-        fp.write('\n'.join(f'{4*" "}{line}' for line in snip.split('\n')[:-1]))
+        fp.write('{}\n\n'.format('\n'.join(func_lines)))
+        fp.write('int main(void) {')
+        fp.write('\n'.join(f'{4*" "}{line}' for line in nonfunc_lines[:-1]))
         fp.write('\n}\n')
 
 def main(infile, outfile, symmap):
