@@ -31,7 +31,7 @@ void test_scc_rbtree_insert(void) {
 
 void test_scc_rbtree_find(void) {
     int *handle = scc_rbtree_init(int, compare);
-    for(int i = 0; i < 13; i++) {
+    for(int i = 0; i < 368; i++) {
         TEST_ASSERT_TRUE(scc_rbtree_insert(handle, i));
         TEST_ASSERT_EQUAL_UINT64(i + 1ull, scc_rbtree_size(handle));
 
@@ -40,8 +40,20 @@ void test_scc_rbtree_find(void) {
         }
     }
 
-    for(int i = 0; i < 13; i++) {
+    for(int i = 0; i < 368; i++) {
         TEST_ASSERT_TRUE(scc_rbtree_find(handle, i));
+    }
+    scc_rbtree_free(handle);
+}
+
+void test_scc_rbtree_remove(void) {
+    int *handle = scc_rbtree_init(int, compare);
+    for(int i = 0; i < 500; i++) {
+        TEST_ASSERT_TRUE(scc_rbtree_insert(handle, i));
+    }
+    for(int i = 0; i < 500; i++) {
+        TEST_ASSERT_TRUE(scc_rbtree_remove(handle, i));
+        TEST_ASSERT_FALSE(scc_rbtree_remove(handle, i));
     }
     scc_rbtree_free(handle);
 }
