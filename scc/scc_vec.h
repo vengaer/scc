@@ -5,6 +5,8 @@
 
 #include <stddef.h>
 
+#define scc_vec(type) type *
+
 struct scc_vec {
     size_t sc_size;
     size_t sc_capacity;
