@@ -1,3 +1,5 @@
+-include .config.mk
+
 CC           := gcc
 LD           := $(CC)
 AR           := ar
@@ -23,6 +25,7 @@ srcdir       := $(root)/src
 headerdir    := $(root)/scc
 testdir      := $(root)/test
 unitdir      := $(testdir)/unit
+fuzzdir      := $(testdir)/fuzz
 inspectdir   := $(testdir)/inspect
 panictestdir := $(testdir)/panic
 doctestdir   := $(testdir)/docs
@@ -70,9 +73,13 @@ TOUCHFLAGS   :=
 PYTESTFLAGS  := -v
 PYLINTFLAGS  := --fail-under=10.0
 
-obj          := $(patsubst $(srcdir)/%.$(cext),$(builddir)/%.$(oext),$(wildcard $(srcdir)/*.$(cext)))
+sccobj       := $(patsubst $(srcdir)/%.$(cext),$(builddir)/%.$(oext),$(wildcard $(srcdir)/*.$(cext)))
+obj          += $(sccobj)
 
+.SECONDEXPANSION:
+include $(mkscripts)/deps.mk
 include $(mkscripts)/inspect.mk
+include $(mkscripts)/fuzz.mk
 include $(mkscripts)/unit.mk
 include $(mkscripts)/docs.mk
 include $(mkscripts)/lint.mk
@@ -85,11 +92,11 @@ $(solink): $(solib)
 	$(info [LN] $(notdir $@))
 	$(LN) $(LNFLAGS) $< $@
 
-$(solib): $(obj)
+$(solib): $(sccobj)
 	$(info [LD] $(notdir $@))
 	$(LD) -o $@ $^ $(LDFLAGS) $(so_LDFLAGS) $(LDLIBS)
 
-$(alib): $(obj)
+$(alib): $(sccobj)
 	$(info [AR] $(notdir $@))
 	$(AR) $(ARFLAGS) -o $@ $^
 
@@ -103,6 +110,9 @@ $(dirs):
 .PHONY: check
 check: CPPFLAGS := $(filter-out -DNDEBUG,$(CPPFLAGS))
 
+.PHONY: fuzz
+fuzz:  CPPFLAGS := $(filter-out -DNDEBUG,$(CPPFLAGS))
+
 .PHONY: lint
 lint:
 
@@ -115,4 +125,4 @@ distclean: clean
 
 $(VERBOSE).SILENT:
 
--include $(patsubst %.$(oext),%.$(dext),$(obj) $(unitobj))
+-include $$(patsubst %.$$(oext),%.$$(dext),$$(obj))

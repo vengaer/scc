@@ -26,7 +26,9 @@ $(panicbuilddir)/%.$(oext): $(panicbuilddir)/%.$(cext)
 __chk_panic:
 	$(PYTEST) $(PYTESTFLAGS) --builddir=$(panicbuilddir) $(panictestdir)
 
+.PHONY: check
 check: __chk_panic
+check: obj += $(panicobj)
 
 define panic-linker-rules
 $(strip

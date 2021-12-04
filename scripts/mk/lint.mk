@@ -12,6 +12,9 @@ tidyignore := clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandli
 __comma    :=,
 tidychecks := $(subst $(subst ,, ),$(__comma),$(addsuffix -*,$(tidyenable)) $(addprefix -,$(tidyignore)))
 
+.PHONY: all
+all:
+
 define tidy-rules
 $(strip
     $(foreach __s,$(tidysrc),
