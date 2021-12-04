@@ -1,4 +1,4 @@
-int *vec = scc_vec_init(int);
+scc_vec(int) vec = scc_vec_init(int);
 int *iter;
 int i = 0;
 

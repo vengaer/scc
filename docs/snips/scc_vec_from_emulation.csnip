@@ -1,4 +1,4 @@
-unsigned *vec = scc_vec_init(unsigned);
+scc_vec(unsigned) vec = scc_vec_init(unsigned);
 scc_vec_reserve(vec, 4u);
 scc_vec_push(vec, 0u);
 scc_vec_push(vec, 1u);

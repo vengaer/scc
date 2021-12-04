@@ -2,7 +2,7 @@ char buffer[32];
 char *endp;
 unsigned long parsed;
 
-unsigned long *vec = scc_vec_init(unsigned long);
+scc_vec(unsigned long) vec = scc_vec_init(unsigned long);
 
 puts("Enter digits. CTRL-D to exit");
 while(fgets(buffer, sizeof(buffer), stdin)) {

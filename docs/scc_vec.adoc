@@ -19,6 +19,15 @@ The following shows an example of how the vector may be used
 include::snips/scc_vec_example.csnip[tags=scc_vec_example]
 ----
 
+== Types
+
+=== scc_vec(type)
+
+Expands to an opaque, fat pointer suitable for representing an `scc_vec` containing elements of type `type`. Once initialized,
+it holds the address of the base of the vector and may be dereferenced and indexed as any raw pointer. The behavior when
+accessing elements beyond the end of the vector is undefined. The size may be queried using `scc_vec_size`. The pointer
+should not be modified through any means other than what is provided by the `scc_vec` API.
+
 == Construction and Dellocation
 
 === void *scc_vec_init(type)
