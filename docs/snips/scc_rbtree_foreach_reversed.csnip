@@ -1,6 +1,6 @@
 extern int compare(void const *, void const *);
 
-int *handle = scc_rbtree_init(int, compare);
+scc_rbtree(int) handle = scc_rbtree_init(int, compare);
 for(unsigned i = 0; i < 10; i++) {
     scc_rbtree_insert(handle, rand());
 }

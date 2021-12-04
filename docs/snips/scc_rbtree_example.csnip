@@ -2,7 +2,7 @@ int compare(void const *left, void const *right) {
     return *(int const *)right - *(int const *)left;
 }
 
-int *handle = scc_rbtree_init(int, compare);
+scc_rbtree(int) handle = scc_rbtree_init(int, compare);
 
 for(unsigned i = 0u; i < 30u; i++) {
     scc_rbtree_insert(handle, rand());
