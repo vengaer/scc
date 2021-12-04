@@ -483,7 +483,7 @@ bool scc_rbtree_impl_insert(void *handle) {
 void const *scc_rbtree_impl_find(void const *handle) {
     struct scc_rbtree const *tree = scc_rbtree_from_handle_qual(handle, const);
     struct scc_rbnode const *p = scc_rbtree_sentinel_qual(tree, const);
-    struct scc_rbnode const *n = scc_rbtree_sentinel_qual(tree, const);
+    struct scc_rbnode const *n = tree->rb_root;
     enum scc_rbdir dir = scc_rbdir_left;
     int rel;
 
