@@ -84,8 +84,8 @@ static bool scc_rbnode_has_red_child(struct scc_rbnode const *node);
 static bool scc_rbnode_has_thread_link(struct scc_rbnode const *node);
 static int scc_rbtree_compare(
     struct scc_rbtree const *restrict tree,
-    struct scc_rbnode const *restrict left,
-    struct scc_rbnode const *restrict right
+    struct scc_rbnode const *restrict node,
+    void const *restrict needle
 );
 static void const *scc_rbnode_leftmost(struct scc_rbnode const *node);
 static void const *scc_rbnode_rightmost(struct scc_rbnode const *node);
@@ -206,12 +206,11 @@ static inline bool scc_rbnode_has_thread_link(struct scc_rbnode const *node) {
 
 static inline int scc_rbtree_compare(
     struct scc_rbtree const *restrict tree,
-    struct scc_rbnode const *restrict left,
-    struct scc_rbnode const *restrict right
+    struct scc_rbnode const *restrict node,
+    void const *restrict needle
 ) {
-    void const *laddr = scc_rbnode_value_qual(tree, left, const);
-    void const *raddr = scc_rbnode_value_qual(tree, right, const);
-    return tree->rb_compare(laddr, raddr);
+    void const *value = scc_rbnode_value_qual(tree, node, const);
+    return tree->rb_compare(value, needle);
 }
 
 static void const *scc_rbnode_leftmost(struct scc_rbnode const *node) {
@@ -351,6 +350,7 @@ static bool scc_rbtree_insert_nonempty(void **handle, struct scc_rbtree *tree, s
     struct scc_rbnode *ggp = &(struct scc_rbnode) { .rn_left = gp };
     struct scc_rbnode *p = scc_rbtree_sentinel(tree);
     struct scc_rbnode *n = tree->rb_root;
+    void const *needle = scc_rbnode_value(tree, node);
 
     enum scc_rbdir dir;
     int rel;
@@ -360,7 +360,7 @@ static bool scc_rbtree_insert_nonempty(void **handle, struct scc_rbtree *tree, s
             /* Push red coloring up */
             scc_rbtree_balance_insertion(n, p, gp, ggp);
         }
-        rel = scc_rbtree_compare(tree, n, node);
+        rel = scc_rbtree_compare(tree, n, needle);
         if(!rel) {
             /* Already in tree */
             scc_rbnode_mkblack(tree->rb_root);
@@ -484,12 +484,11 @@ void const *scc_rbtree_impl_find(void const *handle) {
     struct scc_rbtree const *tree = scc_rbtree_from_handle_qual(handle, const);
     struct scc_rbnode const *p = scc_rbtree_sentinel_qual(tree, const);
     struct scc_rbnode const *n = scc_rbtree_sentinel_qual(tree, const);
-    struct scc_rbnode const *needle = scc_rbnode_baseaddr_qual(handle, const);
     enum scc_rbdir dir = scc_rbdir_left;
     int rel;
 
     while(!scc_rbnode_thread(p, dir)) {
-        rel = scc_rbtree_compare(tree, n, needle);
+        rel = scc_rbtree_compare(tree, n, handle);
         if(!rel) {
             return scc_rbnode_value_qual(tree, n, const);
         }
@@ -504,7 +503,6 @@ void const *scc_rbtree_impl_find(void const *handle) {
 
 bool scc_rbtree_impl_remove(void *handle) {
     struct scc_rbtree *tree = scc_rbtree_from_handle(handle);
-    struct scc_rbnode const *needle = scc_rbnode_baseaddr(handle);
     struct scc_rbnode *gp = &(struct scc_rbnode) {
         .rn_left = scc_rbtree_sentinel(tree)
     };
@@ -518,7 +516,7 @@ bool scc_rbtree_impl_remove(void *handle) {
     int rel;
 
     while(!scc_rbnode_thread(p, dir)) {
-        rel = scc_rbtree_compare(tree, n, needle);
+        rel = scc_rbtree_compare(tree, n, handle);
         if(!rel) {
             fparent = p;
             found = n;
