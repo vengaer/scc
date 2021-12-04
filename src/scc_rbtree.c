@@ -108,8 +108,11 @@ static bool scc_rbtree_replace_handle(void **handle, struct scc_rbtree *tree);
 static bool scc_rbtree_insert_empty(void **handle, struct scc_rbtree *tree, struct scc_rbnode *n);
 static bool scc_rbtree_insert_nonempty(void **handle, struct scc_rbtree *tree, struct scc_rbnode *node);
 static struct scc_rbnode *scc_rbtree_find_parent(struct scc_rbtree *tree, struct scc_rbnode const *needle);
-static void scc_rbnode_swap(
-    struct scc_rbtree *tree,
+static bool scc_rbnode_has_child(
+    struct scc_rbnode const *restrict parent,
+    struct scc_rbnode *restrict child
+);
+static void scc_rbnode_swap(struct scc_rbtree *tree,
     struct scc_rbnode *found,
     struct scc_rbnode *n,
     struct scc_rbnode *p,
@@ -410,6 +413,13 @@ static struct scc_rbnode *scc_rbtree_find_parent(
     return p;
 }
 
+static inline bool scc_rbnode_has_child(
+    struct scc_rbnode const *restrict parent,
+    struct scc_rbnode *restrict child
+) {
+    return  parent->rn_left == child || parent->rn_right == child;
+}
+
 static void scc_rbnode_swap(
     struct scc_rbtree *tree,
     struct scc_rbnode *found,
@@ -417,7 +427,13 @@ static void scc_rbnode_swap(
     struct scc_rbnode *p,
     enum scc_rbdir dir
 ) {
-    struct scc_rbnode *fparent = scc_rbtree_find_parent(tree, found);
+    struct scc_rbnode *fparent = scc_rbnode_link(n, dir);
+    /* If balancing has separated parent and child, look up
+     * new parent */
+    if(!scc_rbnode_has_child(fparent, found)) {
+        fparent = scc_rbtree_find_parent(tree, found);
+    }
+
     enum scc_rbdir fdir = fparent->rn_right == found;
     enum scc_rbdir pdir = p->rn_right == n;
 
@@ -503,6 +519,7 @@ bool scc_rbtree_impl_remove(void *handle) {
     struct scc_rbnode *p = scc_rbtree_sentinel(tree);
     struct scc_rbnode *n = tree->rb_root;
 
+    struct scc_rbnode *fparent = 0;
     struct scc_rbnode *found = 0;
 
     enum scc_rbdir dir = scc_rbdir_left;
@@ -511,6 +528,7 @@ bool scc_rbtree_impl_remove(void *handle) {
     while(!scc_rbnode_thread(p, dir)) {
         rel = scc_rbtree_compare(tree, n, needle);
         if(!rel) {
+            fparent = p;
             found = n;
         }
 
@@ -526,6 +544,8 @@ bool scc_rbtree_impl_remove(void *handle) {
     }
 
     if(found) {
+        /* Use thread for passing fparent */
+        scc_rbnode_link(p, dir) = fparent;
         scc_rbnode_swap(tree, found, p, gp, dir);
         scc_arena_free(&tree->rb_arena, found);
         --tree->rb_size;
