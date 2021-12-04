@@ -2,6 +2,7 @@
 #define SCC_SVEC_H
 
 #include "scc_mem.h"
+#include "scc_pp_token.h"
 
 #include <stddef.h>
 
@@ -132,7 +133,10 @@ inline void scc_svec_clear(void *vec) {
     scc_svec_foreach_reversed_by(iter, svec, 1)
 
 #define scc_svec_foreach_by(iter, svec, by)                             \
-    for(iter = svec; iter < &svec[scc_svec_size(svec)]; iter += by)
+    for(void const *scc_pp_cat_expand(scc_svec_end,__LINE__) =          \
+            (iter = svec, &svec[scc_svec_size(svec)]);                  \
+        (void const *)iter < scc_pp_cat_expand(scc_svec_end,__LINE__);  \
+        iter += by)
 
 #define scc_svec_foreach_reversed_by(iter, svec, by)                    \
     for(iter = &svec[scc_svec_size(svec) - 1u]; iter >= svec; iter -= by)
