@@ -23,6 +23,7 @@ srcdir       := $(root)/src
 headerdir    := $(root)/scc
 testdir      := $(root)/test
 unitdir      := $(testdir)/unit
+inspectdir   := $(testdir)/inspect
 panictestdir := $(testdir)/panic
 doctestdir   := $(testdir)/docs
 docdir       := $(root)/docs
@@ -71,6 +72,7 @@ PYLINTFLAGS  := --fail-under=10.0
 
 obj          := $(patsubst $(srcdir)/%.$(cext),$(builddir)/%.$(oext),$(wildcard $(srcdir)/*.$(cext)))
 
+include $(mkscripts)/inspect.mk
 include $(mkscripts)/unit.mk
 include $(mkscripts)/docs.mk
 include $(mkscripts)/lint.mk
