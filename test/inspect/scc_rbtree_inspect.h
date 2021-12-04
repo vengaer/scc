@@ -18,5 +18,6 @@
                              SCC_RBTREE_ERR_ROOT)
 
 unsigned long long scc_rbtree_inspect_properties(void const *handle);
+void scc_rbtree_inspect_dump_flags(unsigned long long flags);
 
 #endif /* SCC_RBTREE_INSPECT_H */

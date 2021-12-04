@@ -3,6 +3,7 @@
 #include <scc/scc_mem.h>
 
 #include <stdbool.h>
+#include <stdio.h>
 
 #define rn_left     rn_bare.un_link.node.left
 #define rn_right    rn_bare.un_link.node.right
@@ -183,4 +184,25 @@ unsigned long long scc_rbtree_inspect_properties(void const *handle) {
     }
 
     return scc_rbtree_inspect_properties_impl(tree, tree->rb_root);
+}
+
+void scc_rbtree_inspect_dump_flags(unsigned long long flags) {
+    if(!(flags & SCC_RBTREE_ERR_MASK)) {
+        return;
+    }
+    if(flags & SCC_RBTREE_ERR_RED) {
+        puts("Red violation");
+    }
+    if(flags & SCC_RBTREE_ERR_BLACK) {
+        puts("Black height violation");
+    }
+    if(flags & SCC_RBTREE_ERR_LEFT) {
+        puts("Left ordering violation");
+    }
+    if(flags & SCC_RBTREE_ERR_RIGHT) {
+        puts("Right ordering violation");
+    }
+    if(flags & SCC_RBTREE_ERR_ROOT) {
+        puts("Root not black");
+    }
 }
