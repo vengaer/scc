@@ -2,3 +2,4 @@ tags
 build
 libscc.*
 *.pyc
+.config.mk
