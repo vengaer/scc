@@ -20,6 +20,7 @@ struct scc_rbnode_bare {
             struct scc_rbnode *left;        /* Left link */
             struct scc_rbnode *right;       /* Right link */
         } node;
+        struct scc_rbnode *root;            /* Root node */
         struct scc_rbtree *tree;            /* Address of tree */
     } un_link;
     enum scc_rbcolor color;
