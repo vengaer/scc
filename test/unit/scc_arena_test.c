@@ -125,9 +125,10 @@ void test_scc_arena_free_multiple_chunks(void) {
 }
 
 void test_scc_arena_free_middle_chunks(void) {
+    enum { NCHUNKS = 5 };
     struct scc_arena arena = scc_arena_init(int);
 
-    int *chks[5];
+    int *chks[NCHUNKS];
     /* Allocate elements corresponding to 5 chunks */
     for(unsigned i = 0u; i < scc_arrsize(chks); i++) {
         /* First element of chunk i in chks[i] */
@@ -176,8 +177,9 @@ void test_scc_arena_free_middle_chunks(void) {
 }
 
 void test_scc_arena_free_first_chunk(void) {
+    enum { BUFLEN = 32 };
     struct foo {
-        char c[32];
+        char c[BUFLEN];
         long long lld;
     };
 
