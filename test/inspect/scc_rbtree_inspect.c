@@ -177,5 +177,10 @@ unsigned long long scc_rbtree_inspect_properties(void const *handle) {
             const
         )->rn_tree;
 
+    if(!scc_rbtree_inspect_black(tree->rb_root)) {
+        /* Root must be black */
+        return SCC_RBTREE_ERR_ROOT;
+    }
+
     return scc_rbtree_inspect_properties_impl(tree, tree->rb_root);
 }
