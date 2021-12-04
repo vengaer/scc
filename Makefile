@@ -12,6 +12,7 @@ RM           := rm
 TOUCH        := touch
 PYTHON       := python
 PYTEST       := pytest
+PYLINT       := pylint
 
 root         := $(abspath $(CURDIR))
 builddir     := $(root)/build
@@ -41,6 +42,7 @@ socompat     := 0
 adocext      := adoc
 htmlext      := html
 jsonext      := json
+pyext        := py
 
 solink       := lib$(scc).$(soext)
 solib        := $(solink).$(sover)
@@ -65,6 +67,7 @@ LNFLAGS      := -sf
 RMFLAGS      := -rf
 TOUCHFLAGS   :=
 PYTESTFLAGS  := -v
+PYLINTFLAGS  := --fail-under=10.0
 
 obj          := $(patsubst $(srcdir)/%.$(cext),$(builddir)/%.$(oext),$(wildcard $(srcdir)/*.$(cext)))
 
