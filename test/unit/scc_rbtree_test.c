@@ -59,6 +59,18 @@ void test_scc_rbtree_remove(void) {
     }
     for(int i = 0; i < TEST_SIZE; i++) {
         TEST_ASSERT_TRUE(scc_rbtree_remove(handle, i));
+    }
+    scc_rbtree_free(handle);
+}
+
+void test_scc_rbtree_duplicate_removal(void) {
+    enum { TEST_SIZE = 500 };
+    scc_rbtree(int) handle = scc_rbtree_init(int, compare);
+    for(int i = 0; i < TEST_SIZE; i++) {
+        TEST_ASSERT_TRUE(scc_rbtree_insert(handle, i));
+    }
+    for(int i = 0; i < TEST_SIZE; i++) {
+        TEST_ASSERT_TRUE(scc_rbtree_remove(handle, i));
         TEST_ASSERT_FALSE(scc_rbtree_remove(handle, i));
     }
     scc_rbtree_free(handle);
