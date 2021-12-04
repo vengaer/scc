@@ -55,13 +55,8 @@ void *scc_svec_impl_from(
         size_t elemsize
     );
 _Bool scc_svec_impl_resize(void *vec, size_t size, size_t elemsize);
-void scc_svec_impl_erase(void *svec, void *iter, size_t elemsize);
-void scc_svec_impl_erase_range(
-        void *svec,
-        void *first,
-        void const *end,
-        size_t elemsize
-    );
+void scc_svec_impl_erase(void *svec, size_t index, size_t elemsize);
+void scc_svec_impl_erase_range(void *svec, size_t first, size_t end, size_t elemsize);
 void scc_svec_impl_at_check(void *svec, size_t index);
 _Bool scc_svec_impl_push_ensure_capacity(void *vec, size_t elemsize);
 _Bool scc_svec_impl_reserve(void *vec, size_t capacity, size_t elemsize);
@@ -115,8 +110,8 @@ inline void scc_svec_clear(void *vec) {
 #define scc_svec_resize(svec, size)                                     \
     scc_svec_impl_resize(&(svec), size, sizeof(*(svec)))
 
-#define scc_svec_erase(svec, iter)                                      \
-    scc_svec_impl_erase(svec, iter, sizeof(*(svec)))
+#define scc_svec_erase(svec, index)                                     \
+    scc_svec_impl_erase(svec, index, sizeof(*(svec)))
 
 #define scc_svec_erase_range(svec, first, end)                          \
     scc_svec_impl_erase_range(svec, first, end, sizeof(*(svec)))

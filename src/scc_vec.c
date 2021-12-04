@@ -122,32 +122,33 @@ bool scc_vec_impl_reserve(void *vec, size_t capacity, size_t elemsize) {
     return scc_vec_grow(vec, capacity, elemsize);
 }
 
-void scc_vec_impl_erase(void *vec, void *iter, size_t elemsize) {
-    size_t offset = ((unsigned char *)iter - (unsigned char *)vec) / elemsize;
+void scc_vec_impl_erase(void *vec, size_t index, size_t elemsize) {
     --scc_vec_impl_base(vec)->sc_size;
-    if(offset == scc_vec_size(vec)) {
+    if(index == scc_vec_size(vec)) {
         /* Last element */
         return;
     }
-    size_t nbytes = (scc_vec_size(vec) - offset) * elemsize;
-    memmove(iter, (unsigned char *)iter + elemsize, nbytes);
+    size_t nbytes = (scc_vec_size(vec) - index) * elemsize;
+    unsigned char *dstaddr = (unsigned char *)vec + index * elemsize;
+    memmove(dstaddr, dstaddr + elemsize, nbytes);
 }
 
-void scc_vec_impl_erase_range(void *vec, void *first, void const *end, size_t elemsize) {
+void scc_vec_impl_erase_range(void *vec, size_t first, size_t end, size_t elemsize) {
     if(end <= first) {
         return;
     }
 
-    size_t nelems = ((unsigned char const *)end - (unsigned char *)first) / elemsize;
-    size_t offset = ((unsigned char *)first - (unsigned char *)vec) / elemsize;
+    size_t const nelems = end - first;
     scc_vec_impl_base(vec)->sc_size -= nelems;
 
-    if(offset == scc_vec_size(vec)) {
+    if(first == scc_vec_size(vec)) {
         /* Last nelems elements */
         return;
     }
-    size_t nbytes = (scc_vec_size(vec) - offset) * elemsize;
-    memmove(first, (unsigned char *)first + nelems * elemsize, nbytes);
+    size_t const nbytes = (scc_vec_size(vec) - first) * elemsize;
+    unsigned char *dstaddr = (unsigned char *)vec + first * elemsize;
+    unsigned char const *srcaddr = dstaddr + nelems * elemsize;
+    memmove(dstaddr, srcaddr, nbytes);
 }
 
 void scc_vec_pop_safe(void *vec) {

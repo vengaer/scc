@@ -1,6 +1,6 @@
 int *vec = scc_vec_from(int, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
 int *iter;
-scc_vec_erase_range(vec, &vec[3], &vec[8]);
+scc_vec_erase_range(vec, 3, 8);
 scc_vec_foreach(iter, vec) {
     printf("%d ", *iter);
 }

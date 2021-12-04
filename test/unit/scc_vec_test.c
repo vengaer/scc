@@ -287,12 +287,12 @@ void test_scc_vec_erase(void) {
         TEST_ASSERT_TRUE(scc_vec_push(vec, i));
     }
 
-    scc_vec_erase(vec, &vec[ERASE_IDX0]);
+    scc_vec_erase(vec, ERASE_IDX0);
     for(int i = ERASE_IDX0; i < TEST_SIZE - 1; i++) {
         TEST_ASSERT_EQUAL_INT32(i + 1, vec[i]);
     }
 
-    scc_vec_erase(vec, &vec[ERASE_IDX1]);
+    scc_vec_erase(vec, ERASE_IDX1);
     for(int i = 0; i < ERASE_IDX1; ++i) {
         TEST_ASSERT_EQUAL_INT32(i, vec[i]);
     }
@@ -314,7 +314,7 @@ void test_scc_vec_erase_last(void) {
         TEST_ASSERT_TRUE(scc_vec_push(vec, i));
     }
 
-    scc_vec_erase(vec, &vec[TEST_SIZE - 1]);
+    scc_vec_erase(vec, TEST_SIZE - 1);
     for(int i = 0; i < TEST_SIZE - 1; i++) {
         TEST_ASSERT_EQUAL_INT32(i, vec[i]);
     }
@@ -330,7 +330,7 @@ void test_scc_vec_erase_range(void) {
         TEST_ASSERT_TRUE(scc_vec_push(vec, i));
     }
 
-    scc_vec_erase_range(vec, &vec[ERASE_START], &vec[ERASE_END]);
+    scc_vec_erase_range(vec, ERASE_START, ERASE_END);
     for(int i = 0; i < ERASE_START; ++i) {
         TEST_ASSERT_EQUAL_INT32(i, vec[i]);
     }
@@ -351,7 +351,7 @@ void test_scc_vec_erase_range_end_lt_first(void) {
         TEST_ASSERT_TRUE(scc_vec_push(vec, i));
     }
 
-    scc_vec_erase_range(vec, &vec[3], &vec[1]);
+    scc_vec_erase_range(vec, 3, 1);
     TEST_ASSERT_EQUAL_UINT64(TEST_SIZE, scc_vec_size(vec));
     for(int i = 0; i < TEST_SIZE; i++) {
         TEST_ASSERT_EQUAL_INT32(i, vec[i]);
@@ -367,7 +367,7 @@ void test_scc_vec_erase_range_end_eq_first(void) {
         TEST_ASSERT_TRUE(scc_vec_push(vec, i));
     }
 
-    scc_vec_erase_range(vec, &vec[3], &vec[3]);
+    scc_vec_erase_range(vec, 3, 3);
     TEST_ASSERT_EQUAL_UINT64(TEST_SIZE, scc_vec_size(vec));
     for(int i = 0; i < TEST_SIZE; i++) {
         TEST_ASSERT_EQUAL_INT32(i, vec[i]);
@@ -386,7 +386,7 @@ void test_scc_vec_erase_range_end(void) {
     }
     int rem = ERASE_END - ERASE_START;
 
-    scc_vec_erase_range(vec, &vec[ERASE_START], &vec[ERASE_END]);
+    scc_vec_erase_range(vec, ERASE_START, ERASE_END);
     TEST_ASSERT_EQUAL_UINT64(rem, scc_vec_size(vec));
     for(int i = 0; i < rem; i++) {
         TEST_ASSERT_EQUAL_INT32(i, vec[i]);

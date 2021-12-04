@@ -218,12 +218,12 @@ void test_scc_svec_erase(void) {
         TEST_ASSERT_TRUE(scc_svec_push(svec, i));
     }
 
-    scc_svec_erase(svec, &svec[ERASE_IDX0]);
+    scc_svec_erase(svec, ERASE_IDX0);
     for(int i = ERASE_IDX0; i < TEST_SIZE - 1; i++) {
         TEST_ASSERT_EQUAL_INT32(i + 1, svec[i]);
     }
 
-    scc_svec_erase(svec, &svec[ERASE_IDX1]);
+    scc_svec_erase(svec, ERASE_IDX1);
     for(int i = 0; i < ERASE_IDX1; i++) {
         TEST_ASSERT_EQUAL_INT32(i, svec[i]);
     }
@@ -245,7 +245,7 @@ void test_scc_svec_erase_last(void) {
         TEST_ASSERT_TRUE(scc_svec_push(svec, i));
     }
 
-    scc_svec_erase(svec, &svec[TEST_SIZE - 1]);
+    scc_svec_erase(svec, TEST_SIZE - 1);
     for(int i = 0; i < TEST_SIZE - 1; i++) {
         TEST_ASSERT_EQUAL_INT32(i, svec[i]);
     }
@@ -262,7 +262,7 @@ void test_scc_svec_erase_range(void) {
     }
     int rem = TEST_SIZE - (ERASE_END - ERASE_START);
 
-    scc_svec_erase_range(svec, &svec[ERASE_START], &svec[ERASE_END]);
+    scc_svec_erase_range(svec, ERASE_START, ERASE_END);
     for(int i = 0; i < ERASE_START; i++) {
         TEST_ASSERT_EQUAL_INT32(i, svec[i]);
     }
@@ -282,7 +282,7 @@ void test_scc_svec_erase_range_end_lt_first(void) {
         TEST_ASSERT_TRUE(scc_svec_push(svec, i));
     }
 
-    scc_svec_erase_range(svec, &svec[3], &svec[1]);
+    scc_svec_erase_range(svec, 3, 1);
     TEST_ASSERT_EQUAL_UINT64(TEST_SIZE, scc_svec_size(svec));
     for(int i = 0; i < TEST_SIZE; i++) {
         TEST_ASSERT_EQUAL_INT32(i, svec[i]);
@@ -298,7 +298,7 @@ void test_scc_svec_erase_range_end_eq_first(void) {
         TEST_ASSERT_TRUE(scc_svec_push(svec, i));
     }
 
-    scc_svec_erase_range(svec, &svec[3], &svec[3]);
+    scc_svec_erase_range(svec, 3, 3);
     TEST_ASSERT_EQUAL_UINT64(TEST_SIZE, scc_svec_size(svec));
     for(int i = 0; i < TEST_SIZE; i++) {
         TEST_ASSERT_EQUAL_INT32(i, svec[i]);
@@ -315,7 +315,7 @@ void test_scc_svec_erase_range_end(void) {
         TEST_ASSERT_TRUE(scc_svec_push(svec, i));
     }
 
-    scc_svec_erase_range(svec, &svec[ERASE_START], &svec[TEST_SIZE]);
+    scc_svec_erase_range(svec, ERASE_START, TEST_SIZE);
     int rem = TEST_SIZE - ERASE_START;
 
     TEST_ASSERT_EQUAL_UINT64(rem, scc_svec_size(svec));
