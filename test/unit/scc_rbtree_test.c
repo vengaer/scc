@@ -7,12 +7,12 @@ int compare(void const *left, void const *right) {
 }
 
 void test_scc_rbtree_init(void) {
-    int *tree = scc_rbtree_init(int, compare);
+    scc_rbtree(int) tree = scc_rbtree_init(int, compare);
     scc_rbtree_free(tree);
 }
 
 void test_scc_rbtree_size(void) {
-    int *tree = scc_rbtree_init(int, compare);
+    scc_rbtree(int) tree = scc_rbtree_init(int, compare);
     TEST_ASSERT_EQUAL_UINT64(0u, scc_rbtree_size(tree));
     scc_rbtree_free(tree);
 }
@@ -20,7 +20,7 @@ void test_scc_rbtree_size(void) {
 void test_scc_rbtree_insert(void) {
     enum { TEST_SIZE = 3200 };
 
-    int *handle = scc_rbtree_init(int, compare);
+    scc_rbtree(int) handle = scc_rbtree_init(int, compare);
     for(int i = 0; i < TEST_SIZE; i++) {
         TEST_ASSERT_TRUE(scc_rbtree_insert(handle, i));
         TEST_ASSERT_EQUAL_UINT64(i + 1ull, scc_rbtree_size(handle));
@@ -33,7 +33,7 @@ void test_scc_rbtree_insert(void) {
 
 void test_scc_rbtree_find(void) {
     enum { TEST_SIZE = 1200 };
-    int *handle = scc_rbtree_init(int, compare);
+    scc_rbtree(int) handle = scc_rbtree_init(int, compare);
     for(int i = 0; i < TEST_SIZE; i++) {
         TEST_ASSERT_TRUE(scc_rbtree_insert(handle, i));
         TEST_ASSERT_EQUAL_UINT64(i + 1ull, scc_rbtree_size(handle));
@@ -51,7 +51,7 @@ void test_scc_rbtree_find(void) {
 
 void test_scc_rbtree_remove(void) {
     enum { TEST_SIZE = 500 };
-    int *handle = scc_rbtree_init(int, compare);
+    scc_rbtree(int) handle = scc_rbtree_init(int, compare);
     for(int i = 0; i < TEST_SIZE; i++) {
         TEST_ASSERT_TRUE(scc_rbtree_insert(handle, i));
     }
@@ -64,7 +64,7 @@ void test_scc_rbtree_remove(void) {
 
 void test_scc_rbtree_foreach(void) {
     enum { TEST_SIZE = 500 };
-    int *handle = scc_rbtree_init(int, compare);
+    scc_rbtree(int) handle = scc_rbtree_init(int, compare);
     for(int i = 0; i < TEST_SIZE; i++) {
         TEST_ASSERT_TRUE(scc_rbtree_insert(handle, i));
     }
@@ -78,7 +78,7 @@ void test_scc_rbtree_foreach(void) {
 
 void test_scc_rbtree_foreach_reversed(void) {
     enum { TEST_SIZE = 600 };
-    int *handle = scc_rbtree_init(int, compare);
+    scc_rbtree(int) handle = scc_rbtree_init(int, compare);
     for(int i = 0; i < TEST_SIZE; i++) {
         TEST_ASSERT_TRUE(scc_rbtree_insert(handle, i));
     }

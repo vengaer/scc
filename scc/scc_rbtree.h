@@ -5,6 +5,8 @@
 
 #include <stddef.h>
 
+#define scc_rbtree(type) type *
+
 typedef int(*scc_rbcompare)(void const *, void const *);
 
 enum scc_rbcolor {
