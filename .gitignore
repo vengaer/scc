@@ -3,3 +3,5 @@ build
 libscc.*
 *.pyc
 .config.mk
+crash-*
+slow-unit-*
