@@ -45,6 +45,9 @@ $(unitbuilddir)/%.$(oext): $(unitdir)/%.$(cext) | $(unitbuilddir)
 .PHONY: check
 check: CPPFLAGS += -I$(unityinc)
 
+.PHONY: lint
+lint:  CPPFLAGS += -I$(unityinc)
+
 define check-linker-rules
 $(strip
     $(foreach __o,$(unitobj),

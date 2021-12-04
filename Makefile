@@ -4,6 +4,7 @@ AR           := ar
 RB           := ruby
 CMAKE        := cmake
 ADOC         := asciidoc
+TIDY         := clang-tidy
 
 MKDIR        := mkdir
 LN           := ln
@@ -18,6 +19,7 @@ dirs         += $(builddir)
 
 scc          := scc
 srcdir       := $(root)/src
+headerdir    := $(root)/scc
 testdir      := $(root)/test
 unitdir      := $(testdir)/unit
 panictestdir := $(testdir)/panic
@@ -29,6 +31,7 @@ mkscripts    := $(scripts)/mk
 pyscripts    := $(scripts)/python
 
 cext         := c
+hext         := h
 oext         := o
 aext         := a
 dext         := d
@@ -55,6 +58,8 @@ ARFLAGS      := -rcs
 so_CFLAGS    := -fPIC
 so_LDFLAGS   := -shared -Wl,-soname,lib$(scc).$(soext).$(socompat)
 
+TIDYFLAGS     = --warnings-as-errors=* --checks=$(tidychecks)
+
 MKDIRFLAGS   := -p
 LNFLAGS      := -sf
 RMFLAGS      := -rf
@@ -65,6 +70,7 @@ obj          := $(patsubst $(srcdir)/%.$(cext),$(builddir)/%.$(oext),$(wildcard 
 
 include $(mkscripts)/unit.mk
 include $(mkscripts)/docs.mk
+include $(mkscripts)/lint.mk
 include $(mkscripts)/panic.mk
 
 .PHONY: all
@@ -91,6 +97,9 @@ $(dirs):
 
 .PHONY: check
 check: CPPFLAGS := $(filter-out -DNDEBUG,$(CPPFLAGS))
+
+.PHONY: lint
+lint:
 
 .PHONY: clean
 clean:
