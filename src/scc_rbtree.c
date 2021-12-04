@@ -443,7 +443,6 @@ static void scc_rbnode_swap(
 void *scc_rbtree_impl_init(struct scc_rbtree *tree) {
     tree->rb_size = 0u;
     tree->rb_root = scc_rbtree_sentinel(tree);
-    tree->rb_sentinel.un_link.node.right = scc_rbtree_sentinel(tree);
     tree->rb_sentinel.flags = SCC_RBLEAF;
 
     return scc_rbtree_new_handle(tree);
