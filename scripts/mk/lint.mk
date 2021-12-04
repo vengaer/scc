@@ -1,5 +1,4 @@
-
-tidydirs   := $(srcdir) $(unitdir) $(panicdir) $(headerdir)
+tidydirs   := $(srcdir) $(unitdir) $(panicdir) $(headerdir) $(inspectdir)
 tidysrc    := $(foreach __d,$(tidydirs),$(wildcard $(__d)/*.$(cext))\
                                         $(wildcard $(__d)/*.$(hext)))
 pylintsrc  := $(wildcard $(pyscripts)/*$(pyext))
@@ -7,7 +6,8 @@ pylintsrc  := $(wildcard $(pyscripts)/*$(pyext))
 tidyenable := clang-analyzer misc performance portability cert readability
 tidyignore := clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling \
               readability-function-cognitive-complexity                            \
-              readability-uppercase-literal-suffix
+              readability-uppercase-literal-suffix                                 \
+              misc-no-recursion
 
 __comma    :=,
 tidychecks := $(subst $(subst ,, ),$(__comma),$(addsuffix -*,$(tidyenable)) $(addprefix -,$(tidyignore)))
