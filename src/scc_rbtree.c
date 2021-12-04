@@ -7,7 +7,7 @@
 
 #define rn_left     rn_bare.un_link.node.left
 #define rn_right    rn_bare.un_link.node.right
-#define rn_parent   rn_bare.un_link.parent
+#define rn_tree     rn_bare.un_link.tree
 #define rn_color    rn_bare.color
 #define rn_flags    rn_bare.flags
 
@@ -35,7 +35,7 @@
     scc_rbnode_baseaddr_qual(node,)
 
 #define scc_rbtree_from_handle_qual(handle, qual)   \
-    scc_rbnode_baseaddr_qual(handle, qual)->rn_parent
+    scc_rbnode_baseaddr_qual(handle, qual)->rn_tree
 
 #define scc_rbtree_from_handle(handle)              \
     scc_rbtree_from_handle_qual(handle,)
@@ -136,7 +136,7 @@ static void *scc_rbtree_new_handle(struct scc_rbtree *tree) {
     if(!node) {
         return 0;
     }
-    node->rn_parent = tree;
+    node->rn_tree = tree;
     scc_rbnode_set_npad(node, tree);
     return (unsigned char *)node + tree->rb_baseoff;
 }
