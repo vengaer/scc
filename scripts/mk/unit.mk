@@ -43,7 +43,7 @@ $(unitbuilddir)/%.$(oext): $(unitdir)/%.$(cext) | $(unitbuilddir)
 	$(CC) $(CFLAGS) $(unit_CFLAGS) $(CPPFLAGS) -o $@ $<
 
 .PHONY: check
-check: CPPFLAGS += -I$(unityinc)
+check: CPPFLAGS += -I$(unityinc) -I$(inspectdir)
 
 .PHONY: lint
 lint:  CPPFLAGS += -I$(unityinc)
@@ -53,7 +53,7 @@ $(strip
     $(foreach __o,$(unitobj),
         $(eval
             $(eval __bin := $(unitbuilddir)/$(basename $(notdir $(__o))))
-            $(__bin): $(__o) $(patsubst %.$(oext),%$(runnersuffix).$(oext),$(__o)) $(unityalib) $(alib)
+            $(__bin): $(__o) $(patsubst %.$(oext),%$(runnersuffix).$(oext),$(__o)) $(unityalib) $(alib) $(libinspect)
 	            $$(info [LD] $$(notdir $$@))
 	            $$(LD) -o $$@ $$^ $$(LDFLAGS) $$(unit_LDFLAGS) $$(LDLIBS)
 
