@@ -1,4 +1,4 @@
-int *svec = scc_svec_from(int, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+scc_svec(int) svec = scc_svec_from(int, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
 scc_svec_erase_range(svec, 8, 11);
 
 for(unsigned i = 0; i < scc_svec_size(svec); i++) {

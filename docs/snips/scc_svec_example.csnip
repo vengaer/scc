@@ -1,7 +1,7 @@
 char buffer[32];
 char *endp;
 
-char *svec = scc_svec_init(char);
+scc_svec(char) svec = scc_svec_init(char);
 
 puts("Enter a string with spaces");
 fgets(buffer, sizeof(buffer), stdin);

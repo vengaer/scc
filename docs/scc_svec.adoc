@@ -20,6 +20,15 @@ associated functions.
 include::snips/scc_svec_example.csnip[tags=scc_svec_example]
 ----
 
+== Types
+
+=== scc_svec(type)
+
+Expands to an opaque, fat pointer suitable for representing an `scc_svec` containing elements of type `type`. Once initialized,
+it holds the address of the base of the vector and may be dereferenced and indexed as any raw pointer. The behavior when
+accessing elements beyond the end of the vector is undefined. The size may be queried using `scc_svec_size`. The pointer
+should not be modified through any means other than what is provided by the `scc_svec` API.
+
 == Construction and Deallocation
 
 === void *scc_svec_init(type)

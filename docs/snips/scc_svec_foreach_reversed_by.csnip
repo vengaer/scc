@@ -1,4 +1,4 @@
-int *svec = scc_svec_init(int);
+scc_svec(int) svec = scc_svec_init(int);
 int *iter;
 int i = 0;
 

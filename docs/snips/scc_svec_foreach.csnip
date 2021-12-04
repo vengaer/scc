@@ -1,4 +1,4 @@
-int *svec = scc_svec_from(int, 1, 2, 3, 4);
+scc_svec(int) svec = scc_svec_from(int, 1, 2, 3, 4);
 
 int *iter;
 scc_svec_foreach(iter, svec) {
