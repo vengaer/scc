@@ -57,10 +57,10 @@ $(strip
 	            $$(info [LD] $$(notdir $$@))
 	            $$(LD) -o $$@ $$^ $$(LDFLAGS) $$(unit_LDFLAGS) $$(LDLIBS)
 
-            __chk_$(notdir $(__bin)): $(__bin)
+            __chk_$(__bin): $(__bin)
 	          $$^
 
-            check: __chk_$(notdir $(__bin)))))
+            check: __chk_$(__bin))))
 endef
 
 .PHONY: __clean_unity
