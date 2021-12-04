@@ -9,6 +9,8 @@
 enum { SCC_SVEC_STATIC_CAPACITY = 32 };
 #endif
 
+#define scc_svec(type) type *
+
 struct scc_svec {
     size_t sc_size;
     size_t sc_capacity;
