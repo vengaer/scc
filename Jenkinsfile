@@ -71,6 +71,18 @@ pipeline {
                 updateGitlabCommitStatus name: 'build', state: 'success'
             }
         }
+        stage('Lint') {
+            agent {
+                docker {
+                    image "${IMG}"
+                }
+            }
+            steps {
+                script {
+                    sh "make lint"
+                }
+            }
+        }
     }
     post {
         always {
