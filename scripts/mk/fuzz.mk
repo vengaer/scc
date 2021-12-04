@@ -13,12 +13,14 @@ __comma            :=,
 fsanitize          := -fsanitize=$(subst $(subst ,, ),$(__comma),$(addsuffix ,$(sanitizers)))
 fuzzflags          := $(fsanitize) -fprofile-instr-generate -fcoverage-mapping
 
-fuzzbuilddir       := $(builddir)/fuzz
+fuzzsrcdir         := $(fuzzdir)/$(SCC_FUZZ)
+fuzzbuilddir       := $(builddir)/fuzz/$(SCC_FUZZ)
 dirs               += $(fuzzbuilddir)
 
-fuzztarget         := $(fuzzbuilddir)/$(SCC_FUZZ)
+fuzztarget         := $(fuzzbuilddir)/scc_fuzz_$(SCC_FUZZ)
+fuzzobj            := $(patsubst $(fuzzsrcdir)/%.$(cext),$(fuzzbuilddir)/%.$(oext),$(wildcard $(fuzzsrcdir)/*.$(cext)))
 
-srcdirs            := $(srcdir) $(fuzzdir) $(inspectdir)
+srcdirs            := $(srcdir) $(fuzzsrcdir) $(inspectdir)
 
 proffile           := LLVM_PROFILE_FILE
 export $(proffile) := $(builddir)/.fuzz.profraw
@@ -47,17 +49,17 @@ fuzz: $(fuzztarget)
 	$(LLVM_COV) $(LLVM_COV_SHOW)
 	$(LLVM_COV) $(LLVM_COV_REPORT)
 
-$(fuzzbuilddir)/%.$(oext): $(fuzzdir)/%.$(cext) | $(fuzzbuilddir)
+$(fuzzbuilddir)/%.$(oext): $(fuzzsrcdir)/%.$(cext) | $(fuzzbuilddir)
 	$(info [CC] $(notdir $@))
 	$(CC) $(CFLAGS) $(CPPFLAGS) -o $@ $^
 
-$(fuzztarget): $(fuzzbuilddir)/scc_$(SCC_FUZZ)_fuzz.$(oext)
+$(fuzztarget): $(fuzzobj)
 	$(info [LD] $(notdir $(fuzzbuilddir))/$(notdir $@))
 	$(LD) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
-define fuzz-build-rules
+define fuzz-dependency-rules
 $(strip
-    $(eval $(SCC_FUZZ)_deps += $(SCC_FUZZ) $(fuzzdir))
+    $(eval $(SCC_FUZZ)_deps += $(SCC_FUZZ))
     $(foreach __dep,$($(SCC_FUZZ)_deps),
         $(foreach __dir,$(srcdirs),
             $(eval __src := $(__dir)/scc_$(__dep).$(cext))
@@ -72,4 +74,4 @@ $(strip
                     $(fuzztarget): $(__o))))))
 endef
 
-$(call fuzz-build-rules)
+$(call fuzz-dependency-rules)
