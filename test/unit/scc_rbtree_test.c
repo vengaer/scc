@@ -108,10 +108,25 @@ void test_scc_rbtree_properties_insertion(void) {
     enum { TEST_SIZE = 1200 };
     unsigned long long status;
     scc_rbtree(int) handle = scc_rbtree_init(int, compare);
-    for(int i = 0; i < TEST_SIZE; i++) {
+    for(int i = 0; i < TEST_SIZE; ++i) {
         TEST_ASSERT_TRUE(scc_rbtree_insert(handle, i));
         status = scc_rbtree_inspect_properties(handle);
-        TEST_ASSERT_FALSE(status & SCC_RBTREE_ERR_MASK);
+        TEST_ASSERT_EQUAL_UINT64(status & SCC_RBTREE_ERR_MASK, 0ull);
+    }
+    scc_rbtree_free(handle);
+}
+
+void test_scc_rbtree_properties_removal(void) {
+    enum { TEST_SIZE = 1200 };
+    scc_rbtree(int) handle = scc_rbtree_init(int, compare);
+    for(int i = 0; i < TEST_SIZE; ++i) {
+        TEST_ASSERT_TRUE(scc_rbtree_insert(handle, i));
+    }
+    unsigned long long status;
+    for(int i = 0; i < TEST_SIZE; i++) {
+        TEST_ASSERT_TRUE(scc_rbtree_remove(handle, i));
+        status = scc_rbtree_inspect_properties(handle);
+        TEST_ASSERT_EQUAL_UINT64(status & SCC_RBTREE_ERR_MASK, 0ull);
     }
     scc_rbtree_free(handle);
 }
