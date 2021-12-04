@@ -79,7 +79,7 @@ pipeline {
             }
             steps {
                 script {
-                    sh "make lint"
+                    sh "make -j\$(nproc) lint"
                 }
             }
         }
