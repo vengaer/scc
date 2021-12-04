@@ -213,10 +213,10 @@ Pop the last element from the vector (i.e. decrement the size of the vector by o
 
 Like `scc_vec_pop` but with bounds checking. If attempting to pop from an empty vector, standard `exit` is called.
 
-=== void scc_vec_erase(void *vec, void *iter)
+=== void scc_vec_erase(void *vec, size_t iter)
 
-Erase the element at address `iter`, the latter must refer to a suitably aligned address in `vec`. No bounds checking
-is performed. Requires that all elements located at addresses beyond `iter` are copied to replace it.
+Erase the `index`'th element in the vector. No bounds checking is performed. Elements at indices greater than `index` (if any) are copied
+down one step.
 
 .Erasing the 10th element in a vector
 [source]
@@ -230,13 +230,13 @@ include::snips/scc_vec_erase.csnip[tags=scc_vec_erase]
 0 1 2 3 4 5 6 7 8 10
 ----
 
-=== void scc_vec_erase_range(void *vec, void *first, void const *end)
+=== void scc_vec_erase_range(void *vec, size_t first, size_t end)
 
-Erase the elements at addresses in range `[first,end)`. Elements in the range `[end,&vec[scc_vec_size(vec)])` are copied
-to replace the erased range. `first` must refer to a suitably aligned address in `vec`. `end` must be either an address in
-`vec` or `&vec[scc_vec_size(vec)]`. It is subject to the same alignment requirements as `first`.
+Erase the elements at index range `[first,end)`. Elements in the range `[end,scc_svec_size(svec))` are copied to replace
+the erased range. `first` must be an index in range `[0,scc_vec_size(vec))`. `end` must be in range `[0,scc_vec_size(vec)]`,
+i.e. it may be the offset of the first element _after_ the vector.
 
-If `first <= end`, the function returns immediately.
+If `first <= end`, the function returns immediately. No other bounds checking is performed.
 
 .Erasing 5 elements at offset 3
 ----
