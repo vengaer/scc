@@ -123,8 +123,32 @@ void test_scc_rbtree_properties_removal(void) {
         TEST_ASSERT_TRUE(scc_rbtree_insert(handle, i));
     }
     unsigned long long status;
-    for(int i = 0; i < TEST_SIZE; i++) {
+    for(int i = 0; i < TEST_SIZE; ++i) {
         TEST_ASSERT_TRUE(scc_rbtree_remove(handle, i));
+        status = scc_rbtree_inspect_properties(handle);
+        TEST_ASSERT_EQUAL_UINT64(status & SCC_RBTREE_ERR_MASK, 0ull);
+    }
+    scc_rbtree_free(handle);
+}
+
+void test_scc_rbtree_properties_insertion_removal(void) {
+    enum { CHUNKSIZE = 1200 };
+    scc_rbtree(int) handle = scc_rbtree_init(int, compare);
+    unsigned long long status;
+    int i = 0;
+    for(;i < CHUNKSIZE; ++i) {
+        TEST_ASSERT_TRUE(scc_rbtree_insert(handle, i));
+        status = scc_rbtree_inspect_properties(handle);
+        TEST_ASSERT_EQUAL_UINT64(status & SCC_RBTREE_ERR_MASK, 0ull);
+    }
+    for(;i < 2 * CHUNKSIZE; ++i) {
+        TEST_ASSERT_TRUE(scc_rbtree_insert(handle, i));
+        TEST_ASSERT_TRUE(scc_rbtree_remove(handle, i - CHUNKSIZE));
+        status = scc_rbtree_inspect_properties(handle);
+        TEST_ASSERT_EQUAL_UINT64(status & SCC_RBTREE_ERR_MASK, 0ull);
+    }
+    for(; i < 3 * CHUNKSIZE; ++i) {
+        TEST_ASSERT_TRUE(scc_rbtree_remove(handle, i - CHUNKSIZE));
         status = scc_rbtree_inspect_properties(handle);
         TEST_ASSERT_EQUAL_UINT64(status & SCC_RBTREE_ERR_MASK, 0ull);
     }
