@@ -1,21 +1,24 @@
 #!/usr/bin/env python3
 
+''' Hack for generating valid C programs for each panic test '''
+
 import argparse
 import os
 import re
 
 def find_functions(infile):
-    with open(infile, 'r') as fp:
-        contents = fp.read()
+    ''' Find test functions in source file '''
+    with open(infile, 'r', encoding='ascii') as handle:
+        contents = handle.read()
 
     funcs = []
     for line in contents.split('\n'):
-        m = re.match(r'\s*(void\s+([^ ]+)\(void\))\s*{', line)
-        if m is not None:
-            funcs.append((m.groups()[1], m.groups()[0]))
+        if (match := re.match(r'\s*(void\s+([^ ]+)\(void\))\s*{', line)) is not None:
+            funcs.append((match.groups()[1], match.groups()[0]))
     return funcs
 
 def generate_runners(funcs, outdir):
+    ''' Generate a file with main invoking the test for each function '''
     written_files = []
     for func, decl in funcs:
         contents = [f'extern {decl};',
@@ -29,39 +32,41 @@ def generate_runners(funcs, outdir):
             continue
 
         sfile = os.path.join(outdir, f'{func}.c')
-        with open(sfile, 'w') as fp:
-            fp.write('{}\n'.format('\n'.join(contents)))
+        with open(sfile, 'w', encoding='ascii') as handle:
+            handle.write('{}\n'.format('\n'.join(contents)))
 
         written_files.append(sfile)
 
     return written_files
 
 def generate_makelist(outdir, written, makevar):
+    ''' Create list of generated files and write it to makefile '''
     makevar = makevar if makevar is not None else 'generated_testfiles'
     manifest = os.path.join(outdir, 'manifest.mk')
-    contents = dict()
+    contents = {}
     if os.path.isfile(manifest):
-        with open(manifest, 'r') as fp:
-            existing = fp.read()
+        with open(manifest, 'r', encoding='ascii') as handle:
+            existing = handle.read()
 
         for line in existing.split('\n')[:-1]:
-            sp = tuple(map(lambda s: s.strip(), line.split(':=')))
-            if sp[0] not in contents:
-                contents[sp[0]] = set()
+            var, value = tuple(map(lambda s: s.strip(), line.split(':=')))
+            if var not in contents:
+                contents[var] = set()
 
-            for val in list(map(lambda s: s.strip(), sp[1].split(' '))):
-                contents[sp[0]].add(val)
+            for val in list(map(lambda s: s.strip(), value.split(' '))):
+                contents[var].add(val)
 
     if makevar not in contents:
         contents[makevar] = set()
-    for f in written:
-        contents[makevar].add(f)
+    for file in written:
+        contents[makevar].add(file)
 
-    with open(os.path.join(outdir, 'manifest.mk'), 'w') as fp:
-        for k, v in contents.items():
-            fp.write(f'{k} := {" ".join(v)}\n')
+    with open(os.path.join(outdir, 'manifest.mk'), 'w', encoding='ascii') as handle:
+        for var, val in contents.items():
+            handle.write(f'{var} := {" ".join(val)}\n')
 
 def main(infile, outdir, makevar):
+    ''' Find functions in source file, generate runners and write makefile '''
     funcs = find_functions(infile)
     written = generate_runners(funcs, outdir)
     if outdir is not None:
@@ -71,5 +76,5 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generate compilable C source files from snippets')
     parser.add_argument('infile', type=str, help='Input snippet')
     parser.add_argument('-o', '--outdir', type=str, default=None, help='Output directory')
-    parser.add_argument('-m', '--makevar', type=str, default=None, help='Name of make variable to assign list of generated files to')
+    parser.add_argument('-m', '--makevar', default=None, help='make variable to assign list to')
     main(**vars(parser.parse_args()))
