@@ -43,7 +43,7 @@ $(unitbuilddir)/%.$(oext): $(unitdir)/%.$(cext) | $(unitbuilddir)
 	$(CC) $(CFLAGS) $(unit_CFLAGS) $(CPPFLAGS) -o $@ $<
 
 .PHONY: check
-check: CPPFLAGS += -I$(unityinc) -I$(inspectdir)
+check: CPPFLAGS += -I$(unityinc) -I$(testdir)
 check: obj      += $(unitobj)
 
 .PHONY: lint

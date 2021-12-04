@@ -1,6 +1,5 @@
+#include <inspect/scc_rbtree_inspect.h>
 #include <scc/scc_rbtree.h>
-
-#include <scc_rbtree_inspect.h>
 
 #include <unity.h>
 
