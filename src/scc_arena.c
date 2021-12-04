@@ -29,7 +29,8 @@ static inline bool scc_chunk_contains_addr(struct scc_chunk const *chunk, void c
 }
 
 void scc_arena_release(struct scc_arena *arena) {
-    struct scc_chunk *iter, *hare;
+    struct scc_chunk *iter;
+    struct scc_chunk *hare;
     scc_arena_foreach_chunk_safe(iter, hare, arena) {
         free(iter);
     }
@@ -70,7 +71,8 @@ void *scc_arena_alloc(struct scc_arena *arena) {
 }
 
 void scc_arena_free(struct scc_arena *restrict arena, void const *restrict addr) {
-    struct scc_chunk *iter, *tortoise;
+    struct scc_chunk *iter;
+    struct scc_chunk *tortoise;
     scc_arena_foreach_chunk_lagging(iter, tortoise, arena) {
         if(scc_chunk_contains_addr(iter, addr)) {
             break;
