@@ -1,4 +1,5 @@
 #include <inspect/scc_rbtree_inspect.h>
+#include <scc/scc_mem.h>
 #include <scc/scc_rbtree.h>
 
 #include <unity.h>
@@ -170,5 +171,28 @@ void test_scc_rbtree_removal_fuzz_failure_0(void) {
     TEST_ASSERT_TRUE(scc_rbtree_remove(handle, 288));
     TEST_ASSERT_TRUE(scc_rbtree_remove(handle, 0));
     TEST_ASSERT_TRUE(scc_rbtree_remove(handle, 24576));
+    scc_rbtree_free(handle);
+}
+
+
+void test_scc_rbtree_removal_fuzz_failure_1(void) {
+    scc_rbtree(unsigned) handle = scc_rbtree_init(unsigned, compare_unsigned);
+    unsigned values[] = {
+        4294442752, 1644167167, 2013394256, 4294963199, /* NOLINT(readability-magic-numbers) */
+        16777275,   0,          4278190080, 591934463   /* NOLINT(readability-magic-numbers) */
+    };
+
+    unsigned long long mask = 0;
+    for(unsigned i = 0; i < scc_arrsize(values); ++i) {
+        TEST_ASSERT_TRUE(scc_rbtree_insert(handle, values[i]));
+        mask = scc_rbtree_inspect_properties(handle);
+        TEST_ASSERT_EQUAL_UINT64(mask & SCC_RBTREE_ERR_MASK, 0ull);
+    }
+    for(unsigned i = 0; i < scc_arrsize(values); ++i) {
+        TEST_ASSERT_TRUE(scc_rbtree_remove(handle, values[i]));
+        mask = scc_rbtree_inspect_properties(handle);
+        TEST_ASSERT_EQUAL_UINT64(mask & SCC_RBTREE_ERR_MASK, 0ull);
+    }
+
     scc_rbtree_free(handle);
 }

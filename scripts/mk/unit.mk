@@ -47,7 +47,7 @@ check: CPPFLAGS += -I$(unityinc) -I$(testdir)
 check: obj      += $(unitobj)
 
 .PHONY: lint
-lint:  CPPFLAGS += -I$(unityinc)
+lint:  CPPFLAGS += -I$(unityinc) -I$(testdir)
 
 define check-linker-rules
 $(strip
