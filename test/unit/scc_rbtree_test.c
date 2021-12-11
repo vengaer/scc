@@ -4,7 +4,13 @@
 #include <unity.h>
 
 int compare(void const *left, void const *right) {
-    return *(int const *)right - *(int const *)left;
+    return *(int const *)left - *(int const *)right;
+}
+
+int compare_unsigned(void const *left, void const *right) {
+    uint32_t leftval = *(unsigned const *)left;
+    uint32_t rightval = *(unsigned const *)right;
+    return (leftval < rightval ? -1 : 1) * !(leftval == rightval);
 }
 
 void test_scc_rbtree_init(void) {
@@ -151,5 +157,18 @@ void test_scc_rbtree_properties_insertion_removal(void) {
         status = scc_rbtree_inspect_properties(handle);
         TEST_ASSERT_EQUAL_UINT64(status & SCC_RBTREE_ERR_MASK, 0ull);
     }
+    scc_rbtree_free(handle);
+}
+
+void test_scc_rbtree_removal_fuzz_failure_0(void) {
+    scc_rbtree(unsigned) handle = scc_rbtree_init(unsigned, compare_unsigned);
+    TEST_ASSERT_TRUE(scc_rbtree_insert(handle, 160340));
+    TEST_ASSERT_TRUE(scc_rbtree_insert(handle, 288));
+    TEST_ASSERT_TRUE(scc_rbtree_insert(handle, 0));
+    TEST_ASSERT_TRUE(scc_rbtree_insert(handle, 24576));
+    TEST_ASSERT_TRUE(scc_rbtree_remove(handle, 160340));
+    TEST_ASSERT_TRUE(scc_rbtree_remove(handle, 288));
+    TEST_ASSERT_TRUE(scc_rbtree_remove(handle, 0));
+    TEST_ASSERT_TRUE(scc_rbtree_remove(handle, 24576));
     scc_rbtree_free(handle);
 }
