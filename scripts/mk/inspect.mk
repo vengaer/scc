@@ -8,7 +8,7 @@ libinspect      := $(builddir)/libsccinspect.a
 all:
 
 .PHONY: lint
-lint: CPPFLAGS += -I$(inspectdir)
+lint: CPPFLAGS += -I$(testdir)
 
 $(libinspect): $(inspectobj)
 	$(info [AR] $(notdir $@))

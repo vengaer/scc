@@ -100,7 +100,7 @@ static inline bool scc_rbtree_inspect_left_violation(
     struct scc_rbnode const *node
 ) {
     return scc_rbtree_inspect_has_child(node, SCC_RBTREE_INSPECT_LEFT) &&
-           scc_rbtree_inspect_compare(tree, node->rn_left, node) <= 0;
+           scc_rbtree_inspect_compare(tree, node->rn_left, node) >= 0;
 }
 
 static inline bool scc_rbtree_inspect_right_violation(
@@ -108,13 +108,22 @@ static inline bool scc_rbtree_inspect_right_violation(
     struct scc_rbnode const *node
 ) {
     return scc_rbtree_inspect_has_child(node, SCC_RBTREE_INSPECT_RIGHT) &&
-           scc_rbtree_inspect_compare(tree, node, node->rn_right) <= 0;
+           scc_rbtree_inspect_compare(tree, node, node->rn_right) >= 0;
 }
 
 static unsigned long long scc_rbtree_inspect_properties_impl(
     struct scc_rbtree const *tree,
     struct scc_rbnode const *node
 ) {
+    if(node->rn_left == node) {
+        /* Left link causes loop */
+        return SCC_RBTREE_ERR_LOOP;
+    }
+    if(node->rn_right == node) {
+        /* Right link causes loop */
+        return SCC_RBTREE_ERR_LOOP;
+    }
+
     if(scc_rbtree_inspect_red_violation(node)) {
         /* Red node has 1 or more red children */
         return SCC_RBTREE_ERR_RED;
@@ -178,6 +187,10 @@ unsigned long long scc_rbtree_inspect_properties(void const *handle) {
             const
         )->rn_tree;
 
+    if(!tree->rb_size) {
+        return 0;
+    }
+
     if(!scc_rbtree_inspect_black(tree->rb_root)) {
         /* Root must be black */
         return SCC_RBTREE_ERR_ROOT;
@@ -204,5 +217,8 @@ void scc_rbtree_inspect_dump_flags(unsigned long long flags) {
     }
     if(flags & SCC_RBTREE_ERR_ROOT) {
         puts("Root not black");
+    }
+    if(flags & SCC_RBTREE_ERR_LOOP) {
+        puts("Loop in tree");
     }
 }
