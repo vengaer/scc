@@ -57,10 +57,14 @@ def genfile(outfile, headers, snip, funcs):
     func_re = re.compile(r'^\s*((extern|static)\s+)?\w+\s+[a-zA-Z_][a-zA-Z_0-9]*\([^)]+\)')
     func_lines = []
     nonfunc_lines = []
+    explicit_includes = []
 
     in_function = False
     balance = 0
     for line in snip.split('\n'):
+        if line.startswith('#include'):
+            explicit_includes.append(line)
+            continue
         if func_re.search(line):
             in_function = True
         if in_function:
@@ -74,6 +78,7 @@ def genfile(outfile, headers, snip, funcs):
     func_lines = define_externs(func_lines, funcs)
 
     with open(outfile, 'w', encoding='ascii') as handle:
+        handle.write('{}\n'.format('\n'.join(explicit_includes)))
         handle.write('{}\n\n'.format('\n'.join([f'#include <{h}.h>' for h in headers])))
         handle.write('{}\n\n'.format('\n'.join(func_lines)))
         handle.write('int main(void) {\n')
