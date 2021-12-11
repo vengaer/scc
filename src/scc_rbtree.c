@@ -475,9 +475,7 @@ bool scc_rbtree_impl_remove(void *handle, size_t elemsize) {
         scc_arena_free(&tree->rb_arena, p);
         --tree->rb_size;
     }
-    if(!scc_rbnode_thread(scc_rbtree_sentinel(tree), scc_rbdir_left)) {
-        scc_rbnode_mkblack(tree->rb_root);
-    }
+    scc_rbnode_mkblack(tree->rb_root);
 
     return found;
 }
