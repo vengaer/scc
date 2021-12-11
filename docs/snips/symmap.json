@@ -31,6 +31,19 @@
         "scc_rbtree_foreach",
         "scc_rbtree_foreach_reversed"
     ],
+    "scc/scc_stack": [
+        "scc_stack_init",
+        "scc_stack_free",
+        "scc_stack_push",
+        "scc_stack_pop",
+        "scc_stack_top",
+        "scc_stack_size",
+        "scc_stack_capacity",
+        "scc_stack_reserve"
+    ],
+    "assert": [
+        "assert"
+    ],
     "stdio": [
         "fgets",
         "fputs",
