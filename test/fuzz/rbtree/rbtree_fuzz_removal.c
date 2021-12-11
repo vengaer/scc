@@ -33,6 +33,13 @@ bool rbtree_fuzz_removal(scc_rbtree(uint32_t) *handle, uint32_t *data, size_t si
         }
     }
 
+    for(unsigned i = 0; i < size; i++) {
+        if(scc_rbtree_find(*handle, data[i])) {
+            fprintf(stderr, "False positive for %" PRIu32 "on find\n", data[i]);
+            return false;
+        }
+    }
+
     if(scc_rbtree_size(*handle)) {
         fprintf(stderr, "Size reported as %zu for empty tree\n", scc_rbtree_size(handle));
         return false;
