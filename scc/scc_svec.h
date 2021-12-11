@@ -121,7 +121,7 @@ inline void scc_svec_clear(void *vec) {
 
 #define scc_svec_push(svec, element)                                    \
     (scc_svec_impl_push_ensure_capacity(&(svec), sizeof(*(svec))) &&    \
-    (svec[scc_svec_impl_base(svec)->sc_size++] = element,1))
+    ((svec)[scc_svec_impl_base((svec))->sc_size++] = element,1))
 
 #define scc_svec_at(svec, index)                                        \
     (scc_svec_impl_at_check(svec, index),svec[index])
@@ -134,11 +134,11 @@ inline void scc_svec_clear(void *vec) {
 
 #define scc_svec_foreach_by(iter, svec, by)                             \
     for(void const *scc_pp_cat_expand(scc_svec_end,__LINE__) =          \
-            (iter = svec, &svec[scc_svec_size(svec)]);                  \
-        (void const *)iter < scc_pp_cat_expand(scc_svec_end,__LINE__);  \
-        iter += by)
+            ((iter) = (svec), &(svec)[scc_svec_size(svec)]);            \
+        (void const *)(iter) < scc_pp_cat_expand(scc_svec_end,__LINE__);\
+        (iter) += (by))
 
 #define scc_svec_foreach_reversed_by(iter, svec, by)                    \
-    for(iter = &svec[scc_svec_size(svec) - 1u]; iter >= svec; iter -= by)
+    for((iter) = &(svec)[scc_svec_size(svec) - 1u]; (iter) >= (svec); (iter) -= (by))
 
 #endif /* SCC_SVEC_H */
