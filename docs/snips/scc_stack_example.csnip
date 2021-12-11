@@ -1,0 +1,14 @@
+/* Uses scc_svec by default */
+scc_stack(int) stack = scc_stack_init(int);
+
+scc_stack_push(stack, 10);
+scc_stack_push(stack, 32);
+scc_stack_push(stack, 19);
+
+assert(scc_stack_top(stack) == 19);
+scc_stack_pop(stack);
+assert(scc_stack_top(stack) == 32);
+scc_stack_pop(stack);
+assert(scc_stack_top(stack) == 10);
+
+scc_stack_free(stack);

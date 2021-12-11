@@ -1,0 +1,157 @@
+= scc_stack
+:toc:
+:toclevels: 2
+:source-highlighter: rouge
+:source-language: c
+
+`scc_stack` is an adapter providing a stack interface for an underlying container. This underlying container in question is an `scc_svec` by default but may be changed by means of defining `SCC_STACK_CONTAINER`. Pushes and pops are performed at the end of the underlying container.
+
+The reference assumes that the default `scc_svec` container is used. Parts of the behavior described herein may of course be overridden by using a custom container. Refer to <<custom_containers>> for information on how to achieve this.
+
+.Example usage
+[source]
+----
+include::snips/scc_stack_example.csnip[tags=scc_stack_example]
+----
+
+== Types
+
+=== scc_stack(type)
+
+Expands to a handle to the underlying container. What this handle is depends on `SCC_STACK_CONTAINER`.
+
+== Construction and Deallocation
+
+=== void *scc_stack_init(type)
+
+Expands to the appropriate init routine for the underlying container. The returned handle should typically be passed to
+`scc_stack_free` to ensure potential memory is cleaned up. This may be skipped if a custom container that doesn't require
+cleanup is used.
+
+==== Returns
+
+A handle to the underlying container
+
+=== void scc_stack_free(void *stack)
+
+Free the memory used for `stack`. Should not be passed any pointers but ones returned from `scc_stack_init`.
+
+== Capacity
+
+=== size_t scc_stack_size(void const *stack)
+
+Queries the size of the underlying container
+
+==== Returns
+
+Size of the underlying container at the time of the call
+
+=== size_t scc_stack_capacity(void const *stack)
+
+Queries the maximum number of elements that can be stored at the stack at the time of the call
+
+==== Returns
+
+Capacity of the underlying container
+
+=== bol scc_stack_reserve(void *stack, size_t capacity)
+
+Reserve enough space for storing `capacity` elements in the stack.
+
+==== Returns
+
+* `true` if the memory could be allocated
+* `false` on allocation failure
+
+== Modifiers
+
+=== void scc_stack_clear(void *stack)
+
+Flush the contents of the underlying buffer, typically by setting its size to 0
+
+=== bool scc_stack_push(void *stack, type value)
+
+Pushes `value` to the top of the stack. More memory may be allocated if the underlying container requires it.
+
+==== Returns
+
+* `true` if the elements was successfully pushed
+* `false` on allocation failure
+
+=== void scc_stack_pop(void *stack)
+
+Pop the topmost elements from the stack. The capacity is left unchanged.
+
+== Accessors
+
+=== type scc_stack_top(void const *stack)
+
+Access the topmost element in the stack
+
+==== Returns
+
+The element most recently pushed to the stack
+
+== Using Custom Containers [[custom_containers]]
+
+The underlying container may be overridden by defining `SCC_STACK_CONTAINER`. The container must support accessing as if it were a pointer, meaning e.g. `cont[3]` should yield the fourth element in the container `cont`. As all stack operations are implemented as macros, this does not have to be done before including the header. Note, however, that this means that all stacks used simultaneously _must_ by necessity use the same type of underlying container.
+
+The following illustrates the issue of how redefining the underlying container type may result in subtle bugs.
+
+.Mixing underlying containers
+[source]
+----
+include::snips/scc_stack_bad_container.csnip[tags=scc_stack_bad_container]
+----
+
+=== Expected Interface
+
+Any type of container may be used provided that it conforms to the expected interface. In the following section `custom_container` refers to the container in question. It is to be replaced by the actual name of the container at _every_ occurrence, meaning if the underlying container is called `short_vec`, `custom_container_init` should be replaced with `short_vec_init`.
+
+==== void *custom_container_init(type)
+
+Should initialize the underlying container. What this means is entirely up to the user. It may, assuming the stack is known to never grow beyond a fixed size, be as returning a pointer to a local array as shown below.
+
+.Simple custom init
+[source]
+----
+include::snips/scc_stack_custom_init.csnip[tags=scc_stack_custom_init]
+----
+
+==== void custom_container_free(void *container)
+
+Optional. Perform any cleanup required for the underlying container. May be written as a macro expanding to nothing if no cleanup is required.
+
+==== rettype custom_container_push(void *container, type value)
+
+Append `value` as the last element of the container, i.e. the equivalent of incrementing the size and performing `container[custom_container_size(container) - 1] = value`. `rettype` may be chosen freely.
+
+==== void custom_container_pop(void *container)
+
+Decrement the size and, optionally, remove the last element in the container.
+
+==== size_t custom_container_size(void const *container)
+
+Return the number of elements in the container.
+
+==== size_t custom_container_capacity(void const *container)
+
+Optional. Return the current capacity of the container.
+
+==== void custom_container_clear(void *container)
+
+Optional. Remove all elements in the container and set its size to 0.
+
+==== void custom_container_reserve(void *container, size_t nelems)
+
+Optional. Reserve enough space for storing `nelems` elements in the container.
+
+=== Example
+
+The following provides a minimal but complete implementation of a statically sized custom container.
+
+.Simple custom container
+[source]
+----
+include::snips/scc_stack_array.csnip[tags=scc_stack_array]
+----

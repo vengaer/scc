@@ -1,0 +1,1 @@
+#define custom_container_init(type) &(type[32]){ 0 }
