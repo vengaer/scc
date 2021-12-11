@@ -18,3 +18,9 @@ link:reference/scc_vec.html[reference]
 Generic red-black tree utilizing arena allocation.
 
 link:reference/scc_rbtree.html[reference]
+
+== scc_stack
+
+Adapter providing a stack interface for the underlying container
+
+link:reference/scc_stack.html[reference]
