@@ -6,7 +6,7 @@
             "void const *right"
         ],
         "body": [
-            "return *(int const *)right - *(int const *)left;"
+            "return *(int const *)left - *(int const *)right;"
         ]
     }
 }

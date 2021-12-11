@@ -1,5 +1,5 @@
 int compare(void const *left, void const *right) {
-    return *(int const *)right - *(int const *)left;
+    return *(int const *)left - *(int const *)right;
 }
 
 scc_rbtree(int) handle = scc_rbtree_init(int, compare);
