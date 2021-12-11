@@ -50,6 +50,12 @@ pipeline {
             }
         }
         stage("Dynamic Build") {
+            when {
+                beforeAgent true
+                expression {
+                    return env.BUILDTYPE != "fuzz"
+                }
+            }
             agent {
                 docker {
                     image "${IMAGE}"
