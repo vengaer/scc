@@ -1,21 +1,24 @@
 LLVM_COV           := llvm-cov
 LLVM_PROFDATA      := llvm-profdata
 
-FUZZTIME           := 480
+CORPUSDIR          := $(fuzzdir)/corpora/$(SCC_FUZZ)
+
+FUZZTIME           := 360
 FUZZLEN            := 32768
 FUZZTIMEOUT        := 10
-FUZZFLAGS          := -max_len=$(FUZZLEN) -max_total_time=$(FUZZTIME) -use_value_profile=1 \
+FUZZERFLAGS        := -max_len=$(FUZZLEN) -max_total_time=$(FUZZTIME) -use_value_profile=1 \
                       -timeout=$(FUZZTIMEOUT) $(CORPUSDIR)
 
 sanitizers         := address undefined fuzzer
 
-__comma            :=,
-fsanitize          := -fsanitize=$(subst $(subst ,, ),$(__comma),$(addsuffix ,$(sanitizers)))
-fuzzflags          := $(fsanitize) -fprofile-instr-generate -fcoverage-mapping
-
 fuzzsrcdir         := $(fuzzdir)/$(SCC_FUZZ)
 fuzzbuilddir       := $(builddir)/fuzz/$(SCC_FUZZ)
 dirs               += $(fuzzbuilddir)
+
+__comma            :=,
+fsanitize          := -fsanitize=$(subst $(subst ,, ),$(__comma),$(addsuffix ,$(sanitizers)))
+fuzzflags          := $(fsanitize) -fprofile-instr-generate -fcoverage-mapping
+mergeflags         := -merge=1 $(CORPUSDIR) $(SCC_CORPORA)
 
 fuzztarget         := $(fuzzbuilddir)/scc_fuzz_$(SCC_FUZZ)
 fuzzobj            := $(patsubst $(fuzzsrcdir)/%.$(cext),$(fuzzbuilddir)/%.$(oext),$(wildcard $(fuzzsrcdir)/*.$(cext)))
@@ -26,7 +29,7 @@ proffile           := LLVM_PROFILE_FILE
 export $(proffile) := $(builddir)/.fuzz.profraw
 profdata           := $(builddir)/.fuzz.profdata
 
-LLVM_PROFFLAGS     := merge -sparse $(LLVM_PROFILE_FILE) -o $(profdata)
+LLVM_PROFFLAGS     := merge -sparse $($(proffile)) -o $(profdata)
 LLVM_COVFLAGS      := $(fuzztarget) -instr-profile=$(profdata)
 LLVM_COV_SHOW      := show $(LLVM_COVFLAGS)
 LLVM_COV_REPORT    := report $(LLVM_COVFLAGS)
@@ -35,8 +38,7 @@ LLVM_COV_REPORT    := report $(LLVM_COVFLAGS)
 all:
 
 .PHONY: fuzz
-fuzz: $$(if $$(findstring _-$$@_-,_-$$(MAKECMDGOALS)_-),\
-          $$(if $(SCC_FUZZ),,$$(error SCC_FUZZ is empty)))
+fuzz: $$(call require-fuzztarget,fuzz)
 fuzz: CC         := clang
 fuzz: LD         := clang
 fuzz: CFLAGS     += $(fuzzflags)
@@ -44,10 +46,22 @@ fuzz: CPPFLAGS   += -I$(testdir)
 fuzz: LDFLAGS    += $(fuzzflags)
 fuzz: fuzztarget := $(fuzzbuilddir)/$(SCC_FUZZ)
 fuzz: $(fuzztarget)
-	$^ $(FUZZFLAGS)
+	$^ $(FUZZERFLAGS)
 	$(LLVM_PROFDATA) $(LLVM_PROFFLAGS)
 	$(LLVM_COV) $(LLVM_COV_SHOW)
 	$(LLVM_COV) $(LLVM_COV_REPORT)
+
+.PHONY: merge
+merge: $$(call require-fuzztarget,merge)
+merge: $$(call require-corpora,merge)
+merge: CC         := clang
+merge: LD         := clang
+merge: CFLAGS     += $(fuzzflags)
+merge: CPPFLAGS   += -I$(testdir)
+merge: LDFLAGS    += $(fuzzflags)
+merge: fuzztarget := $(fuzzbuilddir)/$(SCC_FUZZ)
+merge: $(fuzztarget)
+	$^ $(mergeflags)
 
 $(fuzzbuilddir)/%.$(oext): $(fuzzsrcdir)/%.$(cext) | $(fuzzbuilddir)
 	$(info [CC] $(notdir $@))
@@ -56,6 +70,14 @@ $(fuzzbuilddir)/%.$(oext): $(fuzzsrcdir)/%.$(cext) | $(fuzzbuilddir)
 $(fuzztarget): $(fuzzobj)
 	$(info [LD] $(notdir $(fuzzbuilddir))/$(notdir $@))
 	$(LD) -o $@ $^ $(LDFLAGS) $(LDLIBS)
+
+define require-fuzztarget
+$(if $(findstring _-$(1)_-,_-$(MAKECMDGOALS)_-),$(if $(SCC_FUZZ),,$(error SCC_FUZZ is empty)))
+endef
+
+define require-corpora
+$(if $(findstring _-$(1)_-,_-$(MAKECMDGOALS)_-),$(if $(SCC_CORPORA),,$(error SCC_CORPORA is empty)))
+endef
 
 define fuzz-dependency-rules
 $(strip

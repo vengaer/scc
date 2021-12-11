@@ -5,3 +5,7 @@ libscc.*
 .config.mk
 crash-*
 slow-unit-*
+
+test/fuzz/corpora/rbtree/*
+
+!test/fuzz/corpora/rbtree/corpus_*
