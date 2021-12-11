@@ -107,7 +107,7 @@ void scc_vec_pop_safe(void *vec);
 
 #define scc_vec_push(vec, element)                                      \
     (scc_vec_impl_push_ensure_capacity(&(vec), sizeof(*(vec))) &&       \
-    (vec[scc_vec_impl_base(vec)->sc_size++] = element,1))
+    ((vec)[scc_vec_impl_base((vec))->sc_size++] = element,1))
 
 #define scc_vec_at(vec, index)                                          \
     (scc_vec_impl_at_check(vec, index),vec[index])
@@ -120,11 +120,11 @@ void scc_vec_pop_safe(void *vec);
 
 #define scc_vec_foreach_by(iter, vec, by)                               \
     for(void const *scc_pp_cat_expand(scc_vec_end,__LINE__) =           \
-            (iter = vec, &vec[scc_vec_size(vec)]);                      \
-        (void const *)iter < scc_pp_cat_expand(scc_vec_end,__LINE__);   \
-        iter += by)
+            ((iter) = (vec), &(vec)[scc_vec_size(vec)]);                \
+        (void const *)(iter) < scc_pp_cat_expand(scc_vec_end,__LINE__); \
+        (iter) += (by))
 
 #define scc_vec_foreach_reversed_by(iter, vec, by)                      \
-    for(iter = &vec[scc_vec_size(vec) - 1u]; iter >= vec; iter -= by)
+    for((iter) = &(vec)[scc_vec_size(vec) - 1u]; (iter) >= (vec); (iter) -= (by))
 
 #endif /* SCC_VEC_H */
