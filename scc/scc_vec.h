@@ -49,7 +49,7 @@ _Bool scc_vec_impl_push_ensure_capacity(void *vec, size_t elemsize);
 _Bool scc_vec_impl_reserve(void *vec, size_t capacity, size_t elemsize);
 void scc_vec_impl_erase(void *vec, size_t index, size_t elemsize);
 void scc_vec_impl_erase_range(void *vec, size_t first, size_t end, size_t elemsize);
-void scc_vec_impl_at_check(void *vec, size_t index);
+size_t scc_vec_impl_at_check(void *vec, size_t index);
 
 inline size_t scc_vec_impl_npad(void const *vec) {
     return ((unsigned char const *)vec)[-1] + sizeof(unsigned char);
@@ -110,7 +110,7 @@ void scc_vec_pop_safe(void *vec);
     ((vec)[scc_vec_impl_base((vec))->sc_size++] = element,1))
 
 #define scc_vec_at(vec, index)                                          \
-    (scc_vec_impl_at_check(vec, index),vec[index])
+    ((vec)[scc_vec_impl_at_check(vec, index)])
 
 #define scc_vec_foreach(iter, vec)                                      \
     scc_vec_foreach_by(iter, vec, 1)
