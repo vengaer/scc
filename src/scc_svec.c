@@ -173,9 +173,10 @@ void scc_svec_pop_safe(void *svec) {
     scc_svec_pop(svec);
 }
 
-void scc_svec_impl_at_check(void *svec, size_t index) {
+size_t scc_svec_impl_at_check(void *svec, size_t index) {
     if(scc_svec_size(svec) <= index) {
         scc_panic("Attempt to access element %zu in vector of size %zu", index, scc_svec_size(svec));
     }
+    return index;
 }
 
