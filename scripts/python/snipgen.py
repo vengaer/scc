@@ -76,7 +76,7 @@ def genfile(outfile, headers, snip, funcs):
     with open(outfile, 'w', encoding='ascii') as handle:
         handle.write('{}\n\n'.format('\n'.join([f'#include <{h}.h>' for h in headers])))
         handle.write('{}\n\n'.format('\n'.join(func_lines)))
-        handle.write('int main(void) {')
+        handle.write('int main(void) {\n')
         handle.write('\n'.join(f'{4*" "}{line}' for line in nonfunc_lines[:-1]))
         handle.write('\n}\n')
 
