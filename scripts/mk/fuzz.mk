@@ -1,8 +1,8 @@
 LLVM_COV           := llvm-cov
 LLVM_PROFDATA      := llvm-profdata
 
-FUZZTIME           := 240
-FUZZLEN            := 8192
+FUZZTIME           := 480
+FUZZLEN            := 32768
 FUZZTIMEOUT        := 10
 FUZZFLAGS          := -max_len=$(FUZZLEN) -max_total_time=$(FUZZTIME) -use_value_profile=1 \
                       -timeout=$(FUZZTIMEOUT) $(CORPUSDIR)
