@@ -1,17 +1,20 @@
+refdir       := $(docdir)/reference
+
 docbuilddir  := $(builddir)/docs
-snipbuilddir := $(docbuilddir)/snips
-dirs         += $(docbuilddir) $(snipbuilddir)
+refbuilddir  := $(docbuilddir)/reference
+snipbuilddir := $(refbuilddir)/snips
+dirs         += $(docbuilddir) $(snipbuilddir) $(refbuilddir)
 
 docindex     := $(docbuilddir)/index.$(htmlext)
 snipgen      := $(pyscripts)/snipgen.py
 
 snipext      := csnip
-snipdir      := $(docdir)/snips
+snipdir      := $(refdir)/snips
 symmap       := $(snipdir)/symmap.$(jsonext)
 funcdefs     := $(snipdir)/funcs.$(jsonext)
 docsnips     := $(wildcard $(snipdir)/*.$(snipext))
 snips        := $(patsubst $(snipdir)/%.$(snipext),$(snipbuilddir)/%,$(docsnips))
-htmlpgs      := $(patsubst $(docdir)%.$(adocext),$(docbuilddir)/%.$(htmlext),$(wildcard $(docdir)/*.$(adocext)))
+htmlpgs      := $(patsubst $(docdir)/%.$(adocext),$(docbuilddir)/%.$(htmlext),$(wildcard $(addsuffix /*.$(adocext),$(docdir) $(refdir))))
 
 .PHONY: all
 all:
@@ -30,7 +33,11 @@ check:
 
 check: __chk_docs
 
-$(docbuilddir)/%.$(htmlext): $(docdir)/%.$(adocext) $(docsnips) | $(docbuilddir)
+$(refbuilddir)/%.$(htmlext): $(refdir)/%.$(adocext) $(docsnips) | $(refbuilddir)
+	$(info [ADOC] $(notdir $@))
+	$(ADOC) -o $@ $<
+
+$(docbuilddir)/%.$(htmlext): $(docdir)/%.$(adocext) | $(refbuilddir)
 	$(info [ADOC] $(notdir $@))
 	$(ADOC) -o $@ $<
 
