@@ -133,7 +133,6 @@ pipeline {
             }
             steps {
                 echo "Fetching corpora"
-                sh "mkdir -p ${ARTIFACTS}{curr,prev}"
                 copyArtifacts filter: "${ARTIFACTS}/${CORPORA}", projectName: "${JOB_NAME}", fingerprintArtifacts: true, optional:true
                 script {
                     if(fileExists("${ARTIFACTS}/${CORPORA}")) {
