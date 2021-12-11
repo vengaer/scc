@@ -1,20 +1,23 @@
-refdir       := $(docdir)/reference
+refdir         := $(docdir)/reference
+designdir      := $(docdir)/design
 
-docbuilddir  := $(builddir)/docs
-refbuilddir  := $(docbuilddir)/reference
-snipbuilddir := $(refbuilddir)/snips
-dirs         += $(docbuilddir) $(snipbuilddir) $(refbuilddir)
+docbuilddir    := $(builddir)/docs
+refbuilddir    := $(docbuilddir)/reference
+designbuilddir := $(docbuilddir)/design
+snipbuilddir   := $(refbuilddir)/snips
+dirs           += $(docbuilddir) $(snipbuilddir) $(refbuilddir) $(designbuilddir)
+docsrcdirs     := $(docdir) $(refdir) $(designdir)
 
-docindex     := $(docbuilddir)/index.$(htmlext)
-snipgen      := $(pyscripts)/snipgen.py
+docindex       := $(docbuilddir)/index.$(htmlext)
+snipgen        := $(pyscripts)/snipgen.py
 
-snipext      := csnip
-snipdir      := $(refdir)/snips
-symmap       := $(snipdir)/symmap.$(jsonext)
-funcdefs     := $(snipdir)/funcs.$(jsonext)
-docsnips     := $(wildcard $(snipdir)/*.$(snipext))
-snips        := $(patsubst $(snipdir)/%.$(snipext),$(snipbuilddir)/%,$(docsnips))
-htmlpgs      := $(patsubst $(docdir)/%.$(adocext),$(docbuilddir)/%.$(htmlext),$(wildcard $(addsuffix /*.$(adocext),$(docdir) $(refdir))))
+snipext        := csnip
+snipdir        := $(refdir)/snips
+symmap         := $(snipdir)/symmap.$(jsonext)
+funcdefs       := $(snipdir)/funcs.$(jsonext)
+docsnips       := $(wildcard $(snipdir)/*.$(snipext))
+snips          := $(patsubst $(snipdir)/%.$(snipext),$(snipbuilddir)/%,$(docsnips))
+htmlpgs        := $(patsubst $(docdir)/%.$(adocext),$(docbuilddir)/%.$(htmlext),$(wildcard $(addsuffix /*.$(adocext),$(docsrcdirs))))
 
 .PHONY: all
 all:
@@ -34,6 +37,10 @@ check:
 check: __chk_docs
 
 $(refbuilddir)/%.$(htmlext): $(refdir)/%.$(adocext) $(docsnips) | $(refbuilddir)
+	$(info [ADOC] $(notdir $@))
+	$(ADOC) -o $@ $<
+
+$(designbuilddir)/%.$(htmlext): $(designdir)/%.$(adocext) | $(designbuilddir)
 	$(info [ADOC] $(notdir $@))
 	$(ADOC) -o $@ $<
 

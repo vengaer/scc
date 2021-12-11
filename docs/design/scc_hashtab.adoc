@@ -1,0 +1,95 @@
+= scc_hashtab
+:toc:
+:toclevels: 2
+:source-highlighter: rouge
+:source-language: c
+
+`scc_hashtab` is a flat hash table using open addressing for resolving collisions. The data is layed out as shown in the following pseudo-code
+
+.Data layout
+[source]
+----
+struct scc_hashtab {
+    size_t ht_dataoffset;                               /* Offset to data array */
+    size_t ht_size;                                     /* Size of table */
+    size_t ht_capacity;                                 /* Current capacity, always power of 2 */
+    unsigned char ht_fwoffset;                          /* offsetof(struct scc_hashtab, ht_hash) */
+    unsigned char ht_pad0[/* computed */];              /* Size computed as described below */
+    unsigned char ht_bkoffset;                          /* offsetof(struct scc_hashtab, ht_hash) - 1 */
+    unsigned short ht_hash[ht_capacity];                /* 14-bit hash + metadata */
+    unsigned short ht_hash_guard[/* vecsize - 2 */];    /* Padding to allow for SIMD probing */
+    unsigned char ht_pad1[/* computed */]               /* Size computed as shown below */
+    type data[ht_capacity];                             /* Data array */
+};
+----
+
+For an instance `hashtab`, the size of `hashtab.ht_pad0` is equivalent to
+
+----
+((uintptr_t)&hashtab.ht_pad0 + 1 + _Alignof(hashtab.ht_hash) - 1) & ~(_Alignof(hashtab.ht_hash) - 1),
+----
+i.e. the number of padding bytes required to align `hashtab.ht_hash` suitably. Similarly, the size of `hashtab.ht_pad1` an be computed as
+----
+((uintptr_t)&hashtab.ht_pad1 + 1 + _Alignof(hashtab.ht_data) - 1) & ~(_Alignof(hashtab.ht_data) - 1)
+----
+
+    In the above, `vecsize` is the size of a SIMD register on the particular architecture, i.e. 32 (for avx2) on amd64, 16 on ARMv8, etc.
+
+== ht_capacity
+
+The capacity of the hash table is always a power of two, allowing for computing the appropriate slot in the data array of a table `hashtab` for a value `x` to be inserted as
+`hash(x) & (hashtab.ht_capacity - 1)`. In other words, by simply discarding the `64 - log_2(hashtab.ht_capacity)` high bits of the hash.
+
+== ht_hash
+
+The `ht_hash` is an auxiliary array used for probing. Each element consists of (at least) 16 bits as shown below
+
+----
+ msb                                                         lsb
++---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+|b15|b14|b13|b12|b11|b10|b9 |b8 |b7 |b6 |b5 |b4 |b3 |b2 |b1 |b0 |
++---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+----
+
+Of these bits, `b0` through `b13` (inclusive) are used for storing a 14-bit hash. This hash is effectively a means of preserving parts of the hash that was computed at insertion, i.e.
+
+----
+extern struct scc_hashtab hashtab;
+extern char const *string;
+unsigned long long hash = calc_hash(string);
+
+size_t index = hash & (hashtab.ht_capacity - 1ull);
+unsigned short hash14 = hash >> 50;
+----
+
+Bits `b14` and `b15` are used for storing information about their corresponding slots in the data array. `b15` is used for keeping track of which slots are, or have ever been, occupied in the table. `b14` is a "tomb" indicator, meaning to special "tombstone" values have to handled. The bits encode the following
+
+[cols="1,1,1,1,8"]
+|===
+| `b15` | `b14` | Insert | Find | Meaning
+
+| 0
+| 0
+| Stop
+| Stop
+| Slot has never been occupied
+
+| 1
+| 0
+| Continue
+| Continue
+| Slot is occupied
+
+| 0
+| 1
+| Continue
+| Continue
+| Special marker used in ht_hash_guard. Cannot occur normally
+
+| 1
+| 1
+| Stop
+| Continue
+| Slot was once occupied but is now free
+
+|===
