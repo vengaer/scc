@@ -2,6 +2,7 @@
 #define SCC_RBTREE_H
 
 #include "scc_arena.h"
+#include "scc_pp_token.h"
 
 #include <stddef.h>
 
@@ -86,13 +87,17 @@ inline _Bool scc_rbtree_empty(void const *handle) {
     scc_rbtree_impl_remove((*handle = value, handle), sizeof(*handle))
 
 #define scc_rbtree_foreach(iter, handle)                            \
-    for(iter = scc_rbtree_impl_leftmost(handle);                    \
-        iter != scc_rbtree_impl_sentinel(handle);                   \
+    for(void const *scc_pp_cat_expand(scc_rbtree_end,__LINE__) =    \
+            (iter = scc_rbtree_impl_leftmost(handle),               \
+                scc_rbtree_impl_sentinel(handle));                  \
+        iter != scc_pp_cat_expand(scc_rbtree_end,__LINE__);         \
         iter = scc_rbtree_impl_successor(iter))
 
 #define scc_rbtree_foreach_reversed(iter, handle)                   \
-    for(iter = scc_rbtree_impl_rightmost(handle);                   \
-        iter != scc_rbtree_impl_sentinel(handle);                   \
+    for(void const *scc_pp_cat_expand(scc_rbtree_end,__LINE__) =    \
+            (iter = scc_rbtree_impl_rightmost(handle),              \
+                scc_rbtree_impl_sentinel(handle));                  \
+        iter != scc_pp_cat_expand(scc_rbtree_end,__LINE__);         \
         iter = scc_rbtree_impl_predecessor(iter))
 
 #endif /* SCC_RBTREE_H */
