@@ -7,5 +7,7 @@ crash-*
 slow-unit-*
 
 test/fuzz/corpora/rbtree/*
+test/fuzz/corpora/svec/*
 
 !test/fuzz/corpora/rbtree/corpus_*
+!test/fuzz/corpora/svec/corpus_*
