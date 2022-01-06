@@ -2,7 +2,7 @@ inspectbuilddir := $(builddir)/inspect
 inspectobj      := $(patsubst $(inspectdir)/%.$(cext),$(inspectbuilddir)/%.$(oext),$(wildcard $(inspectdir)/*.$(cext)))
 dirs            += $(inspectbuilddir)
 
-libinspect      := $(builddir)/libsccinspect.a
+libinspect      := $(inspectbuilddir)/libsccinspect.a
 
 .PHONY: all
 all:
