@@ -1,12 +1,11 @@
 ''' Build system fixtures '''
 
 import os
-import re
 import shutil
 
-from subprocess import Popen, PIPE
-
 import pytest
+
+import make
 
 @pytest.fixture
 def root(pytestconfig):
@@ -48,12 +47,8 @@ def mirror_repo(root, rundir):
 
 @pytest.fixture
 def build(rundir):
-    ''' Return verbose output spat out from build system '''
-    with Popen(['make', '-C', rundir, 'VERBOSE=1'], stdout=PIPE) as proc:
-        stdout = proc.communicate()[0]
-    pproced = re.sub(r'\s{2,}', ' ', stdout.decode().strip()).split('\n')
-    rehandle = re.compile(r'make.*:')
-    return list(filter(lambda line: rehandle.match(line) is None, pproced))
+    ''' Build and return output '''
+    return make.build(rundir, '-j8')
 
 @pytest.fixture
 def remove_mach_asm(rundir):
