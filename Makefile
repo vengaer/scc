@@ -34,6 +34,7 @@ docdir       := $(root)/docs
 
 scripts      := $(root)/scripts
 asscripts    := $(scripts)/asm
+cscripts     := $(scripts)/c
 mkscripts    := $(scripts)/mk
 pyscripts    := $(scripts)/python
 
