@@ -1,6 +1,7 @@
 #include "scc_rbtree_inspect.h"
 
 #include <scc/scc_mem.h>
+#include <scc/scc_stack.h>
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -32,7 +33,6 @@ static bool scc_rbtree_inspect_red_safe(struct scc_rbnode const *node, unsigned 
 static bool scc_rbtree_inspect_has_red_child(struct scc_rbnode const *node);
 static bool scc_rbtree_inspect_red_violation(struct scc_rbnode const *node);
 static bool scc_rbtree_inspect_has_child(struct scc_rbnode const *node, unsigned dir);
-static bool scc_rbtree_inspect_leaf(struct scc_rbnode const *node);
 static int scc_rbtree_inspect_compare(
     struct scc_rbtree const *restrict tree,
     struct scc_rbnode const *restrict left,
@@ -46,9 +46,9 @@ static inline bool scc_rbtree_inspect_right_violation(
     struct scc_rbtree const *tree,
     struct scc_rbnode const *node
 );
-static unsigned long long scc_rbtree_inspect_properties_impl(
-    struct scc_rbtree const *tree,
-    struct scc_rbnode const *node
+unsigned long long scc_rbtree_inspect_node(
+    struct scc_rbtree const *restrict tree,
+    struct scc_rbnode const *restrict node
 );
 
 static inline bool scc_rbtree_inspect_thread(struct scc_rbnode const *node, unsigned dir) {
@@ -81,10 +81,6 @@ static inline bool scc_rbtree_inspect_has_child(struct scc_rbnode const *node, u
     return !(node->rn_flags & (1 << dir));
 }
 
-static inline bool scc_rbtree_inspect_leaf(struct scc_rbnode const *node) {
-    return (node->rn_flags & SCC_RBTREE_INSPECT_LEAF) == SCC_RBTREE_INSPECT_LEAF;
-}
-
 static inline int scc_rbtree_inspect_compare(
     struct scc_rbtree const *restrict tree,
     struct scc_rbnode const *restrict left,
@@ -111,9 +107,9 @@ static inline bool scc_rbtree_inspect_right_violation(
            scc_rbtree_inspect_compare(tree, node, node->rn_right) >= 0;
 }
 
-static unsigned long long scc_rbtree_inspect_properties_impl(
-    struct scc_rbtree const *tree,
-    struct scc_rbnode const *node
+unsigned long long scc_rbtree_inspect_node(
+    struct scc_rbtree const *restrict tree,
+    struct scc_rbnode const *restrict node
 ) {
     if(node->rn_left == node) {
         /* Left link causes loop */
@@ -123,7 +119,6 @@ static unsigned long long scc_rbtree_inspect_properties_impl(
         /* Right link causes loop */
         return SCC_RBTREE_ERR_LOOP;
     }
-
     if(scc_rbtree_inspect_red_violation(node)) {
         /* Red node has 1 or more red children */
         return SCC_RBTREE_ERR_RED;
@@ -137,48 +132,12 @@ static unsigned long long scc_rbtree_inspect_properties_impl(
         return SCC_RBTREE_ERR_RIGHT;
     }
 
-    unsigned black_height = scc_rbtree_inspect_black(node);
-    if(!node->rn_flags) {
-        unsigned long long lsubtree = scc_rbtree_inspect_properties_impl(tree, node->rn_left);
-        unsigned long long rsubtree = scc_rbtree_inspect_properties_impl(tree, node->rn_right);
-        unsigned long long subtrees = lsubtree | rsubtree;
-        if(subtrees & SCC_RBTREE_ERR_MASK) {
-            /* Some violation in subtree */
-            return subtrees;
-        }
-
-        if(lsubtree != rsubtree) {
-            /* Black heights differ between left and right subtrees */
-            return SCC_RBTREE_ERR_BLACK;
-        }
-
-        return black_height + rsubtree;
-    }
-    if(!scc_rbtree_inspect_leaf(node)) {
-        struct scc_rbnode *n;
-        if(node->rn_flags & SCC_RBTREE_INSPECT_RTHRD) {
-            n = node->rn_left;
-        }
-        else {
-            n = node->rn_right;
-        }
-
-        unsigned long long height = scc_rbtree_inspect_properties_impl(tree, n);
-        if(height & SCC_RBTREE_ERR_MASK) {
-            /* Error in subtree */
-            return height;
-        }
-        if(height) {
-            /* Must be no black nodes in child of node with only one subtree */
-            return SCC_RBTREE_ERR_BLACK;
-        }
-    }
-
-    return black_height;
+    return 0ull;
 }
 
 
 unsigned long long scc_rbtree_inspect_properties(void const *handle) {
+    enum { NOT_TRAVERSED = -1 };
     struct scc_rbtree const *tree =
         scc_container_qual(
             handle - ((unsigned char const *)handle)[-1],
@@ -196,7 +155,70 @@ unsigned long long scc_rbtree_inspect_properties(void const *handle) {
         return SCC_RBTREE_ERR_ROOT;
     }
 
-    return scc_rbtree_inspect_properties_impl(tree, tree->rb_root);
+    struct nodectx {
+        struct scc_rbnode const *ct_node;
+        long long *ct_pval;
+        long long ct_left;
+        long long ct_right;
+    };
+
+    scc_stack(struct nodectx) stack
+        = scc_stack_init(struct nodectx);
+
+    scc_stack_push(stack, ((struct nodectx) {
+        .ct_node = tree->rb_root,
+        .ct_left = NOT_TRAVERSED,
+        .ct_right = NOT_TRAVERSED
+    }));
+
+    struct nodectx *curr;
+    unsigned long long emask = 0ull;
+    while(!scc_stack_empty(stack)) {
+        curr = &scc_stack_top(stack);
+        if(curr->ct_left == NOT_TRAVERSED) {
+            /* Height contribution of curr */
+            curr->ct_left = scc_rbtree_inspect_black(curr->ct_node);
+            if(scc_rbtree_inspect_has_child(curr->ct_node, SCC_RBTREE_INSPECT_LEFT)) {
+                /* For computing height of left subtree */
+                scc_stack_push(stack, ((struct nodectx) {
+                    .ct_node = curr->ct_node->rn_left,
+                    .ct_pval = &curr->ct_left,
+                    .ct_left = NOT_TRAVERSED,
+                    .ct_right = NOT_TRAVERSED
+                }));
+            }
+        }
+        else if(curr->ct_right == NOT_TRAVERSED) {
+            /* Height contribution of curr */
+            curr->ct_right = scc_rbtree_inspect_black(curr->ct_node);
+            if(scc_rbtree_inspect_has_child(curr->ct_node, SCC_RBTREE_INSPECT_RIGHT)) {
+                /* For computing height of right subtree */
+                scc_stack_push(stack, ((struct nodectx) {
+                    .ct_node = curr->ct_node->rn_right,
+                    .ct_pval = &curr->ct_right,
+                    .ct_left = NOT_TRAVERSED,
+                    .ct_right = NOT_TRAVERSED
+                }));
+            }
+        }
+        else {
+            if(curr->ct_left != curr->ct_right) {
+                /* Black height violation in subtrees */
+                emask = SCC_RBTREE_ERR_BLACK;
+                goto epilogue;
+            }
+            if(curr->ct_pval) {
+                /* Add black height of subtree to parent's counter */
+                *curr->ct_pval += curr->ct_left;
+            }
+            scc_stack_pop(stack);
+        }
+
+    }
+
+epilogue:
+    scc_stack_free(stack);
+    return emask;
 }
 
 void scc_rbtree_inspect_dump_flags(unsigned long long flags) {

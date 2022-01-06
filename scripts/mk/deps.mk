@@ -1,1 +1,1 @@
-rbtree_deps := arena rbtree_inspect
+rbtree_deps := arena rbtree_inspect svec
