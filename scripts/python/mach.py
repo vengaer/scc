@@ -65,19 +65,28 @@ def main(outfile):
     # pylint: disable=missing-function-docstring
 
     unknown = "UNKNOWN"
+    abis = {
+        'linux_x86_64': 'SYSV',
+        'freebsd_x86_64': 'SYSV',
+        'darwin_x86_64': 'SYSV',
+        'solaris_x86_64': 'SYSV'
+    }
+
     with FileWrHandle(outfile) if outfile is not None else StdoutWrHandle() as handle:
         machine = platform.machine()
         bits, linkage = platform.architecture()
         system = platform.system()
         rel = platform.release()
-        ver = platform.version()
+        ver = platform.version().replace('#', '\\#')
+        abi = abis.get(f'{system.lower()}_{machine.lower()}', unknown)
 
         handle.writeln(f'arch      := {machine.upper() if machine != "" else unknown}')
         handle.writeln(f'bitarch   := {bits.replace("bit","") if bits != "" else unknown}')
         handle.writeln(f'binfmt    := {linkage if linkage.upper() != "" else unknown}')
         handle.writeln(f'hostos    := {system.upper() if system != "" else unknown}')
         handle.writeln(f'hostosrel := {rel.upper() if rel != "" else unknown}')
-        handle.writeln('hostosver := {}'.format(ver.upper().replace('#', '\\#') if ver != '' else unknown))
+        handle.writeln(f'hostosver := {ver.upper() if ver != "" else unknown}')
+        handle.writeln(f'abi       := {abi}')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Detect machine information')
