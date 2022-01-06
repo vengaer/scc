@@ -46,6 +46,14 @@ Queries the size of the underlying container
 
 Size of the underlying container at the time of the call
 
+=== bool scc_stack_empty(void const *stack)
+
+Determines whether the stack is empty
+
+==== Returns
+
+`true` if `scc_stack_size(stack) == 0`, otherwise `false`
+
 === size_t scc_stack_capacity(void const *stack)
 
 Queries the maximum number of elements that can be stored at the stack at the time of the call
