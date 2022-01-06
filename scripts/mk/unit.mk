@@ -54,7 +54,7 @@ $(strip
     $(foreach __o,$(unitobj),
         $(eval
             $(eval __bin := $(unitbuilddir)/$(basename $(notdir $(__o))))
-            $(__bin): $(__o) $(patsubst %.$(oext),%$(runnersuffix).$(oext),$(__o)) $(unityalib) $(alib) $(libinspect)
+            $(__bin): $(__o) $(patsubst %.$(oext),%$(runnersuffix).$(oext),$(__o)) $(unityalib) $(libinspect) $(alib)
 	            $$(info [LD] $$(notdir $$@))
 	            $$(LD) -o $$@ $$^ $$(LDFLAGS) $$(unit_LDFLAGS) $$(LDLIBS)
 
