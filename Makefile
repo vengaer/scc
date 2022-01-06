@@ -33,12 +33,14 @@ doctestdir   := $(testdir)/docs
 docdir       := $(root)/docs
 
 scripts      := $(root)/scripts
+asscripts    := $(scripts)/asm
 mkscripts    := $(scripts)/mk
 pyscripts    := $(scripts)/python
 
 cext         := c
 hext         := h
 oext         := o
+asext        := S
 aext         := a
 dext         := d
 soext        := so
