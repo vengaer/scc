@@ -46,7 +46,7 @@ static inline bool scc_rbtree_inspect_right_violation(
     struct scc_rbtree const *tree,
     struct scc_rbnode const *node
 );
-unsigned long long scc_rbtree_inspect_node(
+scc_inspect_mask scc_rbtree_inspect_node(
     struct scc_rbtree const *restrict tree,
     struct scc_rbnode const *restrict node
 );
@@ -107,7 +107,7 @@ static inline bool scc_rbtree_inspect_right_violation(
            scc_rbtree_inspect_compare(tree, node, node->rn_right) >= 0;
 }
 
-unsigned long long scc_rbtree_inspect_node(
+scc_inspect_mask scc_rbtree_inspect_node(
     struct scc_rbtree const *restrict tree,
     struct scc_rbnode const *restrict node
 ) {
@@ -136,7 +136,7 @@ unsigned long long scc_rbtree_inspect_node(
 }
 
 
-unsigned long long scc_rbtree_inspect_properties(void const *handle) {
+scc_inspect_mask scc_rbtree_inspect_properties(void const *handle) {
     enum { NOT_TRAVERSED = -1 };
     struct scc_rbtree const *tree =
         scc_container_qual(
@@ -172,7 +172,7 @@ unsigned long long scc_rbtree_inspect_properties(void const *handle) {
     }));
 
     struct nodectx *curr;
-    unsigned long long emask = 0ull;
+    scc_inspect_mask emask = 0ull;
     while(!scc_stack_empty(stack)) {
         curr = &scc_stack_top(stack);
         if(curr->ct_left == NOT_TRAVERSED) {
@@ -221,7 +221,7 @@ epilogue:
     return emask;
 }
 
-void scc_rbtree_inspect_dump_flags(unsigned long long flags) {
+void scc_rbtree_inspect_dump_flags(scc_inspect_mask flags) {
     if(!(flags & SCC_RBTREE_ERR_MASK)) {
         return;
     }

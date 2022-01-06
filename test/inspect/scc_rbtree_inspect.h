@@ -5,12 +5,14 @@
 
 #include <limits.h>
 
-#define SCC_RBTREE_ERR_RED   (1ull << (sizeof(0ull) * CHAR_BIT - 1u))
-#define SCC_RBTREE_ERR_BLACK (1ull << (sizeof(0ull) * CHAR_BIT - 2u))
-#define SCC_RBTREE_ERR_LEFT  (1ull << (sizeof(0ull) * CHAR_BIT - 3u))
-#define SCC_RBTREE_ERR_RIGHT (1ull << (sizeof(0ull) * CHAR_BIT - 4u))
-#define SCC_RBTREE_ERR_ROOT  (1ull << (sizeof(0ull) * CHAR_BIT - 5u))
-#define SCC_RBTREE_ERR_LOOP  (1ull << (sizeof(0ull) * CHAR_BIT - 6u))
+#define SCC_RBTREE_ERR_RED   0x01
+#define SCC_RBTREE_ERR_BLACK 0x02
+#define SCC_RBTREE_ERR_LEFT  0x04
+#define SCC_RBTREE_ERR_RIGHT 0x08
+#define SCC_RBTREE_ERR_ROOT  0x10
+#define SCC_RBTREE_ERR_LOOP  0x20
+
+typedef unsigned scc_inspect_mask;
 
 #define SCC_RBTREE_ERR_MASK (SCC_RBTREE_ERR_RED   | \
                              SCC_RBTREE_ERR_BLACK | \
@@ -19,7 +21,7 @@
                              SCC_RBTREE_ERR_ROOT  | \
                              SCC_RBTREE_ERR_LOOP)
 
-unsigned long long scc_rbtree_inspect_properties(void const *handle);
-void scc_rbtree_inspect_dump_flags(unsigned long long flags);
+scc_inspect_mask scc_rbtree_inspect_properties(void const *handle);
+void scc_rbtree_inspect_dump_flags(scc_inspect_mask flags);
 
 #endif /* SCC_RBTREE_INSPECT_H */
