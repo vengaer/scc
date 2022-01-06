@@ -136,4 +136,4 @@ distclean: clean
 $(VERBOSE).SILENT:
 
 $(obj): Makefile $(wildcard $(mkscripts)/*.$(mkext))
--include $$(patsubst %.$$(oext),%.$$(dext),$$(obj))
+-include $(patsubst %.$(oext),%.$(dext),$(obj))
