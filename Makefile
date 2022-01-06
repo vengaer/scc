@@ -86,14 +86,14 @@ sccobj       := $(patsubst $(srcdir)/%.$(cext),$(sccbuilddir)/%.$(oext),$(wildca
 obj          += $(sccobj)
 
 .SECONDEXPANSION:
-include $(mkscripts)/deps.mk
-include $(mkscripts)/inspect.mk
-include $(mkscripts)/mach.mk
-include $(mkscripts)/fuzz.mk
-include $(mkscripts)/unit.mk
-include $(mkscripts)/docs.mk
-include $(mkscripts)/lint.mk
-include $(mkscripts)/panic.mk
+include $(mkscripts)/deps.$(mkext)
+include $(mkscripts)/inspect.$(mkext)
+include $(mkscripts)/mach.$(mkext)
+include $(mkscripts)/fuzz.$(mkext)
+include $(mkscripts)/unit.$(mkext)
+include $(mkscripts)/docs.$(mkext)
+include $(mkscripts)/lint.$(mkext)
+include $(mkscripts)/panic.$(mkext)
 
 .PHONY: all
 all: $(alib) $(solink)
@@ -135,4 +135,5 @@ distclean: clean
 
 $(VERBOSE).SILENT:
 
+$(obj): Makefile $(wildcard $(mkscripts)/*.$(mkext))
 -include $$(patsubst %.$$(oext),%.$$(dext),$$(obj))
