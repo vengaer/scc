@@ -1,6 +1,6 @@
 -include .config.mk
 
-CC           := gcc
+CC           := clang
 LD           := $(CC)
 AR           := ar
 RB           := ruby
