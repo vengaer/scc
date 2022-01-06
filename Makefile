@@ -43,6 +43,7 @@ oext         := o
 asext        := S
 aext         := a
 dext         := d
+mkext        := mk
 soext        := so
 sover        := 0
 socompat     := 0

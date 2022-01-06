@@ -1,6 +1,6 @@
 machscript   := $(pyscripts)/mach.$(pyext)
-machinfo     := $(builddir)/machinfo.mk
-simdinfo     := $(builddir)/simdinfo.mk
+machinfo     := $(builddir)/machinfo.$(mkext)
+simdinfo     := $(builddir)/simdinfo.$(mkext)
 simdbin      := $(builddir)/simd_isa_detect
 # Assume no simd support
 simd_isa     := UNSUPPORTED

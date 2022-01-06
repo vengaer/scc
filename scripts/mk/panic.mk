@@ -1,8 +1,8 @@
 panicbuilddir := $(builddir)/panic
 dirs          += $(panicbuilddir)
-panicparser   := $(pyscripts)/testparser.py
+panicparser   := $(pyscripts)/testparser.$(pyext)
 
-panicmanifest := $(panicbuilddir)/manifest.mk
+panicmanifest := $(panicbuilddir)/manifest.$(mkext)
 panicvar      := panicgen
 
 panicobj      := $(patsubst $(panictestdir)/%.$(cext),$(panicbuilddir)/%.$(oext),$(wildcard $(panictestdir)/*.$(cext)))
