@@ -19,7 +19,8 @@ PYLINT       := pylint
 
 root         := $(abspath $(CURDIR))
 builddir     := $(root)/build
-dirs         += $(builddir)
+sccbuilddir  := $(builddir)/scc
+dirs         += $(builddir) $(sccbuilddir)
 
 scc          := scc
 srcdir       := $(root)/src
@@ -79,7 +80,7 @@ TOUCHFLAGS   :=
 PYTESTFLAGS  := -v
 PYLINTFLAGS  := --fail-under=10.0
 
-sccobj       := $(patsubst $(srcdir)/%.$(cext),$(builddir)/%.$(oext),$(wildcard $(srcdir)/*.$(cext)))
+sccobj       := $(patsubst $(srcdir)/%.$(cext),$(sccbuilddir)/%.$(oext),$(wildcard $(srcdir)/*.$(cext)))
 obj          += $(sccobj)
 
 .SECONDEXPANSION:
@@ -107,7 +108,7 @@ $(alib): $(sccobj)
 	$(info [AR] $(notdir $@))
 	$(AR) $(ARFLAGS) -o $@ $^
 
-$(builddir)/%.$(oext): $(srcdir)/%.$(cext) | $(builddir)
+$(sccbuilddir)/%.$(oext): $(srcdir)/%.$(cext) | $(sccbuilddir)
 	$(info [CC] $(notdir $@))
 	$(CC) $(CFLAGS) $(so_CFLAGS) $(CPPFLAGS) $< -o $@
 
