@@ -54,9 +54,9 @@ htmlext      := html
 jsonext      := json
 pyext        := py
 
-solink       := lib$(scc).$(soext)
+solink       := $(builddir)/lib$(scc).$(soext)
 solib        := $(solink).$(sover)
-alib         := lib$(scc).$(aext)
+alib         := $(builddir)/lib$(scc).$(aext)
 
 ASFLAGS      := -c -g
 CFLAGS       := -std=c99 -c -MD -MP -g -Wall -Wextra -Wpedantic -Waggregate-return   \
