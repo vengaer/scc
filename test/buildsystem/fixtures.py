@@ -48,7 +48,7 @@ def mirror_repo(root, rundir):
 @pytest.fixture
 def build(rundir):
     ''' Build and return output '''
-    return make.build(rundir, '-j8')
+    return make.build(rundir)
 
 @pytest.fixture
 def remove_mach_asm(rundir):

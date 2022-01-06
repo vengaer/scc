@@ -4,11 +4,9 @@ import re
 
 from subprocess import Popen, PIPE
 
-def build(rundir, auxopts=None):
+def build(rundir, jobs=8):
     ''' Return verbose output spat out from build system '''
-    cmd = ['make', '-C', rundir, 'VERBOSE=1']
-    if auxopts is not None:
-        cmd.append(auxopts)
+    cmd = ['make', '-C', rundir, 'VERBOSE=1', f'-j{jobs}']
     with Popen(cmd, stdout=PIPE) as proc:
         stdout = proc.communicate()[0]
     pproced = re.sub(r'\s{2,}', ' ', stdout.decode().strip()).split('\n')
