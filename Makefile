@@ -79,6 +79,7 @@ obj          += $(sccobj)
 .SECONDEXPANSION:
 include $(mkscripts)/deps.mk
 include $(mkscripts)/inspect.mk
+include $(mkscripts)/mach.mk
 include $(mkscripts)/fuzz.mk
 include $(mkscripts)/unit.mk
 include $(mkscripts)/docs.mk
