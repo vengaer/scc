@@ -31,6 +31,7 @@ fuzzdir      := $(testdir)/fuzz
 inspectdir   := $(testdir)/inspect
 panictestdir := $(testdir)/panic
 doctestdir   := $(testdir)/docs
+buildtestdir := $(testdir)/buildsystem
 docdir       := $(root)/docs
 
 scripts      := $(root)/scripts
@@ -93,6 +94,7 @@ include $(mkscripts)/unit.$(mkext)
 include $(mkscripts)/docs.$(mkext)
 include $(mkscripts)/lint.$(mkext)
 include $(mkscripts)/panic.$(mkext)
+include $(mkscripts)/buildtest.$(mkext)
 
 .PHONY: all
 all: $(alib) $(solink)
