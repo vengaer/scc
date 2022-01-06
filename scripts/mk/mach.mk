@@ -14,7 +14,8 @@ umaxinfo      := $(machbuilddir)/umaxinfo.$(mkext)
 
 simdbin       := $(machbuilddir)/simd_isa_detect
 umaxbin       := $(machbuilddir)/umaxsize
-__umaxobj     := $(patsubst $(cscripts)/%.$(cext),$(machbuilddir)/%.$(oext),$(wildcard $(cscripts)/*.$(cext)))
+__umaxobj     := $(patsubst $(cmach)/%.$(cext),$(machbuilddir)/%.$(oext),\
+                   $(wildcard $(cmach)/*.$(cext)))
 
 # Assume no simd support
 simd_isa      := UNSUPPORTED
@@ -31,14 +32,14 @@ $(if $(call __not,$(__is_cleaning)), \
    $(eval -include $(umaxinfo))      \
    $(eval -include $(vecinfo)))
 
-asabiscripts := $(asscripts)/$(arch_lower)/$(abi_lower)
+as_abi_mach   := $(asmach)/$(arch_lower)/$(abi_lower)
 
-__isa_obj    := $(patsubst $(asabiscripts)/%.$(asext),$(machbuilddir)/%.$(oext),\
-                  $(wildcard $(asabiscripts)/*.$(asext)))
+__isa_obj     := $(patsubst $(as_abi_mach)/%.$(asext),$(machbuilddir)/%.$(oext),\
+                   $(wildcard $(as_abi_mach)/*.$(asext)))
 
 # Force delay of linking of $(simdbin) until $(arch_lower) and $(abi_lower)
 # have been set through the above inclusion
-__isa_obj    := $(if $(arch_lower)$(abi_lower),$(__isa_obj),_)
+__isa_obj     := $(if $(and $(arch_lower)$(abi_lower), $(firstword $(__isa_obj))),$(__isa_obj),_)
 
 $(simdinfo): $(simdbin)
 	$< $@
@@ -47,11 +48,11 @@ $(simdbin): $(__isa_obj) | $(machinfo)
 	$(info [LD] $(notdir $@))
 	$(LD) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
-$(machbuilddir)/%.$(oext): $(asabiscripts)/%.$(asext) $(machinfo) | $(machbuilddir)
+$(machbuilddir)/%.$(oext): $(as_abi_mach)/%.$(asext) $(machinfo) | $(machbuilddir)
 	$(info [AS] $(notdir $@))
 	$(AS) -o $@ $< $(ASFLAGS)
 
-$(if $(and $(call __not,$(__is_cleaning), $(wildcard $(asabitscripts)/*.$(asext)))), \
+$(if $(and $(call __not,$(__is_cleaning),$(wildcard $(as_abi_mach)/*.$(asext)))), \
     $(eval -include $(simdinfo)))
 
 $(umaxinfo): $(umaxbin)
@@ -61,7 +62,7 @@ $(umaxbin): $(__umaxobj)
 	$(info [LD] $(notdir $@))
 	$(LD) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
-$(machbuilddir)/%.$(oext): $(cscripts)/%.$(cext) | $(machbuilddir)
+$(machbuilddir)/%.$(oext): $(cmach)/%.$(cext) | $(machbuilddir)
 	$(info [CC] $(notdir $@))
 	$(CC) -o $@ $< $(CFLAGS) $(CPPFLAGS)
 

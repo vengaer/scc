@@ -34,10 +34,12 @@ doctestdir   := $(testdir)/docs
 docdir       := $(root)/docs
 
 scripts      := $(root)/scripts
-asscripts    := $(scripts)/asm
-cscripts     := $(scripts)/c
 mkscripts    := $(scripts)/mk
 pyscripts    := $(scripts)/python
+
+mach         := $(root)/mach
+asmach       := $(mach)/asm
+cmach        := $(mach)/c
 
 cext         := c
 hext         := h
