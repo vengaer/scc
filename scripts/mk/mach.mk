@@ -1,17 +1,20 @@
 machscript    := $(pyscripts)/mach.$(pyext)
 vecscript     := $(pyscripts)/isavec.$(pyext)
-# General platform information
-machinfo      := $(builddir)/machinfo.$(mkext)
-# SIMD ISA information
-simdinfo      := $(builddir)/simdinfo.$(mkext)
-# Vector information
-vecinfo       := $(builddir)/vecinfo.$(mkext)
-# Size of uintmax_t
-umaxinfo      := $(builddir)/umaxinfo.$(mkext)
+machbuilddir  := $(builddir)/mach
+dirs          += $(machbuilddir)
 
-simdbin       := $(builddir)/simd_isa_detect
-umaxbin       := $(builddir)/umaxsize
-__umaxobj     := $(patsubst $(cscripts)/%.$(cext),$(builddir)/%.$(oext),$(wildcard $(cscripts)/*.$(cext)))
+# General platform information
+machinfo      := $(machbuilddir)/machinfo.$(mkext)
+# SIMD ISA information
+simdinfo      := $(machbuilddir)/simdinfo.$(mkext)
+# Vector information
+vecinfo       := $(machbuilddir)/vecinfo.$(mkext)
+# Size of uintmax_t
+umaxinfo      := $(machbuilddir)/umaxinfo.$(mkext)
+
+simdbin       := $(machbuilddir)/simd_isa_detect
+umaxbin       := $(machbuilddir)/umaxsize
+__umaxobj     := $(patsubst $(cscripts)/%.$(cext),$(machbuilddir)/%.$(oext),$(wildcard $(cscripts)/*.$(cext)))
 
 # Assume no simd support
 simd_isa      := UNSUPPORTED
@@ -19,7 +22,7 @@ simd_isa      := UNSUPPORTED
 __is_cleaning := $(findstring clean,$(MAKECMDGOALS))
 __not          = $(if $(1),,_)
 
-$(machinfo): $(machscript) | $(builddir)
+$(machinfo): $(machscript) | $(machbuilddir)
 	$(info [PY] $(notdir $@))
 	$< -o $@
 
@@ -30,7 +33,7 @@ $(if $(call __not,$(__is_cleaning)), \
 
 asabiscripts := $(asscripts)/$(arch_lower)/$(abi_lower)
 
-__isa_obj    := $(patsubst $(asabiscripts)/%.$(asext),$(builddir)/%.$(oext),\
+__isa_obj    := $(patsubst $(asabiscripts)/%.$(asext),$(machbuilddir)/%.$(oext),\
                   $(wildcard $(asabiscripts)/*.$(asext)))
 
 # Force delay of linking of $(simdbin) until $(arch_lower) and $(abi_lower)
@@ -44,7 +47,7 @@ $(simdbin): $(__isa_obj) | $(machinfo)
 	$(info [LD] $(notdir $@))
 	$(LD) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
-$(builddir)/%.$(oext): $(asabiscripts)/%.$(asext) $(machinfo) | $(builddir)
+$(machbuilddir)/%.$(oext): $(asabiscripts)/%.$(asext) $(machinfo) | $(machbuilddir)
 	$(info [AS] $(notdir $@))
 	$(AS) -o $@ $< $(ASFLAGS)
 
@@ -58,12 +61,12 @@ $(umaxbin): $(__umaxobj)
 	$(info [LD] $(notdir $@))
 	$(LD) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
-$(builddir)/%.$(oext): $(cscripts)/%.$(cext) | $(builddir)
+$(machbuilddir)/%.$(oext): $(cscripts)/%.$(cext) | $(machbuilddir)
 	$(info [CC] $(notdir $@))
 	$(CC) -o $@ $< $(CFLAGS) $(CPPFLAGS)
 
 # Run only if a supported SIMD ISA has been detected
-$(vecinfo): $(vecscript) $(simdinfo) | $(builddir) $(findstring UNSUPPORTED,$(simd_isa))
+$(vecinfo): $(vecscript) $(simdinfo) | $(machbuilddir) $(findstring UNSUPPORTED,$(simd_isa))
 	$(info [PY] $(notdir $@))
 	$< -o $@ $(simd_isa)
 
