@@ -16,6 +16,7 @@
 #define scc_stack_pop(stack) scc_pp_cat_expand(SCC_STACK_CONTAINER,_pop)(stack)
 #define scc_stack_top(stack) stack[scc_pp_cat_expand(SCC_STACK_CONTAINER,_size)(stack) - 1]
 #define scc_stack_size(stack) scc_pp_cat_expand(SCC_STACK_CONTAINER,_size)(stack)
+#define scc_stack_empty(stack) (!scc_stack_size(stack))
 #define scc_stack_capacity(stack) scc_pp_cat_expand(SCC_STACK_CONTAINER,_capacity)(stack)
 #define scc_stack_clear(stack) scc_pp_cat_expand(SCC_STACK_CONTAINER,_clear)(stack)
 #define scc_stack_reserve(stack, capacity) scc_pp_cat_expand(SCC_STACK_CONTAINER,_reserve)(stack, capacity)
