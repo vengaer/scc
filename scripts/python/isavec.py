@@ -3,6 +3,7 @@
 ''' Generate processor information given a SIMD ISA '''
 
 import argparse
+import ctypes
 
 from wrhandle import FileWrHandle, StdoutWrHandle
 
@@ -12,10 +13,10 @@ VECSIZES = {
 
 def main(isa, outfile):
     # pylint: disable=missing-function-docstring
-    unknown = 'UNKNOWN'
+    fallback = ctypes.sizeof(ctypes.c_ulonglong)
 
     with FileWrHandle(outfile) if outfile is not None else StdoutWrHandle() as handle:
-        handle.writeln(f'vecsize := {VECSIZES.get(isa.lower(), unknown)}')
+        handle.writeln(f'vecsize := {VECSIZES.get(isa.lower(), fallback)}')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generate processor information given SIMD ISA')

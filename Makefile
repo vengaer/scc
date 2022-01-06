@@ -39,7 +39,6 @@ pyscripts    := $(scripts)/python
 
 mach         := $(root)/mach
 asmach       := $(mach)/asm
-cmach        := $(mach)/c
 
 cext         := c
 hext         := h
