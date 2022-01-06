@@ -73,6 +73,17 @@ void test_scc_stack_clear(void) {
     scc_stack_free(stack);
 }
 
+void test_scc_stack_empty(void) {
+    scc_stack(int) stack = scc_stack_init(int);
+
+    TEST_ASSERT_TRUE(scc_stack_empty(stack));
+    TEST_ASSERT_TRUE(scc_stack_push(stack, 10));
+    TEST_ASSERT_FALSE(scc_stack_empty(stack));
+    scc_stack_clear(stack);
+    TEST_ASSERT_TRUE(scc_stack_empty(stack));
+    scc_stack_free(stack);
+}
+
 void test_scc_stack_custom_container(void) {
     enum { TEST_SIZE = 100 };
     scc_stack(int) default_container = scc_stack_init(int);
