@@ -82,7 +82,9 @@ TOUCHFLAGS   :=
 PYTESTFLAGS  := -v
 PYLINTFLAGS  := --fail-under=10.0
 
-sccobj       := $(patsubst $(srcdir)/%.$(cext),$(sccbuilddir)/%.$(oext),$(wildcard $(srcdir)/*.$(cext)))
+assrcdir      = $(srcdir)/asm/$(arch_lower)/$(abi_lower)
+sccobj        = $(patsubst $(srcdir)/%.$(cext),$(sccbuilddir)/%.$(oext),$(wildcard $(srcdir)/*.$(cext))) \
+                $(patsubst $(assrcdir)/%.$(asext),$(sccbuilddir)/%.$(oext),$(wildcard $(assrcdir)/*.$(asext)))
 obj          += $(sccobj)
 
 .SECONDEXPANSION:
@@ -117,6 +119,10 @@ $(alib): $(sccobj)
 $(sccbuilddir)/%.$(oext): $(srcdir)/%.$(cext) | $(sccbuilddir)
 	$(info [CC] $(notdir $@))
 	$(CC) $(CFLAGS) $(so_CFLAGS) $(CPPFLAGS) $< -o $@
+
+$(sccbuilddir)/%.$(oext): $(assrcdir)/%.$(asext) | $(sccbuilddir)
+	$(info [AS] $(notdir $@))
+	$(AS) $(ASFLAGS) -o $@ $<
 
 $(dirs):
 	$(MKDIR) $(MKDIRFLAGS) $@
