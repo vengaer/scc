@@ -6,9 +6,10 @@
 
 size_t scc_hashtab_impl_bkoff(void const *tab);
 
-void *scc_hashtab_impl_init(void *inittab, scc_eq eq, size_t dataoff, size_t mdoff, size_t capacity) {
+void *scc_hashtab_impl_init(void *inittab, scc_eq eq, scc_hash hash, size_t dataoff, size_t mdoff, size_t capacity) {
     struct scc_hashtab *tab = inittab;
     tab->ht_eq = eq;
+    tab->ht_hash = hash;
     tab->ht_mdoff = mdoff;
     tab->ht_size = 0u;
     tab->ht_capacity = capacity;
@@ -31,3 +32,20 @@ void scc_hashtab_free(void *tab) {
         free(base);
     }
 }
+
+unsigned long long scc_hashtab_fnv1a(void const *input, size_t size) {
+#define SCC_FNV_OFFSET_BASIS 0xcbf29ce484222325ull
+#define SCC_FNV_PRIME 0x100000001b3ull
+
+    unsigned long long hash = SCC_FNV_OFFSET_BASIS;
+    unsigned char const *data = input;
+    for(size_t i = 0; i < size; ++i) {
+        hash ^= data[i];
+        hash *= SCC_FNV_PRIME;
+    }
+    return hash;
+
+#undef SCC_FNV_OFFSET_BASIS
+#undef SCC_FNV_PRIME
+}
+

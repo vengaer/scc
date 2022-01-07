@@ -8,11 +8,13 @@
 enum { SCC_HASHTAB_STACKCAP = 32 };
 
 typedef _Bool(*scc_eq)(void const *, void const *);
+typedef unsigned long long(*scc_hash)(void const *, size_t);
 
 #define scc_hashtab(type) type *
 
 struct scc_hashtab {
     scc_eq ht_eq;
+    scc_hash ht_hash;
     size_t ht_mdoff;
     size_t ht_size;
     size_t ht_capacity;
@@ -24,6 +26,7 @@ struct scc_hashtab {
 #define scc_hashtab_impl_layout(type)                               \
     struct {                                                        \
         scc_eq ht_eq;                                               \
+        scc_hash ht_hash;                                           \
         size_t ht_mdoff;                                            \
         size_t ht_size;                                             \
         size_t ht_capacity;                                         \
@@ -32,8 +35,8 @@ struct scc_hashtab {
         unsigned char ht_bkoff;                                     \
         type ht_tmp;                                                \
         type ht_data[SCC_HASHTAB_STACKCAP];                         \
-        unsigned short ht_hash[SCC_HASHTAB_STACKCAP];               \
-        unsigned char ht_hash_guard[SCC_VECSIZE - 1u];              \
+        unsigned short ht_meta[SCC_HASHTAB_STACKCAP];               \
+        unsigned char ht_meta_guard[SCC_VECSIZE - 1u];              \
     }
 
 #define scc_hashtab_impl_initsize(type)                             \
@@ -49,7 +52,7 @@ struct scc_hashtab {
     offsetof(scc_hashtab_impl_layout(type), ht_tmp)
 
 #define scc_hashtab_impl_mdoff(type)                                \
-    offsetof(scc_hashtab_impl_layout(type), ht_hash)
+    offsetof(scc_hashtab_impl_layout(type), ht_meta)
 
 #define scc_hashtab_impl_base_qual(tab, qual)                       \
     scc_container_qual(                                             \
@@ -66,14 +69,17 @@ struct scc_hashtab {
     scc_hashtab_impl_init(                                          \
         &scc_hashtab_impl_inittab(type),                            \
         eq,                                                         \
+        scc_hashtab_fnv1a,                                          \
         scc_hashtab_impl_dataoff(type),                             \
         scc_hashtab_impl_mdoff(type),                               \
         SCC_HASHTAB_STACKCAP                                        \
     )
 
-void *scc_hashtab_impl_init(void *inittab, scc_eq eq, size_t dataoff, size_t mdoff, size_t capacity);
+void *scc_hashtab_impl_init(void *inittab, scc_eq eq, scc_hash hash, size_t dataoff, size_t mdoff, size_t capacity);
 
 void scc_hashtab_free(void *tab);
+unsigned long long scc_hashtab_fnv1a(void const *data, size_t size);
+
 
 inline size_t scc_hashtab_impl_bkoff(void const *tab) {
     return ((unsigned char const *)tab)[-1] + sizeof(((struct scc_hashtab *)0)->ht_fwoff);
