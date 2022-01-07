@@ -28,15 +28,19 @@ void *scc_hashtab_impl_init(void *inittab, scc_eq eq, scc_hash hash, size_t data
     tab->ht_eq = eq;
     tab->ht_hash = hash;
     tab->ht_mdoff = mdoff;
-    tab->ht_size = 0u;
     tab->ht_capacity = capacity;
-    tab->ht_dynalloc = 0;
     scc_hashtab_init_mdguard(tab);
 
     size_t const off = dataoff - offsetof(struct scc_hashtab, ht_fwoff) - sizeof(tab->ht_fwoff);
     assert(off < UCHAR_MAX);
     /* Power of 2 required */
     assert((capacity & ~(capacity - 1)) == capacity);
+
+    /* To avoid future mishaps, would be triggered only with broken compilers atm */
+    assert(!tab->ht_dynalloc);
+    assert(!tab->ht_size);
+    assert(!*((unsigned char *)tab + tab->ht_mdoff));
+
     tab->ht_fwoff = (unsigned char)off;
 
     unsigned char *ht_tmp = (unsigned char *)inittab + dataoff;
