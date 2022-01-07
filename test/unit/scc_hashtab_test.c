@@ -1,3 +1,4 @@
+#include <inspect/scc_hashtab_inspect.h>
 #include <scc/scc_hashtab.h>
 #include <scc/scc_mem.h>
 
@@ -25,18 +26,9 @@ static unsigned long long ident(void const *data, size_t size) {
     return 0ull;
 }
 
-static struct scc_hashtab *tabbase(void *tab) {
-    struct scc_hashtab *base = scc_container(
-        tab - ((unsigned char *)tab)[-1] - sizeof(base->ht_fwoff),
-        struct scc_hashtab,
-        ht_fwoff
-    );
-    return base;
-}
-
 void test_scc_hashtab_bkoff(void) {
     scc_hashtab(int) hashtab = scc_hashtab_init(int, eq);
-    struct scc_hashtab *base = tabbase(hashtab);
+    struct scc_hashtab *base = scc_hashtab_inspect_base(hashtab);
     /* Probably UB... */
     TEST_ASSERT_EQUAL_PTR(base->ht_eq, eq);
     scc_hashtab_free(hashtab);
@@ -44,7 +36,7 @@ void test_scc_hashtab_bkoff(void) {
 
 void test_scc_hashtab_fwoff(void) {
     scc_hashtab(int) hashtab = scc_hashtab_init(int, eq);
-    struct scc_hashtab *base = tabbase(hashtab);
+    struct scc_hashtab *base = scc_hashtab_inspect_base(hashtab);
     size_t const off = base->ht_fwoff + offsetof(struct scc_hashtab, ht_fwoff) + sizeof(base->ht_fwoff);
     int *fwp = (void *)((unsigned char *)base + off);
     TEST_ASSERT_EQUAL_PTR(hashtab, fwp);
@@ -53,7 +45,7 @@ void test_scc_hashtab_fwoff(void) {
 
 void test_scc_hashtab_explicit_hash(void) {
     scc_hashtab(int) hashtab = scc_hashtab_with_hash(int, eq, ident);
-    struct scc_hashtab *base = tabbase(hashtab);
+    struct scc_hashtab *base = scc_hashtab_inspect_base(hashtab);
     /* UB */
     TEST_ASSERT_EQUAL_PTR(base->ht_hash, ident);
     scc_hashtab_free(hashtab);
@@ -61,7 +53,7 @@ void test_scc_hashtab_explicit_hash(void) {
 
 void test_scc_hashtab_guard_initialized(void) {
     scc_hashtab(int) hashtab = scc_hashtab_init(int, eq);
-    struct scc_hashtab *base = tabbase(hashtab);
+    struct scc_hashtab *base = scc_hashtab_inspect_base(hashtab);
     scc_hashtab_metatype *guard =
         (void *)((unsigned char *)base + base->ht_mdoff + base->ht_capacity * sizeof(*guard));
 
