@@ -96,4 +96,9 @@ inline size_t scc_hashtab_capacity(void const *tab) {
     return scc_hashtab_impl_base_qual(tab, const)->ht_capacity;
 }
 
+_Bool scc_hashtab_impl_insert(void *tab, size_t elemsize);
+
+#define scc_hashtab_insert(tab, value)                                  \
+    scc_hashtab_impl_insert((*tab = value, &tab), sizeof(*tab))
+
 #endif /* SCC_HASHTAB_H */
