@@ -86,7 +86,7 @@ typedef unsigned short scc_hashtab_metatype;
 void *scc_hashtab_impl_init(void *inittab, scc_eq eq, scc_hash hash, size_t dataoff, size_t mdoff, size_t capacity);
 
 void scc_hashtab_free(void *tab);
-unsigned long long scc_hashtab_fnv1a(void const *data, size_t size);
+unsigned long long scc_hashtab_fnv1a(void const *input, size_t size);
 
 inline size_t scc_hashtab_impl_bkoff(void const *tab) {
     return ((unsigned char const *)tab)[-1] + sizeof(((struct scc_hashtab *)0)->ht_fwoff);
