@@ -1,11 +1,16 @@
 ''' Make command wrappers '''
 
+import multiprocessing
 import re
 
 from subprocess import Popen, PIPE
 
-def build(rundir, jobs=8):
+def build(rundir, jobs=None):
     ''' Return verbose output spat out from build system '''
+    try:
+        jobs = jobs if jobs is not None else multiprocessing.cpu_count()
+    except NotImplementedError:
+        jobs = 1
     cmd = ['make', '-C', rundir, 'VERBOSE=1', f'-j{jobs}']
     with Popen(cmd, stdout=PIPE) as proc:
         stdout = proc.communicate()[0]
