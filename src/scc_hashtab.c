@@ -19,6 +19,7 @@ long long scc_hashtab_impl_insert_probe(
 
 size_t scc_hashtab_impl_bkoff(void const *tab);
 size_t scc_hashtab_capacity(void const *tab);
+size_t scc_hashtab_size(void const *tab);
 
 static size_t scc_hashtab_md_size(struct scc_hashtab const *base);
 static void scc_hashtab_init_mdguard(struct scc_hashtab *base);
