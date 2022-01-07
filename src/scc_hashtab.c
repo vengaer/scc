@@ -90,10 +90,11 @@ unsigned long long scc_hashtab_fnv1a(void const *input, size_t size) {
 }
 
 bool scc_hashtab_impl_insert(void *tab, size_t elemsize) {
-
-#warning TODO: rehash
-
     struct scc_hashtab *base = scc_hashtab_impl_base(*(void **)tab);
+
+    /* For the time being */
+    assert((base->ht_capacity >> 1u) >= base->ht_size);
+
     unsigned long long hash = base->ht_hash(*(void **)tab, elemsize);
     long long const index = scc_hashtab_impl_insert_probe(base, *(void **)tab, elemsize, hash);
     if(index == -1) {
