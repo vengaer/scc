@@ -6,6 +6,8 @@ libscc.*
 crash-*
 slow-unit-*
 
+submodules/*.stamp
+
 test/fuzz/corpora/rbtree/*
 test/fuzz/corpora/svec/*
 
