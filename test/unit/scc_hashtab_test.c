@@ -58,3 +58,16 @@ void test_scc_hashtab_explicit_hash(void) {
     TEST_ASSERT_EQUAL_PTR(base->ht_hash, ident);
     scc_hashtab_free(hashtab);
 }
+
+void test_scc_hashtab_guard_initialized(void) {
+    scc_hashtab(int) hashtab = scc_hashtab_init(int, eq);
+    struct scc_hashtab *base = tabbase(hashtab);
+    scc_hashtab_metatype *guard =
+        (void *)((unsigned char *)base + base->ht_mdoff + base->ht_capacity * sizeof(*guard));
+
+    for(unsigned i = 0u; i < scc_hashtab_impl_guardsz(); ++i) {
+        TEST_ASSERT_EQUAL_UINT16(0x4000u, guard[i]);
+    }
+
+    scc_hashtab_free(hashtab);
+}
