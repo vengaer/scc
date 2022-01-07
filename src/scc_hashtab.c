@@ -16,6 +16,8 @@ void *scc_hashtab_impl_init(void *inittab, scc_eq eq, size_t dataoff, size_t mdo
 
     size_t const off = dataoff - offsetof(struct scc_hashtab, ht_fwoff) - sizeof(tab->ht_fwoff);
     assert(off < UCHAR_MAX);
+    /* Power of 2 required */
+    assert((capacity & ~(capacity - 1)) == capacity);
     tab->ht_fwoff = (unsigned char)off;
 
     unsigned char *ht_tmp = (unsigned char *)inittab + dataoff;
