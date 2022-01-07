@@ -46,12 +46,8 @@ $(machbuilddir)/%.$(oext): $(as_abi_mach)/%.$(asext) $(machinfo) | $(machbuilddi
 $(if $(and $(call not,$(__is_cleaning),$(wildcard $(as_abi_mach)/*.$(asext)))), \
     $(eval -include $(simdinfo)))
 
-# Force reevaluation of simd_isa for recipe
-$(vecinfo): simd_isa := $(eval $(vecinfo): simd_isa := $(simd_isa))$(simd_isa)
-# $(simdinfo) dependence for found SIMD ISA
-$(vecinfo): $(if $(simd_isa),$(simdinfo))
-# Unknown ISA, set simd_isa to UNSUPPORTED
-$(vecinfo): $(if $(call not,$(simd_isa)),$(eval $(vecinfo): simd_isa := UNSUPPORTED))
+$(vecinfo): $(call reeval,simd_isa,$(vecinfo))
+$(vecinfo): $(if $(simd_isa),$(simdinfo),$(eval $(vecinfo): simd_isa := UNSUPPORTED))
 $(vecinfo): $(vecscript) | $(machbuilddir)
 	$(info [PY] $(notdir $@))
 	$< -o $@ $(simd_isa)
