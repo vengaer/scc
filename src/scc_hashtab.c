@@ -4,7 +4,24 @@
 #include <limits.h>
 #include <stdlib.h>
 
+#define SCC_HASHTAB_GUARD ((scc_hashtab_metatype)0x4000u)
+
 size_t scc_hashtab_impl_bkoff(void const *tab);
+
+static size_t scc_hashtab_md_size(struct scc_hashtab const *base);
+static void scc_hashtab_init_mdguard(struct scc_hashtab *tab);
+
+static inline size_t scc_hashtab_md_size(struct scc_hashtab const *base) {
+    return base->ht_capacity * sizeof(scc_hashtab_metatype);
+}
+
+static inline void scc_hashtab_init_mdguard(struct scc_hashtab *base) {
+    scc_hashtab_metatype *guard =
+        (void *)((unsigned char *)base + base->ht_mdoff + scc_hashtab_md_size(base));
+    for(unsigned i = 0u; i < scc_hashtab_impl_guardsz(); ++i) {
+        guard[i] = SCC_HASHTAB_GUARD;
+    }
+}
 
 void *scc_hashtab_impl_init(void *inittab, scc_eq eq, scc_hash hash, size_t dataoff, size_t mdoff, size_t capacity) {
     struct scc_hashtab *tab = inittab;
@@ -14,6 +31,7 @@ void *scc_hashtab_impl_init(void *inittab, scc_eq eq, scc_hash hash, size_t data
     tab->ht_size = 0u;
     tab->ht_capacity = capacity;
     tab->ht_dynalloc = 0;
+    scc_hashtab_init_mdguard(tab);
 
     size_t const off = dataoff - offsetof(struct scc_hashtab, ht_fwoff) - sizeof(tab->ht_fwoff);
     assert(off < UCHAR_MAX);

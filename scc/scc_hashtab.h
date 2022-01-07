@@ -23,59 +23,64 @@ struct scc_hashtab {
     unsigned char ht_buffer[];
 };
 
-#define scc_hashtab_impl_layout(type)                               \
-    struct {                                                        \
-        scc_eq ht_eq;                                               \
-        scc_hash ht_hash;                                           \
-        size_t ht_mdoff;                                            \
-        size_t ht_size;                                             \
-        size_t ht_capacity;                                         \
-        unsigned char ht_dynalloc;                                  \
-        unsigned char ht_fwoff;                                     \
-        unsigned char ht_bkoff;                                     \
-        type ht_tmp;                                                \
-        type ht_data[SCC_HASHTAB_STACKCAP];                         \
-        unsigned short ht_meta[SCC_HASHTAB_STACKCAP];               \
-        unsigned char ht_meta_guard[SCC_VECSIZE - 1u];              \
+typedef unsigned short scc_hashtab_metatype;
+
+#define scc_hashtab_impl_layout(type)                                   \
+    struct {                                                            \
+        scc_eq ht_eq;                                                   \
+        scc_hash ht_hash;                                               \
+        size_t ht_mdoff;                                                \
+        size_t ht_size;                                                 \
+        size_t ht_capacity;                                             \
+        unsigned char ht_dynalloc;                                      \
+        unsigned char ht_fwoff;                                         \
+        unsigned char ht_bkoff;                                         \
+        type ht_tmp;                                                    \
+        type ht_data[SCC_HASHTAB_STACKCAP];                             \
+        scc_hashtab_metatype ht_meta[SCC_HASHTAB_STACKCAP];             \
+        scc_hashtab_metatype ht_meta_guard[scc_hashtab_impl_guardsz()]; \
     }
 
-#define scc_hashtab_impl_initsize(type)                             \
+#define scc_hashtab_impl_initsize(type)                                 \
     sizeof(scc_hashtab_impl_layout(type))
 
-#define scc_hashtab_impl_inittab(type)                              \
-    (union {                                                        \
-        struct scc_hashtab sc_tab;                                  \
-        unsigned char sc_buffer[scc_hashtab_impl_initsize(type)];   \
+#define scc_hashtab_impl_inittab(type)                                  \
+    (union {                                                            \
+        struct scc_hashtab sc_tab;                                      \
+        unsigned char sc_buffer[scc_hashtab_impl_initsize(type)];       \
     }){ 0 }.sc_tab
 
-#define scc_hashtab_impl_dataoff(type)                              \
+#define scc_hashtab_impl_guardsz()                                      \
+    (SCC_VECSIZE / sizeof(scc_hashtab_metatype) - 1u)
+
+#define scc_hashtab_impl_dataoff(type)                                  \
     offsetof(scc_hashtab_impl_layout(type), ht_tmp)
 
-#define scc_hashtab_impl_mdoff(type)                                \
+#define scc_hashtab_impl_mdoff(type)                                    \
     offsetof(scc_hashtab_impl_layout(type), ht_meta)
 
-#define scc_hashtab_impl_base_qual(tab, qual)                       \
-    scc_container_qual(                                             \
-        tab - scc_hashtab_impl_bkoff(tab),                          \
-        struct scc_hashtab,                                         \
-        ht_fwoff,                                                   \
-        qual                                                        \
+#define scc_hashtab_impl_base_qual(tab, qual)                           \
+    scc_container_qual(                                                 \
+        tab - scc_hashtab_impl_bkoff(tab),                              \
+        struct scc_hashtab,                                             \
+        ht_fwoff,                                                       \
+        qual                                                            \
     )
 
-#define scc_hashtab_impl_base(tab)                                  \
+#define scc_hashtab_impl_base(tab)                                      \
     scc_hashtab_impl_base_qual(tab,)
 
-#define scc_hashtab_init(type, eq)                                  \
+#define scc_hashtab_init(type, eq)                                      \
     scc_hashtab_with_hash(type, eq, scc_hashtab_fnv1a)
 
-#define scc_hashtab_with_hash(type, eq, hash)                       \
-    scc_hashtab_impl_init(                                          \
-        &scc_hashtab_impl_inittab(type),                            \
-        eq,                                                         \
-        hash,                                                       \
-        scc_hashtab_impl_dataoff(type),                             \
-        scc_hashtab_impl_mdoff(type),                               \
-        SCC_HASHTAB_STACKCAP                                        \
+#define scc_hashtab_with_hash(type, eq, hash)                           \
+    scc_hashtab_impl_init(                                              \
+        &scc_hashtab_impl_inittab(type),                                \
+        eq,                                                             \
+        hash,                                                           \
+        scc_hashtab_impl_dataoff(type),                                 \
+        scc_hashtab_impl_mdoff(type),                                   \
+        SCC_HASHTAB_STACKCAP                                            \
     )
 
 void *scc_hashtab_impl_init(void *inittab, scc_eq eq, scc_hash hash, size_t dataoff, size_t mdoff, size_t capacity);
