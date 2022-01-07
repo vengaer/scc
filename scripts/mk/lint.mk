@@ -6,7 +6,8 @@ pylintsrc  := $(wildcard $(pyscripts)/*$(pyext))
 tidyenable := clang-analyzer misc performance portability cert readability
 tidyignore := clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling \
               readability-function-cognitive-complexity                            \
-              readability-uppercase-literal-suffix readability-magic-numbers
+              readability-uppercase-literal-suffix readability-magic-numbers       \
+              cert-dcl16-c
 
 __comma    :=,
 tidychecks := $(subst $(subst ,, ),$(__comma),$(addsuffix -*,$(tidyenable)) $(addprefix -,$(tidyignore)))
