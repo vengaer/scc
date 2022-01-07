@@ -17,7 +17,6 @@ unit_LDFLAGS := -fsanitize=address,undefined
 .PHONY: all
 all:
 
-$(unityalib): $(machinfo)
 $(unityalib): $(call reeval,cpu_cores,$(unityalib))
 $(unityalib): $(submodules)
 	$(CMAKE) -B $(dir $@) $(dir $@)
