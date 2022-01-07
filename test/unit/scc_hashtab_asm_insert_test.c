@@ -31,5 +31,18 @@ void test_hashtab_insertion_probing_when_empty(void) {
     scc_hashtab_free(hashtab);
 }
 
+void test_hashtab_insertion_probing_single_duplicate(void) {
+    scc_hashtab(int) hashtab = scc_hashtab_init(int, eq);
+    struct scc_hashtab *base = scc_hashtab_inspect_base(hashtab);
+
+    TEST_ASSERT_TRUE(scc_hashtab_insert(hashtab, 13));
+
+    unsigned long long hash = scc_hashtab_fnv1a(&(int){ 13 }, sizeof(int));
+    long long probed = scc_hashtab_impl_insert_probe(base, hashtab, sizeof(int), hash);
+
+    TEST_ASSERT_EQUAL_INT64(-1ll, probed);
+
+    scc_hashtab_free(hashtab);
+}
 
 #endif
