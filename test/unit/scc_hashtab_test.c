@@ -9,6 +9,22 @@ static bool eq(void const *left, void const *right) {
     return *(int const *)left == *(int const *)right;
 }
 
+static unsigned long long ident(void const *data, size_t size) {
+    switch(size) {
+        case sizeof(unsigned char):
+            return *(unsigned char const *)data;
+        case sizeof(unsigned short):
+            return *(unsigned short const *)data;
+        case sizeof(unsigned):
+            return *(unsigned const *)data;
+        case sizeof(unsigned long long):
+            return *(unsigned long long const *)data;
+        default:
+            TEST_ASSERT_EQUAL_UINT64(0ull, size);
+    }
+    return 0ull;
+}
+
 static struct scc_hashtab *tabbase(void *tab) {
     struct scc_hashtab *base = scc_container(
         tab - ((unsigned char *)tab)[-1] - sizeof(base->ht_fwoff),
@@ -32,5 +48,13 @@ void test_scc_hashtab_fwoff(void) {
     size_t const off = base->ht_fwoff + offsetof(struct scc_hashtab, ht_fwoff) + sizeof(base->ht_fwoff);
     int *fwp = (void *)((unsigned char *)base + off);
     TEST_ASSERT_EQUAL_PTR(hashtab, fwp);
+    scc_hashtab_free(hashtab);
+}
+
+void test_scc_hashtab_explicit_hash(void) {
+    scc_hashtab(int) hashtab = scc_hashtab_with_hash(int, eq, ident);
+    struct scc_hashtab *base = tabbase(hashtab);
+    /* UB */
+    TEST_ASSERT_EQUAL_PTR(base->ht_hash, ident);
     scc_hashtab_free(hashtab);
 }
