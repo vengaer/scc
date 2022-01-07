@@ -21,6 +21,12 @@ link:reference/scc_rbtree.html[reference]
 
 == scc_stack
 
-Adapter providing a stack interface for the underlying container
+Adapter providing a stack interface for the underlying container.
 
 link:reference/scc_stack.html[reference]
+
+== scc_hashtab
+
+Flat, high-performant hash table.
+
+link:reference/scc_hashtab.html[reference]
