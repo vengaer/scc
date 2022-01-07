@@ -1,6 +1,8 @@
 #ifndef SCC_HASHTAB_H
 #define SCC_HASHTAB_H
 
+#include "scc_mem.h"
+
 #include <stddef.h>
 
 enum { SCC_HASHTAB_STACKCAP = 32 };
@@ -49,6 +51,17 @@ struct scc_hashtab {
 #define scc_hashtab_impl_mdoff(type)                                \
     offsetof(scc_hashtab_impl_layout(type), ht_hash)
 
+#define scc_hashtab_impl_base_qual(tab, qual)                       \
+    scc_container_qual(                                             \
+        tab - scc_hashtab_impl_bkoff(tab),                          \
+        struct scc_hashtab,                                         \
+        ht_fwoff,                                                   \
+        qual                                                        \
+    )
+
+#define scc_hashtab_impl_base(tab)                                  \
+    scc_hashtab_impl_base_qual(tab,)
+
 #define scc_hashtab_init(type, eq)                                  \
     scc_hashtab_impl_init(                                          \
         &scc_hashtab_impl_inittab(type),                            \
@@ -59,5 +72,11 @@ struct scc_hashtab {
     )
 
 void *scc_hashtab_impl_init(void *inittab, scc_eq eq, size_t dataoff, size_t mdoff, size_t capacity);
+
+void scc_hashtab_free(void *tab);
+
+inline size_t scc_hashtab_impl_bkoff(void const *tab) {
+    return ((unsigned char const *)tab)[-1] + sizeof(((struct scc_hashtab *)0)->ht_fwoff);
+}
 
 #endif /* SCC_HASHTAB_H */
