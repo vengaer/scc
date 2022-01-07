@@ -66,10 +66,13 @@ struct scc_hashtab {
     scc_hashtab_impl_base_qual(tab,)
 
 #define scc_hashtab_init(type, eq)                                  \
+    scc_hashtab_with_hash(type, eq, scc_hashtab_fnv1a)
+
+#define scc_hashtab_with_hash(type, eq, hash)                       \
     scc_hashtab_impl_init(                                          \
         &scc_hashtab_impl_inittab(type),                            \
         eq,                                                         \
-        scc_hashtab_fnv1a,                                          \
+        hash,                                                       \
         scc_hashtab_impl_dataoff(type),                             \
         scc_hashtab_impl_mdoff(type),                               \
         SCC_HASHTAB_STACKCAP                                        \
