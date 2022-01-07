@@ -53,4 +53,4 @@ def build(rundir):
 @pytest.fixture
 def remove_mach_asm(rundir):
     ''' Remove asm tree in {rundir}/mach '''
-    shutil.rmtree(f'{rundir}/mach/asm')
+    shutil.rmtree(f'{rundir}/mach')

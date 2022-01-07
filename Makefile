@@ -39,7 +39,6 @@ mkscripts    := $(scripts)/mk
 pyscripts    := $(scripts)/python
 
 mach         := $(root)/mach
-asmach       := $(mach)/asm
 
 cext         := c
 hext         := h

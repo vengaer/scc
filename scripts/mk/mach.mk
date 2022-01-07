@@ -23,7 +23,7 @@ $(if $(call not,$(__is_cleaning)), \
    $(eval -include $(machinfo))    \
    $(eval -include $(vecinfo)))
 
-as_abi_mach   := $(asmach)/$(arch_lower)/$(abi_lower)
+as_abi_mach   := $(mach)/$(arch_lower)/$(abi_lower)
 
 __isa_obj     := $(patsubst $(as_abi_mach)/%.$(asext),$(machbuilddir)/%.$(oext),\
                    $(wildcard $(as_abi_mach)/*.$(asext)))
