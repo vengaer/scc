@@ -13,15 +13,14 @@ vecinfo       := $(machbuilddir)/vecinfo.$(mkext)
 simdbin       := $(machbuilddir)/simd_isa_detect
 
 __is_cleaning := $(findstring clean,$(MAKECMDGOALS))
-__not          = $(if $(1),,_)
 __delay       := _
 
 $(machinfo): $(machscript) | $(machbuilddir)
 	$(info [PY] $(notdir $@))
 	$< -o $@
 
-$(if $(call __not,$(__is_cleaning)), \
-   $(eval -include $(machinfo))      \
+$(if $(call not,$(__is_cleaning)), \
+   $(eval -include $(machinfo))    \
    $(eval -include $(vecinfo)))
 
 as_abi_mach   := $(asmach)/$(arch_lower)/$(abi_lower)
@@ -44,7 +43,7 @@ $(machbuilddir)/%.$(oext): $(as_abi_mach)/%.$(asext) $(machinfo) | $(machbuilddi
 	$(info [AS] $(notdir $@))
 	$(AS) -o $@ $< $(ASFLAGS)
 
-$(if $(and $(call __not,$(__is_cleaning),$(wildcard $(as_abi_mach)/*.$(asext)))), \
+$(if $(and $(call not,$(__is_cleaning),$(wildcard $(as_abi_mach)/*.$(asext)))), \
     $(eval -include $(simdinfo)))
 
 # Force reevaluation of simd_isa for recipe
@@ -52,7 +51,7 @@ $(vecinfo): simd_isa := $(eval $(vecinfo): simd_isa := $(simd_isa))$(simd_isa)
 # $(simdinfo) dependence for found SIMD ISA
 $(vecinfo): $(if $(simd_isa),$(simdinfo))
 # Unknown ISA, set simd_isa to UNSUPPORTED
-$(vecinfo): $(if $(call __not,$(simd_isa)),$(eval $(vecinfo): simd_isa := UNSUPPORTED))
+$(vecinfo): $(if $(call not,$(simd_isa)),$(eval $(vecinfo): simd_isa := UNSUPPORTED))
 $(vecinfo): $(vecscript) | $(machbuilddir)
 	$(info [PY] $(notdir $@))
 	$< -o $@ $(simd_isa)

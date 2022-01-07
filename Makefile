@@ -86,6 +86,7 @@ sccobj       := $(patsubst $(srcdir)/%.$(cext),$(sccbuilddir)/%.$(oext),$(wildca
 obj          += $(sccobj)
 
 .SECONDEXPANSION:
+include $(mkscripts)/expr.$(mkext)
 include $(mkscripts)/deps.$(mkext)
 include $(mkscripts)/inspect.$(mkext)
 include $(mkscripts)/mach.$(mkext)
