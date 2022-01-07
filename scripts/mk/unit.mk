@@ -17,9 +17,11 @@ unit_LDFLAGS := -fsanitize=address,undefined
 .PHONY: all
 all:
 
+$(unityalib): $(machinfo)
+$(unityalib): $(call reeval,cpu_cores,$(unityalib))
 $(unityalib): $(submodules)
 	$(CMAKE) -B $(dir $@) $(dir $@)
-	$(MAKE) -C $(dir $@)
+	$(MAKE) -C $(dir $@) -j$(cpu_cores)
 	$(TOUCH) $@
 
 $(unitygen): $(submodules)
