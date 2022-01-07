@@ -33,6 +33,7 @@ panictestdir := $(testdir)/panic
 doctestdir   := $(testdir)/docs
 buildtestdir := $(testdir)/buildsystem
 docdir       := $(root)/docs
+submoddir    := $(root)/submodules
 
 scripts      := $(root)/scripts
 mkscripts    := $(scripts)/mk

@@ -1,4 +1,4 @@
-unitydir     := $(root)/unity
+unitydir     := $(submoddir)/unity
 unitygen     := $(unitydir)/auto/generate_test_runner.rb
 unityinc     := $(unitydir)/src
 unityalib    := $(unitydir)/libunity.a
