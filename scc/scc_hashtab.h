@@ -88,9 +88,12 @@ void *scc_hashtab_impl_init(void *inittab, scc_eq eq, scc_hash hash, size_t data
 void scc_hashtab_free(void *tab);
 unsigned long long scc_hashtab_fnv1a(void const *data, size_t size);
 
-
 inline size_t scc_hashtab_impl_bkoff(void const *tab) {
     return ((unsigned char const *)tab)[-1] + sizeof(((struct scc_hashtab *)0)->ht_fwoff);
+}
+
+inline size_t scc_hashtab_capacity(void const *tab) {
+    return scc_hashtab_impl_base_qual(tab, const)->ht_capacity;
 }
 
 #endif /* SCC_HASHTAB_H */

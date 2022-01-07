@@ -7,6 +7,7 @@
 #define SCC_HASHTAB_GUARD ((scc_hashtab_metatype)0x4000u)
 
 size_t scc_hashtab_impl_bkoff(void const *tab);
+size_t scc_hashtab_capacity(void const *tab);
 
 static size_t scc_hashtab_md_size(struct scc_hashtab const *base);
 static void scc_hashtab_init_mdguard(struct scc_hashtab *tab);
