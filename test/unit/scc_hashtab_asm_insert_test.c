@@ -45,4 +45,18 @@ void test_hashtab_insertion_probing_single_duplicate(void) {
     scc_hashtab_free(hashtab);
 }
 
+void test_hashtab_insertion_probing_single_non_duplicate(void) {
+    scc_hashtab(int) hashtab = scc_hashtab_init(int, eq);
+    struct scc_hashtab *base = scc_hashtab_inspect_base(hashtab);
+
+    unsigned long long hash = scc_hashtab_fnv1a(&(int){ 88 }, sizeof(int));
+    unsigned slot = hash & (scc_hashtab_capacity(hashtab) - 1u);
+    scc_hashtab_metatype *md = scc_hashtab_inspect_md(hashtab);
+    md[slot] = 0x8000;
+    long long probed = scc_hashtab_impl_insert_probe(base, hashtab, sizeof(int), hash);
+
+    TEST_ASSERT_EQUAL_INT64(slot + 1ll, probed);
+    scc_hashtab_free(hashtab);
+}
+
 #endif
