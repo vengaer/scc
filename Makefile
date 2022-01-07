@@ -97,6 +97,7 @@ include $(mkscripts)/docs.$(mkext)
 include $(mkscripts)/lint.$(mkext)
 include $(mkscripts)/panic.$(mkext)
 include $(mkscripts)/buildtest.$(mkext)
+include $(mkscripts)/perf.$(mkext)
 
 .PHONY: all
 all: $(alib) $(solink)
