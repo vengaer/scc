@@ -105,4 +105,9 @@ _Bool scc_hashtab_impl_insert(void *tab, size_t elemsize);
 #define scc_hashtab_insert(tab, value)                                  \
     scc_hashtab_impl_insert((*tab = value, &tab), sizeof(*tab))
 
+void const *scc_hashtab_impl_find(void const *tab, size_t elemsize);
+
+#define scc_hashtab_find(tab, value)                                    \
+    scc_hashtab_impl_find((*tab = value, tab), sizeof(value))
+
 #endif /* SCC_HASHTAB_H */

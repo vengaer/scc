@@ -19,6 +19,12 @@ extern long long scc_hashtab_impl_insert_probe(
     unsigned long long hash
 );
 extern void scc_hashtab_impl_prep_iter(scc_hashtab_metatype *md, unsigned long long size);
+extern long long scc_hashtab_impl_find_probe(
+    struct scc_hashtab const *base,
+    void const *table,
+    unsigned long long elemsize,
+    unsigned long long hash
+);
 #endif
 
 size_t scc_hashtab_impl_bkoff(void const *tab);
@@ -207,5 +213,17 @@ bool scc_hashtab_impl_insert(void *tab, size_t elemsize) {
         return true;
     }
     return false;
+}
+
+void const *scc_hashtab_impl_find(void const *tab, size_t elemsize) {
+    struct scc_hashtab const *base = scc_hashtab_impl_base_qual(tab, const);
+    unsigned long long hash = base->ht_hash(tab, elemsize);
+    long long const index = scc_hashtab_impl_find_probe(base, tab, elemsize, hash);
+    if(index == -1) {
+        return 0;
+    }
+
+    /* tab holds address of base->ht_data[-1] */
+    return (void const *)((unsigned char const *)tab + (index + 1) * elemsize);
 }
 
