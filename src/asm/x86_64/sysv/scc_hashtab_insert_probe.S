@@ -16,7 +16,7 @@ scc_hashtab_impl_insert_probe:
 
     subq    $framesz, %rsp                  # Space for locals, align stack
 
-    movq    %rbx, (%rsp)                    # Use %rbx for persistently storing table address
+    movq    %rbx, 0x40(%rsp)                # Use %rbx for persistently storing table address
     movq    %rdi, %rbx
 
     movq    cap(%rbx), %r8                  # Table capacity
@@ -72,13 +72,13 @@ scc_hashtab_impl_insert_probe:
     notl    %r11d
     andl    %r11d, %r9d
 
-    movl    %r10d, 0x08(%rsp)               # Store offset of first vacant slot
-    movq    %rax, 0x10(%rsp)                # Store slot index
-    movq    %rdx, 0x18(%rsp)                # Store element size
-    movq    %rsi, 0x20(%rsp)                # Store ht_tmp
+    movl    %r10d,(%rsp)                    # Store offset of first vacant slot
+    movq    %rax, 0x08(%rsp)                # Store slot index
+    movq    %rdx, 0x10(%rsp)                # Store element size
+    movq    %rsi, 0x18(%rsp)                # Store ht_tmp
 
 .Leq_probe:
-    movl    %r9d, 0x0c(%rsp)                # Store hash match bitmask
+    movl    %r9d, 0x04(%rsp)                # Store hash match bitmask
 
     shrl    $1, %ecx                        # Divide by to for word offset
     leaq    1(%rax, %rcx), %r11             # Array offset, %rdi holds address of ht_data[-1]
@@ -94,8 +94,8 @@ scc_hashtab_impl_insert_probe:
 
     jc      .Lduplicate
 
-    movl    0x08(%rsp), %r10d               # Restore offset of first vacant slot
-    movl    0x0c(%rsp), %r9d                # Restore hash match bitset
+    movl    (%rsp), %r10d                   # Restore offset of first vacant slot
+    movl    0x04(%rsp), %r9d                # Restore hash match bitset
 
     bsfl    %r9d, %ecx                      # Offset in ymmword of next matching hash
     jz      .Lfound                         # Vacant exists, no match, done
@@ -103,9 +103,9 @@ scc_hashtab_impl_insert_probe:
     cmpl    %ecx, %r10d                     # Check if vacant before matching hash
     jb      .Lfound
 
-    movq    0x10(%rsp), %rax                # Restore slot index
-    movq    0x18(%rsp), %rdx                # Restore element size
-    movq    0x20(%rsp), %rsi                # Restore ht_tmp
+    movq    0x08(%rsp), %rax                # Restore slot index
+    movq    0x10(%rsp), %rdx                # Restore element size
+    movq    0x18(%rsp), %rsi                # Restore ht_tmp
 
     movl    $1, %r11d                       # Clear hash match bit
     shll    %cl, %r11d
@@ -117,10 +117,10 @@ scc_hashtab_impl_insert_probe:
     bsfl    %r9d, %ecx                      # Offset in ymmword of first matching hash
     jz      .Lno_match
 
-    movq    %rax, 0x10(%rsp)                # Slot index
-    movq    %rdx, 0x18(%rsp)                # Element size
-    movq    %rsi, 0x20(%rsp)                # ht_tmp
-    vmovdqa %ymm15, 0x28(%rsp)              # Packed hash
+    movq    %rax, 0x08(%rsp)                # Slot index
+    movq    %rdx, 0x10(%rsp)                # Element size
+    movq    %rsi, 0x18(%rsp)                # ht_tmp
+    vmovdqa %ymm15, 0x20(%rsp)              # Packed hash
 
 .Leq_probe_no_vacant:
     movl    $1, %r11d                       # Clear hash match bit
@@ -128,7 +128,7 @@ scc_hashtab_impl_insert_probe:
     notl    %r11d
     andl    %r11d, %r9d
 
-    movl    %r9d, 0x0c(%rsp)                # Hash match bitmask
+    movl    %r9d, 0x04(%rsp)                # Hash match bitmask
 
     shrl    $1, %ecx                        # Divide by 2 for word offset
     leaq    1(%rax, %rcx), %r11             # Array offset, %rdi holds address of ht_data[-1]
@@ -144,15 +144,15 @@ scc_hashtab_impl_insert_probe:
 
     jc      .Lduplicate
 
-    movl    0x0c(%rsp), %r9d                # Hash match bitmask
-    movq    0x10(%rsp), %rax                # Restore slot index
-    movq    0x18(%rsp), %rdx                # Element size
-    movq    0x20(%rsp), %rsi                # ht_tmp
+    movl    0x04(%rsp), %r9d                # Hash match bitmask
+    movq    0x08(%rsp), %rax                # Restore slot index
+    movq    0x10(%rsp), %rdx                # Element size
+    movq    0x18(%rsp), %rsi                # ht_tmp
 
     bsfl    %r9d, %ecx                      # Check if another match exists
     jnz     .Leq_probe_no_vacant
 
-    vmovdqa 0x28(%rsp), %ymm15              # Restore packed hash
+    vmovdqa 0x20(%rsp), %ymm15              # Restore packed hash
 
 .Lno_match:
     addq    $0x20, %rax                     # Addvance index
@@ -162,7 +162,7 @@ scc_hashtab_impl_insert_probe:
     jmp     .Lprobe
 
 .Lfound:
-    movq    (%rsp), %rbx                    # Restore rbx
+    movq    0x40(%rsp), %rbx                # Restore rbx
     addq    $framesz, %rsp                  # Restore stack
     shrl    $1, %r10d                       # Divide by 2 for word offset
     leaq    (%rax, %r10), %rax              # Compute index
@@ -170,7 +170,7 @@ scc_hashtab_impl_insert_probe:
     ret
 
 .Lduplicate:
-    movq    (%rsp), %rbx                    # Restore rbx
+    movq    0x40(%rsp), %rbx                # Restore rbx
     addq    $framesz, %rsp                  # Restore stack
     movq    $-1, %rax                       # Return -1
     vzeroupper
