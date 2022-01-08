@@ -19,10 +19,8 @@
 scc_hashtab_impl_prep_iter:
     shlq    $1, %rsi                        # Multiply by 2 for word size
     leaq    (%rdi, %rsi), %rdi              # Address of end
-
-    movq    %rsi, %rdx                      # Compute number of vectors
-    shrq    $5, %rdx
     negq    %rsi                            # Negate offset
+
 .Ltransform_unrolled:
     vmovdqu (%rdi, %rsi), %ymm0             # Load first ymmword
     transform   %ymm0, %ymm1, %ymm2
@@ -35,14 +33,5 @@ scc_hashtab_impl_prep_iter:
     addq    $0x40, %rsi                     # Advance
     jnz     .Ltransform_unrolled
 
-    btl     $0, %edx                        # Check for residual
-    jz      .Lepi
-
-.Lresidual:
-    vmovdqu -0x20(%rdi), %ymm0              # Final ymmword
-    transform   %ymm0, %ymm1, %ymm2
-    vmovdqu %ymm0, -0x20(%rdi)              # Write back
-
-.Lepi:
     vzeroupper
     ret
