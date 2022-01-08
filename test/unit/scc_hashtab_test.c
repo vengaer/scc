@@ -122,3 +122,18 @@ void test_scc_hashtab_non_rehashed_find(void) {
     }
     scc_hashtab_free(tab);
 }
+
+void test_scc_hashtab_rehashed_find(void) {
+    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+    size_t const cap = scc_hashtab_capacity(tab);
+    int const *elem;
+    for(unsigned i = 0u; i < cap; ++i) {
+        TEST_ASSERT_TRUE(scc_hashtab_insert(tab, i));
+        for(unsigned j = 0u; j < i; ++j) {
+            elem = scc_hashtab_find(tab, i);
+            TEST_ASSERT_TRUE(elem);
+            TEST_ASSERT_EQUAL_INT32(i, *elem);
+        }
+    }
+    scc_hashtab_free(tab);
+}
