@@ -52,11 +52,13 @@ $(strip
             $(__bin): $(__o) $(patsubst %.$(oext),%$(runnersuffix).$(oext),$(__o)) $(unityalib) $(libinspect) $(alib)
 	            $$(info [LD] $$(notdir $$@))
 	            $$(LD) -o $$@ $$^ $$(LDFLAGS) $$(unit_LDFLAGS) $$(LDLIBS)
+            $(eval __stamp := $(unitbuilddir)/.__chk_$(subst /,_,$(__bin)).stamp)
 
-            __chk_$(__bin): $(__bin)
+            $(__stamp): $(__bin)
 	          $$^
+	          $(TOUCH) $$@
 
-            check: __chk_$(__bin))))
+            check: $(__stamp))))
 endef
 
 .PHONY: __clean_unity
