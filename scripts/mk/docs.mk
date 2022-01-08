@@ -19,6 +19,8 @@ docsnips       := $(wildcard $(snipdir)/*.$(snipext))
 snips          := $(patsubst $(snipdir)/%.$(snipext),$(snipbuilddir)/%,$(docsnips))
 htmlpgs        := $(patsubst $(docdir)/%.$(adocext),$(docbuilddir)/%.$(htmlext),$(wildcard $(addsuffix /*.$(adocext),$(docsrcdirs))))
 
+__chk_docs     := $(docbuilddir)/.chk.stamp
+
 .PHONY: all
 all:
 
@@ -30,11 +32,15 @@ show: $(docindex) doc
 	$(if $(BROWSER),,$(error BROWSER environment variable not set))
 	$(BROWSER) $<
 
-.PHONY: __chk_docs
-check:
+$(__chk_docs): $(wildcard $(snipdir)/*.$(snipext))
+$(__chk_docs): $(wildcard $(snipdir)/*.$(jsonext))
+$(__chk_docs): $(wildcard $(mkscripts)/*.$(mkext))
+$(__chk_docs): $(wildcard $(pyscripts)/*.$(pyext))
+$(__chk_docs): Makefile
 	$(PYTEST) $(PYTESTFLAGS) --builddir=$(snipbuilddir) $(doctestdir)
+	$(TOUCH) $@
 
-check: __chk_docs
+check: $(__chk_docs)
 
 $(refbuilddir)/%.$(htmlext): $(refdir)/%.$(adocext) $(docsnips) | $(refbuilddir)
 	$(info [ADOC] $(notdir $@))
@@ -60,7 +66,7 @@ $(strip
 	            $$(info [PY] $$(notdir $$@))
 	            $$(PYTHON) $$(snipgen) -o $$@ -s $$(symmap) -f $$(funcdefs) $$<
 
-            __chk_docs: $(__t))))
+            $(__chk_docs): $(__t))))
 endef
 
 $(call snip-linker-rules)
