@@ -7,6 +7,8 @@ panicvar      := panicgen
 
 panicobj      := $(patsubst $(panictestdir)/%.$(cext),$(panicbuilddir)/%.$(oext),$(wildcard $(panictestdir)/*.$(cext)))
 
+__chk_panic   := $(panicbuilddir)/.chk.stamp
+
 .PHONY: all
 all:
 
@@ -22,12 +24,16 @@ $(panicbuilddir)/%.$(oext): $(panicbuilddir)/%.$(cext)
 	$(info [CC] $(notdir $@))
 	$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $^
 
-.PHONY: __chk_panic
-__chk_panic:
+$(__chk_panic): $(wildcard $(mkscripts)/*.$(mkext))
+$(__chk_panic): $(wildcard $(pyscripts)/*.$(pyext))
+$(__chk_panic): $(wildcard $(panictestdir)/*.$(pyext))
+$(__chk_panic): $(wildcard $(panictestdir)/*.$(cext))
+$(__chk_panic): Makefile
 	$(PYTEST) $(PYTESTFLAGS) --builddir=$(panicbuilddir) $(panictestdir)
+	$(TOUCH) $@
 
 .PHONY: check
-check: __chk_panic
+check: $(__chk_panic)
 check: obj += $(panicobj)
 
 define panic-linker-rules
@@ -39,7 +45,7 @@ $(strip
 	            $$(info [LD] $$(notdir $$@))
 	            $$(LD) -o $$@ $$^ $$(LDFLAGS) $$(unit_LDFLAGS) $$(LDLIBS)
 
-            __chk_panic: $(__bin))))
+            $(__chk_panic): $(__bin))))
 endef
 
 
