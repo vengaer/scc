@@ -11,4 +11,9 @@
 struct scc_hashtab *scc_hashtab_inspect_base(void *tab);
 scc_hashtab_metatype *scc_hashtab_inspect_md(void *tab);
 
+void *scc_hashtab_inspect_impl_data(void *tab, size_t elemsize);
+
+#define scc_hashtab_inspect_data(tab)   \
+    scc_hashtab_inspect_impl_data(tab, sizeof(*tab))
+
 #endif /* SCC_HASHTAB_INSPECT_H */

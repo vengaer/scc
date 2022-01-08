@@ -10,6 +10,16 @@ static bool eq(void const *left, void const *right) {
     return *(int const *)left == *(int const *)right;
 }
 
+static bool contains(int *tab, int value) {
+    int *data = scc_hashtab_inspect_data(tab);
+    for(unsigned i = 0u; i < scc_hashtab_capacity(tab); ++i) {
+        if(data[i] == value) {
+            return true;
+        }
+    }
+    return false;
+}
+
 static unsigned long long ident(void const *data, size_t size) {
     switch(size) {
         case sizeof(unsigned char):
@@ -67,13 +77,16 @@ void test_scc_hashtab_guard_initialized(void) {
 void test_scc_hashtab_insert_single(void) {
     scc_hashtab(int) hashtab = scc_hashtab_init(int, eq);
     TEST_ASSERT_TRUE(scc_hashtab_insert(hashtab, 13));
+    TEST_ASSERT_TRUE(contains(hashtab, 13));
     scc_hashtab_free(hashtab);
 }
 
 void test_scc_hashtab_insert_disallow_duplicate(void) {
     scc_hashtab(int) tab = scc_hashtab_init(int, eq);
     TEST_ASSERT_TRUE(scc_hashtab_insert(tab, 88));
+    TEST_ASSERT_TRUE(contains(tab, 88));
     TEST_ASSERT_FALSE(scc_hashtab_insert(tab, 88));
+    TEST_ASSERT_TRUE(contains(tab, 88));
     scc_hashtab_free(tab);
 }
 
@@ -83,6 +96,9 @@ void test_scc_hashtab_insert_10x(void) {
     for(int i = 0; i < SIZE; ++i) {
         TEST_ASSERT_TRUE(scc_hashtab_insert(tab, i));
         TEST_ASSERT_EQUAL_UINT64(i + 1ull, scc_hashtab_size(tab));
+        for(int j = 0u; j <= i; ++j) {
+            TEST_ASSERT_TRUE(contains(tab, j));
+        }
     }
     scc_hashtab_free(tab);
 }
@@ -90,9 +106,12 @@ void test_scc_hashtab_insert_10x(void) {
 void test_scc_hashtab_insert_rehash(void) {
     scc_hashtab(int) tab = scc_hashtab_init(int, eq);
     size_t const cap = scc_hashtab_capacity(tab);
-    for(unsigned i = 0; i < cap; ++i) {
+    for(unsigned i = 0u; i < cap; ++i) {
         TEST_ASSERT_TRUE(scc_hashtab_insert(tab, i));
         TEST_ASSERT_EQUAL_UINT64(i + 1ull, scc_hashtab_size(tab));
+        for(unsigned j = 0u; j <= i; ++j) {
+            TEST_ASSERT_TRUE(contains(tab, j));
+        }
     }
     TEST_ASSERT_NOT_EQUAL_UINT64(cap, scc_hashtab_capacity(tab));
     scc_hashtab_free(tab);

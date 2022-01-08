@@ -15,3 +15,7 @@ scc_hashtab_metatype *scc_hashtab_inspect_md(void *tab) {
     struct scc_hashtab *base = scc_hashtab_inspect_base(tab);
     return (void *)((unsigned char *)base + base->ht_mdoff);
 }
+
+void *scc_hashtab_inspect_impl_data(void *tab, size_t elemsize) {
+    return (unsigned char *)tab + elemsize;
+}
