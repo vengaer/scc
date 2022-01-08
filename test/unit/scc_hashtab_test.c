@@ -10,6 +10,10 @@ static bool eq(void const *left, void const *right) {
     return *(int const *)left == *(int const *)right;
 }
 
+static bool ueq(void const *left, void const *right) {
+    return *(unsigned const *)left == *(unsigned const *)right;
+}
+
 static bool contains(int *tab, int value) {
     int *data = scc_hashtab_inspect_data(tab);
     for(unsigned i = 0u; i < scc_hashtab_capacity(tab); ++i) {
@@ -163,5 +167,22 @@ void test_scc_hashtab_removal(void) {
     TEST_ASSERT_TRUE(scc_hashtab_find(tab, 13));
     TEST_ASSERT_TRUE(scc_hashtab_remove(tab, 13));
     TEST_ASSERT_FALSE(scc_hashtab_find(tab, 13));
+    scc_hashtab_free(tab);
+}
+
+void test_scc_hashtab_fuzzer_failure_case0(void) {
+    scc_hashtab(unsigned) tab = scc_hashtab_init(unsigned, ueq);
+    static unsigned const data[] = {
+        3394184074u, 3621246897
+    };
+    unsigned const *elem;
+    for(unsigned i = 0u; i < scc_arrsize(data); ++i) {
+        TEST_ASSERT_TRUE(scc_hashtab_insert(tab, data[i]));
+        for(unsigned j = 0u; j <= i; ++j) {
+            elem = scc_hashtab_find(tab, data[j]);
+            TEST_ASSERT_TRUE(elem);
+            TEST_ASSERT_EQUAL_UINT32(data[j], *elem);
+        }
+    }
     scc_hashtab_free(tab);
 }
