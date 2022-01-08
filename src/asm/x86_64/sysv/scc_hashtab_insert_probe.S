@@ -66,15 +66,15 @@ scc_hashtab_impl_insert_probe:
 
     vpsllw  $15, %ymm13, %ymm13             # High-bit mask
 
-    vpand   %ymm2, %ymm13, %ymm2            # Mask out low 15 bits of each word
-    vpand   %ymm3, %ymm13, %ymm3
-    vpand   %ymm7, %ymm13, %ymm7
-    vpand   %ymm8, %ymm13, %ymm8
+    vpand   %ymm2, %ymm13, %ymm0            # Mask out low 15 bits of each word
+    vpand   %ymm3, %ymm13, %ymm1
+    vpand   %ymm7, %ymm13, %ymm5
+    vpand   %ymm8, %ymm13, %ymm6
 
-    vpsrlw  $1, %ymm2, %ymm2                # Shift down sign bit
-    vpsrlw  $1, %ymm3, %ymm3
-    vpsrlw  $1, %ymm7, %ymm7
-    vpsrlw  $1, %ymm8, %ymm8
+    vpsrlw  $1, %ymm0, %ymm2                # Shift down sign bit
+    vpsrlw  $1, %ymm1, %ymm3
+    vpsrlw  $1, %ymm5, %ymm7
+    vpsrlw  $1, %ymm6, %ymm8
 
     vpackuswb   %ymm7, %ymm2, %ymm0         # Bit 14 of words to high bit of bytes
     vpackuswb   %ymm8, %ymm3, %ymm1
