@@ -103,16 +103,16 @@ inline size_t scc_hashtab_size(void const *tab) {
 _Bool scc_hashtab_impl_insert(void *tab, size_t elemsize);
 
 #define scc_hashtab_insert(tab, value)                                  \
-    scc_hashtab_impl_insert((*tab = value, &tab), sizeof(*tab))
+    scc_hashtab_impl_insert((*(tab) = (value), &(tab)), sizeof(*tab))
 
 void const *scc_hashtab_impl_find(void const *tab, size_t elemsize);
 
 #define scc_hashtab_find(tab, value)                                    \
-    scc_hashtab_impl_find((*tab = value, tab), sizeof(value))
+    scc_hashtab_impl_find((*(tab) = (value), (tab)), sizeof(value))
 
 _Bool scc_hashtab_impl_remove(void *tab, size_t elemsize);
 
 #define scc_hashtab_remove(tab, value)                                  \
-    scc_hashtab_impl_remove((*tab = value, tab), sizeof(value))
+    scc_hashtab_impl_remove((*(tab) = (value), (tab)), sizeof(value))
 
 #endif /* SCC_HASHTAB_H */
