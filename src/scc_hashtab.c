@@ -159,7 +159,10 @@ static struct scc_hashtab *scc_hashtab_resize(
 
     size_t const size = mdoff + (newcap + scc_hashtab_impl_guardsz()) * sizeof(scc_hashtab_metatype);
 
-    struct scc_hashtab *newbase = calloc(size, sizeof(unsigned char));
+    /* Allocate new hash table consisting of a total of size bytes, ignore
+     * clang-tidy being worried about struct scc_hashtab being larger than
+     * unsigned char */
+    struct scc_hashtab *newbase = calloc(size, sizeof(unsigned char)); /* NOLINT */
     if(!newbase) {
         return 0;
     }
