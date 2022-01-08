@@ -22,9 +22,6 @@ scc_hashtab_impl_prep_iter:
 
     movq    %rsi, %rdx                      # Compute number of vectors
     shrq    $5, %rdx
-    cmpq    $1, %rdx                        # Check if unrolling is possible
-    jna     .Lresidual
-
     negq    %rsi                            # Negate offset
 .Ltransform_unrolled:
     vmovdqu (%rdi, %rsi), %ymm0             # Load first ymmword
