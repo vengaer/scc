@@ -16,6 +16,8 @@ scc_hashtab_impl_insert_probe:
 
     subq    $framesz, %rsp                  # Space for locals, align stack
 
+    bsfq    %rdx, %rdx                      # Low bit of element size
+
     movq    %rbx, 0x40(%rsp)                # Use %rbx for persistently storing table address
     movq    %rdi, %rbx
 
@@ -87,8 +89,8 @@ scc_hashtab_impl_insert_probe:
     vpackuswb   %ymm7, %ymm2, %ymm0         # Bit 14 of words to high bit of bytes
     vpackuswb   %ymm8, %ymm3, %ymm1
 
-    vpmovmskb   %ymm0, %r8d                 # Extract bitmasks
-    vpmovmskb   %ymm1, %r9d
+    vpmovmskb   %ymm0, %r8d                 # Bit set for vacant slot
+    vpmovmskb   %ymm1, %r9d                 # Bit set for occupied with matching hash
 
     bsfl    %r8d, %r10d                     # Offset in ymmword for first vacant slot
     jz      .Lno_vacant
@@ -112,9 +114,9 @@ scc_hashtab_impl_insert_probe:
 .Leq_probe:
     movl    %r9d, 0x04(%rsp)                # Store hash match bitmask
 
-    leaq    1(%rax, %rcx), %r11             # Array offset, %rdi holds address of ht_data[-1]
+    leaq    1(%rax, %rcx), %r11             # Array offset, %rsi holds address of ht_data[-1]
 
-    bsfq    %rdx, %rcx                      # Multiply for offset
+    movq    %rdx, %rcx                      # Multiply for offset
     shlq    %cl, %r11
 
     leaq    (%rsi, %r11), %rdi              # Address of slot
@@ -161,9 +163,9 @@ scc_hashtab_impl_insert_probe:
 
     movl    %r9d, 0x04(%rsp)                # Hash match bitmask
 
-    leaq    1(%rax, %rcx), %r11             # Array offset, %rdi holds address of ht_data[-1]
+    leaq    1(%rax, %rcx), %r11             # Array offset, %rsi holds address of ht_data[-1]
 
-    bsfq    %rdx, %rcx                      # Multiply for offset
+    movq    %rdx, %rcx                      # Multiply for offset
     shlq    %cl, %r11
 
     leaq    (%rsi, %r11), %rdi              # Address of slot
