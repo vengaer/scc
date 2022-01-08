@@ -1,6 +1,7 @@
 -include .config.mk
 
 CC           := clang
+CXX          := clang++
 AS           := $(CC)
 LD           := $(CC)
 AR           := ar
@@ -32,6 +33,7 @@ inspectdir   := $(testdir)/inspect
 panictestdir := $(testdir)/panic
 doctestdir   := $(testdir)/docs
 buildtestdir := $(testdir)/buildsystem
+perfdir      := $(testdir)/perf
 docdir       := $(root)/docs
 submoddir    := $(root)/submodules
 
@@ -42,6 +44,7 @@ pyscripts    := $(scripts)/python
 mach         := $(root)/mach
 
 cext         := c
+cxxext       := cc
 hext         := h
 oext         := o
 asext        := S
@@ -65,6 +68,7 @@ CFLAGS       := -std=c99 -c -MD -MP -g -Wall -Wextra -Wpedantic -Waggregate-retu
                 -Wbad-function-cast -Wcast-qual -Wfloat-equal -Wmissing-include-dirs \
                 -Wnested-externs -Wpointer-arith -Wshadow -Wunknown-pragmas -Wswitch \
                 -Wundef -Wunused -Wwrite-strings
+CXXFLAGS     := -std=c++17 -c -MD -MP -g -Wall -Wextra -Wpedantic
 CPPFLAGS     := -I$(root) -DNDEBUG
 LDFLAGS      :=
 LDLIBS       :=
@@ -126,6 +130,10 @@ $(sccbuilddir)/%.$(oext): $(assrcdir)/%.$(asext) | $(sccbuilddir)
 
 $(dirs):
 	$(MKDIR) $(MKDIRFLAGS) $@
+
+.PHONY: benchmark
+benchmark: CFLAGS   += -O3
+benchmark: CXXFLAGS += -O3
 
 .PHONY: check
 check: CPPFLAGS := $(filter-out -DNDEBUG,$(CPPFLAGS))
