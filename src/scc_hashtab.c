@@ -12,8 +12,9 @@
 #define scc_hashtab_verify(expr) assert(expr)
 #endif
 
-#define SCC_HASHTAB_OCCUPIED ((scc_hashtab_metatype)0x8000u)
 #define SCC_HASHTAB_GUARD    ((scc_hashtab_metatype)0x4000u)
+#define SCC_HASHTAB_OCCUPIED ((scc_hashtab_metatype)0x8000u)
+#define SCC_HASHTAB_VACATED  ((scc_hashtab_metatype)0xc000u)
 
 enum { SCC_HASHTAB_HASHSHIFT = 50 };
 
@@ -231,5 +232,19 @@ void const *scc_hashtab_impl_find(void const *tab, size_t elemsize) {
 
     /* tab holds address of base->ht_data[-1] */
     return (void const *)((unsigned char const *)tab + (index + 1) * elemsize);
+}
+
+bool scc_hashtab_impl_remove(void *tab, size_t elemsize) {
+    struct scc_hashtab *base = scc_hashtab_impl_base(tab);
+    unsigned long long hash = base->ht_hash(tab, elemsize);
+    long long const index = scc_hashtab_impl_find_probe(base, tab, elemsize, hash);
+    if(index == -1) {
+        return false;
+    }
+    assert(index >= 0 && (size_t)index < base->ht_capacity);
+    assert(base->ht_size);
+    --base->ht_size;
+    scc_hashtab_md(base)[index] |= SCC_HASHTAB_VACATED;
+    return true;
 }
 
