@@ -55,7 +55,6 @@ scc_hashtab_impl_insert_probe:
     vpand   %ymm0, %ymm4, %ymm3             # High bit set if occupied and hash matches
 
     leaq    0x10(%rax), %r9                 # Advance for next ymmword
-    andq    %rdi, %r9                       # Wrap
     leaq    (%r8, %r9, 2), %rcx             # Offset of next ymmword
 
     vmovdqu (%rbx, %rcx), %ymm5             # Second ymmword
@@ -129,6 +128,7 @@ scc_hashtab_impl_insert_probe:
 
     movl    (%rsp), %r10d                   # Restore offset of first vacant slot
     movl    0x04(%rsp), %r9d                # Restore hash match bitset
+    movq    0x08(%rsp), %rax                # Restore slot index
 
     bsfl    %r9d, %ecx                      # Offset in ymmword of next matching hash
     jz      .Lfound                         # Vacant exists, no match, done
@@ -136,7 +136,6 @@ scc_hashtab_impl_insert_probe:
     cmpl    %ecx, %r10d                     # Check if vacant before matching hash
     jb      .Lfound
 
-    movq    0x08(%rsp), %rax                # Restore slot index
     movq    0x10(%rsp), %rdx                # Restore element size
     movq    0x18(%rsp), %rsi                # Restore ht_tmp
 
@@ -153,7 +152,7 @@ scc_hashtab_impl_insert_probe:
     movq    %rax, 0x08(%rsp)                # Slot index
     movq    %rdx, 0x10(%rsp)                # Element size
     movq    %rsi, 0x18(%rsp)                # ht_tmp
-    vmovdqa %ymm15, 0x20(%rsp)              # Packed hash
+    vmovdqu %ymm15, 0x20(%rsp)              # Packed hash
 
 .Leq_probe_no_vacant:
     movl    $1, %r11d                       # Clear hash match bit
@@ -184,13 +183,13 @@ scc_hashtab_impl_insert_probe:
     bsfl    %r9d, %ecx                      # Check if another match exists
     jnz     .Leq_probe_no_vacant
 
-    vmovdqa 0x20(%rsp), %ymm15              # Restore packed hash
+    vmovdqu 0x20(%rsp), %ymm15              # Restore packed hash
 
 .Lno_match:
     addq    $0x20, %rax                     # Advance index
-    movq    cap(%rbx), %rdi                 # Capacity
-    subq    $1, %rdi                        # Wrap index
-    andq    %rdi, %rax
+    xorl    %edi, %edi
+    cmpq    cap(%rbx), %rax                 # Zero on wrap
+    cmovnbl %edi, %eax
     jmp     .Lprobe
 
 .Lfound:

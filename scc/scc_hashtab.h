@@ -51,7 +51,7 @@ typedef unsigned short scc_hashtab_metatype;
     }){ 0 }.sc_tab
 
 #define scc_hashtab_impl_guardsz()                                      \
-    (SCC_VECSIZE / sizeof(scc_hashtab_metatype) - 1u)
+    (2u * SCC_VECSIZE / sizeof(scc_hashtab_metatype) - 1u)
 
 #define scc_hashtab_impl_dataoff(type)                                  \
     offsetof(scc_hashtab_impl_layout(type), ht_tmp)

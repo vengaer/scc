@@ -74,7 +74,6 @@ scc_hashtab_impl_find_probe:
     vpand   %ymm2, %ymm3, %ymm1             # High bit set for occupied with matching hash
 
     leaq    0x10(%r13), %rsi                # Advance for next ymmword
-    andq    %rdi, %rsi                      # Wrap
     leaq    (%rax, %rsi, 2), %rcx           # Offset of next ymmword
 
     vmovdqu (%rbx, %rcx), %ymm5             # Second ymmword
@@ -157,7 +156,7 @@ scc_hashtab_impl_find_probe:
     bsfl    %r15d, %ecx                     # Offset of first matching slot
     jz      .Lkeep_probing
 
-    vmovdqa %ymm15, (%rsp)                  # Preserve packed hash
+    vmovdqu %ymm15, (%rsp)                  # Preserve packed hash
 
 .Leq_probe_no_stop:
     movl    $1, %eax                        # Clear has match bit
@@ -183,13 +182,13 @@ scc_hashtab_impl_find_probe:
     bsfl    %r15d, %ecx                     # Check if another match exists
     jnz     .Leq_probe_no_stop
 
-    vmovdqa (%rsp), %ymm15                  # Restore packed hash
+    vmovdqu (%rsp), %ymm15                  # Restore packed hash
 
 .Lkeep_probing:
     addq    $0x20, %r13                     # Advance offset
-    movq    cap(%rbx), %rdi                 # Capacity
-    subq    $1, %rdi                        # Mask offset
-    andq    %rdi, %r13
+    xorl    %edi, %edi
+    cmpq    cap(%rbx), %r13
+    cmovnbl %edi, %r13d
     jmp     .Lprobe
 
 .Lfound:
