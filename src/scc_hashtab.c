@@ -6,6 +6,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef NDEBUG
+#define scc_hashtab_verify(expr) (void)expr
+#else
+#define scc_hashtab_verify(expr) assert(expr)
+#endif
+
 #define SCC_HASHTAB_OCCUPIED ((scc_hashtab_metatype)0x8000u)
 #define SCC_HASHTAB_GUARD    ((scc_hashtab_metatype)0x4000u)
 
@@ -188,7 +194,7 @@ static bool scc_hashtab_rehash(void **tab, struct scc_hashtab *base, size_t elem
     for(size_t i = 0u; i < base->ht_capacity; ++i) {
         if(md[i]) {
             memcpy(newtab, (unsigned char *)*(void **)tab + (i + 1) * elemsize, elemsize);
-            scc_hashtab_emplace(newtab, newbase, elemsize);
+            scc_hashtab_verify(scc_hashtab_emplace(newtab, newbase, elemsize));
         }
     }
 
