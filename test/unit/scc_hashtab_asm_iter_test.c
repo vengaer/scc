@@ -1,3 +1,4 @@
+#include <inspect/scc_hashtab_inspect.h>
 #include <scc/scc_hashtab.h>
 #include <scc/scc_mem.h>
 
@@ -10,7 +11,8 @@ extern void scc_hashtab_impl_prep_iter(scc_hashtab_metatype *md, unsigned long l
 void test_hashtab_prep_iter_collapse_interleaved(void) {
     scc_hashtab_metatype md[SCC_VECSIZE];
     static scc_hashtab_metatype const ctrl[] = {
-        0x00, 0x8000, 0x4000, 0xc000
+        SCC_HASHTAB_INSPECT_VACANT, SCC_HASHTAB_INSPECT_OCCUPIED,
+        SCC_HASHTAB_INSPECT_GUARD,  SCC_HASHTAB_INSPECT_VACATED
     };
     for(unsigned i = 0u; i < scc_arrsize(md); ++i) {
         md[i] = ctrl[i & (scc_arrsize(ctrl) - 1u)];
@@ -34,11 +36,31 @@ void test_hashtab_prep_iter_collapse_interleaved(void) {
 void test_hashtab_prep_iter_collapse_all_occupied(void) {
     scc_hashtab_metatype md[SCC_VECSIZE];
     for(unsigned i = 0u; i < scc_arrsize(md); ++i) {
-        md[i] = 0x8000;
+        md[i] = SCC_HASHTAB_INSPECT_OCCUPIED;
     }
     scc_hashtab_impl_prep_iter(md, scc_arrsize(md));
     for(unsigned i = 0u; i < scc_arrsize(md); ++i) {
         TEST_ASSERT_EQUAL_UINT16(1, md[i]);
+    }
+}
+
+void test_hashtab_prep_iter_collapse_guard_hit(void) {
+    scc_hashtab_metatype md[SCC_VECSIZE];
+    unsigned i = 0u;
+    for(; i < scc_arrsize(md) >> 1u; ++i) {
+        md[i] = SCC_HASHTAB_INSPECT_OCCUPIED;
+    }
+    /* The guard can technically never be hit, still,
+     * simple enough to test if that were ever to change */
+    for(; i < scc_arrsize(md); ++i) {
+        md[i] = SCC_HASHTAB_INSPECT_GUARD;
+    }
+    scc_hashtab_impl_prep_iter(md, scc_arrsize(md));
+    for(i = 0u; i < scc_arrsize(md) >> 1u; ++i) {
+        TEST_ASSERT_EQUAL_UINT16(1, md[i]);
+    }
+    for(; i < scc_arrsize(md); ++i) {
+        TEST_ASSERT_EQUAL_UINT16(0, md[i]);
     }
 }
 
