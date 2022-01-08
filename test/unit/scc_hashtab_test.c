@@ -156,3 +156,12 @@ void test_scc_hashtab_rehashed_find(void) {
     }
     scc_hashtab_free(tab);
 }
+
+void test_scc_hashtab_removal(void) {
+    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+    TEST_ASSERT_TRUE(scc_hashtab_insert(tab, 13));
+    TEST_ASSERT_TRUE(scc_hashtab_find(tab, 13));
+    TEST_ASSERT_TRUE(scc_hashtab_remove(tab, 13));
+    TEST_ASSERT_FALSE(scc_hashtab_find(tab, 13));
+    scc_hashtab_free(tab);
+}
