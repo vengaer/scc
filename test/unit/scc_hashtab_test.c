@@ -69,3 +69,10 @@ void test_scc_hashtab_insert_single(void) {
     TEST_ASSERT_TRUE(scc_hashtab_insert(hashtab, 13));
     scc_hashtab_free(hashtab);
 }
+
+void test_scc_hashtab_insert_disallow_duplicate(void) {
+    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+    TEST_ASSERT_TRUE(scc_hashtab_insert(tab, 88));
+    TEST_ASSERT_FALSE(scc_hashtab_insert(tab, 88));
+    scc_hashtab_free(tab);
+}
