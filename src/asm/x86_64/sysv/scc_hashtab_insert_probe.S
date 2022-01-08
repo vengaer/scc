@@ -70,12 +70,12 @@ scc_hashtab_impl_insert_probe:
     vpcmpeqw    %ymm6, %ymm15, %ymm9        # Compare hashes
     vpand   %ymm5, %ymm9, %ymm8             # High bit set if occupied and hash matches
 
-    vpsllw  $15, %ymm13, %ymm13             # High-bit mask
+    vpsllw  $15, %ymm13, %ymm12             # High-bit mask
 
-    vpand   %ymm2, %ymm13, %ymm0            # Mask out low 15 bits of each word
-    vpand   %ymm3, %ymm13, %ymm1
-    vpand   %ymm7, %ymm13, %ymm5
-    vpand   %ymm8, %ymm13, %ymm6
+    vpand   %ymm2, %ymm12, %ymm0            # Mask out low 15 bits of each word
+    vpand   %ymm3, %ymm12, %ymm1
+    vpand   %ymm7, %ymm12, %ymm5
+    vpand   %ymm8, %ymm12, %ymm6
 
     vpsrlw  $1, %ymm0, %ymm2                # Shift down sign bit
     vpsrlw  $1, %ymm1, %ymm3
