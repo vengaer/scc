@@ -186,3 +186,25 @@ void test_scc_hashtab_fuzzer_failure_case0(void) {
     }
     scc_hashtab_free(tab);
 }
+
+void testscc_hashtab_fuzzer_failure_case1(void) {
+    scc_hashtab(unsigned) tab = scc_hashtab_init(unsigned, ueq);
+    static unsigned const data[] = {
+        4278910730u, 2382594815u, 767622536u,  1617063168u,
+        4194305175u, 3321559802u, 1912372959u, 4294836082u,
+        1831714816u, 9920767u,    4210752010u, 16434682u,
+        4210752000u, 3678075642u, 3688618971u, 789248762u,
+        17632714u
+    };
+    unsigned const *elem;
+    for(unsigned i = 0u; i < scc_arrsize(data); ++i) {
+        TEST_ASSERT_TRUE(scc_hashtab_insert(tab, data[i]));
+        for(unsigned j = 0u; j <= i; ++j) {
+            elem = scc_hashtab_find(tab, data[j]);
+            TEST_ASSERT_TRUE(elem);
+            TEST_ASSERT_EQUAL_UINT32(data[j], *elem);
+        }
+    }
+    scc_hashtab_free(tab);
+}
+
