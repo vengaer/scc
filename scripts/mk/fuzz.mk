@@ -23,7 +23,7 @@ mergeflags         := -merge=1 $(CORPUSDIR) $(SCC_CORPORA)
 fuzztarget         := $(fuzzbuilddir)/scc_fuzz_$(SCC_FUZZ)
 fuzzobj            := $(patsubst $(fuzzsrcdir)/%.$(cext),$(fuzzbuilddir)/%.$(oext),$(wildcard $(fuzzsrcdir)/*.$(cext)))
 
-srcdirs            := $(srcdir) $(fuzzsrcdir) $(inspectdir)
+__srcdirs          := $(srcdir) $(assrcdir) $(fuzzsrcdir) $(inspectdir)
 
 proffile           := LLVM_PROFILE_FILE
 export $(proffile) := $(builddir)/.fuzz.profraw
@@ -83,7 +83,7 @@ define fuzz-dependency-rules
 $(strip
     $(eval $(SCC_FUZZ)_deps += $(SCC_FUZZ))
     $(foreach __dep,$($(SCC_FUZZ)_deps),
-        $(foreach __dir,$(srcdirs),
+        $(foreach __dir,$(__srcdirs),
             $(eval __src := $(__dir)/scc_$(__dep).$(cext))
             $(if $(wildcard $(__src)),
                 $(eval
@@ -91,7 +91,18 @@ $(strip
                     $(eval obj += $(__o))
                     $(__o): $(__src) | $(fuzzbuilddir)
 	                    $$(info [CC] $(notdir $(fuzzbuilddir))/$$(notdir $$@))
-	                    $$(CC) $$(CFLAGS) $$(CPPFLAGS) -o $$@ $$^
+	                    $$(CC) $$(CFLAGS) $$(CPPFLAGS) -o $$@ $$<
+
+                    $(fuzztarget): $(__o)))
+
+            $(eval __src := $(__dir)/scc_$(__dep).$(asext))
+            $(if $(wildcard $(__src)),
+                $(eval
+                    $(eval __o := $(patsubst $(__dir)/%.$(asext),$(fuzzbuilddir)/%.$(oext),$(__src)))
+                    $(eval obj += $(__o))
+                    $(__o): $(__src) | $(fuzzbuilddir)
+	                    $$(info [AS] $(notdir $(fuzzbuilddir))/$$(notdir $$@))
+	                    $$(AS) $$(ASFLAGS) -o $$@ $$<
 
                     $(fuzztarget): $(__o))))))
 endef
