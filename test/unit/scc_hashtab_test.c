@@ -129,7 +129,7 @@ void test_scc_hashtab_trivial_find(void) {
 void test_scc_hashtab_non_rehashed_find(void) {
     scc_hashtab(int) tab = scc_hashtab_init(int, eq);
     size_t const cap = scc_hashtab_capacity(tab);
-    for(unsigned i = 0u; i < cap >> 1u; ++i) {
+    for(unsigned i = 0u; i < 10u; ++i) {
         TEST_ASSERT_TRUE(scc_hashtab_insert(tab, i));
     }
     TEST_ASSERT_EQUAL_UINT64(cap, scc_hashtab_capacity(tab));
