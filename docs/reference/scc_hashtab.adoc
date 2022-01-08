@@ -39,7 +39,7 @@ typedef unsigned long long(*scc_hash)(void const *data, size_t size)
 
 === void *scc_hashtab_init(type, scc_eq eq)
 
-Returns the address of a automatically allocated, empty hash table for storing instances of type `type`. The `eq` parameter is used for equality comparisons. The returned pointer must be assigned to a pointer to `type` and should be passed to `scc_hashtab_free` to ensure any dynamically allocated memory is freed.
+Returns the address of a automatically allocated, empty hash table for storing instances of type `type`. The `eq` parameter is used for equality comparisons. The returned pointer must be assigned to an instance of `scc_hashtab(type)` and should be passed to `scc_hashtab_free` to ensure any dynamically allocated memory is freed.
 
 Hash tables initialized using `scc_hashtab_init` use the https://en.wikipedia.org/wiki/Fowler-Noll-Vo_hash_function#FNV-1a_hash[FNV-1a Fowler-Noll-Vo hash]. If wanting to specify the hash function manually, use `scc_hashtab_with_hash`.
 
@@ -55,6 +55,64 @@ Like `scc_hashtab_init` but sets the hash function of the returned hash table to
 
 Address of en empty `scc_hashtab` instance. The object is initially allocated in the frame of the calling function.
 
-=== void scc_hashtab_free(void *hashtab)
+=== void scc_hashtab_free(scc_hashtab(type) hashtab)
 
 Deallocate any memory allocated for `hashtab`. If wanting to reuse the `hashtab` parameter after this call returns, the pointer must be passed to `scc_hashtab_init` or equivalent.
+
+== Capacity
+
+=== size_t scc_hashtab_capacity(scc_hashtab(type) tab)
+
+Return the current capacity of they underlying array used by `tab`. Rehashing may be performed before the array is full.
+
+Subsequent calls to `scc_hashtab_insert` may obsolete the returned value.
+
+==== Returns
+
+The current capacity of the table.
+
+=== size_t scc_hashtab_size(scc_hashtab(type) tab)
+
+Return the number of values currently stored in `tab`.
+
+==== Returns
+
+The number of elements in the table
+
+== Modifiers
+
+=== bool scc_hashtab_insert(scc_hashtab(type) tab, type value)
+
+Attempt to insert `value` in `tab`. May result in reallocation and rehashing of `tab`. If `type` is a structure or union, it is strongly recommended that `value` is explicitly zeroed before any members are assigned.
+
+Should `tab` already contain `value`, `false` is returned. This is the case also on allocation failure. If wanting to verify that `value` is present in `tab`, refer to `scc_hashtab_find`.
+
+Probing is SIMD-optimized on operating systems adhering to the System V ABI running on AVX2-capable hardware.
+
+==== Returns
+
+* `false` if `value` already exists in `tab` or on allocation faliure
+* `true` otherwise
+
+=== bool scc_hashtab_remove(scc_hashtab(type) tab, type value)
+
+Attempt to remove `value` from `tab`. If `type` is a structure or union, it is strongly recommended that `value` is explicitly zeroed before any members are assigned.
+
+Probing is SIMD-optimized on operating systems adhering to the System V ABI running on AVX2-capable hardware.
+
+==== Returns
+
+* `false` is `tab` does not contain `value`
+* `true` otherwise
+
+== Lookup
+
+=== void const *scc_hashtab_find(scc_hashtab(type) tab, type value)
+
+Lookups up `value` in the table and returns the address of the found element, or `NULL` if the element does not exist in `tab`. If `type` is a structure or usion, it is strongly recommended that `value` is explicitly zeroed before any members are assigned.
+
+Probind is SIMD-optimized on operating systems adhering to the System V ABI running on AVX2-capable hardware.
+
+==== Returns
+
+The address of the element in `tab` with value `value`, or `NULL` is no such element exists
