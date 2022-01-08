@@ -76,3 +76,13 @@ void test_scc_hashtab_insert_disallow_duplicate(void) {
     TEST_ASSERT_FALSE(scc_hashtab_insert(tab, 88));
     scc_hashtab_free(tab);
 }
+
+void test_scc_hashtab_insert_10x(void) {
+    enum { SIZE = 10 };
+    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+    for(int i = 0; i < SIZE; ++i) {
+        TEST_ASSERT_TRUE(scc_hashtab_insert(tab, i));
+        TEST_ASSERT_EQUAL_UINT64(i + 1ull, scc_hashtab_size(tab));
+    }
+    scc_hashtab_free(tab);
+}
