@@ -104,11 +104,23 @@ scc_hashtab_impl_find_probe:
     vpand   %ymm6, %ymm12, %ymm8
     vpsrlw  $1, %ymm8, %ymm6
 
-    vpackuswb   %ymm5, %ymm0, %ymm2         # Bit 14 of words to high bit of bytes
-    vpackuswb   %ymm6, %ymm1, %ymm3
-
+    vpackuswb   %ymm5, %ymm0, %ymm2         # Bit 14 of words to high bit of bytes in interleaved xmmwords
     vpmovmskb   %ymm2, %eax                 # Bit set for stop
+
+    movl    %eax, %ecx                      # Swap bytes 2 and 3
+    andl    $0xff0000ff, %eax
+    bswapl  %ecx
+    andl    $0x00ffff00, %ecx
+    orl     %ecx, %eax
+
+    vpackuswb   %ymm6, %ymm1, %ymm3         # Bit 14 of words to high bit of bytes in interleaved xmmwords
     vpmovmskb   %ymm3, %r15d                # Bit set for occupied slot with matching hash
+
+    movl    %r15d, %edi                     # Swap bytes 2 and 3
+    andl    $0xff0000ff, %r15d
+    bswapl  %edi
+    andl    $0x00ffff00, %edi
+    orl     %edi, %r15d
 
     bsfl    %eax, %r14d                     # Stop slot
     jz      .Lno_stop

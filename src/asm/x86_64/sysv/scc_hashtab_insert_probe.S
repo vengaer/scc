@@ -85,11 +85,23 @@ scc_hashtab_impl_insert_probe:
     vpand   %ymm8, %ymm12, %ymm6
     vpsrlw  $1, %ymm6, %ymm8
 
-    vpackuswb   %ymm7, %ymm2, %ymm0         # Bit 14 of words to high bit of bytes
-    vpackuswb   %ymm8, %ymm3, %ymm1
-
+    vpackuswb   %ymm7, %ymm2, %ymm0         # Bit 14 of words to high bit of bytes in interleaved xmmwords
     vpmovmskb   %ymm0, %r8d                 # Bit set for vacant slot
+
+    movl    %r8d, %r10d                     # Swap second and third bytes
+    andl    $0xff0000ff, %r8d
+    bswapl  %r10d
+    andl    $0x00ffff00, %r10d
+    orl     %r10d, %r8d
+
+    vpackuswb   %ymm8, %ymm3, %ymm1         # Bit 14 of words to high bit of bytes in i nterleaved xmmwords
     vpmovmskb   %ymm1, %r9d                 # Bit set for occupied with matching hash
+
+    movl    %r9d, %ecx                      # Swap second and third bytes
+    andl    $0xff0000ff, %r9d
+    bswapl  %ecx
+    andl    $0x00ffff00, %ecx
+    orl     %ecx, %r9d
 
     bsfl    %r8d, %r10d                     # Offset in ymmword for first vacant slot
     jz      .Lno_vacant
