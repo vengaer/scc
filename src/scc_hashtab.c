@@ -6,7 +6,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define SCC_HASHTAB_GUARD ((scc_hashtab_metatype)0x4000u)
+#define SCC_HASHTAB_OCCUPIED ((scc_hashtab_metatype)0x8000u)
+#define SCC_HASHTAB_GUARD    ((scc_hashtab_metatype)0x4000u)
+
+enum { SCC_HASHTAB_HASHSHIFT = 50 };
 
 #ifndef SCC_SIMD_ISA_UNSUPPORTED
 extern long long scc_hashtab_impl_insert_probe(
@@ -114,7 +117,8 @@ static bool scc_hashtab_emplace(void *tab, struct scc_hashtab *base, size_t elem
     /* tab holds address of base->ht_data[-1] */
     memcpy((unsigned char *)tab + (index + 1) * elemsize, tab, elemsize);
     /* Mark slot as occupied */
-    scc_hashtab_md(base)[index] = (scc_hashtab_metatype)((hash >> 50) | 0x8000u);
+    scc_hashtab_md(base)[index] =
+        (scc_hashtab_metatype)((hash >> SCC_HASHTAB_HASHSHIFT) | SCC_HASHTAB_OCCUPIED);
 
     return true;
 }
