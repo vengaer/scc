@@ -19,11 +19,11 @@ scc_hashtab_impl_insert_probe:
     movq    %rbx, 0x40(%rsp)                # Use %rbx for persistently storing table address
     movq    %rdi, %rbx
 
-    movq    cap(%rbx), %r8                  # Table capacity
-    subq    $1, %r8                         # Mask for finding slot
+    movq    cap(%rbx), %rdi                 # Table capacity
+    subq    $1, %rdi                        # Mask for finding slot
 
     movq    %rcx, %rax                      # Compute slot
-    andq    %r8, %rax
+    andq    %rdi, %rax
 
     movq    %rcx, %r8                       # 14 high-bit hash
     shrq    $50, %r8
@@ -33,13 +33,12 @@ scc_hashtab_impl_insert_probe:
 
 .Lprobe:
     movq    mdoff(%rbx), %r8                # Offset of metadata array
-    leaq    (%r8, %rax, 2), %rdi            # Offset of slot in metadata array
-    leaq    (%rbx, %rdi), %rcx              # Address of slot
+    leaq    (%r8, %rax, 2), %rcx            # Offset of slot in metadata array
 
     vpcmpeqb    %ymm14, %ymm14, %ymm14      # Mask for hash comparison
     vpsrlw  $2, %ymm14, %ymm14
 
-    vmovdqu (%rcx), %ymm0                   # Load ymmword at offset
+    vmovdqu (%rbx, %rcx), %ymm0             # Load first ymmword at offset
 
     vpand   %ymm0, %ymm14, %ymm1            # Mask out control bits
 
@@ -52,11 +51,38 @@ scc_hashtab_impl_insert_probe:
     vpcmpeqw    %ymm1, %ymm15, %ymm4        # Compare hashes
     vpand   %ymm4, %ymm0, %ymm3             # High bit one if hashes match
 
-    vpmovmskb   %ymm2, %r8d                 # Extract bitmasks
-    andl    $0xaaaaaaaa, %r8d               # Mask out bits corresponding to low bytes
+    leaq    0x10(%rax), %r9                 # Advance for next ymmword
+    andq    %rdi, %r9                       # Wrap
+    leaq    (%r8, %r9, 2), %rcx             # Offset of next ymmword
 
-    vpmovmskb   %ymm3, %r9d
-    andl    $0xaaaaaaaa, %r9d
+    vmovdqu (%rbx, %rcx), %ymm5             # Second ymmword
+
+    vpand   %ymm5, %ymm14, %ymm6            # Mask out control bits
+
+    vpsllw  $1, %ymm5, %ymm7                # Compute xnor of control bits
+    vpxor   %ymm5, %ymm7, %ymm8
+    vpxor   %ymm8, %ymm13, %ymm7            # High bit 1 for vacant slot
+
+    vpcmpeqw    %ymm6, %ymm15, %ymm9        # Compare hashes
+    vpand   %ymm9, %ymm5, %ymm8             # High bit one if hashes match
+
+    vpsllw  $15, %ymm13, %ymm13             # High-bit mask
+
+    vpand   %ymm2, %ymm13, %ymm2            # Mask out low 15 bits of each word
+    vpand   %ymm3, %ymm13, %ymm3
+    vpand   %ymm7, %ymm13, %ymm7
+    vpand   %ymm8, %ymm13, %ymm8
+
+    vpsrlw  $1, %ymm2, %ymm2                # Shift down sign bit
+    vpsrlw  $1, %ymm3, %ymm3
+    vpsrlw  $1, %ymm7, %ymm7
+    vpsrlw  $1, %ymm8, %ymm8
+
+    vpackuswb   %ymm7, %ymm2, %ymm0         # Bit 14 of words to high bit of bytes
+    vpackuswb   %ymm8, %ymm3, %ymm1
+
+    vpmovmskb   %ymm0, %r8d                 # Extract bitmasks
+    vpmovmskb   %ymm1, %r9d
 
     bsfl    %r8d, %r10d                     # Offset in ymmword for first vacant slot
     jz      .Lno_vacant
@@ -80,7 +106,6 @@ scc_hashtab_impl_insert_probe:
 .Leq_probe:
     movl    %r9d, 0x04(%rsp)                # Store hash match bitmask
 
-    shrl    $1, %ecx                        # Divide by to for word offset
     leaq    1(%rax, %rcx), %r11             # Array offset, %rdi holds address of ht_data[-1]
 
     bsfq    %rdx, %rcx                      # Multiply for offset
@@ -130,7 +155,6 @@ scc_hashtab_impl_insert_probe:
 
     movl    %r9d, 0x04(%rsp)                # Hash match bitmask
 
-    shrl    $1, %ecx                        # Divide by 2 for word offset
     leaq    1(%rax, %rcx), %r11             # Array offset, %rdi holds address of ht_data[-1]
 
     bsfq    %rdx, %rcx                      # Multiply for offset
@@ -155,7 +179,7 @@ scc_hashtab_impl_insert_probe:
     vmovdqa 0x20(%rsp), %ymm15              # Restore packed hash
 
 .Lno_match:
-    addq    $0x20, %rax                     # Addvance index
+    addq    $0x20, %rax                     # Advance index
     movq    cap(%rbx), %rdi                 # Capacity
     subq    $1, %rdi                        # Wrap index
     andq    %rdi, %rax
@@ -164,7 +188,6 @@ scc_hashtab_impl_insert_probe:
 .Lfound:
     movq    0x40(%rsp), %rbx                # Restore rbx
     addq    $framesz, %rsp                  # Restore stack
-    shrl    $1, %r10d                       # Divide by 2 for word offset
     leaq    (%rax, %r10), %rax              # Compute index
     vzeroupper
     ret
