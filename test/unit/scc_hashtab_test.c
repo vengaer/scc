@@ -86,3 +86,14 @@ void test_scc_hashtab_insert_10x(void) {
     }
     scc_hashtab_free(tab);
 }
+
+void test_scc_hashtab_insert_rehash(void) {
+    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+    size_t const cap = scc_hashtab_capacity(tab);
+    for(unsigned i = 0; i < cap; ++i) {
+        TEST_ASSERT_TRUE(scc_hashtab_insert(tab, i));
+        TEST_ASSERT_EQUAL_UINT64(i + 1ull, scc_hashtab_size(tab));
+    }
+    TEST_ASSERT_NOT_EQUAL_UINT64(cap, scc_hashtab_capacity(tab));
+    scc_hashtab_free(tab);
+}
