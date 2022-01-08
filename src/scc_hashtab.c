@@ -127,6 +127,7 @@ static bool scc_hashtab_emplace(void *tab, struct scc_hashtab *base, size_t elem
     if(index == -1) {
         return false;
     }
+    assert(index >= 0 && (size_t)index < base->ht_capacity);
     /* tab holds address of base->ht_data[-1] */
     memcpy((unsigned char *)tab + (index + 1) * elemsize, tab, elemsize);
     /* Mark slot as occupied */
