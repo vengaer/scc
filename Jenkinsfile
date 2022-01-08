@@ -7,7 +7,7 @@ class config {
 
 ccs = ["gcc", "clang"]
 buildtypes = ["ci", "fuzz"]
-fuzztargets = ["rbtree", "svec"]
+fuzztargets = ["hashtab", "rbtree", "svec"]
 
 fuzztime = config.CI_JOB_FUZZTIME
 fuzzruns = config.CI_JOB_FUZZRUNS
