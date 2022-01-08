@@ -38,7 +38,7 @@ LLVM_COV_REPORT    := report $(LLVM_COVFLAGS)
 all:
 
 .PHONY: fuzz
-fuzz: $$(call require-fuzztarget,fuzz)
+fuzz: $$(call require,fuzz,SCC_FUZZ)
 fuzz: CC         := clang
 fuzz: LD         := clang
 fuzz: CFLAGS     += $(fuzzflags)
@@ -52,8 +52,8 @@ fuzz: $(fuzztarget)
 	$(LLVM_COV) $(LLVM_COV_REPORT)
 
 .PHONY: merge
-merge: $$(call require-fuzztarget,merge)
-merge: $$(call require-corpora,merge)
+merge: $$(call require,merge,SCC_FUZZ)
+merge: $$(call require,merge,SCC_CORPORA)
 merge: CC         := clang
 merge: LD         := clang
 merge: CFLAGS     += $(fuzzflags)
@@ -70,14 +70,6 @@ $(fuzzbuilddir)/%.$(oext): $(fuzzsrcdir)/%.$(cext) | $(fuzzbuilddir)
 $(fuzztarget): $(fuzzobj)
 	$(info [LD] $(notdir $(fuzzbuilddir))/$(notdir $@))
 	$(LD) -o $@ $^ $(LDFLAGS) $(LDLIBS)
-
-define require-fuzztarget
-$(if $(findstring _-$(1)_-,_-$(MAKECMDGOALS)_-),$(if $(SCC_FUZZ),,$(error SCC_FUZZ is empty)))
-endef
-
-define require-corpora
-$(if $(findstring _-$(1)_-,_-$(MAKECMDGOALS)_-),$(if $(SCC_CORPORA),,$(error SCC_CORPORA is empty)))
-endef
 
 define fuzz-dependency-rules
 $(strip
