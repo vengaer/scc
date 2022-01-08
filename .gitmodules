@@ -1,8 +1,8 @@
 [submodule "Unity"]
 	path = submodules/unity
-    url = https://github.com/ThrowTheSwitch/Unity.git
-    ignore = dirty
+	url = https://github.com/ThrowTheSwitch/Unity.git
+	ignore = dirty
 [submodule "benchmark"]
 	path = submodules/benchmark
 	url = https://github.com/google/benchmark
-    ignore = dirty
+	ignore = dirty
