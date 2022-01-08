@@ -25,10 +25,8 @@ scc_hashtab_impl_insert_probe:
     movq    %rcx, %rax                      # Compute slot
     andq    %rdi, %rax
 
-    movq    %rcx, %r8                       # 14 high-bit hash
-    shrq    $50, %r8
-
-    vmovd   %r8d, %xmm0                     # Broadcast hash to ymm15
+    shrq    $50, %rcx                       # 14 high-bit hash
+    vmovd   %ecx, %xmm0                     # Broadcast hash to ymm15
     vpbroadcastw    %xmm0, %ymm15
 
 .Lprobe:
