@@ -63,3 +63,9 @@ void test_scc_hashtab_guard_initialized(void) {
 
     scc_hashtab_free(hashtab);
 }
+
+void test_scc_hashtab_insert_single(void) {
+    scc_hashtab(int) hashtab = scc_hashtab_init(int, eq);
+    TEST_ASSERT_TRUE(scc_hashtab_insert(hashtab, 13));
+    scc_hashtab_free(hashtab);
+}
