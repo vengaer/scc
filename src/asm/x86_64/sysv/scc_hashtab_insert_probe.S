@@ -42,12 +42,15 @@ scc_hashtab_impl_insert_probe:
 
     vpcmpeqb    %ymm13, %ymm13, %ymm13      # One's complement mask
 
-    vpsllw  $1, %ymm0, %ymm2                # Compute xnor of control bits
-    vpxor   %ymm0, %ymm2, %ymm3
-    vpxor   %ymm3, %ymm13, %ymm2            # High bit 1 for vacant slot
+    vpsllw  $1, %ymm0, %ymm2                # Overlay vacant and tombstone bits
+    vpxor   %ymm0, %ymm2, %ymm3             # First part of xnor of control bits
+    vpor    %ymm0, %ymm2, %ymm5             # High bit set for occupied, tombstone or both
+    vpxor   %ymm2, %ymm13, %ymm4            # One's complement
+    vpand   %ymm4, %ymm5, %ymm0             # High bit set if occupied
+    vpxor   %ymm3, %ymm13, %ymm2            # Complete xnor, high bit 1 for vacant slot
 
     vpcmpeqw    %ymm1, %ymm15, %ymm4        # Compare hashes
-    vpand   %ymm4, %ymm0, %ymm3             # High bit one if hashes match
+    vpand   %ymm0, %ymm4, %ymm3             # High bit set if occupied and hash matches
 
     leaq    0x10(%rax), %r9                 # Advance for next ymmword
     andq    %rdi, %r9                       # Wrap
@@ -57,12 +60,15 @@ scc_hashtab_impl_insert_probe:
 
     vpand   %ymm5, %ymm14, %ymm6            # Mask out control bits
 
-    vpsllw  $1, %ymm5, %ymm7                # Compute xnor of control bits
-    vpxor   %ymm5, %ymm7, %ymm8
-    vpxor   %ymm8, %ymm13, %ymm7            # High bit 1 for vacant slot
+    vpsllw  $1, %ymm5, %ymm7                # Overlay vacant and tombstone bits
+    vpxor   %ymm5, %ymm7, %ymm8             # First part of xnor of control bits
+    vpor    %ymm5, %ymm7, %ymm10            # High bit set for occupied, tombstone or both
+    vpxor   %ymm7, %ymm13, %ymm9            # One's complement
+    vpand   %ymm9, %ymm10, %ymm5            # High bit set for occupied
+    vpxor   %ymm8, %ymm13, %ymm7            # Finish xnor, high bit 1 for vacant slot
 
     vpcmpeqw    %ymm6, %ymm15, %ymm9        # Compare hashes
-    vpand   %ymm9, %ymm5, %ymm8             # High bit one if hashes match
+    vpand   %ymm5, %ymm9, %ymm8             # High bit set if occupied and hash matches
 
     vpsllw  $15, %ymm13, %ymm13             # High-bit mask
 
