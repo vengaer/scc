@@ -97,3 +97,12 @@ void test_scc_hashtab_insert_rehash(void) {
     TEST_ASSERT_NOT_EQUAL_UINT64(cap, scc_hashtab_capacity(tab));
     scc_hashtab_free(tab);
 }
+
+void test_scc_hashtab_trivial_find(void) {
+    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+    TEST_ASSERT_TRUE(scc_hashtab_insert(tab, 38));
+    int const *val = scc_hashtab_find(tab, 38);
+    TEST_ASSERT_TRUE(val);
+    TEST_ASSERT_EQUAL_INT32(38, *val);
+    scc_hashtab_free(tab);
+}
