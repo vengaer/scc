@@ -22,7 +22,7 @@ all:
 
 $(bmalib): $(call reeval,cpu_cores,$(bmalib))
 
-$(bmalib_main): $(call reeval,cpu_cores,$(bmalib))
+$(bmalib_main): $(call reeval,cpu_cores,$(bmalib_main))
 
 $(bmalib) $(bmalib_main)&: $(submodules) | $(bmbuilddir)
 	$(CMAKE) -E chdir $(bmbuilddir) $(CMAKE) $(bmflags) $(bmdir)
