@@ -29,11 +29,11 @@ $(runnerdir)/%$(runnersuffix).$(cext): $(unitdir)/%.$(cext) $(unitygen) | $(runn
 	$(info [RB] $(notdir $@))
 	$(RB) $(unitygen) $< $@
 
-$(unitbuilddir)/%.$(oext): $(runnerdir)/%.$(cext) | $(unitbuilddir)
+$(unitbuilddir)/%.$(oext): $(runnerdir)/%.$(cext) $(submodules) | $(unitbuilddir)
 	$(info [CC] $(notdir $@))
 	$(CC) $(CFLAGS) $(unit_CFLAGS) $(CPPFLAGS) -o $@ $<
 
-$(unitbuilddir)/%.$(oext): $(unitdir)/%.$(cext) | $(unitbuilddir)
+$(unitbuilddir)/%.$(oext): $(unitdir)/%.$(cext) $(submodules) | $(unitbuilddir)
 	$(info [CC] $(notdir $@))
 	$(CC) $(CFLAGS) $(unit_CFLAGS) $(CPPFLAGS) -o $@ $<
 
