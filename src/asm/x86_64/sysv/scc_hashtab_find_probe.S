@@ -73,8 +73,7 @@ scc_hashtab_impl_find_probe:
     vpcmpeqw    %ymm1, %ymm15, %ymm3        # All bits set for matching hash
     vpand   %ymm2, %ymm3, %ymm1             # High bit set for occupied with matching hash
 
-    leaq    0x10(%r13), %rsi                # Advance for next ymmword
-    leaq    (%rax, %rsi, 2), %rcx           # Offset of next ymmword
+    leaq    0x20(%rax, %r13, 2), %rcx       # Offset of next ymmword
 
     vmovdqu (%rbx, %rcx), %ymm5             # Second ymmword
 
