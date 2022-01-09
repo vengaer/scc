@@ -54,6 +54,6 @@ $(perfbuilddir)/%.$(oext): $(perfsrcdir)/%.$(cext) | $(perfbuilddir)
 	$(info [CC] $(notdir $(perfbuilddir))/$(notdir $@))
 	$(CC) -o $@ $< $(CFLAGS) $(CPPFLAGS)
 
-$(perfbuilddir)/%.$(oext): $(perfsrcdir)/%.$(cxxext) | $(perfbuilddir)
+$(perfbuilddir)/%.$(oext): $(perfsrcdir)/%.$(cxxext) $(submodules) | $(perfbuilddir)
 	$(info [CXX] $(notdir $(perfbuilddir))/$(notdir $@))
 	$(CXX) -o $@ $< $(CXXFLAGS) $(CPPFLAGS)
