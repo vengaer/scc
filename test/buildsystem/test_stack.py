@@ -104,18 +104,27 @@ def test_stack_pop_on_empty_disallowed(script_dir):
     assert ec != 0
     assert list(filter(lambda s: 'stack is empty' in s.lower(), stderr))
 
-def test_stack_empty_after_pushing_empty_string(script_dir):
+def test_stack_handles_intermittently_empty_slots(script_dir):
     ''' Push an empty string to the stack and verify that it's still empty '''
 
     ec, stdout, stderr = make.make_supplied([
        f'mkscripts := {script_dir}',
         'include $(mkscripts)/stack.mk',
         '$(call stack-init,stack)',
+        '$(call stack-push,stack,a)',
         '$(call stack-push,stack)',
-        '$(call assert,$(call stack-empty,stack))',
+        '$(call stack-push,stack,b)',
+        '$(call assert,$(call eq,$(call stack-top,stack),b),top not b)',
+        '$(call stack-pop,stack)',
+        '$(call assert,$(call not,$(call stack-top,stack)),top not empty)',
+        '$(call stack-pop,stack)',
+        '$(call assert,$(call eq,$(call stack-top,stack),a),top not a)',
+        '$(call stack-pop,stack)',
+        '$(call assert,$(call stack-empty,stack),stack not empty)'
         '.PHONY: all',
         'all:'
     ])
 
+    assert stderr == []
     assert ec == 0
     assert not list(filter(lambda s: s, stderr))
