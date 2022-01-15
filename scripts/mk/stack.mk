@@ -12,7 +12,7 @@ __stack-assert-nonempty = $(call assert,$(call not,$(call stack-empty,$(1))),Sta
 
 stack-init              = $(eval $(1) := $(__stack_top_sym))
 stack-empty             = $(call not,$(subst $(__stack_top_sym),,$($(1))))
-stack-push              = $(eval $(1) := $(__stack_top_sym)$(subst $(__space),$(__stack_join_sym),$(2)) $(subst $(__stack_top_sym),,$($(1))))
+stack-push              = $(if $(2),$(eval $(1) := $(__stack_top_sym)$(subst $(__space),$(__stack_join_sym),$(strip $(2))) $(subst $(__stack_top_sym),,$($(1)))))
 stack-pop               = $(call __stack-assert-nonempty,$(1)) \
                           $(eval $(1) := $(__stack_top_sym)$(filter-out $(firstword $($(1))),$($(1))))
 stack-top               = $(strip $(call __stack-assert-nonempty,$(1)) \
