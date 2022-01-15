@@ -36,6 +36,9 @@ $(eval
     $(eval __node_builddir := $(__node_builddir)/$(strip $(if $(2),$(2),$(1))))
     $(call __node_debug,__node_builddir: $(__node_builddir))
 
+    # Use dirs recipe to create builddir
+    $(eval dirs += $(__node_builddir))
+
     # Update path to node
     $(eval __node_path := $(__node_path)/$(__node))
     $(call __node_debug,__node_path: $(__node_path)))
