@@ -103,3 +103,19 @@ def test_stack_pop_on_empty_disallowed(script_dir):
 
     assert ec != 0
     assert list(filter(lambda s: 'stack is empty' in s.lower(), stderr))
+
+def test_stack_empty_after_pushing_empty_string(script_dir):
+    ''' Push an empty string to the stack and verify that it's still empty '''
+
+    ec, stdout, stderr = make.make_supplied([
+       f'mkscripts := {script_dir}',
+        'include $(mkscripts)/stack.mk',
+        '$(call stack-init,stack)',
+        '$(call stack-push,stack)',
+        '$(call assert,$(call stack-empty,stack))',
+        '.PHONY: all',
+        'all:'
+    ])
+
+    assert ec == 0
+    assert not list(filter(lambda s: s, stderr))
