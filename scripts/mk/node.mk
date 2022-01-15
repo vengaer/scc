@@ -7,6 +7,7 @@ include $(mkscripts)/stack.mk
 
 $(call stack-init,__node_stack)
 $(call stack-init,__node_builddir_stack)
+$(call stack-init,__obj_stack)
 
 $(call assert,$(builddir),builddir is empty)
 $(call assert,$(root),root is empty)
@@ -41,12 +42,20 @@ $(eval
 
     # Update path to node
     $(eval __node_path := $(__node_path)/$(__node))
-    $(call __node_debug,__node_path: $(__node_path)))
+    $(call __node_debug,__node_path: $(__node_path))
+
+    # Back up node-local objects
+    $(call stack-push,__obj_stack,$(__node_obj))
+    $(eval __node_obj :=))
 endef
 
 define __exit-node
 $(eval
     $(call __node_debug,exit $(__node))
+
+    $(eval __node_obj := $(call stack-top,__obj_stack))
+    $(call stack-pop,__obj_stack)
+    $(call __node_debug,restored obj: $(__node_obj))
 
     # Restore node path
     $(eval __node_path := $(patsubst %/$(__node),%,$(__node_path)))
