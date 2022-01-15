@@ -1,0 +1,13 @@
+cext     := c
+cxxext   := cc
+hext     := h
+oext     := o
+asext    := S
+aext     := a
+dext     := d
+mkext    := mk
+soext    := so
+adocext  := adoc
+htmlext  := html
+jsonext  := json
+pyext    := py
