@@ -1,3 +1,6 @@
+ifndef __Stack_mk
+__Stack_mk := _
+
 $(if $(mkscripts),,$(error mkscritps is empty))
 include $(mkscripts)/expr.mk
 
@@ -14,3 +17,5 @@ stack-pop               = $(call __stack-assert-nonempty,$(1)) \
                           $(eval $(1) := $(__stack_top_sym)$(filter-out $(firstword $($(1))),$($(1))))
 stack-top               = $(strip $(call __stack-assert-nonempty,$(1)) \
                               $(subst $(__stack_top_sym),,$(subst $(__stack_join_sym), ,$(firstword $($(1))))))
+
+endif # __Stack_mk

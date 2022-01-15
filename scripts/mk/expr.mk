@@ -1,3 +1,6 @@
+ifndef __Expr_mk
+__Expr_mk := _
+
 # Negation, for use with $(if ...)
 # $(call not,VARIABLE)
 not     = $(if $(1),,_)
@@ -18,3 +21,5 @@ require = $(if $(findstring _-$(1)_-,_-$(MAKECMDGOALS)_-),$(if $(call not,$($(2)
 # error message
 # $(call assert,CONDITION[, DESCRIPTION])
 assert  = $(if $(call not,$(1)),$(error assertion failed$(if $(2),: $(strip $(2)))))
+
+endif # __Expr_mk
