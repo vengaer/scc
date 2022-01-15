@@ -213,3 +213,35 @@ def test_builddirs_generated(script_dir):
         assert builddirs
         for builddir in builddirs:
             assert os.path.exists(builddir)
+
+def test_node_objects_restored_on_exit(script_dir):
+    ''' Verify that node-local objects are restored when exiting substate '''
+
+    subdirs = ['a', 'b', 'c', 'd']
+    exp_objs = 'root.o main.o abcd.o'
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        for subdir in subdirs:
+            path = pathlib.Path(tmpdir) / subdir
+            path.mkdir()
+            _write_makefile(path, [
+               f'__node_obj := {subdir}.o'
+            ])
+
+        ec, stdout, stderr = make.make_supplied([
+           f'root       := {tmpdir}',
+            'builddir   := ${root}/build',
+           f'mkscripts  := {script_dir}',
+           f'__node_obj := {exp_objs}',
+            'include $(mkscripts)/node.mk',
+           f'$(foreach __s,{" ".join(subdirs)},$(call __include-node,$(__s)))',
+            '$(info root objects: $(__node_obj))',
+            '.PHONY: all',
+            'all:'
+        ], args='DEBUG=1', directory=tmpdir)
+
+        assert ec == 0
+        assert f'root objects: {exp_objs}' in stdout
+
+        grouped = _group_debug_output(stdout, 2, tmpdir)
+        assert f'restored obj: {exp_objs}' in grouped[tmpdir]
