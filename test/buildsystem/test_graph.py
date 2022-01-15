@@ -1,6 +1,9 @@
 ''' Tests related to directory graph traversal '''
 
+import os
 import pathlib
+import shutil
+import subprocess
 import tempfile
 import pytest
 
@@ -28,6 +31,24 @@ def _group_debug_output(stdout, maxdepth, root):
         # Depth should be at most maxdepth
         assert len(stack) <= maxdepth
     return grouped
+
+def _write_makefile(path, contents):
+    ''' Write but don't run makefile '''
+    with open(str(path / 'Makefile'), 'w', encoding='ascii') as handle:
+        handle.write('\n'.join(contents))
+        handle.write('\n')
+
+def _supports_mkdir():
+    ''' Check whether the OS supports mkdir, the brutish way '''
+    exists = False
+    with tempfile.TemporaryDirectory() as tmpdir:
+        testdir = f'{tmpdir}/test'
+        try:
+            exists = subprocess.run(['mkdir', '-p', testdir], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
+        finally:
+            if os.path.exists(testdir):
+                shutil.rmtree(testdir)
+    return exists
 
 @pytest.mark.parametrize('explicit_builddir', [False, True])
 def test_flat_graph_traversal(script_dir, explicit_builddir):
@@ -77,11 +98,6 @@ def test_nested_graph_traversal(script_dir):
     lvl2_dirs = ['e', 'f', 'g', 'h']
     lvl3_dirs = ['i', 'j', 'k', 'l']
 
-    def write_makefile(path, contents):
-        with open(str(path / 'Makefile'), 'w', encoding='ascii') as handle:
-            handle.write('\n'.join(contents))
-            handle.write('\n')
-
     with tempfile.TemporaryDirectory() as tmpdir:
         root = pathlib.Path(tmpdir)
         for l1d in lvl1_dirs:
@@ -94,8 +110,8 @@ def test_nested_graph_traversal(script_dir):
                     l3d = l2d / l3d
                     l3d.mkdir()
                     (l3d / 'Makefile').touch()
-                write_makefile(l2d, [ f'$(foreach __s,{" ".join(lvl3_dirs)},$(call __include-node, $(__s)))' ])
-            write_makefile(l1d, [ f'$(foreach __s,{" ".join(lvl2_dirs)},$(call __include-node, $(__s)))' ])
+                _write_makefile(l2d, [ f'$(foreach __s,{" ".join(lvl3_dirs)},$(call __include-node, $(__s)))' ])
+            _write_makefile(l1d, [ f'$(foreach __s,{" ".join(lvl2_dirs)},$(call __include-node, $(__s)))' ])
 
         ec, stdout, stderr = make.make_supplied([
            f'root      := {tmpdir}',
@@ -148,3 +164,52 @@ def test_nested_graph_traversal(script_dir):
                 assert len(list(filter(lambda s: f'{info}:' in s, grouped[tmpdir]))) == len(lvl1_dirs)
             # No __enter_node for root
             assert len(set(grouped[str(l1d)])) == len(grouped[str(l1d)]) / len(lvl2_dirs) + len(lvl2_dirs)
+
+@pytest.mark.skipif(not _supports_mkdir(), reason='Relies on mkdir command')
+def test_builddirs_generated(script_dir):
+    ''' Make sure that build directories are generated as required '''
+    dirchain = ['a', 'b', 'c']
+    subdirs = ['d', 'e']
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        top = pathlib.Path(tmpdir)
+        for subdir in subdirs:
+            subdir = top / subdir
+            subdir.mkdir()
+            _write_makefile(subdir, [
+                'all: | $(__node_builddir)',
+               f'$(call __include-node,{dirchain[0]})'
+            ])
+            chain = subdir
+            for i, chaindir in enumerate(dirchain):
+                chain = chain / chaindir
+                chain.mkdir()
+                _write_makefile(chain, [
+                    f'$(call __include-node,{dirchain[i + 1]})' if i < len(dirchain) - 1 else '',
+                    'all: | $(__node_builddir)'
+                ])
+
+        ec, stdout, stderr = make.make_supplied([
+           f'root      := {tmpdir}',
+            'builddir  := ${root}/build',
+           f'mkscripts := {script_dir}',
+            'include $(mkscripts)/node.mk',
+            'dirs += $(root)',
+            '.PHONY: all',
+            'all:',
+            '',
+           f'$(foreach __s,{" ".join(subdirs)},$(call __include-node,$(__s)))',
+            '$(dirs):',
+            '\tmkdir -p $@'
+        ], args='DEBUG=1', directory=tmpdir)
+
+        assert ec == 0
+        grouped = _group_debug_output(stdout, 5, tmpdir)
+        builddirs = []
+        for dbg in grouped.values():
+            for ent in set(dbg):
+                if ent.startswith('__node_builddir'):
+                    builddirs.append(ent.replace('__node_builddir: ', '').strip())
+        assert builddirs
+        for builddir in builddirs:
+            assert os.path.exists(builddir)
