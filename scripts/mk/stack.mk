@@ -20,6 +20,7 @@ stack-top               = $(strip $(call __stack-assert-nonempty,$(1)) \
                               $(subst $(__stack_empty_ent),,$(subst $(__stack_top_sym),,$(subst $(__stack_join_sym), ,$(firstword $($(strip $(1))))))))
 
 __dstack_add_prefix   := ||+||
+__dstack_sub_prefix   := ||-||
 
 dstack-init             = $(call stack-init,__dstack_$(1))$(eval __dstack_$(1)_top := $(2))
 dstack-top              = $(__dstack_$(1)_top)
@@ -34,6 +35,17 @@ $(strip
             $(eval __dstack_diff += $(__w))))
     $(if $(__dstack_diff),
         $(call stack-push,__dstack_$(1),$(__dstack_add_prefix)$(subst $(__space),$(__stack_join_sym),$(strip $(__dstack_diff))))))
+endef
+
+define dstack-sub
+$(strip
+    $(eval __dstack_diff :=)
+    $(foreach __w,$(2),
+        $(if $(findstring $(__w),$(__dstack_$(1)_top)),
+            $(eval __dstack_$(1)_top := $(filter-out $(__w),$(__dstack_$(1)_top)))
+            $(eval __dstack_diff += $(__w))))
+    $(if $(__dstack_diff),
+        $(call stack-push,__dstack_$(1),$(__dstack_sub_prefix)$(subst $(__space),$(__stack_join_sym),$(strip $(__dstack_diff))))))
 endef
 
 endif # __Stack_mk
