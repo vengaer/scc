@@ -72,7 +72,7 @@ $(eval
     $(call __node_debug,__node: $(__node)))
 endef
 
-define __include-node
+define include-node
 $(call __enter-node,$(1),$(2))
 $(eval
     # Include the Makefile

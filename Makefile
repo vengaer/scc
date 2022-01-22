@@ -62,7 +62,7 @@ alib         := $(builddir)/lib$(scc).$(aext)
 .PHONY: all
 all: $(alib) $(solink)
 
-$(call __include-node,src,scc)
+$(call include-node,src,scc)
 
 $(dirs):
 	$(MKDIR) $(MKDIRFLAGS) $@

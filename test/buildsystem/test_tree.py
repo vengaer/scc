@@ -67,7 +67,7 @@ def test_flat_tree_traversal(script_dir, explicit_builddir):
             'builddir  := ${root}/build',
            f'mkscripts := {script_dir}',
             'include $(mkscripts)/node.mk',
-           f'$(foreach __s,{" ".join(subdirs)},$(call __include-node,$(__s){", build_$(__s)" if explicit_builddir else ""}))',
+           f'$(foreach __s,{" ".join(subdirs)},$(call include-node,$(__s){", build_$(__s)" if explicit_builddir else ""}))',
             '.PHONY: all',
             'all:'
         ], args='DEBUG=1', directory=tmpdir)
@@ -110,15 +110,15 @@ def test_nested_tree_traversal(script_dir):
                     l3d = l2d / l3d
                     l3d.mkdir()
                     (l3d / 'Makefile').touch()
-                _write_makefile(l2d, [ f'$(foreach __s,{" ".join(lvl3_dirs)},$(call __include-node, $(__s)))' ])
-            _write_makefile(l1d, [ f'$(foreach __s,{" ".join(lvl2_dirs)},$(call __include-node, $(__s)))' ])
+                _write_makefile(l2d, [ f'$(foreach __s,{" ".join(lvl3_dirs)},$(call include-node, $(__s)))' ])
+            _write_makefile(l1d, [ f'$(foreach __s,{" ".join(lvl2_dirs)},$(call include-node, $(__s)))' ])
 
         ec, stdout, stderr = make.make_supplied([
            f'root      := {tmpdir}',
             'builddir  := ${root}/build',
            f'mkscripts := {script_dir}',
             'include $(mkscripts)/node.mk',
-           f'$(foreach __s,{" ".join(lvl1_dirs)},$(call __include-node,$(__s)))',
+           f'$(foreach __s,{" ".join(lvl1_dirs)},$(call include-node,$(__s)))',
             '.PHONY: all',
             'all:'
         ], args='DEBUG=1', directory=tmpdir)
@@ -178,14 +178,14 @@ def test_builddirs_generated(script_dir):
             subdir.mkdir()
             _write_makefile(subdir, [
                 'all: | $(__node_builddir)',
-               f'$(call __include-node,{dirchain[0]})'
+               f'$(call include-node,{dirchain[0]})'
             ])
             chain = subdir
             for i, chaindir in enumerate(dirchain):
                 chain = chain / chaindir
                 chain.mkdir()
                 _write_makefile(chain, [
-                    f'$(call __include-node,{dirchain[i + 1]})' if i < len(dirchain) - 1 else '',
+                    f'$(call include-node,{dirchain[i + 1]})' if i < len(dirchain) - 1 else '',
                     'all: | $(__node_builddir)'
                 ])
 
@@ -198,7 +198,7 @@ def test_builddirs_generated(script_dir):
             '.PHONY: all',
             'all:',
             '',
-           f'$(foreach __s,{" ".join(subdirs)},$(call __include-node,$(__s)))',
+           f'$(foreach __s,{" ".join(subdirs)},$(call include-node,$(__s)))',
             '$(dirs):',
             '\tmkdir -p $@'
         ], args='DEBUG=1', directory=tmpdir)
@@ -234,7 +234,7 @@ def test_node_objects_restored_on_exit(script_dir):
            f'mkscripts  := {script_dir}',
            f'__node_obj := {exp_objs}',
             'include $(mkscripts)/node.mk',
-           f'$(foreach __s,{" ".join(subdirs)},$(call __include-node,$(__s)))',
+           f'$(foreach __s,{" ".join(subdirs)},$(call include-node,$(__s)))',
             '$(info root objects: $(__node_obj))',
             '.PHONY: all',
             'all:'
