@@ -10,8 +10,10 @@ __memprefix := $(notdir $(__node_builddir))
 $(memtest): $(call reeval,LDLIBS,$(memtest))
 $(memtest): $(call reeval,LDFLAGS,$(memtest))
 $(memtest): $(__node_obj) | $(__node_builddir)
-	$(info [LD] $(__memprefix)/$(notdir $@) (unit))
+	$(info [LD] $(notdir $@))
 	$(LD) -o $@ $^ $(LDFLAGS) $(LDLIBS)
+
+$(__node_builddir)/%.$(oext): $(call reeval,CFLAGS,$(__node_builddir)/%.$(oext))
 
 $(__node_builddir)/%.$(oext): $(__node_path)/%.$(cext) | $(__node_builddir)
 	$(info [CC] $(__memprefix)/$(notdir $@) (unit))

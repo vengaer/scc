@@ -11,8 +11,10 @@ __arenaprefix := $(notdir $(__node_builddir))
 $(arenatest): $(call reeval,LDLIBS,$(arenatest))
 $(arenatest): $(call reeval,LDFLAGS,$(arenatest))
 $(arenatest): $(__node_obj) | $(__node_builddir)
-	$(info [LD] $(__arenaprefix)/$(notdir $@) (unit))
+	$(info [LD] $(notdir $@))
 	$(LD) -o $@ $^ $(LDFLAGS) $(LDLIBS)
+
+$(__node_builddir)/%.$(oext): $(call reeval,CFLAGS,$(__node_builddir)/%.$(oext))
 
 $(__node_builddir)/%.$(oext): $(__node_path)/%.$(cext) | $(__node_builddir)
 	$(info [CC] $(__arenaprefix)/$(notdir $@) (unit))
@@ -25,7 +27,6 @@ $(__node_builddir)/%.$(oext): $(srcdir)/%.$(cext) | $(__node_builddir)
 $(__node_builddir)/%$(runnersuffix).$(cext): $(__node_path)/%.$(cext) | $(__node_builddir)
 	$(info [RB] $(__arenaprefix)/$(notdir $@) (unit))
 	$(RB) $(unitygenerator) $< $@
-	$(TOUCH) $@
 
 $(__node_builddir)/%.$(oext): $(__node_builddir)/%.$(cext)
 	$(info [CC] $(__arenaprefix)/$(notdir $@) (unit))
