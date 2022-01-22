@@ -128,3 +128,18 @@ def test_stack_handles_intermittently_empty_slots(script_dir):
     assert stderr == []
     assert ec == 0
     assert not list(filter(lambda s: s, stderr))
+
+def test_stack_value_init(script_dir):
+    ''' Initialize a stack with a value '''
+
+    ec, stdout, stderr = make.make_supplied([
+       f'mkscripts := {script_dir}',
+        'include $(mkscripts)/stack.mk',
+        '$(call stack-init,stack,a b c)',
+        '$(call assert,$(call eq,$(call stack-top,stack),a b c))',
+        '$(info $(stack))',
+        '.PHONY: all',
+        'all:'
+    ])
+    assert stderr == []
+    assert ec == 0
