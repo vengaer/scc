@@ -48,4 +48,15 @@ $(strip
         $(call stack-push,__dstack_$(1),$(__dstack_sub_prefix)$(subst $(__space),$(__stack_join_sym),$(strip $(__dstack_diff))))))
 endef
 
+define dstack-pop
+$(strip
+    $(eval __dstack_chg  := $(call stack-top,__dstack_$(1)))
+    $(call stack-pop,__dstack_$(1))
+    $(if $(findstring $(__dstack_sub_prefix),$(__dstack_chg)),
+        $(eval __dstack_$(1)_top += $(subst $(__dstack_sub_prefix),,$(__dstack_chg))),
+      $(if $(findstring $(__dstack_add_prefix),$(__dstack_chg)),
+          $(foreach __w,$(subst $(__dstack_add_prefix),,$(__dstack_chg)),
+              $(eval __dstack_$(1)_top := $(filter-out $(__w),$(__dstack_$(1)_top)))))))
+endef
+
 endif # __Stack_mk
