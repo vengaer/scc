@@ -35,6 +35,7 @@ stack-top               = $(strip $(call __stack-assert-nonempty,$(1)) \
 
 __dstack_add_prefix   := ||+||
 __dstack_sub_prefix   := ||-||
+__dstack_op_div       := ||_||
 
 # Initialize a diff stack $(1)  with value $(2). $(2) may be empty
 # $(call dstack-init,NAME[,INIT])
@@ -74,17 +75,35 @@ $(strip
         $(call stack-push,__dstack_$(1),$(__dstack_sub_prefix)$(subst $(__space),$(__stack_join_sym),$(strip $(__dstack_diff))))))
 endef
 
+# Push a new value $(2) to the top of diff stack $(1)
+# $(call dstack-push,DSTACK,VALUE)
+define dstack-push
+$(strip
+    $(eval __dstack_add := $(call diff,$(2),$(call dstack-top,$(1))))
+    $(eval __dstack_sub := $(call diff,$(call dstack-top,$(1)),$(2)))
+    $(call stack-push,__dstack_$(1),$(strip
+        $(if $(__dstack_add),
+            $(__dstack_add_prefix)$(subst $(__space),$(__stack_join_sym),$(strip $(__dstack_add))))$(strip
+        )$(__dstack_op_div)$(strip
+        $(if $(__dstack_sub),
+            $(__dstack_sub_prefix)$(subst $(__space),$(__stack_join_sym),$(strip $(__dstack_sub)))))))
+    $(if $(2),$(eval __dstack_$(1)_top := $(2))))
+endef
+
 # Undo the last dstack-add or dstack-sub on dstack $(1)
 # $(call dstack-pop,DSTACK)
 define dstack-pop
 $(strip
-    $(eval __dstack_chg  := $(call stack-top,__dstack_$(1)))
+    $(eval __dstack_chg  := $(subst $(__dstack_op_div), ,$(subst $(__space),$(__stack_join_sym),$(call stack-top,__dstack_$(1)))))
     $(call stack-pop,__dstack_$(1))
-    $(if $(findstring $(__dstack_sub_prefix),$(__dstack_chg)),
-        $(eval __dstack_$(1)_top += $(subst $(__dstack_sub_prefix),,$(__dstack_chg))),
-      $(if $(findstring $(__dstack_add_prefix),$(__dstack_chg)),
-          $(foreach __w,$(subst $(__dstack_add_prefix),,$(__dstack_chg)),
-              $(eval __dstack_$(1)_top := $(filter-out $(__w),$(__dstack_$(1)_top)))))))
+    $(eval __dstack_sub := $(filter $(__dstack_sub_prefix)%,$(__dstack_chg)))
+    $(if $(__dstack_sub),
+        $(eval __dstack_$(1)_top += $(subst $(__stack_join_sym), ,$(subst $(__dstack_sub_prefix),,$(__dstack_sub)))))
+
+    $(eval __dstack_add := $(filter $(__dstack_add_prefix)%,$(__dstack_chg)))
+    $(if $(__dstack_add),
+        $(foreach __w,$(subst $(__stack_join_sym), ,$(subst $(__dstack_add_prefix),,$(__dstack_add))),
+            $(eval __dstack_$(1)_top := $(filter-out $(__w),$(__dstack_$(1)_top))))))
 endef
 
 endif # __Stack_mk

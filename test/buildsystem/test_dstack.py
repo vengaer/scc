@@ -62,6 +62,12 @@ def test_dstack_pop(script_dir):
         '$(call dstack-sub,dstack,-Wall -Wextra)',
         '$(call dstack-add,dstack,-Wall)',
         '$(call dstack-sub,dstack,-Wall)',
+        '$(call dstack-add,dstack,-Wall -Wunused)',
+        '$(call dstack-sub,dstack,-Wall -Wunused)',
+        '$(info $(call dstack-top,dstack))',
+        '$(call dstack-pop,dstack)',
+        '$(info $(call dstack-top,dstack))',
+        '$(call dstack-pop,dstack)',
         '$(info $(call dstack-top,dstack))',
         '$(call dstack-pop,dstack)',
         '$(info $(call dstack-top,dstack))',
@@ -78,9 +84,12 @@ def test_dstack_pop(script_dir):
     ])
     assert stderr == []
     assert ec == 0
-    assert stdout[0] == '-Wpedantic -Wunused -Wunknown-pragmas'
-    assert stdout[1] == '-Wpedantic -Wunused -Wunknown-pragmas -Wall'
-    assert stdout[2] == '-Wpedantic -Wunused -Wunknown-pragmas'
-    assert stdout[3] == '-Wpedantic -Wunused -Wunknown-pragmas -Wall -Wextra'
-    assert stdout[4] == '-Wpedantic -Wall -Wextra'
-    assert stdout[5] == '-Wall -Wextra'
+    assert stdout[0] == '-Wpedantic -Wunknown-pragmas'
+    assert stdout[1] == '-Wpedantic -Wunknown-pragmas -Wall -Wunused'
+    assert stdout[2] == '-Wpedantic -Wunknown-pragmas -Wunused'
+    assert stdout[3] == '-Wpedantic -Wunknown-pragmas -Wunused -Wall'
+    assert stdout[4] == '-Wpedantic -Wunknown-pragmas -Wunused'
+    assert stdout[5] == '-Wpedantic -Wunknown-pragmas -Wunused -Wall -Wextra'
+    assert stdout[6] == '-Wpedantic -Wall -Wextra'
+    assert stdout[7] == '-Wall -Wextra'
+
