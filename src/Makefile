@@ -3,7 +3,7 @@ ifdef __node
 CFLAGS     += -fPIC
 LDFLAGS    += -shared -Wl,-soname,lib$(scc).$(soext).$(socompat)
 
-__node_obj := $(patsubst $(__node_path)/%.$(cext),$(__node_builddir)/%.$(oext),$(wildcard $(__node_path)/*.$(cext)))
+__node_obj := $(call wildcard_obj,$(__node_path),$(cext))
 
 $(call include-node,asm)
 
