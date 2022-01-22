@@ -46,16 +46,24 @@ $(eval
 
     # Back up node-local objects
     $(call stack-push,__obj_stack,$(__node_obj))
-    $(eval __node_obj :=))
+    $(eval __node_obj :=)
+
+    # Back up volatile variables
+    $(call volatile-push))
 endef
 
 define __exit-node
 $(eval
     $(call __node_debug,exit $(__node))
 
+    $(eval __all_obj  += $(__node_obj))
+
     $(eval __node_obj := $(call stack-top,__obj_stack))
     $(call stack-pop,__obj_stack)
     $(call __node_debug,restored obj: $(__node_obj))
+
+    # Restore volatile variables
+    $(call volatile-pop)
 
     # Restore node path
     $(eval __node_path := $(patsubst %/$(__node),%,$(__node_path)))
@@ -73,11 +81,18 @@ $(eval
 endef
 
 define include-node
-$(call __enter-node,$(1),$(2))
-$(eval
-    # Include the Makefile
-    $(eval include $(__node_path)/Makefile))
-$(call __exit-node)
+$(if $(call not,$(__is_cleaning)),
+    $(call __enter-node,$(1),$(2))
+    $(eval
+        # Include the Makefile
+        $(eval include $(__node_path)/Makefile))
+    $(eval __all_mkfiles += $(__node_path)/Makefile)
+    $(call __exit-node))
 endef
+
+# Generate objects on the form $(__node_builddir)/STEM.$(oext) for each file with extension
+# $(2) in directory $(1)
+# $(call wildcard_obj,SRCDIR,EXTENSION)
+wildcard_obj = $(patsubst $(1)/%.$(2),$(__node_builddir)/%.$(oext),$(wildcard $(1)/*.$(2)))
 
 endif # __Node_mk

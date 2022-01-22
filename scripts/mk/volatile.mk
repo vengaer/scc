@@ -4,7 +4,7 @@ __Volatile_mk := _
 $(if $(mkscripts),,$(error mkscritps is empty))
 include $(mkscripts)/expr.mk
 include $(mkscripts)/stack.mk
-__volatile_vars := CFLAGS CPPFLAGS LDFLAGS LDLIBS
+__volatile_vars := CFLAGS LDFLAGS LDLIBS PYTESTFLAGS
 
 $(foreach __v,$(__volatile_vars),$(call dstack-init,__$(__v)_dstack,$($(__v))))
 

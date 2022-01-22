@@ -28,7 +28,8 @@ CFLAGS       := -std=c99 -c -MD -MP -g -Wall -Wextra -Wpedantic -Waggregate-retu
                 -Wnested-externs -Wpointer-arith -Wshadow -Wunknown-pragmas -Wswitch \
                 -Wundef -Wunused -Wwrite-strings
 CXXFLAGS     := -std=c++17 -c -MD -MP -g -Wall -Wextra -Wpedantic
-CPPFLAGS     := -I$(root) -DNDEBUG
+CPPFLAGS      = -I$(root) -DNDEBUG -DSCC_$(bitarch)BIT -DSCC_SIMD_ISA_$(simd_isa)    \
+                -DSCC_HOST_OS_$(hostos) -DSCC_ARCH_$(arch)  -DSCC_VECSIZE=$(vecsize)
 LDFLAGS      :=
 LDLIBS       :=
 ARFLAGS      := -rcs
@@ -62,6 +63,7 @@ alib         := $(builddir)/lib$(scc).$(aext)
 .PHONY: all
 all: $(alib) $(solink)
 
+$(call include-node,mach)
 $(call include-node,src,scc)
 
 $(dirs):
@@ -89,5 +91,5 @@ distclean: clean
 
 $(VERBOSE).SILENT:
 
-$(obj): Makefile $(wildcard $(mkscripts)/*.$(mkext))
--include $(patsubst %.$(oext),%.$(dext),$(obj))
+$(__all_obj): Makefile $(__all_mkfiles) $(wildcard $(mkscripts)/*.$(mkext))
+-include $(patsubst %.$(oext),%.$(dext),$(__all_obj))
