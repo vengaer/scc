@@ -9,6 +9,7 @@ LDLIBS          += -lunity
 $(call include-node,arena)
 $(call include-node,mem)
 $(call include-node,rbtree)
+$(call include-node,stack)
 
 else
 # Recurse to top level
