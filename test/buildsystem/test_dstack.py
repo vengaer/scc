@@ -50,3 +50,37 @@ def test_dstack_sub(script_dir):
     assert stdout[0] == '-Wall -Wextra -Wpedantic -Wunused -Wunknown-pragmas'
     assert stdout[1] == '-Wall -Wunknown-pragmas'
     assert len(stdout[2].strip().split(_JOIN_SYM)) == 3
+
+def test_dstack_pop(script_dir):
+    ''' Test dstack pop '''
+    ec, stdout, stderr = make.make_supplied([
+       f'mkscripts := {script_dir}',
+        'include $(mkscripts)/stack.mk',
+        '$(call dstack-init,dstack,-Wall -Wextra)',
+        '$(call dstack-add,dstack,-Wpedantic)',
+        '$(call dstack-add,dstack,-Wunused -Wunknown-pragmas)',
+        '$(call dstack-sub,dstack,-Wall -Wextra)',
+        '$(call dstack-add,dstack,-Wall)',
+        '$(call dstack-sub,dstack,-Wall)',
+        '$(info $(call dstack-top,dstack))',
+        '$(call dstack-pop,dstack)',
+        '$(info $(call dstack-top,dstack))',
+        '$(call dstack-pop,dstack)',
+        '$(info $(call dstack-top,dstack))',
+        '$(call dstack-pop,dstack)',
+        '$(info $(call dstack-top,dstack))',
+        '$(call dstack-pop,dstack)',
+        '$(info $(call dstack-top,dstack))',
+        '$(call dstack-pop,dstack)',
+        '$(info $(call dstack-top,dstack))',
+        '.PHONY: all',
+        'all:'
+    ])
+    assert stderr == []
+    assert ec == 0
+    assert stdout[0] == '-Wpedantic -Wunused -Wunknown-pragmas'
+    assert stdout[1] == '-Wpedantic -Wunused -Wunknown-pragmas -Wall'
+    assert stdout[2] == '-Wpedantic -Wunused -Wunknown-pragmas'
+    assert stdout[3] == '-Wpedantic -Wunused -Wunknown-pragmas -Wall -Wextra'
+    assert stdout[4] == '-Wpedantic -Wall -Wextra'
+    assert stdout[5] == '-Wall -Wextra'
