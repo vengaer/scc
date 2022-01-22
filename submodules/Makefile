@@ -25,7 +25,7 @@ lint:  CPPFLAGS += -I$(unityinc)
 
 .PHONY: __clean_unity
 __clean_unity:
-	$(MAKE) -sC $(unitydir) clean
+	$(MAKE)C $(unitydir) clean
 
 .PHONY: distclean
 distclean: $(if $(wildcard $(submodules)),__clean_unity)
@@ -35,5 +35,5 @@ else
 __recurse := $(if $(MAKECMDGOALS),$(MAKECMDGOALS),__recurse)
 .PHONY: $(__recurse)
 $(__recurse):
-	@$(MAKE) $(MAKECMDGOALS) -C $(CURDIR)/.. --no-print-directory -s
+	@$(MAKE) $(MAKECMDGOALS) -C $(CURDIR)/.. --no-print-directory
 endif
