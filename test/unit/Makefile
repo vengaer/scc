@@ -7,6 +7,7 @@ LDFLAGS      += -fsanitize=address,undefined -L$(unitydir)
 LDLIBS       += -lunity
 
 $(call include-node,arena)
+$(call include-node,mem)
 
 else
 # Recurse to top level
