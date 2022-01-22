@@ -10,6 +10,7 @@ $(call include-node,arena)
 $(call include-node,mem)
 $(call include-node,rbtree)
 $(call include-node,stack)
+$(call include-node,svec)
 
 else
 # Recurse to top level
