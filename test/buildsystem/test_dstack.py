@@ -52,7 +52,7 @@ def test_dstack_sub(script_dir):
     assert len(stdout[2].strip().split(_JOIN_SYM)) == 3
 
 def test_dstack_pop(script_dir):
-    ''' Test dstack pop '''
+    ''' Repeatedly call dstack-add and dstack-sub and verify the results '''
     ec, stdout, stderr = make.make_supplied([
        f'mkscripts := {script_dir}',
         'include $(mkscripts)/stack.mk',
@@ -93,3 +93,35 @@ def test_dstack_pop(script_dir):
     assert stdout[6] == '-Wpedantic -Wall -Wextra'
     assert stdout[7] == '-Wall -Wextra'
 
+def test_dstack_push(script_dir):
+    ''' Repeatedly push values to a diff stack and verify the results '''
+    ec, stdout, stderr = make.make_supplied([
+       f'mkscripts := {script_dir}',
+        'include $(mkscripts)/stack.mk',
+        '$(call dstack-init,dstack,-Wall -Wextra)',
+        '$(call dstack-push,dstack,-Wpedantic)',
+        '$(info $(call dstack-top,dstack))',
+        '$(call dstack-pop,dstack)',
+        '$(info $(call dstack-top,dstack))',
+        '$(call dstack-push,dstack,-Wall -Wextra -Wpedantic -Wunused)',
+        '$(info $(call dstack-top,dstack))'
+        '$(call dstack-push,dstack,$(call dstack-top,dstack))'
+        '$(info $(call dstack-top,dstack))',
+        '$(call dstack-pop,dstack)',
+        '$(info $(call dstack-top,dstack))',
+        '$(call dstack-pop,dstack)',
+        '$(info $(call dstack-top,dstack))',
+        '$(call dstack-push,dstack)'
+        '$(info $(call dstack-top,dstack))',
+        '.PHONY: all',
+        'all:'
+    ])
+    assert stderr == []
+    assert ec == 0
+    assert stdout[0] == '-Wpedantic'
+    assert stdout[1] == '-Wall -Wextra'
+    assert stdout[2] == '-Wall -Wextra -Wpedantic -Wunused'
+    assert stdout[3] == '-Wall -Wextra -Wpedantic -Wunused'
+    assert stdout[4] == '-Wall -Wextra -Wpedantic -Wunused'
+    assert stdout[5] == '-Wall -Wextra'
+    assert stdout[6] == '-Wall -Wextra'
