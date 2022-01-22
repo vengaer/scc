@@ -1,3 +1,4 @@
+import re
 import subprocess
 import tempfile
 
@@ -7,7 +8,8 @@ def make(path, args=None):
         cmd += args.split()
     ''' Run make on the makefile at path. Return exit status, stdout and stderr '''
     proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    decode_stream = lambda b: list(filter(lambda s: s != '', b.decode('utf-8').strip().split('\n')))
+    handle = re.compile(r'(^$|^make(\[\d+\])?:)')
+    decode_stream = lambda b: list(filter(lambda s: not handle.search(s), b.decode('utf-8').strip().split('\n')))
     return proc.returncode, decode_stream(proc.stdout), decode_stream(proc.stderr)
 
 def make_supplied(contents, args=None, directory=None):
