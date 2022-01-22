@@ -1,0 +1,17 @@
+ifdef __node
+
+$(call include-node,buildsystem)
+#$(call include-node,docs)
+#$(call include-node,fuzz)
+#$(call include-node,inspect)
+#$(call include-node,panic)
+#$(call include-node,perf)
+#$(call include-node,unit)
+
+else
+# Recurse to top level
+__recurse := $(if $(MAKECMDGOALS),$(MAKECMDGOALS),__recurse)
+.PHONY: $(__recurse)
+$(__recurse):
+	@$(MAKE) $(MAKECMDGOALS) -C $(CURDIR)/.. --no-print-directory -s
+endif

@@ -65,6 +65,7 @@ all: $(alib) $(solink)
 
 $(call include-node,mach)
 $(call include-node,src,scc)
+$(call include-node,test)
 
 $(dirs):
 	$(MKDIR) $(MKDIRFLAGS) $@
