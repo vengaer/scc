@@ -97,6 +97,6 @@ wildcard_obj = $(patsubst $(1)/%.$(2),$(__node_builddir)/%$(3).$(oext),$(wildcar
 
 # Generate path to object on the form $(__node_builddir)/$(2).$(oext) for file at $(1)/$(2).$(3)
 # $(clal objpath,SRCDIR,STEM,EXTENSION)
-objpath      = $(patsubst $(1)/%.$(3),$(__node_builddir)/%.$(oext),$(wildcard $(1)/$(2).$(3)))
+objpath      = $(eval __p :=)$(foreach __w,$(2),$(eval __p += $(patsubst $(1)/%.$(3),$(__node_builddir)/%.$(oext),$(wildcard $(1)/$(__w).$(3)))))$(__p)
 
 endif # __Node_mk

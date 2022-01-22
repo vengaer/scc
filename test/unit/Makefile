@@ -1,13 +1,14 @@
 ifdef __node
 
-runnersuffix := _runner
+runnersuffix    := _runner
 
-CFLAGS       += -fsanitize=address,undefined
-LDFLAGS      += -fsanitize=address,undefined -L$(unitydir)
-LDLIBS       += -lunity
+CFLAGS          += -fsanitize=address,undefined
+LDFLAGS         += -fsanitize=address,undefined -L$(unitydir)
+LDLIBS          += -lunity
 
 $(call include-node,arena)
 $(call include-node,mem)
+$(call include-node,rbtree)
 
 else
 # Recurse to top level
