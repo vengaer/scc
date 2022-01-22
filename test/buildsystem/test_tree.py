@@ -1,4 +1,4 @@
-''' Tests related to directory graph traversal '''
+''' Tests related to directory tree traversal '''
 
 import os
 import pathlib
@@ -51,7 +51,7 @@ def _supports_mkdir():
     return exists
 
 @pytest.mark.parametrize('explicit_builddir', [False, True])
-def test_flat_graph_traversal(script_dir, explicit_builddir):
+def test_flat_tree_traversal(script_dir, explicit_builddir):
     ''' Create a directory tree with Makefiles and verify that its traversed correctly '''
     subdirs = ['a', 'b', 'c', 'd']
 
@@ -91,8 +91,8 @@ def test_flat_graph_traversal(script_dir, explicit_builddir):
         # Automatic variables should be the same for the root each time
         assert len(set(grouped[tmpdir])) == len(grouped[tmpdir]) / len(subdirs) + len(subdirs) - 1
 
-def test_nested_graph_traversal(script_dir):
-    ''' Generate a nested directory graph and verify the correctness '''
+def test_nested_tree_traversal(script_dir):
+    ''' Generate a nested directory tree and verify the correctness '''
 
     lvl1_dirs = ['a', 'b', 'c', 'd']
     lvl2_dirs = ['e', 'f', 'g', 'h']
