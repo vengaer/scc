@@ -92,3 +92,23 @@ def test_eq(script_dir):
 
     assert stderr == []
     assert ec == 0
+
+def test_diff(script_dir):
+    ''' Test diff macro '''
+
+    ec, stdout, stderr = make.make_supplied([
+       f'mkscripts := {script_dir}',
+        'include $(mkscripts)/stack.mk',
+        '$(info $(call diff,a b c,a c))',
+        '$(info $(call diff,-std=c11 -Wall -Wextra -Wpedantic,-std=c11 -Wall))',
+        '$(info $(call diff,-std=c99 -Wall -Wunused,-std=c11))',
+        '$(info $(call diff,quack,ack))',
+        '.PHONY: all',
+        'all:'
+    ])
+    assert stdout[0] == 'b'
+    assert stdout[1] == '-Wextra -Wpedantic'
+    assert stdout[2] == '-std=c99 -Wall -Wunused'
+    assert stdout[3] == 'quack'
+    assert stderr == []
+    assert ec == 0
