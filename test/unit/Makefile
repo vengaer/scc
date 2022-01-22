@@ -11,6 +11,7 @@ $(call include-node,mem)
 $(call include-node,rbtree)
 $(call include-node,stack)
 $(call include-node,svec)
+$(call include-node,vec)
 
 else
 # Recurse to top level
