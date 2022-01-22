@@ -26,4 +26,8 @@ assert  = $(if $(call not,$(1)),$(error assertion failed$(if $(2),: $(strip $(2)
 # $(call eq,LHS,RHS)
 eq      = $(and $(findstring $(1),$(2)),$(call not,$(filter-out $(1),$(2))))
 
+# Compute difference between $(1) and $(2), i.e. the words in $(1) that are not in $(2)
+# $(call diff,STR0,STR1)
+diff    = $(strip $(eval __dr :=$(1))$(foreach __w,$(2),$(eval __dr := $(filter-out $(__w),$(__dr))))$(__dr))
+
 endif # __Expr_mk
