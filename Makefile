@@ -21,6 +21,7 @@ PYLINT       := pylint
 root         := $(abspath $(CURDIR))
 builddir     := $(root)/build
 dirs         += $(builddir)
+srcdir       := $(root)/src
 
 ASFLAGS      := -c -g
 CFLAGS       := -std=c99 -c -MD -MP -g -Wall -Wextra -Wpedantic -Waggregate-return   \
@@ -65,6 +66,7 @@ all: $(alib) $(solink)
 
 $(call include-node,mach)
 $(call include-node,src,scc)
+$(call include-node,submodules)
 $(call include-node,test)
 
 $(dirs):

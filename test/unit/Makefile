@@ -1,12 +1,12 @@
 ifdef __node
 
-$(call include-node,buildsystem)
-#$(call include-node,docs)
-#$(call include-node,fuzz)
-#$(call include-node,inspect)
-#$(call include-node,panic)
-#$(call include-node,perf)
-$(call include-node,unit)
+runnersuffix := _runner
+
+CFLAGS       += -fsanitize=address,undefined
+LDFLAGS      += -fsanitize=address,undefined -L$(unitydir)
+LDLIBS       += -lunity
+
+$(call include-node,arena)
 
 else
 # Recurse to top level
