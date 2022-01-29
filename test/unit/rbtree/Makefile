@@ -1,8 +1,12 @@
 ifdef __node
 
-rbtree_deps := arena svec
+$(call push,rbtree_deps)
+
+rbtree_deps += svec
 
 $(call decl-unit)
+
+$(call pop,rbtree_deps)
 
 else
 # Recurse to top level

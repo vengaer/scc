@@ -1,11 +1,6 @@
 ifdef __node
 
-$(call push,stack_deps)
-stack_deps += vec
-
-$(call decl-unit)
-
-$(call pop,stack_deps)
+snipdir      := $(__node_path)
 
 else
 # Recurse to top level

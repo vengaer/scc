@@ -3,7 +3,7 @@ ifdef __node
 testdir    := $(__node_path)
 
 $(call include-node,buildsystem)
-#$(call include-node,docs)
+$(call include-node,docs)
 #$(call include-node,fuzz)
 $(call include-node,inspect)
 #$(call include-node,panic)

@@ -11,3 +11,4 @@ adocext  := adoc
 htmlext  := html
 jsonext  := json
 pyext    := py
+snipext  := csnip
