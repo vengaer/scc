@@ -21,19 +21,19 @@ $(__chk_panic): $(panicbins) $(__all_mkfiles) $(wildcard $(__node_path)/*.$(pyex
 	$(TOUCH) $@
 
 $(panicmanifest): $(wildcard $(__node_path)/*.$(cext)) | $(__node_builddir)
-	$(info [PY] $(notdir $@))
+	$(info [PY]   $(notdir $@))
 	$(panicparser) -m$(panicsrcvar) -o $(dir $@) $^
 
 $(panicbins): $$@.$(oext) $(panicobj) $(__sccobj)
-	$(info [LD] $(notdir $@))
+	$(info [LD]   $(notdir $@))
 	$(LD) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
 $(__node_builddir)/%.$(oext): $(__node_builddir)/%.$(cext) | $(__node_builddir)
-	$(info [CC] $(notdir $@))
+	$(info [CC]   $(notdir $@))
 	$(CC) -o $@ $< $(CFLAGS) $(CPPFLAGS)
 
 $(__node_builddir)/%.$(oext): $(__node_path)/%.$(cext) | $(__node_builddir)
-	$(info [CC] $(notdir $@))
+	$(info [CC]   $(notdir $@))
 	$(CC) -o $@ $< $(CFLAGS) $(CPPFLAGS)
 
 check: $(__chk_panic)

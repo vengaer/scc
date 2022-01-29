@@ -42,20 +42,20 @@ $(eval
 
     # Runner source generation
     $(__node_builddir)/%$(runnersuffix).$(cext): $(__node_path)/%.$(cext) | $(__node_builddir)
-	    $$(info [RB] $$(notdir $$@))
+	    $$(info [RB]   $$(notdir $$@))
 	    $(RB) $(unitygenerator) $$< $$@
 
     $(foreach __r,$(__runners),
         $(__r): $(__r).$(oext) $(patsubst %$(runnersuffix),%.$(oext),$(__r))  $(call __unit-obj)
-	        $$(info [LD] $$(notdir $$@))
+	        $$(info [LD]   $$(notdir $$@))
 	        $(LD) -o $$@ $$^ $(LDFLAGS) $(LDLIBS))
 
     $(__node_builddir)/%.$(oext): $(__node_path)/%.$(cext) | $(__node_builddir)
-	    $$(info [CC] $$(notdir $$@))
+	    $$(info [CC]   $$(notdir $$@))
 	    $(CC) -o $$@ $$< $(CFLAGS) $(CPPFLAGS)
 
     $(__node_builddir)/%.$(oext): $(srcdir)/%.$(cext) | $(__node_builddir)
-	    $$(info [CC] $(__node)/$$(notdir $$@))
+	    $$(info [CC]   $(__node)/$$(notdir $$@))
 	    $(CC) -o $$@ $$< $(CFLAGS) $(CPPFLAGS)
 
     check: $(__chk)

@@ -12,21 +12,21 @@ sccbuilddir := $(__node_builddir)
 $(call include-node,asm)
 
 $(solink): $(solib) | $(builddir)
-	$(info [LN] $(notdir $@))
+	$(info [LN]   $(notdir $@))
 	$(LN) $(LNFLAGS) $< $@
 
 $(solib): $(call reeval,LDFLAGS,$(solib))
 $(solib): $(__node_obj) | $(builddir)
-	$(info [LD] $(notdir $@))
+	$(info [LD]   $(notdir $@))
 	$(LD) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
 $(alib): $(__node_obj) | $(builddir)
-	$(info [AR] $(notdir $@))
+	$(info [AR]   $(notdir $@))
 	$(AR) $(ARFLAGS) -o $@ $^
 
 $(__node_builddir)/%.$(oext): $(call reeval,CFLAGS,$(__node_builddir)/%.$(oext))
 $(__node_builddir)/%.$(oext): $(__node_path)/%.$(cext) | $(__node_builddir)
-	$(info [CC] $(notdir $@))
+	$(info [CC]   $(notdir $@))
 	$(CC) -o $@ $< $(CFLAGS) $(CPPFLAGS)
 
 $(call pop,LDFLAGS)

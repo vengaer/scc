@@ -13,7 +13,7 @@ vecinfo    := $(__node_builddir)/vecinfo.$(mkext)
 isa_query  := $(__node_builddir)/isa_query
 
 $(machinfo): $(machscript) | $(__node_builddir)
-	$(info [PY] $(notdir $@))
+	$(info [PY]   $(notdir $@))
 	$< -o $@
 
 $(if $(call not,$(__is_cleaning)), \
@@ -27,18 +27,18 @@ $(simdinfo): $(isa_query)
 	$< $@
 
 $(if $(arch_lower)$(abi_lower),$(isa_query)): $(__node_obj) | $(machinfo) $(__node_builddir)
-	$(info [LD] $(notdir $@))
+	$(info [LD]   $(notdir $@))
 	$(LD) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
 $(__node_builddir)/%.$(oext): $(query_srcdir)/%.$(asext) | $(__node_builddir)
-	$(info [AS] $(notdir $@))
+	$(info [AS]   $(notdir $@))
 	$(AS) -o $@ $< $(ASFLAGS)
 
 $(if $(and $(call not,$(__is_cleaning)),$(wildcard $(query_srcdir)/*.$(asext))), \
     $(eval -include $(simdinfo)))
 
 $(if $(simd_isa),$(vecinfo)): $(vecscript) $(simdinfo) $(call reeval,simd_isa,$(vecinfo))| $(__node_builddir)
-	$(info [PY] $(notdir $@))
+	$(info [PY]   $(notdir $@))
 	$< -o $@ $(simd_isa)
 
 simd_isa ?= UNSUPPORTED
