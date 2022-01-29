@@ -90,7 +90,7 @@ $(eval
 endef
 
 define include-node
-$(if $(and $(1),$(call not,$(__is_cleaning))),
+$(if $(1),
     $(call __enter-node,$(1),$(2))
     $(eval __all_mkfiles += $(__node_path)/Makefile)
     $(eval

@@ -29,7 +29,7 @@ $(unitygenerator): $(submodules)
 
 .PHONY: __clean_unity
 __clean_unity:
-	$(MAKE) -C $(unitydir) clean
+	$(MAKE) -C $(unitydir) clean --no-print-directory
 
 $(benchmarkalib): $(call reeval,cpu_cores,$(benchmarkalib))
 
@@ -40,10 +40,12 @@ $(benchmarkalib) $(benchmarkmain_alib)&: $(submodules) | $(benchmarkbuilddir)
 	$(CMAKE) --build $(benchmarkbuilddir) --parallel $(cpu_cores) --config Releasekk
 
 .PHONY: __clean_benchmark
-	$(MAKE) -C $(benchmarkdir) clean
+__clean_benchmark:
+	$(CMAKE) --build $(benchmarkbuilddir) --target clean
 
 .PHONY: distclean
-distclean: $(if $(wildcard $(submodules)),__clean_unity __clean_benchmark)
+distclean: $(if $(wildcard $(submodules)),__clean_unity)
+distclean: $(if $(wildcard $(submodules)),__clean_benchmark)
 
 else
 # Recurse to top level
