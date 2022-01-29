@@ -143,3 +143,32 @@ def test_stack_value_init(script_dir):
     ])
     assert stderr == []
     assert ec == 0
+
+def test_global_stack(script_dir):
+    ''' Verify the behavior of pushing and poping to the global stack '''
+
+    ec, stdout, stderr = make.make_supplied([
+       f'mkscripts := {script_dir}',
+        'include $(mkscripts)/stack.mk',
+        'CFLAGS   := -Wall -Wextra -Wpedantic',
+        'CPPFLAGS := -DFOO -DBAR',
+        '$(call push,$(CFLAGS))',
+        '$(call push,$(CPPFLAGS))',
+        'CFLAGS   += -Wshadow',
+        'CPPFLAGS += -DNDEBUG',
+        '$(info $(CFLAGS))',
+        '$(info $(CPPFLAGS))',
+        'CPPFLAGS := $(call pop)',
+        'CFLAGS   := $(call pop)',
+        '$(info $(CFLAGS))',
+        '$(info $(CPPFLAGS))',
+        '.PHONY: all',
+        'all:'
+    ])
+
+    assert stderr == []
+    assert ec == 0
+    assert stdout[0] == '-Wall -Wextra -Wpedantic -Wshadow'
+    assert stdout[1] == '-DFOO -DBAR -DNDEBUG'
+    assert stdout[2] == '-Wall -Wextra -Wpedantic'
+    assert stdout[3] == '-DFOO -DBAR'
