@@ -6,7 +6,7 @@ $(call include-node,buildsystem)
 $(call include-node,docs)
 #$(call include-node,fuzz)
 $(call include-node,inspect)
-#$(call include-node,panic)
+$(call include-node,panic)
 #$(call include-node,perf)
 $(call include-node,unit)
 

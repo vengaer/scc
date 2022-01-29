@@ -49,6 +49,8 @@ def generate_makelist(outdir, written, makevar):
             existing = handle.read()
 
         for line in existing.split('\n')[:-1]:
+            if line.startswith('.SECONDARY'):
+                continue
             var, value = tuple(map(lambda s: s.strip(), line.split(':=')))
             if var not in contents:
                 contents[var] = set()
@@ -64,17 +66,19 @@ def generate_makelist(outdir, written, makevar):
     with open(os.path.join(outdir, 'manifest.mk'), 'w', encoding='ascii') as handle:
         for var, val in contents.items():
             handle.write(f'{var} := {" ".join(val)}\n')
+            handle.write(f'.SECONDARY: $({var})\n')
 
-def main(infile, outdir, makevar):
+def main(infiles, outdir, makevar):
     ''' Find functions in source file, generate runners and write makefile '''
-    funcs = find_functions(infile)
-    written = generate_runners(funcs, outdir)
-    if outdir is not None:
-        generate_makelist(outdir, written, makevar)
+    for infile in infiles:
+        funcs = find_functions(infile)
+        written = generate_runners(funcs, outdir)
+        if outdir is not None:
+            generate_makelist(outdir, written, makevar)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generate compilable C source files from snippets')
-    parser.add_argument('infile', type=str, help='Input snippet')
+    parser.add_argument('infiles', type=str, nargs='*', help='Input snippets')
     parser.add_argument('-o', '--outdir', type=str, default=None, help='Output directory')
     parser.add_argument('-m', '--makevar', default=None, help='make variable to assign list to')
     main(**vars(parser.parse_args()))
