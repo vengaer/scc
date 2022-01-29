@@ -83,10 +83,10 @@ endef
 define include-node
 $(if $(call not,$(__is_cleaning)),
     $(call __enter-node,$(1),$(2))
+    $(eval __all_mkfiles += $(__node_path)/Makefile)
     $(eval
         # Include the Makefile
         $(eval include $(__node_path)/Makefile))
-    $(eval __all_mkfiles += $(__node_path)/Makefile)
     $(call __exit-node))
 endef
 
