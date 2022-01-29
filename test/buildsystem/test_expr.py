@@ -98,7 +98,7 @@ def test_diff(script_dir):
 
     ec, stdout, stderr = make.make_supplied([
        f'mkscripts := {script_dir}',
-        'include $(mkscripts)/stack.mk',
+        'include $(mkscripts)/expr.mk',
         '$(info $(call diff,a b c,a c))',
         '$(info $(call diff,-std=c11 -Wall -Wextra -Wpedantic,-std=c11 -Wall))',
         '$(info $(call diff,-std=c99 -Wall -Wunused,-std=c11))',
@@ -106,9 +106,25 @@ def test_diff(script_dir):
         '.PHONY: all',
         'all:'
     ])
+    assert stderr == []
+    assert ec == 0
     assert stdout[0] == 'b'
     assert stdout[1] == '-Wextra -Wpedantic'
     assert stdout[2] == '-std=c99 -Wall -Wunused'
     assert stdout[3] == 'quack'
+
+def test_secondword(script_dir):
+    ''' Test secondword macro '''
+
+    ec, stdout, stderr = make.make_supplied([
+       f'mkscripts := {script_dir}',
+        'include $(mkscripts)/expr.mk',
+        '$(info $(call secondword,a b))',
+        '$(info $(call secondword,a b c))',
+        '.PHONY: all',
+        'all:'
+    ])
     assert stderr == []
     assert ec == 0
+    assert stdout[0] == 'b'
+    assert stdout[1] == 'b'
