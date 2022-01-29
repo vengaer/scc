@@ -92,12 +92,13 @@ endef
 
 # Generate objects on the form $(__node_builddir)/STEM$(3).$(oext) for each file with extension
 # $(2) in directory $(1) where $(3) is an optional suffix to be appended to the object stem
-# $(call wildcard_obj,SRCDIR,EXTENSION)
-wildcard_obj   = $(patsubst $(1)/%.$(2),$(__node_builddir)/%$(3).$(oext),$(wildcard $(1)/*.$(2)))
+# $(call wildcard_obj,SRCDIR,EXTENSION[,SUFFIX])
+wildcard_obj       = $(call wildcard_artifacts,$(1),$(2),$(oext),$(3))
 
-# Generate path to object on the form $(__node_builddir)/$(2).$(oext) for file at $(1)/$(2).$(3)
-# $(clal objpath,SRCDIR,STEM,EXTENSION)
-objpath        = $(eval __p :=)$(foreach __w,$(2),$(eval __p += $(patsubst $(1)/%.$(3),$(__node_builddir)/%.$(oext),$(wildcard $(1)/$(__w).$(3)))))$(__p)
+# Generate artifacts in build tree given a path, extensions and optional artifact suffix
+# $(call wildcard_artifacts,SRCDIR,SRC_EXTENSION,ARTIFACT_EXTENSION[,SUFFIX])
+wildcard_artifacts = $(patsubst $(1)/%.$(2),$(__node_builddir)/%$(4).$(3),$(wildcard $(1)/*.$(2)))
+
 
 __all_mkfiles := $(root)/Makefile
 
