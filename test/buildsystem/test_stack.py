@@ -2,7 +2,7 @@
 
 import make
 
-from fixtures import project_root, script_dir
+from fixtures import *
 
 def test_stack_empty_on_init(script_dir):
     ''' Initialize a stack and verify that stack-empty returns true '''

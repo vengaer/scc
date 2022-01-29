@@ -1,7 +1,7 @@
 ''' Tests of misc. expression macros '''
 
 import make
-from fixtures import project_root, script_dir
+from fixtures import *
 
 def test_not(script_dir):
     ''' Test logical negation '''

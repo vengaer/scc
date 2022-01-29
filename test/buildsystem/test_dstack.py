@@ -2,7 +2,7 @@
 
 import make
 
-from fixtures import project_root, script_dir
+from fixtures import *
 
 _JOIN_SYM = '<<>>'
 

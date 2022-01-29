@@ -8,7 +8,7 @@ import tempfile
 import pytest
 
 import make
-from fixtures import project_root, script_dir
+from fixtures import *
 
 def _group_debug_output(stdout, maxdepth, root):
     ''' Group debug output after directory '''
