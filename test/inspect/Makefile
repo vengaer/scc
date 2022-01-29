@@ -1,6 +1,5 @@
 ifdef __node
 
-inspectdir      := $(__node_path)
 inspectbuilddir := $(__node_builddir)
 
 $(__node_builddir)/%.$(oext): $(__node_path)/%.$(cext) | $(__node_builddir)

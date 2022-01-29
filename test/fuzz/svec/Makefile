@@ -1,11 +1,6 @@
 ifdef __node
 
-$(call push,rbtree_deps)
-rbtree_deps += svec
-
-$(call decl-unit)
-
-$(call pop,rbtree_deps)
+$(call decl-fuzz)
 
 else
 # Recurse to top level

@@ -3,7 +3,7 @@ ifdef __node
 $(call push,rbtree_deps)
 rbtree_deps += svec
 
-$(call decl-unit)
+$(call decl-fuzz)
 
 $(call pop,rbtree_deps)
 
