@@ -63,8 +63,16 @@ $(eval
     fuzz: $(fuzztarget)
 	    $$< $(FUZZERFLAGS)
 	    $(LLVM_PROFDATA) $(LLVM_PROFFLAGS)
-	    $(LLVM_COV) $(LLVM_COV_SHOW))
+	    $(LLVM_COV) $(LLVM_COV_SHOW)
+
+    merge: $(fuzztarget)
+	    $$< $(mergeflags))
 endef
+
+fuzz: $$(call require,fuzz,SCC_FUZZ)
+
+merge: $$(call require,merge,SCC_FUZZ)
+merge: $$(call require,merge,SCC_CORPORA)
 
 $(call push,CC)
 $(call push,LD)
