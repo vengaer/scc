@@ -1,5 +1,8 @@
 ifdef __node
 
+$(call push,CFLAGS)
+$(call push,LDFLAGS)
+
 CFLAGS     += -fPIC
 LDFLAGS    += -shared -Wl,-soname,lib$(scc).$(soext).$(socompat)
 
@@ -23,6 +26,9 @@ $(alib): $(__node_obj) | $(builddir)
 $(__node_builddir)/%.$(oext): $(__node_path)/%.$(cext) | $(__node_builddir)
 	$(info [CC] $(notdir $@))
 	$(CC) -o $@ $< $(CFLAGS) $(CPPFLAGS)
+
+$(call pop,LDFLAGS)
+$(call pop,CFLAGS)
 
 else
 # Recurse to top level

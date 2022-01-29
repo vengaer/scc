@@ -1,6 +1,8 @@
 ifdef __node
 
 __chk_buildsystem := $(__node_builddir)/.check.stamp
+
+$(call push,PYTESTFLAGS)
 PYTESTFLAGS       += --project-root=$(root)
 
 check: $(__chk_buildsystem)
@@ -12,6 +14,8 @@ $(__chk_buildsystem): $(wildcard $(__node_path)/*.$(pyext))
 $(__chk_buildsystem): | $(__node_builddir)
 	$(PYTEST) $(PYTESTFLAGS) $(__node_path)
 	$(TOUCH) $@
+
+$(call pop,PYTESTFLAGS)
 
 else
 # Recurse to top level
