@@ -46,7 +46,7 @@ $(eval
 	    $(RB) $(unitygenerator) $$< $$@
 
     $(foreach __r,$(__runners),
-        $(__r): $(__r).$(oext) $(patsubst %$(runnersuffix),%.$(oext),$(__r))  $(call __unit-obj)
+        $(__r): $(__r).$(oext) $(patsubst %$(runnersuffix),%.$(oext),$(__r)) $(call __unit-obj) $(unityalib)
 	        $$(info [LD]   $$(notdir $$@))
 	        $(LD) -o $$@ $$^ $(LDFLAGS) $(LDLIBS))
 
