@@ -57,6 +57,8 @@ define __exit-node
 $(eval
     $(call __node_debug,exit $(__node))
 
+    $(call decl-lint)
+
     $(eval __all_obj        += $(__node_obj))
     $(eval __all_obj        += $(filter-out $(__node_obj),$(call wildcard-obj,$(__node_path),$(cext))))
     $(eval __all_obj        += $(filter-out $(__node_obj),$(call wildcard-obj,$(__node_path),$(asext))))

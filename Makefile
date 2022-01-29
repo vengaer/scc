@@ -1,5 +1,7 @@
 -include .config.mk
 
+.SECONDEXPANSION:
+
 CC           := clang
 CXX          := clang++
 AS           := $(CC)
@@ -58,8 +60,6 @@ socompat     := 0
 solink       := $(builddir)/lib$(scc).$(soext)
 solib        := $(solink).$(sover)
 alib         := $(builddir)/lib$(scc).$(aext)
-
-.SECONDEXPANSION:
 
 .PHONY: all
 all: $(alib) $(solink)
