@@ -100,6 +100,6 @@ wildcard_obj       = $(call wildcard_artifacts,$(1),$(2),$(oext),$(3))
 wildcard_artifacts = $(patsubst $(1)/%.$(2),$(__node_builddir)/%$(4).$(3),$(wildcard $(1)/*.$(2)))
 
 
-__all_mkfiles := $(root)/Makefile
+__all_mkfiles := $(root)/Makefile $(wildcard $(mkscripts)/*.$(mkext))
 
 endif # __Node_mk
