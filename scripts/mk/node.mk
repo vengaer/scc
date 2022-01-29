@@ -93,10 +93,12 @@ endef
 # Generate objects on the form $(__node_builddir)/STEM$(3).$(oext) for each file with extension
 # $(2) in directory $(1) where $(3) is an optional suffix to be appended to the object stem
 # $(call wildcard_obj,SRCDIR,EXTENSION)
-wildcard_obj = $(patsubst $(1)/%.$(2),$(__node_builddir)/%$(3).$(oext),$(wildcard $(1)/*.$(2)))
+wildcard_obj   = $(patsubst $(1)/%.$(2),$(__node_builddir)/%$(3).$(oext),$(wildcard $(1)/*.$(2)))
 
 # Generate path to object on the form $(__node_builddir)/$(2).$(oext) for file at $(1)/$(2).$(3)
 # $(clal objpath,SRCDIR,STEM,EXTENSION)
-objpath      = $(eval __p :=)$(foreach __w,$(2),$(eval __p += $(patsubst $(1)/%.$(3),$(__node_builddir)/%.$(oext),$(wildcard $(1)/$(__w).$(3)))))$(__p)
+objpath        = $(eval __p :=)$(foreach __w,$(2),$(eval __p += $(patsubst $(1)/%.$(3),$(__node_builddir)/%.$(oext),$(wildcard $(1)/$(__w).$(3)))))$(__p)
+
+__all_mkfiles := $(root)/Makefile
 
 endif # __Node_mk
