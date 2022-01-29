@@ -48,6 +48,8 @@ $(vecinfo): $(vecscript) | $(__node_builddir)
 	$< -o $@ $(simd_isa)
 
 simd_isa ?= UNSUPPORTED
+CPPFLAGS += -DSCC_$(bitarch)BIT -DSCC_SIMD_ISA_$(simd_isa)    \
+            -DSCC_HOST_OS_$(hostos) -DSCC_ARCH_$(arch)  -DSCC_VECSIZE=$(vecsize)
 else
 
 # Recurse to top level

@@ -29,8 +29,8 @@ CFLAGS       := -std=c99 -c -MD -MP -g -Wall -Wextra -Wpedantic -Waggregate-retu
                 -Wnested-externs -Wpointer-arith -Wshadow -Wunknown-pragmas -Wswitch \
                 -Wundef -Wunused -Wwrite-strings
 CXXFLAGS     := -std=c++17 -c -MD -MP -g -Wall -Wextra -Wpedantic
-CPPFLAGS      = -I$(root) -DNDEBUG -DSCC_$(bitarch)BIT -DSCC_SIMD_ISA_$(simd_isa)    \
-                -DSCC_HOST_OS_$(hostos) -DSCC_ARCH_$(arch)  -DSCC_VECSIZE=$(vecsize)
+CPPFLAGS     := -I$(root) -DNDEBUG
+
 LDFLAGS      :=
 LDLIBS       :=
 ARFLAGS      := -rcs
