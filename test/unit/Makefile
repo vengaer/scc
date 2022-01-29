@@ -8,7 +8,7 @@ $(call push,LDFLAGS)
 $(call push,LDLIBS)
 
 CFLAGS          += -fsanitize=address,undefined
-CPPFLAGS        += -I$(unityinc) -I$(testdir)
+CPPFLAGS        := -I$(unityinc) -I$(testdir) $(filter-out -DNDEBUG,$(CPPFLAGS))
 LDFLAGS         += -fsanitize=address,undefined -L$(unitydir)
 LDLIBS          += -lunity
 
