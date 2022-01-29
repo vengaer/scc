@@ -7,7 +7,7 @@ snipgen    := $(pyscripts)/snipgen.$(pyext)
 symmap     := $(snipdir)/symmap.$(jsonext)
 funcdefs   := $(snipdir)/funcs.$(jsonext)
 
-snipobj    := $(call wildcard_obj,$(snipdir),$(snipext))
+snipobj    := $(call wildcard-obj,$(snipdir),$(snipext))
 snipbins   := $(subst .$(oext),,$(snipobj))
 
 scc_stack_bad_container_deps := vec
@@ -36,7 +36,7 @@ $(__node_builddir)/%.$(cext): $(snipdir)/%.$(snipext) | $(__node_builddir)
 	$(snipgen) -o $@ -s $(symmap) -f $(funcdefs) $<
 
 # Don't remove temporary files
-.SECONDARY: $(call wildcard_artifacts,$(snipdir),$(snipext),$(cext))
+.SECONDARY: $(call wildcard-artifacts,$(snipdir),$(snipext),$(cext))
 
 .PHONY: check
 check: $(__chk_docs)

@@ -21,7 +21,7 @@ $(if $(call not,$(__is_cleaning)), \
     $(eval -include $(vecinfo)))
 
 query_srcdir := $(__node_path)/$(arch_lower)/$(abi_lower)
-__node_obj   := $(call wildcard_obj,$(query_srcdir),$(asext))
+__node_obj   := $(call wildcard-obj,$(query_srcdir),$(asext))
 
 $(simdinfo): $(isa_query)
 	$< $@

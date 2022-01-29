@@ -6,7 +6,7 @@ $(__node_builddir)/%.$(htmlext): $(__node_path)/%.$(adocext) $(__all_mkfiles) | 
 	$(info [ADOC] $(notdir $@))
 	$(ADOC) $(ADOCFLAGS) -o $@ $<
 
-$(docindex): $(call wildcard_artifacts,$(__node_path),$(adocext),$(htmlext))
+$(docindex): $(call wildcard-artifacts,$(__node_path),$(adocext),$(htmlext))
 
 else
 # Recurse to top level

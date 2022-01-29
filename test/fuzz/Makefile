@@ -33,7 +33,7 @@ $(strip
         $(wildcard $(asdir)/scc_$(__node)*.$(asext)))
     $(patsubst $(inspectdir)/%.$(cext),$(__node_builddir)/%.$(oext),
         $(wildcard $(inspectdir)/scc_$(__node)*.$(cext)))
-    $(call wildcard_obj,$(__node_path),$(cext)))
+    $(call wildcard-obj,$(__node_path),$(cext)))
 endef
 
 define decl-fuzz

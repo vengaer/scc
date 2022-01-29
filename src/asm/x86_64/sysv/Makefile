@@ -1,6 +1,6 @@
 ifdef __node
 
-__node_obj := $(call wildcard_obj,$(__node_path),$(asext))
+__node_obj := $(call wildcard-obj,$(__node_path),$(asext))
 
 $(solib) $(alib): $(__node_obj)
 

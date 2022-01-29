@@ -13,7 +13,7 @@ __sccobj      := $(addsuffix .$(oext),$(addprefix $(sccbuilddir)/scc_,svec vec))
 $(if $(call eq,$(MAKECMDGOALS),check),\
     $(eval -include $(panicmanifest)))
 
-panicobj      := $(call wildcard_obj,$(__node_path),$(cext))
+panicobj      := $(call wildcard-obj,$(__node_path),$(cext))
 panicbins     := $(patsubst $(__node_builddir)/%.$(cext),$(__node_builddir)/%,$($(panicsrcvar)))
 
 $(__chk_panic): $(panicbins) $(__all_mkfiles) $(wildcard $(__node_path)/*.$(pyext))

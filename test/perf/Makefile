@@ -7,8 +7,8 @@ benchmark: $$(call require,benchmark,SCC_BENCHMARK_TYPE)
 define decl-benchmark
 $(eval
     $(eval benchmarktarget := $(__node_builddir)/benchmark_$(__node))
-    $(eval __node_obj      := $(call wildcard_obj,$(__node_path),$(cext))                            \
-                              $(call wildcard_obj,$(__node_path),$(cxxext))                          \
+    $(eval __node_obj      := $(call wildcard-obj,$(__node_path),$(cext))                            \
+                              $(call wildcard-obj,$(__node_path),$(cxxext))                          \
                               $(patsubst $(srcdir)/%.$(cext),$(__node_builddir)/%.$(oext),           \
                                   $(wildcard $(srcdir)/*$(__node)*.$(cext)))                         \
                               $(patsubst $(srcdir)/%.$(cext),$(__node_builddir)/%.$(oext),           \
