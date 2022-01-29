@@ -24,6 +24,7 @@ $(alib): $(__node_obj) | $(builddir)
 	$(info [AR] $(notdir $@))
 	$(AR) $(ARFLAGS) -o $@ $^
 
+$(__node_builddir)/%.$(oext): $(call reeval,CFLAGS,$(__node_builddir)/%.$(oext))
 $(__node_builddir)/%.$(oext): $(__node_path)/%.$(cext) | $(__node_builddir)
 	$(info [CC] $(notdir $@))
 	$(CC) -o $@ $< $(CFLAGS) $(CPPFLAGS)
