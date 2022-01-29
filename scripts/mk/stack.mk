@@ -106,8 +106,8 @@ $(strip
             $(eval __dstack_$(1)_top := $(filter-out $(__w),$(__dstack_$(1)_top))))))
 endef
 
-push = $(call stack-push,__global_stack,$(1))
-pop  = $(strip $(call stack-top,__global_stack)$(call stack-pop,__global_stack))
+push = $(call stack-push,__global_stack,$($(1)))
+pop  = $(eval $(1) := $(strip $(call stack-top,__global_stack)$(call stack-pop,__global_stack)))
 
 $(call stack-init,__global_stack)
 
