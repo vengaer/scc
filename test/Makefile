@@ -10,10 +10,6 @@ $(call include-node,inspect)
 #$(call include-node,perf)
 $(call include-node,unit)
 
-.PHONY: check
-check: $(call reeval,__node_path,check)
-check: CPPFLAGS += -I$(__node_path)
-
 else
 # Recurse to top level
 __recurse := $(if $(MAKECMDGOALS),$(MAKECMDGOALS),__recurse)

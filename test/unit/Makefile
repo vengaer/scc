@@ -1,7 +1,6 @@
 ifdef __node
 
 runnersuffix    := _runner
-unitdir         := $(__node_path)
 
 $(call push,CFLAGS)
 $(call push,CPPFLAGS)
@@ -9,7 +8,7 @@ $(call push,LDFLAGS)
 $(call push,LDLIBS)
 
 CFLAGS          += -fsanitize=address,undefined
-CPPFLAGS        += -I$(testdir) -I$(unityinc)
+CPPFLAGS        += -I$(unityinc) -I$(testdir)
 LDFLAGS         += -fsanitize=address,undefined -L$(unitydir)
 LDLIBS          += -lunity
 
@@ -36,6 +35,7 @@ $(eval
 
     # Recipies for running tests
     $(foreach __s,$(__chk),
+        $(__s): $(call reeval,CPPFLAGS,$(__s))
         $(__s): $(patsubst $(__node_builddir)/.chk.%.stamp,$(__node_builddir)/%$(runnersuffix),$(__s))
 	        $$<
 	        $(TOUCH) $$@)

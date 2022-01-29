@@ -19,10 +19,6 @@ $(unityalib): $(submodules)
 
 $(unitygenerator): $(submodules)
 
-check: CPPFLAGS += -I$(unityinc)
-
-lint:  CPPFLAGS += -I$(unityinc)
-
 .PHONY: __clean_unity
 __clean_unity:
 	$(MAKE)C $(unitydir) clean
