@@ -1,9 +1,17 @@
 ifdef __node
 
-unitydir       := $(__node_path)/unity
-unityinc       := $(unitydir)/src
-unityalib      := $(unitydir)/libunity.a
-unitygenerator := $(unitydir)/auto/generate_test_runner.rb
+unitydir             := $(__node_path)/unity
+unityinc             := $(unitydir)/src
+unityalib            := $(unitydir)/libunity.a
+unitygenerator       := $(unitydir)/auto/generate_test_runner.rb
+
+benchmarkdir         := $(__node_path)/benchmark
+benchmarkbuilddir    := $(benchmarkdir)/build
+dirs                 += $(benchmarkbuilddir)
+
+benchmarkalib        := $(benchmarkdir)/src/libbenchmark.a
+benchmarkmain_alib   := $(patsubst %.a,%_main.a,$(benchmarkalib))
+benchmark_buildflags := -DCMAKE_BUILD_TYPE=Release -DBENCHMARK_DOWNLOAD_DEPENDENCIES=on
 
 submodules := $(__node_path)/.init.stamp
 
@@ -21,10 +29,21 @@ $(unitygenerator): $(submodules)
 
 .PHONY: __clean_unity
 __clean_unity:
-	$(MAKE)C $(unitydir) clean
+	$(MAKE) -C $(unitydir) clean
+
+$(benchmarkalib): $(call reeval,cpu_cores,$(benchmarkalib))
+
+$(benchmarkmain_alib): $(call reeval,cpu_cores,$(benchmarkmain_alib))
+
+$(benchmarkalib) $(benchmarkmain_alib)&: $(submodules) | $(benchmarkbuilddir)
+	$(CMAKE) -E chdir $(benchmarkbuilddir) $(CMAKE) $(benchmark_buildflags) $(benchmarkdir)
+	$(CMAKE) --build $(benchmarkbuilddir) --parallel $(cpu_cores) --config Releasekk
+
+.PHONY: __clean_benchmark
+	$(MAKE) -C $(benchmarkdir) clean
 
 .PHONY: distclean
-distclean: $(if $(wildcard $(submodules)),__clean_unity)
+distclean: $(if $(wildcard $(submodules)),__clean_unity __clean_benchmark)
 
 else
 # Recurse to top level
