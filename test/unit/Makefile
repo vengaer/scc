@@ -1,17 +1,71 @@
 ifdef __node
 
 runnersuffix    := _runner
+unitdir         := $(__node_path)
 
 $(call push,CFLAGS)
+$(call push,CPPFLAGS)
 $(call push,LDFLAGS)
 $(call push,LDLIBS)
 
 CFLAGS          += -fsanitize=address,undefined
+CPPFLAGS        += -I$(testdir) -I$(unityinc)
 LDFLAGS         += -fsanitize=address,undefined -L$(unitydir)
 LDLIBS          += -lunity
 
+define __unit-obj
+$(strip
+    $(patsubst $(srcdir)/%.$(cext),$(builddir)/scc/%.$(oext),
+        $(wildcard $(patsubst %,$(srcdir)/*%*.$(cext),$(__node) $($(__node)_deps))))
+    $(patsubst $(inspectdir)/%.$(cext),$(inspectbuilddir)/%.$(oext),
+        $(wildcard $(inspectdir)/*$(__node)*.$(cext)))
+    $(patsubst $(asdir)/%.$(asext),$(asbuilddir)/%.$(oext),
+        $(wildcard $(patsubst %,$(asdir)/*%*.$(asext),$(__node) $($(__node)_deps)))))
+endef
+
+define decl-unit
+$(eval
+    $(eval __prefix    := $(__node_name))
+    $(eval __unitsrc   := $(wildcard $(__node_path)/*.$(cext)))
+    $(eval __chk       := $(patsubst $(__node_path)/%.$(cext),$(__node_builddir)/.chk.%.stamp,$(__unitsrc)))
+    $(eval __runners   := $(patsubst $(__node_path)/%.$(cext),$(__node_builddir)/%$(runnersuffix),$(__unitsrc)))
+
+
+    # Prevent make from removing generated runners
+    .SECONDARY: $(addsuffix .$(cext),$(__runners))
+
+    # Recipies for running tests
+    $(foreach __s,$(__chk),
+        $(__s): $(patsubst $(__node_builddir)/.chk.%.stamp,$(__node_builddir)/%$(runnersuffix),$(__s))
+	        $$<
+	        $(TOUCH) $$@)
+
+    # Runner source generation
+    $(__node_builddir)/%$(runnersuffix).$(cext): $(__node_path)/%.$(cext) | $(__node_builddir)
+	    $$(info [RB] $$(notdir $$@))
+	    $(RB) $(unitygenerator) $$< $$@
+
+    $(foreach __r,$(__runners),
+        $(__r): $(__r).$(oext) $(patsubst %$(runnersuffix),%.$(oext),$(__r))  $(call __unit-obj)
+	        $$(info [LD] $$(notdir $$@))
+	        $(LD) -o $$@ $$^ $(LDFLAGS) $(LDLIBS))
+
+    $(__node_builddir)/%.$(oext): $(__node_path)/%.$(cext) | $(__node_builddir)
+	    $$(info [CC] $$(notdir $$@))
+	    $(CC) -o $$@ $$< $(CFLAGS) $(CPPFLAGS)
+
+    $(__node_builddir)/%.$(oext): $(srcdir)/%.$(cext) | $(__node_builddir)
+	    $$(info [CC] $(__node)/$$(notdir $$@))
+	    $(CC) -o $$@ $$< $(CFLAGS) $(CPPFLAGS)
+
+    check: $(__chk)
+)
+endef
+
+
 $(call include-node,arena)
 $(call include-node,mem)
+$(call include-node,hashtab)
 $(call include-node,rbtree)
 $(call include-node,stack)
 $(call include-node,svec)
@@ -19,6 +73,7 @@ $(call include-node,vec)
 
 $(call pop,LDLIBS)
 $(call pop,LDFLAGS)
+$(call pop,CPPFLAGS)
 $(call pop,CFLAGS)
 
 else
