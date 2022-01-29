@@ -9,7 +9,7 @@ benchmarkdir         := $(__node_path)/benchmark
 benchmarkbuilddir    := $(benchmarkdir)/build
 dirs                 += $(benchmarkbuilddir)
 
-benchmarkalib        := $(benchmarkdir)/src/libbenchmark.a
+benchmarkalib        := $(benchmarkbuilddir)/src/libbenchmark.a
 benchmarkmain_alib   := $(patsubst %.a,%_main.a,$(benchmarkalib))
 benchmark_buildflags := -DCMAKE_BUILD_TYPE=Release -DBENCHMARK_DOWNLOAD_DEPENDENCIES=on
 
