@@ -57,6 +57,8 @@ $(eval
     $(call __node_debug,exit $(__node))
 
     $(eval __all_obj  += $(__node_obj))
+    $(eval __all_obj  += $(filter-out $(__node_obj),$(call wildcard_obj,$(__node_path),$(cext))))
+    $(eval __all_obj  += $(filter-out $(__node_obj),$(call wildcard_obj,$(__node_path),$(asext))))
 
     $(eval __node_obj := $(call stack-top,__obj_stack))
     $(call stack-pop,__obj_stack)
