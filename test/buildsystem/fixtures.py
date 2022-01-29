@@ -1,6 +1,13 @@
 import os
 import pytest
 
+@pytest.fixture(autouse=True, scope='session')
+def clear_environment():
+    try:
+        del os.environ['MAKEFLAGS']
+    except KeyError:
+        pass
+
 @pytest.fixture
 def project_root(pytestconfig):
     root = pytestconfig.getoption('project_root')
