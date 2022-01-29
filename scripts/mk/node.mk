@@ -19,6 +19,7 @@ $(call stack-push,__node_stack,$(lastword $(subst /, ,/$(__node_path))))
 $(call stack-push,__node_builddir_stack,$(__node_builddir))
 
 __node_debug     = $(if $(DEBUG),$$(info DEBUG: $(1)))
+__node          := $(notdir $(root))
 
 # Traverse path through $(1), optionally supplying the
 # stem of the builddir as $(2)
@@ -56,9 +57,13 @@ define __exit-node
 $(eval
     $(call __node_debug,exit $(__node))
 
-    $(eval __all_obj  += $(__node_obj))
-    $(eval __all_obj  += $(filter-out $(__node_obj),$(call wildcard-obj,$(__node_path),$(cext))))
-    $(eval __all_obj  += $(filter-out $(__node_obj),$(call wildcard-obj,$(__node_path),$(asext))))
+    $(eval __all_obj        += $(__node_obj))
+    $(eval __all_obj        += $(filter-out $(__node_obj),$(call wildcard-obj,$(__node_path),$(cext))))
+    $(eval __all_obj        += $(filter-out $(__node_obj),$(call wildcard-obj,$(__node_path),$(asext))))
+
+    $(eval __all_c_cxx_src  += $(wildcard $(__node_path)/*.$(cext)))
+    $(eval __all_c_cxx_src  += $(wildcard $(__node_path)/*.$(cxxext)))
+    $(eval __all_c_cxx_src  += $(wildcard $(__node_path)/*.$(hext)))
 
     $(eval __node_obj := $(call stack-top,__obj_stack))
     $(call stack-pop,__obj_stack)
@@ -83,7 +88,7 @@ $(eval
 endef
 
 define include-node
-$(if $(call not,$(__is_cleaning)),
+$(if $(and $(1),$(call not,$(__is_cleaning))),
     $(call __enter-node,$(1),$(2))
     $(eval __all_mkfiles += $(__node_path)/Makefile)
     $(eval
