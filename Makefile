@@ -52,6 +52,9 @@ scripts      := $(root)/scripts
 mkscripts    := $(scripts)/mk
 pyscripts    := $(scripts)/python
 
+.PHONY: all
+all:
+
 include $(wildcard $(mkscripts)/*.mk)
 
 sover        := 0
