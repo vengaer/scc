@@ -81,10 +81,10 @@ main:
     exit    $0x00
 
 .Lopen_failure:
-    write   open_fail(%rip), $open_fail_len, $STDERR_FILENO
+    write   $STDERR_FILENO, open_fail(%rip), $open_fail_len
     exit    $0x01
 .Lwrite_failure:
-    write   write_fail(%rip), $write_fail_len, $STDERR_FILENO
+    write   $STDERR_FILENO, write_fail(%rip), $write_fail_len
     exit    $0x01
 
     .section .data
