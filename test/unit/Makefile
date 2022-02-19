@@ -41,7 +41,7 @@ $(eval
 	        $(TOUCH) $$@)
 
     # Runner source generation
-    $(__node_builddir)/%$(runnersuffix).$(cext): $(__node_path)/%.$(cext) | $(__node_builddir)
+    $(__node_builddir)/%$(runnersuffix).$(cext): $(__node_path)/%.$(cext) $(submodules) | $(__node_builddir)
 	    $$(info [RB]   $$(notdir $$@))
 	    $(RB) $(unitygenerator) $$< $$@
 
