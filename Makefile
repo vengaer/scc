@@ -91,7 +91,7 @@ lint:
 
 .PHONY: clean
 clean:
-	$(RM) $(RMFLAGS) $(builddir) $(solink) $(solib) $(alib)
+	$(RM) $(RMFLAGS) $(builddir)
 
 .PHONY: distclean
 distclean: clean
