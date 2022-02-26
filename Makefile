@@ -96,6 +96,12 @@ clean:
 .PHONY: distclean
 distclean: clean
 
+tags: FORCE
+	$(info [GEN] $@)
+	$(CTAGS) $(CTAGSFLAGS)
+
+FORCE:
+
 $(VERBOSE).SILENT:
 
 $(__all_obj): $(__all_mkfiles) $(wildcard $(mkscripts)/*.$(mkext))

@@ -16,7 +16,7 @@ $(archinfo): $(archscript) | $(__node_builddir)
 	$(info [PY]   $(notdir $@))
 	$< -o $@
 
-$(if $(call not,$(__is_cleaning)), \
+$(if $(call not,$(__skip_arch)), \
     $(eval -include $(archinfo))   \
     $(eval -include $(vecinfo)))
 
@@ -34,7 +34,7 @@ $(__node_builddir)/%.$(oext): $(query_srcdir)/%.$(asext) | $(__node_builddir)
 	$(info [AS]   $(notdir $@))
 	$(AS) -o $@ $< $(ASFLAGS)
 
-$(if $(and $(call not,$(__is_cleaning)),$(wildcard $(query_srcdir)/*.$(asext))), \
+$(if $(and $(call not,$(__skip_arch)),$(wildcard $(query_srcdir)/*.$(asext))), \
     $(eval -include $(simdinfo)))
 
 $(if $(simd_isa),$(vecinfo)): $(vecscript) $(simdinfo) $(call reeval,simd_isa,$(vecinfo))| $(__node_builddir)
