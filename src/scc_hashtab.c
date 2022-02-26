@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <limits.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -15,6 +16,9 @@
 #define SCC_HASHTAB_GUARD    ((scc_hashtab_metatype)0x4000u)
 #define SCC_HASHTAB_OCCUPIED ((scc_hashtab_metatype)0x8000u)
 #define SCC_HASHTAB_VACATED  ((scc_hashtab_metatype)0xc000u)
+
+#define scc_hashtab_is_power_of_2(val)  \
+    (((val) & ~((val) - 1)) == (val))
 
 enum { SCC_HASHTAB_HASHSHIFT = 50 };
 
@@ -46,10 +50,12 @@ static struct scc_hashtab *scc_hashtab_resize(
     void *restrict *newtab,
     void *tab,
     struct scc_hashtab const *base,
-    size_t elemsize
+    size_t elemsize,
+    size_t newcap
 );
 static bool scc_hashtab_emplace(void *tab, struct scc_hashtab *base, size_t elemsize);
-static bool scc_hashtab_rehash(void **tab, struct scc_hashtab *base, size_t elemsize);
+static bool scc_hashtab_rehash(void **tab, struct scc_hashtab *base, size_t elemsize, size_t newcap);
+static size_t scc_hashtab_next_power_of_2(size_t val);
 
 static inline size_t scc_hashtab_md_size(struct scc_hashtab const *base) {
     return base->ht_capacity * sizeof(scc_hashtab_metatype);
@@ -72,6 +78,31 @@ static inline bool scc_hashtab_should_rehash(struct scc_hashtab const *base) {
     return (base->ht_capacity >> 1u) < base->ht_size;
 }
 
+static inline size_t scc_hashtab_next_power_of_2(size_t v) {
+    assert(v);
+    --v;
+#if CHAR_BIT == 8
+#if SIZE_MAX >= 0xffffu /* Minimum required by standard */
+    v |= v >> 1;
+    v |= v >> 2;
+    v |= v >> 4;
+    v |= v >> 8;
+#endif
+#if SIZE_MAX >= 0xfffffffful
+    v |= v >> 16;
+#endif
+#if SIZE_MAX >= 0xffffffffffffffffull
+    v |= v >> 32;
+#endif
+#else
+    for(unsigned i = 1u; i < sizeof(v) * CHAR_BIT; i >>= 1u) {
+        v |= v >> i;
+    }
+#endif
+    ++v;
+    return v;
+}
+
 void *scc_hashtab_impl_init(void *inittab, scc_eq eq, scc_hash hash, size_t dataoff, size_t mdoff, size_t capacity) {
     struct scc_hashtab *tab = inittab;
     tab->ht_eq = eq;
@@ -83,7 +114,7 @@ void *scc_hashtab_impl_init(void *inittab, scc_eq eq, scc_hash hash, size_t data
     size_t const off = dataoff - offsetof(struct scc_hashtab, ht_fwoff) - sizeof(tab->ht_fwoff);
     assert(off < UCHAR_MAX);
     /* Power of 2 required */
-    assert((capacity & ~(capacity - 1)) == capacity);
+    assert(scc_hashtab_is_power_of_2(capacity));
 
     /* To avoid future mishaps, would be triggered only with broken compilers atm */
     assert(!tab->ht_dynalloc);
@@ -142,9 +173,9 @@ static struct scc_hashtab *scc_hashtab_resize(
     void *restrict *newtab,
     void *tab,
     struct scc_hashtab const *base,
-    size_t elemsize
+    size_t elemsize,
+    size_t newcap
 ) {
-    size_t const newcap = base->ht_capacity << 1u;
     /* Size of the struct up to and including ht_tmp */
     size_t const hdrsize = (unsigned char *)tab - (unsigned char const *)base + elemsize;
     /* Size of ht_data */
@@ -184,9 +215,9 @@ static struct scc_hashtab *scc_hashtab_resize(
 
 /* Allocate a new table and insert all elements in current table. On success, replace
  * *tab with the new table */
-static bool scc_hashtab_rehash(void **tab, struct scc_hashtab *base, size_t elemsize) {
+static bool scc_hashtab_rehash(void **tab, struct scc_hashtab *base, size_t elemsize, size_t newcap) {
     void *newtab;
-    struct scc_hashtab *newbase = scc_hashtab_resize(&newtab, *tab, base, elemsize);
+    struct scc_hashtab *newbase = scc_hashtab_resize(&newtab, *tab, base, elemsize, newcap);
     if(!newbase) {
         return false;
     }
@@ -213,7 +244,7 @@ static bool scc_hashtab_rehash(void **tab, struct scc_hashtab *base, size_t elem
 bool scc_hashtab_impl_insert(void *tab, size_t elemsize) {
     struct scc_hashtab *base = scc_hashtab_impl_base(*(void **)tab);
     if(scc_hashtab_should_rehash(base)) {
-        if(!scc_hashtab_rehash(tab, base, elemsize)) {
+        if(!scc_hashtab_rehash(tab, base, elemsize, base->ht_capacity << 1u)) {
             return false;
         }
         /* *tab has been reallocated */
@@ -252,3 +283,15 @@ bool scc_hashtab_impl_remove(void *tab, size_t elemsize) {
     return true;
 }
 
+bool scc_hashtab_impl_reserve(void *tab, size_t newcap, size_t elemsize) {
+    struct scc_hashtab *base = scc_hashtab_impl_base(*(void **)tab);
+    if(newcap < base->ht_capacity) {
+        return true;
+    }
+
+    if(!scc_hashtab_is_power_of_2(newcap)) {
+        newcap = scc_hashtab_next_power_of_2(newcap);
+    }
+
+    return scc_hashtab_rehash(tab, base, elemsize, newcap);
+}
