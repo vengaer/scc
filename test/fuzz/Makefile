@@ -83,7 +83,7 @@ $(call push,LDFLAGS)
 CC                 := clang
 LD                 := clang
 CFLAGS             += $(fuzzflags)
-CPPFLAGS           := -I$(testdir) $(filter-out -DNDEBUG,$(CPPFLAGS))
+CPPFLAGS           := -I$(testdir) $(filter-out -DNDEBUG,$(CPPFLAGS)) -I$(__node_path)
 LDFLAGS            += $(fuzzflags)
 
 $(call include-node,$(SCC_FUZZ))

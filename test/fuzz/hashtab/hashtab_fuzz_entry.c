@@ -1,6 +1,7 @@
 #include "hashtab_fuzz_insertion.h"
 #include "hashtab_fuzz_removal.h"
 
+#include <fuzzer/dbg.h>
 #include <scc/scc_hashtab.h>
 
 #include <assert.h>
@@ -48,6 +49,12 @@ int LLVMFuzzerTestOneInput(uint8_t const *data, size_t size) {
     memcpy(buf, data, size * sizeof(*buf));
 
     unsigned end = partition(buf, size);
+
+    unsigned *it;
+
+    dbg_pr("Data:\n");
+    dbg_pr_n(it, buf, size, "%u ", *it);
+    dbg_pr("\n");
 
     scc_hashtab(uint32_t) tab = scc_hashtab_init(uint32_t, eq);
 
