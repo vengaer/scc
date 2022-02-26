@@ -74,7 +74,6 @@ static inline scc_hashtab_metatype *scc_hashtab_md(struct scc_hashtab *base) {
 }
 
 static inline bool scc_hashtab_should_rehash(struct scc_hashtab const *base) {
-    /* TODO: this can likely be relaxed */
     return (base->ht_capacity >> 1u) < base->ht_size;
 }
 
