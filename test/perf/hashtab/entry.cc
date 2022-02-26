@@ -16,6 +16,7 @@ using bm_type = SCC_BM_TYPE;
 static_assert(std::is_arithmetic_v<bm_type>);
 
 extern "C" void insertion_benchmark(bm_type const* data, size_t size);
+extern "C" void automatic_init_free_benchmark();
 
 static void BM_insert(benchmark::State& state) {
     std::vector<bm_type> bmdata{};
@@ -32,5 +33,13 @@ static void BM_insert(benchmark::State& state) {
                             static_cast<long long>(state.range(0)));
 }
 BENCHMARK(BM_insert)->Range(8, 8 << 20);
+
+static void BM_create(benchmark::State& state) {
+    for(auto _ : state) {
+        automatic_init_free_benchmark();
+    }
+}
+BENCHMARK(BM_create)->Range(8, 8 << 20);
+
 
 BENCHMARK_MAIN();

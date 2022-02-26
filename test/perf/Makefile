@@ -49,7 +49,7 @@ $(call push,LD)
 
 CFLAGS   += -O3
 CXXFLAGS += -O3
-CPPFLAGS += -DSCC_BM_TYPE=$(SCC_BENCHMARK_TYPE) -isystem$(benchmarkdir)/include
+CPPFLAGS += -DSCC_BM_TYPE=$(SCC_BENCHMARK_TYPE) -isystem$(benchmarkdir)/include -I$(__node_path)
 LDFLAGS  += -L$(benchmarkbuilddir)/src
 LDLIBS   += -lbenchmark -lbenchmark_main -pthread
 LD       := $(CXX)
