@@ -1,9 +1,6 @@
+#include "hashtab_find.h"
+
 #include <scc/scc_hashtab.h>
-
-#include "bmtypes.h"
-
-#include <stdbool.h>
-#include <stddef.h>
 
 static bool eq(void const *left, void const *right) {
     return *(bm_type const *)left == *(bm_type const *)right;
@@ -17,9 +14,7 @@ void *hashtab_find_init(void) {
 
     return tab;
 }
-
-void hashtab_find_free(void *tab) {
-    scc_hashtab_free(tab);
+void hashtab_find_free(void *tab) { scc_hashtab_free(tab);
 }
 
 void hashtab_find_insert_all(void **handle, bm_type const *data, size_t size) {

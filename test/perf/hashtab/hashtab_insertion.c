@@ -1,9 +1,6 @@
+#include "hashtab_insertion.h"
+
 #include <scc/scc_hashtab.h>
-
-#include "bmtypes.h"
-
-#include <stdbool.h>
-#include <stddef.h>
 
 static bool eq(void const *left, void const *right) {
     return *(bm_type const *)left == *(bm_type const *)right;

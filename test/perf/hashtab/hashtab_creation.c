@@ -1,7 +1,8 @@
+#include "bmtypes.h"
+#include "hashtab_creation.h"
+
 #include <perfutil/memory.h>
 #include <scc/scc_hashtab.h>
-
-#include "bmtypes.h"
 
 #include <stdbool.h>
 
