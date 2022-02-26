@@ -295,3 +295,10 @@ bool scc_hashtab_impl_reserve(void *tab, size_t newcap, size_t elemsize) {
 
     return scc_hashtab_rehash(tab, base, elemsize, newcap);
 }
+
+void scc_hashtab_clear(void *tab) {
+    struct scc_hashtab *base = scc_hashtab_impl_base(tab);
+    base->ht_size = 0u;
+    scc_hashtab_metatype *md = scc_hashtab_md(base);
+    memset(md, 0, base->ht_capacity * sizeof(*md));
+}

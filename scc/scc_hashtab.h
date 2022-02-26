@@ -120,4 +120,6 @@ _Bool scc_hashtab_impl_reserve(void *tab, size_t newcap, size_t elemsize);
 #define scc_hashtab_reserve(tab, newcap)                                \
     scc_hashtab_impl_reserve(&(tab), newcap, sizeof(*(tab)))
 
+void scc_hashtab_clear(void *tab);
+
 #endif /* SCC_HASHTAB_H */
