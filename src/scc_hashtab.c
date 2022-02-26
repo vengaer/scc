@@ -227,10 +227,11 @@ static bool scc_hashtab_rehash(void **tab, struct scc_hashtab *base, size_t elem
     scc_hashtab_impl_prep_iter(md, base->ht_capacity);
 
     /* Insert each element in old table */
-    for(size_t i = 0u; i < base->ht_capacity; ++i) {
+    for(size_t i = 0u, j = 0u; i < base->ht_capacity && j < base->ht_size; ++i) {
         if(md[i]) {
             memcpy(newtab, (unsigned char *)*(void **)tab + (i + 1) * elemsize, elemsize);
             scc_hashtab_verify(scc_hashtab_emplace(newtab, newbase, elemsize));
+            ++j;
         }
     }
 
