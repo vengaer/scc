@@ -1,4 +1,5 @@
 #include "bm_insertion.hpp"
+#include "bmhash.hpp"
 #include "hashtab_insertion.h"
 #include "rng.hpp"
 #include "std_unordered_set_insertion.hpp"
@@ -6,7 +7,7 @@
 #include <unordered_set>
 
 static void *table;
-static std::unordered_set<bm_type> *stdtable;
+static std::unordered_set<bm_type, fnv1a<bm_type>> *stdtable;
 
 void BM_insertion(benchmark::State& state) {
     auto const bmdata = rng::iota_shuffle(state);

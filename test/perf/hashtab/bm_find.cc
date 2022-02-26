@@ -1,5 +1,6 @@
-#include "bmtypes.h"
 #include "bm_find.hpp"
+#include "bmhash.hpp"
+#include "bmtypes.h"
 #include "hashtab_find.h"
 #include "rng.hpp"
 #include "std_unordered_set_find.hpp"
@@ -8,7 +9,7 @@
 #include <type_traits>
 
 static void *table;
-static std::unordered_set<bm_type> *stdtable;
+static std::unordered_set<bm_type, fnv1a<bm_type>> *stdtable;
 
 void BM_find(benchmark::State& state) {
     auto const bmdata = rng::iota_shuffle(state);
