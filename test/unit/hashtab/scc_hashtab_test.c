@@ -255,3 +255,31 @@ void test_scc_hashtab_rehash(void) {
 
     scc_hashtab_free(tab);
 }
+
+void test_scc_hashtab_clear(void) {
+    scc_hashtab(unsigned) tab = scc_hashtab_init(unsigned, ueq);
+    static unsigned const data[] = {
+        4278910730, 2382594815, 767622514, 1617756206,
+        4194304151, 4210688153, 989526778, 3403406299,
+        2576980237, 2576980377, 1650614937, 1650621538,
+        1650614882, 1650614875, 421093986, 14935011,
+        0, 3808429056, 1819045091, 1819044972,
+        235802126, 38710, 4278190080, 4294967295,
+        16777215, 369098752, 3823362816, 3705922352,
+        174982861, 690563338, 858383145, 3809092362,
+        1845939676, 218376458
+    };
+    for(unsigned i = 0u; i < scc_arrsize(data); ++i) {
+        TEST_ASSERT_TRUE(scc_hashtab_insert(tab, data[i]));
+    }
+
+    TEST_ASSERT_EQUAL_UINT64(scc_arrsize(data), scc_hashtab_size(tab));
+    scc_hashtab_clear(tab);
+    TEST_ASSERT_EQUAL_UINT64(0ull, scc_hashtab_size(tab));
+
+    for(unsigned i = 0u; i < scc_arrsize(data); ++i) {
+        TEST_ASSERT_TRUE(scc_hashtab_insert(tab, data[i]));
+    }
+
+    scc_hashtab_free(tab);
+}
