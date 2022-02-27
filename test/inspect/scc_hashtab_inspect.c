@@ -2,17 +2,17 @@
 
 #include <scc/scc_mem.h>
 
-struct scc_hashtab *scc_hashtab_inspect_base(void *tab) {
-    struct scc_hashtab *base = scc_container(
-        tab - ((unsigned char *)tab)[-1] - sizeof(base->ht_fwoff),
-        struct scc_hashtab,
+struct scc_hashtab_base *scc_hashtab_inspect_base(void *tab) {
+    struct scc_hashtab_base *base = scc_container(
+        (unsigned char *)tab - ((unsigned char *)tab)[-1] - sizeof(base->ht_fwoff),
+        struct scc_hashtab_base,
         ht_fwoff
     );
     return base;
 }
 
 scc_hashtab_metatype *scc_hashtab_inspect_md(void *tab) {
-    struct scc_hashtab *base = scc_hashtab_inspect_base(tab);
+    struct scc_hashtab_base *base = scc_hashtab_inspect_base(tab);
     return (void *)((unsigned char *)base + base->ht_mdoff);
 }
 

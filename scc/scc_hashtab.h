@@ -5,14 +5,55 @@
 
 #include <stddef.h>
 
+#define scc_hashtab(type) type *
+
 enum { SCC_HASHTAB_STACKCAP = 32 };
 
 typedef _Bool(*scc_eq)(void const *, void const *);
-typedef unsigned long long(*scc_hash)(void const *, size_t);
+typedef unsigned long long(*scc_hash)(void const*, size_t);
+typedef unsigned char scc_hashtab_metatype;
 
-#define scc_hashtab(type) type *
-
-struct scc_hashtab {
+/* struct scc_hashtab_base
+ *
+ * Internal use only
+ *
+ * Base struct of the hash table. Never exposed directly
+ * through the API. Instead, all "public" functions operate
+ * on a fat pointer referred to as a handle. Given a struct
+ * scc_hashtab_base base, the address of said pointer is
+ * obtained by computing &base.ht_fwoff + base.ht_fwoff - 1.
+ *
+ * scc_eq ht_eq;
+ *      Pointer to function used for equality comparison
+ *
+ * scc_hash ht_hash;
+ *      Pointer to hash function.
+ *
+ * size_t ht_mdoff;
+ *      Offset of metadata array relative base address. This
+ *      is used to access the metadata in the FAM part of the
+ *      struct.
+ *
+ * size_t ht_size;
+ *      Size of the hash table
+ *
+ * size_t ht_capacity;
+ *      Capacity of the hash table. Always a power of two to
+ *      allow for efficient modulo.
+ *
+ * unsigned char ht_dynalloc;
+ *      Set to 1 if the current table was allocated dynamically.
+ *      Upon initial construction, the table is allocated on the
+ *      stack, this field is set on the first rehash.
+ *
+ * unsigned char ht_fwoff;
+ *      Offset of the pointer exposed through the API. The offset
+ *      is relative to the field itself.
+ * unsigned char ht_buffer[];
+ *      FAM hiding type-specific details. For details on the
+ *      layout, see scc_hashtab_impl_layout.
+ */
+struct scc_hashtab_base {
     scc_eq ht_eq;
     scc_hash ht_hash;
     size_t ht_mdoff;
@@ -23,103 +64,193 @@ struct scc_hashtab {
     unsigned char ht_buffer[];
 };
 
-typedef unsigned short scc_hashtab_metatype;
+#define scc_hashtab_impl_guardsz()                                          \
+    (SCC_VECSIZE - 1u)
 
-#define scc_hashtab_impl_layout(type)                                   \
-    struct {                                                            \
-        scc_eq ht_eq;                                                   \
-        scc_hash ht_hash;                                               \
-        size_t ht_mdoff;                                                \
-        size_t ht_size;                                                 \
-        size_t ht_capacity;                                             \
-        unsigned char ht_dynalloc;                                      \
-        unsigned char ht_fwoff;                                         \
-        unsigned char ht_bkoff;                                         \
-        type ht_tmp;                                                    \
-        type ht_data[SCC_HASHTAB_STACKCAP];                             \
-        scc_hashtab_metatype ht_meta[SCC_HASHTAB_STACKCAP];             \
-        scc_hashtab_metatype ht_meta_guard[scc_hashtab_impl_guardsz()]; \
+/* scc_hashtab_impl_layout(type)
+ *
+ * Internal use only
+ *
+ * The actual layout of the hash table instantiated for the given
+ * type. The ht_eq through ht_fwoff members are the same as for
+ * struct scc_hashtab_base.
+ *
+ * unsigned char ht_bkoff;
+ *      Field used for tracking the padding between ht_fwoff and
+ *      ht_curr. Just as ht_fwoff is used to compute the address
+ *      of ht_curr given a base address, ht_bkoff is used to
+ *      compute the base address given the address of ht_curr.
+ *
+ *      The primary purpose of this field is to force injection of
+ *      padding bytes between ht_fwoff and ht_curr. Whether the offset
+ *      is actually stored in this field depends on the alignment of
+ *      the type parameter. In practice, this occurs only for 1-byte
+ *      aligned types. For types with stricter alignment requirements,
+ *      the last padding byte is used instead.
+ *
+ * type ht_curr;
+ *      Temporary instance of the type stored in the hash table.
+ *      Values to be inserted or used in probing are stored here to
+ *      provide rvalue support. The address of this element is the
+ *      one exposed through the API.
+ *
+ * type ht_data[SCC_HASHTAB_STACKCAP];
+ *      The data array in which elements in the table are stored.
+
+ * scc_hashtab_metatype ht_meta[SCC_HASHTAB_STACKCAP];
+ *      Metadata array used for tracking vacant slots. Each slot n
+ *      in the metadata array corresponds to slot n in the data array.
+ *
+ *      A slot is unused if the value of its metadata entry is 0. If the
+ *      byte has a non-zero with the MSB unset, the slot was previously
+ *      occupied but has been vacated. Meaning it can be reused during
+ *      insertion and should not be used for a stop during find.
+ *
+ *      An entry with the MSB set signifies that the slot is occupied. In
+ *      this case, the remaining bits are the CHAR_BIT - 1 most
+ *      significant bytes of the hash computed for the value in the
+ *      corresponding slot in the data array. This is used for
+ *      avoiding unnecessary calls to eq.
+ *
+ * scc_hashtab_metatype ht_guard[scc_hashtab_impl_guardsz()];
+ *      Guard to allow for unaligned vector loads without risking
+ *      reads from potential guard pages. The scc_hashtab_impl_guardsz()
+ *      low bytes of ht_meta are mirrored in the guard.
+ */
+#define scc_hashtab_impl_layout(type)                                       \
+    struct {                                                                \
+        scc_eq ht_eq;                                                       \
+        scc_hash ht_hash;                                                   \
+        size_t ht_mdoff;                                                    \
+        size_t ht_size;                                                     \
+        size_t ht_capacity;                                                 \
+        unsigned char ht_dynalloc;                                          \
+        unsigned char ht_fwoff;                                             \
+        unsigned char ht_bkoff;                                             \
+        type ht_curr;                                                       \
+        type ht_data[SCC_HASHTAB_STACKCAP];                                 \
+        scc_hashtab_metatype ht_meta[SCC_HASHTAB_STACKCAP];                 \
+        scc_hashtab_metatype ht_guard[scc_hashtab_impl_guardsz()];          \
     }
 
-#define scc_hashtab_impl_initsize(type)                                 \
-    sizeof(scc_hashtab_impl_layout(type))
+/* scc_hashtab_impl_init
+ *
+ * Internal use only
+ *
+ * Initialize and empty hash table
+ *
+ * struct scc_hashtab_base *base
+ *      Address of hash table base. The handle returned by the function
+ *      refers to the ht_curr entry in this parameter
+ *
+ * scc_eq eq
+ *      Pointer to the equality function to use
+ *
+ * scc_hash
+ *      Pointer to the hash function to use
+ *
+ * size_t coff
+ *      Offset of ht_curr relative the address of *base
+ *
+ * size_t mdoff
+ *      Offset of ht_meta relative the address of *base
+ *
+ * size_t cap
+ *      The capacity allocated for *base
+ */
+void *scc_hashtab_impl_init(struct scc_hashtab_base *base, scc_eq eq, scc_hash hash, size_t coff, size_t mdoff, size_t cap);
 
-#define scc_hashtab_impl_inittab(type)                                  \
-    (union {                                                            \
-        struct scc_hashtab sc_tab;                                      \
-        unsigned char sc_buffer[scc_hashtab_impl_initsize(type)];       \
-    }){ 0 }.sc_tab
-
-#define scc_hashtab_impl_guardsz()                                      \
-    (2u * SCC_VECSIZE / sizeof(scc_hashtab_metatype) - 1u)
-
-#define scc_hashtab_impl_dataoff(type)                                  \
-    offsetof(scc_hashtab_impl_layout(type), ht_tmp)
-
-#define scc_hashtab_impl_mdoff(type)                                    \
-    offsetof(scc_hashtab_impl_layout(type), ht_meta)
-
-#define scc_hashtab_impl_base_qual(tab, qual)                           \
-    scc_container_qual(                                                 \
-        tab - scc_hashtab_impl_bkoff(tab),                              \
-        struct scc_hashtab,                                             \
-        ht_fwoff,                                                       \
-        qual                                                            \
+/* scc_hashtab_init_with_hash
+ *
+ * Initialize hash table with a specified hash function.
+ *
+ * type
+ *      Type the hash table is to store
+ *
+ * scc_eq eq
+ *      Pointer to function to use for equality comparisons
+ *
+ * scc_hash hash
+ *      Pointer to function to use for hashing
+ */
+#define scc_hashtab_init_with_hash(type, eq, hash)                          \
+    scc_hashtab_impl_init(                                                  \
+        (void *)&(scc_hashtab_impl_layout(type)){ 0 },                      \
+        eq,                                                                 \
+        hash,                                                               \
+        offsetof(scc_hashtab_impl_layout(type), ht_curr),                   \
+        offsetof(scc_hashtab_impl_layout(type), ht_meta),                   \
+        SCC_HASHTAB_STACKCAP                                                \
     )
 
-#define scc_hashtab_impl_base(tab)                                      \
-    scc_hashtab_impl_base_qual(tab,)
+/* scc_hashtab_init
+ *
+ * Initialize a hash table. The hash function is set to an fnv1a.
+ *
+ * type
+ *      Type the hash table is to store
+ *
+ * scc_eq eq
+ *      Pointer to function to use for equality comparisons
+ */
+#define scc_hashtab_init(type, eq)                                          \
+    scc_hashtab_init_with_hash(type, eq, scc_hashtab_fnv1a)
 
-#define scc_hashtab_init(type, eq)                                      \
-    scc_hashtab_with_hash(type, eq, scc_hashtab_fnv1a)
+/* scc_hashtab_impl_bkpad
+ *
+ * Internal use only
+ *
+ * Compute number of padding bytes between ht_curr and ht_fwoff
+ */
+static inline size_t scc_hashtab_impl_bkpad(void const *handle) {
+    return ((unsigned char const *)handle)[-1] + sizeof(((struct scc_hashtab_base *)0)->ht_fwoff);
+}
 
-#define scc_hashtab_with_hash(type, eq, hash)                           \
-    scc_hashtab_impl_init(                                              \
-        &scc_hashtab_impl_inittab(type),                                \
-        eq,                                                             \
-        hash,                                                           \
-        scc_hashtab_impl_dataoff(type),                                 \
-        scc_hashtab_impl_mdoff(type),                                   \
-        SCC_HASHTAB_STACKCAP                                            \
+#define scc_hashtab_impl_bkoff(handle)
+
+/* scc_hashtab_impl_base_qual
+ *
+ * Internal use only
+ *
+ * Obtain qualified pointer to the struct scc_hashtab_base
+ * corresponding to the given handle
+ */
+#define scc_hashtab_impl_base_qual(handle, qual)                            \
+    scc_container_qual(                                                     \
+        (unsigned char qual *)(handle) - scc_hashtab_impl_bkpad(handle),    \
+        struct scc_hashtab_base,                                            \
+        ht_fwoff,                                                           \
+        qual                                                                \
     )
 
-void *scc_hashtab_impl_init(void *inittab, scc_eq eq, scc_hash hash, size_t dataoff, size_t mdoff, size_t capacity);
+/* scc_hashtab_impl_base
+ *
+ * Internal use only
+ *
+ * Obtain unqualified pointer to the struct scc_hashtab_base
+ * corresponding to the given handle
+ */
+#define scc_hashtab_impl_base(handle)                                       \
+    scc_hashtab_impl_base_qual(handle,)
 
-void scc_hashtab_free(void *tab);
-unsigned long long scc_hashtab_fnv1a(void const *input, size_t size);
+/* scc_hashtab_fnv1a
+ *
+ * Simple alternative Fowler-Voll-No implementation
+ *
+ * void const *data
+ *      Address of data to be hashed. The data is treated as a
+ *      consecutive array of bytes. Potential padding in structs
+ *      must be explicitly initialized to avoid hash mismatches.
+ *
+ * size_t size
+ *      Size of data, in bytes
+ */
+unsigned long long scc_hashtab_fnv1a(void const *data, size_t size);
 
-inline size_t scc_hashtab_impl_bkoff(void const *tab) {
-    return ((unsigned char const *)tab)[-1] + sizeof(((struct scc_hashtab *)0)->ht_fwoff);
-}
-
-inline size_t scc_hashtab_capacity(void const *tab) {
-    return scc_hashtab_impl_base_qual(tab, const)->ht_capacity;
-}
-
-inline size_t scc_hashtab_size(void const *tab) {
-    return scc_hashtab_impl_base_qual(tab, const)->ht_size;
-}
-
-_Bool scc_hashtab_impl_insert(void *tab, size_t elemsize);
-
-#define scc_hashtab_insert(tab, value)                                  \
-    scc_hashtab_impl_insert((*(tab) = (value), &(tab)), sizeof(*tab))
-
-void const *scc_hashtab_impl_find(void const *tab, size_t elemsize);
-
-#define scc_hashtab_find(tab, value)                                    \
-    scc_hashtab_impl_find((*(tab) = (value), (tab)), sizeof(value))
-
-_Bool scc_hashtab_impl_remove(void *tab, size_t elemsize);
-
-#define scc_hashtab_remove(tab, value)                                  \
-    scc_hashtab_impl_remove((*(tab) = (value), (tab)), sizeof(value))
-
-_Bool scc_hashtab_impl_reserve(void *tab, size_t newcap, size_t elemsize);
-
-#define scc_hashtab_reserve(tab, newcap)                                \
-    scc_hashtab_impl_reserve(&(tab), newcap, sizeof(*(tab)))
-
-void scc_hashtab_clear(void *tab);
+/* scc_hashtab_free
+ *
+ * Reclaim memory used by the given hash table
+ */
+void scc_hashtab_free(void *handle);
 
 #endif /* SCC_HASHTAB_H */
