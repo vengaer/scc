@@ -26,7 +26,7 @@ void BM_find(benchmark::State& state) {
     hashtab_find_clear(table);
 }
 
-void BM_find_unordered_setup(benchmark::State const&) {
+void BM_find_setup(benchmark::State const&) {
     table = hashtab_find_init();
 }
 
@@ -49,7 +49,7 @@ void BM_find_std(benchmark::State& state) {
     std_unordered_set_find_clear(stdtable);
 }
 
-void BM_find_std_unordered_setup(benchmark::State const&) {
+void BM_find_std_setup(benchmark::State const&) {
     stdtable = new ptrtype(stdtable){};
 }
 

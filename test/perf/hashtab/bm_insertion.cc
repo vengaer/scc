@@ -20,7 +20,7 @@ void BM_insertion(benchmark::State& state) {
                             static_cast<long long>(state.range(0)));
 }
 
-void BM_insertion_unordered_setup(benchmark::State const&) {
+void BM_insertion_setup(benchmark::State const&) {
     table = hashtab_insertion_init();
 }
 
@@ -39,7 +39,7 @@ void BM_insertion_std(benchmark::State& state) {
                             static_cast<long long>(state.range(0)));
 }
 
-void BM_insertion_std_unordered_setup(benchmark::State const&) {
+void BM_insertion_std_setup(benchmark::State const&) {
     stdtable = new ptrtype(stdtable){};
 }
 
