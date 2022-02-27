@@ -13,6 +13,31 @@ typedef _Bool(*scc_eq)(void const *, void const *);
 typedef unsigned long long(*scc_hash)(void const*, size_t);
 typedef unsigned char scc_hashtab_metatype;
 
+/* struct scc_hashtab_perfevts
+ *
+ * Counters for tracking performance-
+ * related events.
+ *
+ * size_t ev_n_rehashes;
+ *      Number of times the hash table
+ *      hash been rehashed
+ *
+ * size_t ev_n_eqs;
+ *      Number of calls to eq performed
+ *
+ * size_t ev_n_hash;
+ *      Number of calls to hash performed
+ *
+ * size_t ev_n_inserts
+ *      Number of successful insertions performed
+ */
+struct scc_hashtab_perfevts {
+    size_t ev_n_rehashes;
+    size_t ev_n_eqs;
+    size_t ev_n_hash;
+    size_t ev_n_inserts;
+};
+
 /* struct scc_hashtab_base
  *
  * Internal use only
@@ -39,7 +64,10 @@ typedef unsigned char scc_hashtab_metatype;
  *
  * size_t ht_capacity;
  *      Capacity of the hash table. Always a power of two to
- *      allow for efficient modulo.
+ *      allow for efficient modulo computation.
+ *
+ * struct scc_hashtab_perfevts ht_perf;
+ *      Performance counters.
  *
  * unsigned char ht_dynalloc;
  *      Set to 1 if the current table was allocated dynamically.
@@ -49,6 +77,7 @@ typedef unsigned char scc_hashtab_metatype;
  * unsigned char ht_fwoff;
  *      Offset of the pointer exposed through the API. The offset
  *      is relative to the field itself.
+ *
  * unsigned char ht_buffer[];
  *      FAM hiding type-specific details. For details on the
  *      layout, see scc_hashtab_impl_layout.
@@ -59,6 +88,9 @@ struct scc_hashtab_base {
     size_t ht_mdoff;
     size_t ht_size;
     size_t ht_capacity;
+#ifdef SCC_PERFEVTS
+    struct scc_hashtab_perfevts ht_perf;
+#endif
     unsigned char ht_dynalloc;
     unsigned char ht_fwoff;
     unsigned char ht_buffer[];
@@ -66,6 +98,13 @@ struct scc_hashtab_base {
 
 #define scc_hashtab_impl_guardsz()                                          \
     (SCC_VECSIZE - 1u)
+
+#ifdef SCC_PERFEVTS
+#define SCC_HASHTAB_INJECT_PERFEVTS(name)                                   \
+    struct scc_hashtab_perfevts name;
+#else
+#define SCC_HASHTAB_INJECT_PERFEVTS(name)
+#endif
 
 /* scc_hashtab_impl_layout(type)
  *
@@ -124,6 +163,7 @@ struct scc_hashtab_base {
         size_t ht_mdoff;                                                    \
         size_t ht_size;                                                     \
         size_t ht_capacity;                                                 \
+        SCC_HASHTAB_INJECT_PERFEVTS(ht_perf)                                \
         unsigned char ht_dynalloc;                                          \
         unsigned char ht_fwoff;                                             \
         unsigned char ht_bkoff;                                             \
@@ -137,7 +177,7 @@ struct scc_hashtab_base {
  *
  * Internal use only
  *
- * Initialize and empty hash table
+ * Initialize an empty hash table and returns a handle to it.
  *
  * struct scc_hashtab_base *base
  *      Address of hash table base. The handle returned by the function
@@ -206,8 +246,6 @@ static inline size_t scc_hashtab_impl_bkpad(void const *handle) {
     return ((unsigned char const *)handle)[-1] + sizeof(((struct scc_hashtab_base *)0)->ht_fwoff);
 }
 
-#define scc_hashtab_impl_bkoff(handle)
-
 /* scc_hashtab_impl_base_qual
  *
  * Internal use only
@@ -252,5 +290,36 @@ unsigned long long scc_hashtab_fnv1a(void const *data, size_t size);
  * Reclaim memory used by the given hash table
  */
 void scc_hashtab_free(void *handle);
+
+/* scc_hashtab_impl_insert
+ *
+ * Internal use only
+ *
+ * Insert the value in ht_curr in the table. Return true
+ * on success.
+ *
+ * void *handleaddr
+ *      Address of the handle used to refer to the hash table.
+ *
+ * size_t elemsize
+ *      Size of the elements stored in the hash table
+ */
+_Bool scc_hashtab_impl_insert(void *handleaddr, size_t elemsize);
+
+/* scc_hashtab_insert
+ *
+ * Insert a value in the hash table. May result in a reallocation.
+ *
+ * Expands to true if the value was successfully inserted
+ *
+ * type **handleaddr
+ *      Address of the handle used for referring to the hash table.
+ *
+ * value_type value
+ *      The value to insert. Subject to implicit conversion should type
+ *      and value_type not be the same.
+ */
+#define scc_hashtab_insert(handleaddr, value)                               \
+    scc_hashtab_impl_insert((**(handleaddr) = (value), (handleaddr)), sizeof(**(handleaddr)))
 
 #endif /* SCC_HASHTAB_H */

@@ -1,12 +1,30 @@
+#include <scc/scc_dbg.h>
 #include <scc/scc_hashtab.h>
+#include <scc/scc_mem.h>
+#include "asm/asm_common.h"
 
 #include <assert.h>
 #include <limits.h>
+#include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
+
+enum { SCC_HASHTAB_OCCUPIED = 0x80 };
+enum { SCC_HASHTAB_HASHSHIFT = 57 };
+
+#define scc_hashtab_is_power_of_2(val) \
+    (((val) & ~((val) - 1)) == (val))
 
 static inline size_t scc_hashtab_impl_bkpad(void const *handle);
 
-static inline unsigned char scc_hashtab_calc_fwoff(size_t coff) {
+/* scc_hashtab_calcpad
+ *
+ * Calculate the number of padding bytes between ht_fwoff and ht_curr
+ *
+ * size_t coff
+ *      Offset of ht_curr relative the base of the struct
+ */
+static inline unsigned char scc_hashtab_calcpad(size_t coff) {
     size_t const fwoff = coff -
         offsetof(struct scc_hashtab_base, ht_fwoff) -
         sizeof(((struct scc_hashtab_base *)0)->ht_fwoff);
@@ -14,8 +32,228 @@ static inline unsigned char scc_hashtab_calc_fwoff(size_t coff) {
     return fwoff;
 }
 
+/* scc_hashtab_set_bkoff
+ *
+ * Set the ht_bkoff field
+ *
+ * void *handle
+ *      Handle referring to the hash table
+ *
+ * unsigned char bkoff
+ *      The value to set
+ */
 static inline void scc_hashtab_set_bkoff(void *handle, unsigned char bkoff) {
     ((unsigned char *)handle)[-1] = bkoff;
+}
+
+/* scc_hashtab_should_rehash
+ *
+ * Return true if the load factor is large enough to merit a rehash
+ *
+ * struct scc_hashtab_base const *base
+ *      Address of the hash table base
+ */
+static inline bool scc_hashtab_should_rehash(struct scc_hashtab_base const *base) {
+    /* Rehash at 50% */
+    return (base->ht_size >> 1u) >= base->ht_capacity;
+}
+
+/* scc_hashtab_sizeup
+ *
+ * Compute capacity after resize for given hash table
+ *
+ * struct scc_hashtab_base const *base
+ *      Address of the hash table base
+ */
+static inline size_t scc_hashtab_sizeup(struct scc_hashtab_base const *base) {
+    return base->ht_capacity << 1u;
+}
+
+/* scc_hashtab_metadata
+ *
+ * Return address of first element of the metadata array in *base
+ *
+ * struct scc_hashtab_base *base
+ *      Address of the hash table base
+ */
+static inline scc_hashtab_metatype *scc_hashtab_metadata(struct scc_hashtab_base *base) {
+    return (void *)((unsigned char *)base + base->ht_mdoff);
+}
+
+/* scc_hashtab_emplace
+ *
+ * Attempt to emplace the value referred to by the given handle
+ * into the hash table. Return true if the value was emplaced
+ *
+ * void *handle:
+ *      Handle to the hash table
+ *
+ * struct scc_hashtab_base *base
+ *      Base address of the hash table referred to by handle
+ *
+ * size_t elemsize
+ *      The size of the elements stored in the table
+ */
+static bool scc_hashtab_emplace(void *handle, struct scc_hashtab_base *base, size_t elemsize) {
+    unsigned long long hash = base->ht_hash(handle, elemsize);
+    long long index = scc_hashtab_probe_insert(base, handle, elemsize, hash);
+    if(index == -1ll) {
+        return false;
+    }
+
+    assert(index >= 0ll && (size_t)index < base->ht_capacity);
+    /* handle holds address of base->ht_data[-1] */
+    memcpy((unsigned char *)handle + (index + 1ll) * elemsize, handle, elemsize);
+
+    /* Mark slot as occupied */
+    scc_hashtab_metatype *md = scc_hashtab_metadata(base);
+    scc_hashtab_metatype const ent =
+        (scc_hashtab_metatype)(SCC_HASHTAB_OCCUPIED | (hash >> SCC_HASHTAB_HASHSHIFT));
+    md[index] = ent;
+
+    /* Duplicate low entries in guard */
+    if(index <= scc_hashtab_impl_guardsz()) {
+        md[index + base->ht_capacity] = ent;
+    }
+    return true;
+}
+
+/* scc_hashtab_realloc
+ *
+ * Allocate a new hash table, fill in the fields of
+ * its header and return its base address.
+ *
+ * void *restrict *newtab
+ *      Address of a new handle to be used for referring to the
+ *      table
+ *
+ * void const *handle
+ *      Handle of the original hashtable
+ *
+ * struct scc_hashtab_base const *base
+ *      Base of the table referred to by handle
+ *
+ * size_t elemsize
+ *      Size of the elements to be stored in the new table
+ *
+ * size_t cap
+ *      Capacity of the new table
+ */
+static struct scc_hashtab_base *scc_hashtab_realloc(
+    void *restrict *newtab,
+    void const *handle,
+    struct scc_hashtab_base const *base,
+    size_t elemsize,
+    size_t cap
+) {
+    assert(scc_hashtab_is_power_of_2(cap));
+
+    /* Size of table up to and including ht_curr */
+    size_t const hdrsize =
+        (unsigned char const *)handle - (unsigned char const *)base + elemsize;
+
+    /* Size of ht_data for new table */
+    size_t const datasize = cap * elemsize;
+    size_t const align = scc_alignof(scc_hashtab_metatype);
+
+    /* Initial metadata offset, no padding allowed between
+     * ht_curr and ht_data */
+    size_t mdoff = hdrsize + datasize;
+
+    /* Align metadata */
+    mdoff = (mdoff + align - 1) & ~(align - 1);
+    assert((mdoff & ~(align - 1)) == mdoff);
+
+    size_t const size = mdoff + (cap + scc_hashtab_impl_guardsz()) * sizeof(scc_hashtab_metatype);
+
+    /* Allocate new hash table
+     * Ignore clang tidy complaining about struct scc_hashtab_base being
+     * larger than unsigned char */
+    struct scc_hashtab_base *newbase = calloc(size, sizeof(unsigned char)); /* NOLINT */
+    if(!newbase) {
+        return 0;
+    }
+
+    newbase->ht_eq = base->ht_eq;
+    newbase->ht_hash = base->ht_hash;
+    newbase->ht_mdoff = mdoff;
+    newbase->ht_size = base->ht_size;
+    newbase->ht_capacity = cap;
+    newbase->ht_dynalloc = 1;
+    newbase->ht_fwoff = base->ht_fwoff;
+#ifdef SCC_PERFEVTS
+    newbase->ht_pref = base->ht_perf;
+#endif
+
+    *newtab = (unsigned char *)newbase + hdrsize - elemsize;
+    scc_hashtab_set_bkoff(*newtab, base->ht_fwoff);
+    return newbase;
+}
+
+/* scc_hashtab_rehash
+ *
+ * Reallocate and rehash the entire hash table. On success,
+ * *handle is updated to refer to the new table and true is
+ * returned. On failure, *handle remains unchanged.
+ *
+ * void **handle:
+ *      Address of the handle used to refer to hash table
+ *
+ * struct scc_hashtab_base *base
+ *      Base address of the hash table referred to by *handle
+ *
+ *  size_t elemsize
+ *      Size of each element stored in the table
+ *
+ *  size_t cap
+ *      Capacity of the new table
+ */
+static bool scc_hashtab_rehash(
+    void **handle,
+    struct scc_hashtab_base *base,
+    size_t elemsize,
+    size_t cap
+) {
+    void *newtab;
+    struct scc_hashtab_base *newbase = scc_hashtab_realloc(&newtab, *handle, base, elemsize, cap);
+    if(!newtab) {
+        return false;
+    }
+
+    scc_hashtab_metatype *md = scc_hashtab_metadata(base);
+
+    for(size_t i = 0u; base->ht_size && i < base->ht_capacity; ++i) {
+        if(md[i] & SCC_HASHTAB_OCCUPIED) {
+            memcpy(newtab, (unsigned char *)*(void **)handle + (i + 1u) * elemsize, elemsize);
+            scc_bug_on(!scc_hashtab_emplace(newtab, newbase, elemsize));
+            --base->ht_size;
+        }
+    }
+
+    /* Copy ht_curr of old table */
+    memcpy(newtab, *handle, elemsize);
+    scc_hashtab_free(*handle);
+    *handle = newtab;
+    return true;
+}
+
+bool scc_hashtab_impl_insert(void *handleaddr, size_t elemsize) {
+    struct scc_hashtab_base *base = scc_hashtab_impl_base(*(void **)handleaddr);
+    if(scc_hashtab_should_rehash(base)) {
+        size_t const newcap = scc_hashtab_sizeup(base);
+        if(!scc_hashtab_rehash(handleaddr, base, elemsize, newcap)) {
+            return false;
+        }
+
+        /* Table has been reallocated */
+        base = scc_hashtab_impl_base(*(void **)handleaddr);
+    }
+    if(!scc_hashtab_emplace(*(void **)handleaddr, base, elemsize)) {
+        return false;
+    }
+
+    ++base->ht_size;
+    return true;
 }
 
 void *scc_hashtab_impl_init(struct scc_hashtab_base *base, scc_eq eq, scc_hash hash, size_t coff, size_t mdoff, size_t cap) {
@@ -23,7 +261,7 @@ void *scc_hashtab_impl_init(struct scc_hashtab_base *base, scc_eq eq, scc_hash h
     base->ht_hash = hash;
     base->ht_mdoff = mdoff;
     base->ht_capacity = cap;
-    base->ht_fwoff = scc_hashtab_calc_fwoff(coff);
+    base->ht_fwoff = scc_hashtab_calcpad(coff);
     unsigned char *tab = (unsigned char *)base + coff;
     scc_hashtab_set_bkoff(tab, base->ht_fwoff);
     return tab;
@@ -51,3 +289,4 @@ void scc_hashtab_free(void *handle) {
         free(base);
     }
 }
+
