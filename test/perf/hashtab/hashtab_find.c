@@ -17,17 +17,17 @@ void *hashtab_find_init(void) {
 void hashtab_find_free(void *tab) { scc_hashtab_free(tab);
 }
 
-void hashtab_find_insert_all(void **handle, bm_type const *data, size_t size) {
-    scc_hashtab(bm_type) tab = *handle;
+void hashtab_find_insert_all(void **table, bm_type const *data, size_t size) {
+    scc_hashtab(bm_type) tab = *table;
     scc_hashtab_reserve(tab, size << 1u);
     for(unsigned i = 0u; i < size; ++i) {
         scc_hashtab_insert(tab, data[i]);
     }
-    *handle = tab;
+    *table = tab;
 }
 
-void hashtab_find_clear(void *handle) {
-    scc_hashtab(bm_type) tab = handle;
+void hashtab_find_clear(void *table) {
+    scc_hashtab(bm_type) tab = table;
     scc_hashtab_clear(tab);
 }
 
