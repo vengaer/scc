@@ -14,36 +14,41 @@
 
 #define rb_root     rb_sentinel.un_link.root
 
-#define scc_rbtree_sentinel_qual(tree, qual)        \
+#define scc_rbtree_sentinel_qual(tree, qual)                \
     (struct scc_rbnode qual *)&(tree)->rb_sentinel
 
-#define scc_rbtree_sentinel(tree)                   \
+#define scc_rbtree_sentinel(tree)                           \
     scc_rbtree_sentinel_qual(tree,)
 
-#define scc_rbnode_link_qual(node, idx, qual)       \
-    (*(struct scc_rbnode * qual*)                   \
-        ((unsigned char qual*)&(node)->rn_left  +   \
+#define scc_rbnode_link_qual(node, idx, qual)               \
+    (*(struct scc_rbnode * qual*)                           \
+        ((unsigned char qual*)&(node)->rn_left  +           \
             scc_rbnode_link_offset(node) * idx))
 
-#define scc_rbnode_link(node, idx)                  \
+#define scc_rbnode_link(node, idx)                          \
     scc_rbnode_link_qual(node, idx,)
 
-#define scc_rbnode_baseaddr_qual(node, qual)        \
-    scc_container_qual(node - scc_rbnode_npad(node), struct scc_rbnode, rn_buffer, qual)
+#define scc_rbnode_baseaddr_qual(node, qual)                \
+    scc_container_qual(                                     \
+        (unsigned char qual *)node - scc_rbnode_npad(node), \
+        struct scc_rbnode,                                  \
+        rn_buffer,                                          \
+        qual                                                \
+    )
 
-#define scc_rbnode_baseaddr(node)                   \
+#define scc_rbnode_baseaddr(node)                           \
     scc_rbnode_baseaddr_qual(node,)
 
-#define scc_rbtree_from_handle_qual(handle, qual)   \
+#define scc_rbtree_from_handle_qual(handle, qual)           \
     scc_rbnode_baseaddr_qual(handle, qual)->rn_tree
 
-#define scc_rbtree_from_handle(handle)              \
+#define scc_rbtree_from_handle(handle)                      \
     scc_rbtree_from_handle_qual(handle,)
 
-#define scc_rbnode_value_qual(tree, node, qual)     \
+#define scc_rbnode_value_qual(tree, node, qual)             \
     ((unsigned char qual *)(node) + (tree)->rb_baseoff)
 
-#define scc_rbnode_value(tree, node)                \
+#define scc_rbnode_value(tree, node)                        \
     scc_rbnode_value_qual(tree, node,)
 
 enum {

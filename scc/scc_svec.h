@@ -38,7 +38,7 @@ struct scc_svec {
 
 #define scc_svec_impl_base_qual(svec, qual)                             \
     scc_container_qual(                                                 \
-        svec - scc_svec_impl_npad(svec),                                \
+        (unsigned char qual *)svec - scc_svec_impl_npad(svec),          \
         struct scc_svec,                                                \
         sc_buffer,                                                      \
         qual                                                            \

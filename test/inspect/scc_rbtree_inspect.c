@@ -140,7 +140,7 @@ scc_inspect_mask scc_rbtree_inspect_properties(void const *handle) {
     enum { NOT_TRAVERSED = -1 };
     struct scc_rbtree const *tree =
         scc_container_qual(
-            handle - ((unsigned char const *)handle)[-1],
+            (unsigned char const *)handle - ((unsigned char const *)handle)[-1],
             struct scc_rbnode,
             rn_buffer,
             const
