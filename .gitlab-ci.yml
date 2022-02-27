@@ -1,0 +1,46 @@
+image: archlinux:latest
+
+before_script:
+  - pacman -Syu --needed --noconfirm make clang gcc git python{,-pytest,-pylint} llvm asciidoc ruby cmake
+
+stages:
+  - build
+  - test
+  - fuzz
+  - lint
+  - doc
+
+build_lib:
+  stage: build
+  script:
+    - make -j$(nproc)
+
+check:
+  stage: test
+  script:
+    - make -j$(nproc) check
+
+fuzz_hashtab:
+  stage: fuzz
+  script:
+    - make fuzz SCC_FUZZ=hashtab FUZZTIME=10
+
+fuzz_rbtree:
+  stage: fuzz
+  script:
+    - make fuzz SCC_FUZZ=rbtree FUZZTIME=10
+
+fuzz_svec:
+  stage: fuzz
+  script:
+    - make fuzz SCC_FUZZ=svec FUZZTIME=10
+
+lint:
+  stage: lint
+  script:
+    - make -j$(nproc) lint
+
+docs:
+  stage: doc
+  script:
+    - make -j$(nproc) doc
