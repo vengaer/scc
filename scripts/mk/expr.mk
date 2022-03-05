@@ -34,4 +34,8 @@ diff       = $(strip $(eval __dr :=$(1))$(foreach __w,$(2),$(eval __dr := $(filt
 # $(call secondword,VAR)
 secondword = $(strip $(firstword $(filter-out __|$(firstword $(1)), __|$(1))))
 
+# Check if $(1) is enabled (i.e. equal to y)
+# $(call is_seq,VAR)
+is_set     = $(call eq,y,$(1))
+
 endif # __Expr_mk
