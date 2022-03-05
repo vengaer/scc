@@ -242,7 +242,7 @@ void *scc_hashtab_impl_init(struct scc_hashtab_base *base, scc_eq eq, scc_hash h
  *
  * Compute number of padding bytes between ht_curr and ht_fwoff
  */
-static inline size_t scc_hashtab_impl_bkpad(void const *handle) {
+inline size_t scc_hashtab_impl_bkpad(void const *handle) {
     return ((unsigned char const *)handle)[-1] + sizeof(((struct scc_hashtab_base *)0)->ht_fwoff);
 }
 
@@ -321,5 +321,17 @@ _Bool scc_hashtab_impl_insert(void *handleaddr, size_t elemsize);
  */
 #define scc_hashtab_insert(handleaddr, value)                               \
     scc_hashtab_impl_insert((**(handleaddr) = (value), (handleaddr)), sizeof(**(handleaddr)))
+
+/* scc_hashtab_capacity
+ *
+ * Return the current capacity of the hash table
+ *
+ * void const *handle
+ *      Handle to the hash table in question
+ */
+inline size_t scc_hashtab_capacity(void const *handle) {
+    struct scc_hashtab_base const *base = scc_hashtab_impl_base_qual(handle, const);
+    return base->ht_capacity;
+}
 
 #endif /* SCC_HASHTAB_H */
