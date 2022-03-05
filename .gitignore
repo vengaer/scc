@@ -2,7 +2,7 @@ tags
 build
 libscc.*
 *.pyc
-.config.mk
+.config
 crash-*
 slow-unit-*
 

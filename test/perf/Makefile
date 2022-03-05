@@ -1,8 +1,8 @@
 ifdef __node
 
 .PHONY: benchmark
-benchmark: $$(call require,benchmark,SCC_BENCHMARK)
-benchmark: $$(call require,benchmark,SCC_BENCHMARK_TYPE)
+benchmark: $$(call require,benchmark,CONFIG_BENCHMARK)
+benchmark: $$(call require,benchmark,CONFIG_BENCHMARK_TYPE)
 
 define decl-benchmark
 $(eval
@@ -49,12 +49,12 @@ $(call push,LD)
 
 CFLAGS   += -O3
 CXXFLAGS += -O3
-CPPFLAGS += -DSCC_BM_TYPE=$(SCC_BENCHMARK_TYPE) -isystem$(benchmarkdir)/include -I$(__node_path)
+CPPFLAGS += -DSCC_BM_TYPE=$(CONFIG_BENCHMARK_TYPE) -isystem$(benchmarkdir)/include -I$(__node_path)
 LDFLAGS  += -L$(benchmarkbuilddir)/src
 LDLIBS   += -lbenchmark -lbenchmark_main -pthread
 LD       := $(CXX)
 
-$(call include-node,$(SCC_BENCHMARK))
+$(call include-node,$(CONFIG_BENCHMARK))
 
 $(call pop,LD)
 $(call pop,LDLIBS)

@@ -5,7 +5,7 @@ asmexpander := $(pyscripts)/asmexpander.py
 
 $(solib) $(alib): $(__node_obj)
 
-__srcdir := $(if $(call is_set,$(SCC_EXPAND_ASM)),   \
+__srcdir := $(if $(call is_set,$(CONFIG_EXPAND_ASM)),\
                 $(__node_builddir),                  \
               $(__node_path))
 

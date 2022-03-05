@@ -161,7 +161,7 @@ pipeline {
                     fuzztargets.each { target ->
                         if(fileExists("${ARTIFACTS}/prev/${target}")) {
                             echo "Merging ${target} corpora"
-                            sh "make merge SCC_FUZZ=${target} SCC_CORPORA=${ARTIFACTS}/prev/${target}"
+                            sh "make merge CONFIG_FUZZ=${target} CONFIG_CORPORA=${ARTIFACTS}/prev/${target}"
                         }
                         else {
                             echo "No corpora found for ${target}"
@@ -184,7 +184,7 @@ pipeline {
                         stage("Fuzz ${target}") {
                             for(int i = 0; i < fuzzruns; i++) {
                                 echo "Fuzzing ${target} ${i + 1}/${fuzzruns}"
-                                sh "make fuzz FUZZTIME=${fuzztime} SCC_FUZZ=${target}"
+                                sh "make fuzz FUZZTIME=${fuzztime} CONFIG_FUZZ=${target}"
                             }
                         }
                     }
