@@ -8,7 +8,7 @@ $(call push,LDFLAGS)
 $(call push,LDLIBS)
 
 CFLAGS          += -fsanitize=address,undefined
-CPPFLAGS        := -I$(unityinc) -I$(testdir) $(filter-out -DNDEBUG,$(CPPFLAGS))
+CPPFLAGS        := -I$(unityinc) -I$(testdir) $(filter-out -DNDEBUG,$(CPPFLAGS)) -I$(srcdir)
 LDFLAGS         += -fsanitize=address,undefined -L$(unitydir)
 LDLIBS          += -lunity
 
@@ -28,7 +28,6 @@ $(eval
     $(eval __unitsrc   := $(wildcard $(__node_path)/*.$(cext)))
     $(eval __chk       := $(patsubst $(__node_path)/%.$(cext),$(__node_builddir)/.chk.%.stamp,$(__unitsrc)))
     $(eval __runners   := $(patsubst $(__node_path)/%.$(cext),$(__node_builddir)/%$(runnersuffix),$(__unitsrc)))
-
 
     # Prevent make from removing generated runners
     .SECONDARY: $(addsuffix .$(cext),$(__runners))
