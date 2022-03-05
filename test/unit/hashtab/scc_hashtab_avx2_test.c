@@ -34,4 +34,32 @@ void test_insertion_probe_detects_duplicate(void) {
     scc_hashtab_free(tab);
 }
 
+void test_insertion_probe_functional_up_to_full_capacity(void) {
+    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+    struct scc_hashtab_base *base = scc_hashtab_inspect_base(tab);
+    unsigned long long hash;
+    size_t index;
+    scc_hashtab_metatype ent;
+    scc_hashtab_metatype *md = scc_hashtab_inspect_metadata(tab);
+    int *data = scc_hashtab_inspect_data(tab);
+    for(unsigned i = 0u; i < scc_hashtab_capacity(tab); ++i) {
+        hash = scc_hashtab_fnv1a(&(int){ i }, sizeof(int));
+        *tab = i;
+        index = scc_hashtab_probe_insert(base, tab, sizeof(int), hash);
+        TEST_ASSERT_NOT_EQUAL_INT64(-1ll, index);
+        ent = (scc_hashtab_metatype)((hash >> 57) | 0x80);
+        md[index] = ent;
+        if(index < scc_hashtab_impl_guardsz()) {
+            md[index + scc_hashtab_capacity(tab)] = ent;
+        }
+        data[index] = i;
+    }
+
+    for(unsigned i = 0u; i < scc_hashtab_capacity(tab); ++i) {
+        TEST_ASSERT_TRUE(md[i] & 0x80);
+    }
+
+    scc_hashtab_free(tab);
+}
+
 #endif
