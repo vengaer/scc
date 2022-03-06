@@ -1,4 +1,4 @@
-#include <asm/asm_common.h>
+#include <asm/asm_generic.h>
 #include <inspect/scc_hashtab_inspect.h>
 #include <scc/scc_hashtab.h>
 

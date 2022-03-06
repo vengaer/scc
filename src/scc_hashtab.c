@@ -2,7 +2,7 @@
 #include <scc/scc_hashtab.h>
 #include <scc/scc_mem.h>
 #include <scc/scc_perf.h>
-#include "asm/asm_common.h"
+#include "asm/asm_generic.h"
 
 #include <assert.h>
 #include <limits.h>
