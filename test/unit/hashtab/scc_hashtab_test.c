@@ -56,3 +56,25 @@ void test_scc_hashtab_insert(void) {
     scc_hashtab_free(tab);
 }
 
+/* test_scc_hashtab_retained_on_rehash
+ *
+ * Repeatedly insert values until a rehash is triggered
+ * and verify that all values are retained after the
+ * rehashing
+ */
+void test_scc_hashtab_values_retained_on_rehash(void) {
+    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+    size_t const cap = scc_hashtab_capacity(tab);
+
+    /* Insert until rehash */
+    int i = 0;
+    for(; cap == scc_hashtab_capacity(tab); ++i) {
+        TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, i));
+    }
+
+    while(i--) {
+        TEST_ASSERT_TRUE(contains(tab, i));
+    }
+
+    scc_hashtab_free(tab);
+}
