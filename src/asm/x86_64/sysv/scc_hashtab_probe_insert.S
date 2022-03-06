@@ -61,6 +61,28 @@
 #endif
 .endm
 
+# Prepare stack frame for eq calls
+.macro framesetup
+    subq    $framesz, %rsp                  # Make space and align rsp
+    movq    %r15, 0x28(%rsp)                # Use non-scratch registers to preserve data across calls
+    movl    %r8d, %r15d                     # Hash match mask
+
+    movq    %r14, 0x20(%rsp)
+    movl    %ecx, %r14d                     # Vacant mask
+
+    movq    %r13, 0x18(%rsp)
+    movq    %rsi, %r13                      # Address of ht_curr
+
+    movq    %r12, 0x10(%rsp)
+    movq    %rdx, %r12                      # Element size
+
+    movq    %rbx, 0x08(%rsp)
+    movq    %rax, %rbx                      # Slot index
+
+    movq    %rbp, (%rsp)
+    movq    %rdi, %rbp                      # Base address
+.endm
+
 # Restore stack frame
 .macro framerst
     movq    (%rsp), %rbp
@@ -118,7 +140,9 @@
     jnc     0b                              # Loop if more matches
 .endm
 
-# The actual probing logic
+# The actual probing logic. The capacity of the hash table
+# is not considered at iteration - there must always be at
+# least one vacant slot.
 #
 # Prerequisites:
 #   %rdi: Base address of hash table
@@ -155,6 +179,7 @@
     vpcmpeqb    %ymm14, %ymm14, %ymm14      # All ones
     vpxor   %ymm13, %ymm13, %ymm13          # All zeroes
 
+9:
     movq    mdoff(%rdi), %r8                # Load ht_mdoff
     leaq    (%rax, %r8), %rcx               # Offset of metadata entry relative base
 
@@ -176,24 +201,7 @@
 
     tzcntl  %r8d, %r9d                      # Vector index of next matching slot
 
-    subq    $framesz, %rsp                  # Must call eq at least once, make space and align sp
-    movq    %r15, 0x28(%rsp)                # Use non-scratch registers to preserve data across calls
-    movl    %r8d, %r15d                     # Hash match mask
-
-    movq    %r14, 0x20(%rsp)
-    movl    %ecx, %r14d                     # Vacant mask
-
-    movq    %r13, 0x18(%rsp)
-    movq    %rsi, %r13                      # Address of ht_curr
-
-    movq    %r12, 0x10(%rsp)
-    movq    %rdx, %r12                      # Element size
-
-    movq    %rbx, 0x08(%rsp)
-    movq    %rax, %rbx                      # Slot index
-
-    movq    %rbp, (%rsp)
-    movq    %rdi, %rbp                      # Base address
+    framesetup                              # Must call eq at least once
 
     testl   %ecx, %ecx                      # Check for at least one vacant in next 32 slots
     jz      3f                              # No vacant, must probe again
@@ -206,8 +214,22 @@
 
     wrapq   %rbp, %rax, %rcx                # Wrap for return
     framerst                                # Restore stack
+    vzeroupper
+    ret
+
 1:  # no matching hash in vector
-                                            # %rax already holds index
+    testl   %ecx, %ecx                      # Check for at least one vacant
+    jnz     4f
+
+    leaq    0x20(%rax), %rax                # Advance and wrap offset
+    wrapq   %rdi, %rax, %rcx
+    jmp     9b
+
+4:
+    tzcntl  %ecx, %edx                      # Vector offset of first vacant
+    leaq    (%rax, %rdx), %rax              # Compute and wrap index
+    wrapq   %rdi, %rax, %rcx
+
     vzeroupper
     ret
 
@@ -266,13 +288,26 @@
     ret
 
 1:  # no matching hash in vector
-    movq    %rbx, %rax                      # Return value
+    testl   %r14d, %r14d
+    jz      5f
+
+    leaq    0x20(%rbx), %rbx                # Adavance and wrap offset
+    wrapq   %rdi, %rbx, %rcx
+
+    jmp     3b
+
+5:
+    tzcntl  %r14d, %edx                     # Vector offset of first vacant
+    leaq    (%rbx, %rdx), %rax              # Compute and wrap index
+    wrapq   %rbp, %rax, %rcx
     framerst                                # Reset stack frame
     vzeroupper
     ret
+
 .endm
 
-# Probe for empty slot to insert in
+# Probe for empty slot to insert in. The hash table is
+# assumed to have at least one vacant slot.
 #
 # Params:
 #   %rdi: Base address of hash table
