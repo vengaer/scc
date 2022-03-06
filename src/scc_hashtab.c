@@ -220,7 +220,7 @@ static bool scc_hashtab_rehash(
 ) {
     void *newtab;
     struct scc_hashtab_base *newbase = scc_hashtab_realloc(&newtab, *handle, base, elemsize, cap);
-    if(!newtab) {
+    if(!newbase) {
         return false;
     }
 
