@@ -72,15 +72,15 @@ struct scc_hashtab_perfevts {
  * unsigned char ht_dynalloc;
  *      Set to 1 if the current table was allocated dynamically.
  *      Upon initial construction, the table is allocated on the
- *      stack, this field is set on the first rehash.
+ *      stack. This field is set on the first rehash.
  *
  * unsigned char ht_fwoff;
  *      Offset of the pointer exposed through the API. The offset
  *      is relative to the field itself.
  *
  * unsigned char ht_buffer[];
- *      FAM hiding type-specific details. For details on the
- *      layout, see scc_hashtab_impl_layout.
+ *      FAM hiding type-specific details. For the exact layout,
+ *      refer to scc_hashtab_impl_layout.
  */
 struct scc_hashtab_base {
     scc_eq ht_eq;
@@ -96,6 +96,13 @@ struct scc_hashtab_base {
     unsigned char ht_buffer[];
 };
 
+/* scc_hashtab_impl_guardsz
+ *
+ * Internal use only
+ *
+ * Size of the guard placed after the metadata array to
+ * avoid SIMD probes reading out of bounds
+ */
 #define scc_hashtab_impl_guardsz()                                          \
     (SCC_VECSIZE - 1u)
 
@@ -110,7 +117,7 @@ struct scc_hashtab_base {
  *
  * Internal use only
  *
- * The actual layout of the hash table instantiated for the given
+ * The actual layout of the hash table instantiated for a given
  * type. The ht_eq through ht_fwoff members are the same as for
  * struct scc_hashtab_base.
  *
@@ -141,9 +148,9 @@ struct scc_hashtab_base {
  *      in the metadata array corresponds to slot n in the data array.
  *
  *      A slot is unused if the value of its metadata entry is 0. If the
- *      byte has a non-zero with the MSB unset, the slot was previously
- *      occupied but has been vacated. Meaning it can be reused during
- *      insertion and should not be used for a stop during find.
+ *      byte has a non-zero value with the MSB unset, the slot was previously
+ *      occupied but has since been vacated. Such slots can be reused during
+ *      insertion but cannot be used as probing stops.
  *
  *      An entry with the MSB set signifies that the slot is occupied. In
  *      this case, the remaining bits are the CHAR_BIT - 1 most
@@ -177,11 +184,11 @@ struct scc_hashtab_base {
  *
  * Internal use only
  *
- * Initialize an empty hash table and returns a handle to it.
+ * Initialize an empty hash table and return a handle to it.
  *
  * struct scc_hashtab_base *base
  *      Address of hash table base. The handle returned by the function
- *      refers to the ht_curr entry in this parameter
+ *      refers to the ht_curr entry in this table
  *
  * scc_eq eq
  *      Pointer to the equality function to use

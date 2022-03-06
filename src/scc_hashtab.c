@@ -1,6 +1,7 @@
 #include <scc/scc_dbg.h>
 #include <scc/scc_hashtab.h>
 #include <scc/scc_mem.h>
+#include <scc/scc_perf.h>
 #include "asm/asm_common.h"
 
 #include <assert.h>
@@ -98,6 +99,9 @@ static inline scc_hashtab_metatype *scc_hashtab_metadata(struct scc_hashtab_base
 static bool scc_hashtab_emplace(void *handle, struct scc_hashtab_base *base, size_t elemsize) {
     unsigned long long hash = base->ht_hash(handle, elemsize);
     long long index = scc_hashtab_probe_insert(base, handle, elemsize, hash);
+
+    SCC_ON_PERFTRACK(++base->ht_perf.ev_n_hash);
+
     if(index == -1ll) {
         return false;
     }
@@ -182,9 +186,8 @@ static struct scc_hashtab_base *scc_hashtab_realloc(
     newbase->ht_capacity = cap;
     newbase->ht_dynalloc = 1;
     newbase->ht_fwoff = base->ht_fwoff;
-#ifdef SCC_PERFEVTS
-    newbase->ht_pref = base->ht_perf;
-#endif
+
+    SCC_ON_PERFTRACK(newbase->ht_perf = base->ht_perf);
 
     *newtab = (unsigned char *)newbase + hdrsize - elemsize;
     scc_hashtab_set_bkoff(*newtab, base->ht_fwoff);
@@ -231,6 +234,8 @@ static bool scc_hashtab_rehash(
         }
     }
 
+    SCC_ON_PERFTRACK(++newbase->ht_perf.ev_n_rehashes);
+
     /* Copy ht_curr of old table */
     memcpy(newtab, *handle, elemsize);
     scc_hashtab_free(*handle);
@@ -253,6 +258,7 @@ bool scc_hashtab_impl_insert(void *handleaddr, size_t elemsize) {
         return false;
     }
 
+    SCC_ON_PERFTRACK(++base->ht_perf.ev_n_inserts);
     ++base->ht_size;
     return true;
 }
