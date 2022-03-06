@@ -1,4 +1,5 @@
 import os
+import sys
 import pytest
 
 @pytest.fixture(autouse=True, scope='session')
@@ -18,3 +19,11 @@ def project_root(pytestconfig):
 @pytest.fixture
 def script_dir(project_root):
     return os.path.join(project_root, 'scripts/mk')
+
+@pytest.fixture
+def build_dir(project_root):
+    return os.path.join(project_root, 'build/test/buildsystem')
+
+@pytest.fixture
+def pyscripts_in_path(project_root):
+    sys.path.append(f'{project_root}/scripts/python')
