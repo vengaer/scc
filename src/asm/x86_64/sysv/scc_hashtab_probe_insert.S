@@ -157,13 +157,6 @@
 #   %rax: Index of slot, or -1 if element
 #         is already present
 .macro do_probe pwr2
-.equ    mdoff,   0x10                       # Offset of ht_mdoff relative base address
-.equ    cap,     0x20                       # Offset of ht_capacity relative base address
-.equ    framesz, 0x58                       # Size of stack frame
-#ifdef SCC_PERFEVTS
-.equ    neqs,    0x28                       # Offset of ev_n_eqs in perf member, relative base
-#endif
-
 .if \pwr2
     tzcntq  %rdx, %rdx                      # Element size power of 2, use bit index for efficient mult
 .endif
@@ -320,6 +313,13 @@
 #         is already present
 .globl scc_hashtab_probe_insert
 scc_hashtab_probe_insert:
+.equ    mdoff,   0x10                       # Offset of ht_mdoff relative base address
+.equ    cap,     0x20                       # Offset of ht_capacity relative base address
+.equ    framesz, 0x58                       # Size of stack frame
+#ifdef SCC_PERFEVTS
+.equ    neqs,    0x28                       # Offset of ev_n_eqs in perf member, relative base
+#endif
+
     popcntq %rdx, %rax                      # Check if element size is power of 2
     cmpq    $1, %rax
     je      .Lpwr2
