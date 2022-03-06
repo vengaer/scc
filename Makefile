@@ -104,5 +104,5 @@ FORCE:
 
 $(VERBOSE).SILENT:
 
-$(__all_obj): $(__all_mkfiles) $(wildcard $(mkscripts)/*.$(mkext))
+$(__all_obj): $(__all_mkfiles) $(wildcard $(mkscripts)/*.$(mkext)) $(wildcard $(root)/.config)
 -include $(patsubst %.$(oext),%.$(dext),$(__all_obj))

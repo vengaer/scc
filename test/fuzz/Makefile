@@ -3,16 +3,16 @@ ifdef __node
 LLVM_COV           := llvm-cov
 LLVM_PROFDATA      := llvm-profdata
 
-CORPUSDIR          := $(__node_path)/corpora/$(CONFIG_FUZZ)
+CORPUSDIR          := $(__node_path)/corpora/$(SCC_FUZZ_TARGET)
 
-FUZZTIME           := 360
-FUZZLEN            := 32768
-FUZZTIMEOUT        := 10
-FUZZERFLAGS        := -max_len=$(FUZZLEN) -max_total_time=$(FUZZTIME) -use_value_profile=1 \
-                      -timeout=$(FUZZTIMEOUT) $(CORPUSDIR)
+SCC_FUZZTIME       ?= 360
+SCC_FUZZLEN        ?= 32768
+SCC_FUZZTIMEO      ?= 10
+FUZZERFLAGS        := -max_len=$(SCC_FUZZLEN) -max_total_time=$(SCC_FUZZTIME) -use_value_profile=1 \
+                      -timeout=$(SCC_FUZZTIMEO) $(CORPUSDIR)
 
 fuzzflags          := -fsanitize=fuzzer,undefined,address -fprofile-instr-generate -fcoverage-mapping
-mergeflags         := -merge=1 $(CORPUSDIR) $(CONFIG_CORPORA)
+mergeflags         := -merge=1 $(CORPUSDIR) $(SCC_FUZZ_CORPORA)
 
 proffile           := LLVM_PROFILE_FILE
 export $(proffile) := $(builddir)/.fuzz.profraw
@@ -69,10 +69,10 @@ $(eval
 	    $$< $(mergeflags))
 endef
 
-fuzz: $$(call require,fuzz,CONFIG_FUZZ)
+fuzz: $$(call require,fuzz,SCC_FUZZ_TARGET)
 
-merge: $$(call require,merge,CONFIG_FUZZ)
-merge: $$(call require,merge,CONFIG_CORPORA)
+merge: $$(call require,merge,SCC_FUZZ_TARGET)
+merge: $$(call require,merge,SCC_FUZZ_CORPORA)
 
 $(call push,CC)
 $(call push,LD)
@@ -86,7 +86,7 @@ CFLAGS             += $(fuzzflags)
 CPPFLAGS           := -I$(testdir) $(filter-out -DNDEBUG,$(CPPFLAGS)) -I$(__node_path)
 LDFLAGS            += $(fuzzflags)
 
-$(call include-node,$(CONFIG_FUZZ))
+$(call include-node,$(SCC_FUZZ_TARGET))
 
 $(call pop,LDFLAGS)
 $(call pop,CPPFLAGS)
