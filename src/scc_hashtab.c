@@ -17,6 +17,7 @@ enum { SCC_HASHTAB_HASHSHIFT = 57 };
     (((val) & ~((val) - 1)) == (val))
 
 size_t scc_hashtab_capacity(void const *handle);
+size_t scc_hashtab_size(void const *handle);
 size_t scc_hashtab_impl_bkpad(void const *handle);
 
 /* scc_hashtab_calcpad

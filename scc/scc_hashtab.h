@@ -341,4 +341,16 @@ inline size_t scc_hashtab_capacity(void const *handle) {
     return base->ht_capacity;
 }
 
+/* scc_hashtab_size
+ *
+ * Return the current size of the hash table
+ *
+ * void const *handle
+ *      Handle to the hash table in question
+ */
+inline size_t scc_hashtab_size(void const *handle) {
+    struct scc_hashtab_base const *base = scc_hashtab_impl_base_qual(handle, const);
+    return base->ht_size;
+}
+
 #endif /* SCC_HASHTAB_H */
