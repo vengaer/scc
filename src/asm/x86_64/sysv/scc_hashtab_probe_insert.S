@@ -322,8 +322,7 @@
 scc_hashtab_probe_insert:
     popcntq %rdx, %rax                      # Check if element size is power of 2
     cmpq    $1, %rax
-    je      .Lprobe_power_of_2
+    je      .Lpwr2
     do_probe 0
-
-.Lprobe_power_of_2:
+.Lpwr2:
     do_probe 1
