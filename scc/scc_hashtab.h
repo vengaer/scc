@@ -419,7 +419,6 @@ _Bool scc_hashtab_impl_reserve(void *handleaddr, size_t capacity, size_t elemsiz
  */
 #define scc_hashtab_reserve(handleaddr, capacity)                           \
     scc_hashtab_impl_reserve(handleaddr, capacity, sizeof(**(handleaddr)))
-#endif /* SCC_HASHTAB_H */
 
 /* scc_hashtab_impl_remove
  *
@@ -458,3 +457,5 @@ _Bool scc_hashtab_impl_remove(void *handle, size_t elemsize);
  *      Handle used for referring to the hash table
  */
 void scc_hashtab_clear(void *handle);
+
+#endif /* SCC_HASHTAB_H */
