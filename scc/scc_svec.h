@@ -109,7 +109,7 @@ struct scc_svec_base {
  *
  * Internal use only
  *
- * Obtains a qualified pointer to the struct
+ * Obtain a qualified pointer to the struct
  * scc_svec_base corresponding to the given svec
  *
  * scc_svec(type) svec
@@ -120,7 +120,7 @@ struct scc_svec_base {
  */
 #define scc_svec_impl_base_qual(svec, qual)                             \
     scc_container_qual(                                                 \
-        (unsigned char qual *)svec - scc_svec_impl_npad(svec),          \
+        (unsigned char qual *)(svec) - scc_svec_impl_npad(svec),        \
         struct scc_svec_base,                                           \
         sv_buffer,                                                      \
         qual                                                            \
@@ -158,7 +158,7 @@ struct scc_svec_base {
  * Internal use only
  *
  * Initialize the raw vector at initvec and return
- * a pointer to it
+ * a fat pointer to it
  *
  * void *initvec
  *      Address of the automatically allocated, uninitialized
@@ -175,7 +175,7 @@ void *scc_svec_impl_init(void *initvec, size_t offset, size_t capacity);
 /* scc_svec_init
  *
  * Instantiate a small vector for storing instances
- * of the given type and return a pointer to it. The
+ * of the given type and return a fat pointer to it. The
  * initial vector has automatic storage duration
  *
  * type
@@ -256,7 +256,7 @@ _Bool scc_svec_impl_resize(void *svec, size_t size, size_t elemsize);
 /* scc_svec_resize
  *
  * Resize the given vector to a certain size. Empty slots are set
- * to 0, slots whose indices are larger than size are removed
+ * to 0, slots whose indices are larger than size are stripped
  *
  * scc_svec(type) svec
  *      The svec to be resized
@@ -381,7 +381,7 @@ size_t scc_svec_impl_at_check(void *svec, size_t index);
  * case at the time of the call, the vector is reallocated.
  *
  * void *svecaddr
- *      The vector for which the capacity is to be asserted
+ *      Address of the vector for which the capacity is to be asserted
  *
  * size_t elemsize
  *      Size of the element type for which the vector was instantiated
@@ -391,7 +391,8 @@ _Bool scc_svec_impl_push_ensure_capacity(void *svecaddr, size_t elemsize);
 /* scc_svec_push
  *
  * Push the given value to the back of the vector,
- * reallocating it if needed
+ * reallocating it if needed. Expands to true if the
+ * operation succeeded
  *
  *  scc_svec(type) *svecaddr
  *      Pointer to the svec for which the value is to be inserted
@@ -400,8 +401,8 @@ _Bool scc_svec_impl_push_ensure_capacity(void *svecaddr, size_t elemsize);
  *      Value to be appended to the vector. Subject to implicit
  *      conversion should type and type' differ
  */
-#define scc_svec_push(svecaddr, value)                                          \
-    (scc_svec_impl_push_ensure_capacity((svecaddr), sizeof(**(svecaddr))) &&    \
+#define scc_svec_push(svecaddr, value)                                      \
+    (scc_svec_impl_push_ensure_capacity(svecaddr, sizeof(**(svecaddr))) &&  \
     ((*(svecaddr))[scc_svec_impl_base(*(svecaddr))->sv_size++] = (value),1))
 
 

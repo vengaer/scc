@@ -84,8 +84,7 @@ void test_scc_stack_empty(void) {
     scc_stack_free(stack);
 }
 
-#if 0
-void scc_stack_custom_container(void) {
+void test_scc_stack_custom_container(void) {
     enum { TEST_SIZE = 100 };
     scc_stack(int) default_container = scc_stack_init(int);
     TEST_ASSERT_EQUAL_UINT64(SCC_SVEC_STATIC_CAPACITY + 0ull, scc_stack_capacity(default_container));
@@ -109,4 +108,3 @@ void scc_stack_custom_container(void) {
     }
     scc_stack_free(custom_container);
 }
-#endif
