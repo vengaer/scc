@@ -4,8 +4,9 @@ __Config_mk := _
 include $(mkscripts)/expr.mk
 
 # Instrumentation
-SCC_EXPAND_ASM   := $(call is_set,$(CONFIG_EXPAND_ASM))
-CPPFLAGS         += $(if $(call is_set,$(CONFIG_PERFEVENTS)),-DSCC_PERFEVTS)
+SCC_EXPAND_ASM   := $(call is-set,$(CONFIG_EXPAND_ASM))
+CPPFLAGS         += $(if $(call is-set,$(CONFIG_PERFEVENTS)),-DSCC_PERFEVTS)
+CPPFLAGS         += $(if $(call is-set,$(CONFIG_FUZZ_DEBUG)),-DSCC_FUZZ_DEBUG)
 
 # Fuzzing
 SCC_FUZZ_TARGET  := $(CONFIG_FUZZ_TARGET)

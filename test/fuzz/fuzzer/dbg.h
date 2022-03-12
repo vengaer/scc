@@ -5,7 +5,7 @@
 
 #include <stdio.h>
 
-#ifdef SCC_FUZZ_DBG
+#ifdef SCC_FUZZ_DEBUG
 
 #define dbg_pr(...) printf(__VA_ARGS__)
 #define dbg_pr_n(it, data, n, ...)                      \
