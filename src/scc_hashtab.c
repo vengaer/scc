@@ -201,6 +201,7 @@ static struct scc_hashtab_base *scc_hashtab_realloc(
     newbase->ht_fwoff = base->ht_fwoff;
 
     SCC_ON_PERFTRACK(newbase->ht_perf = base->ht_perf);
+    SCC_ON_PERFTRACK(newbase->ht_perf.ev_bytesz = size);
 
     *newtab = (unsigned char *)newbase + hdrsize - elemsize;
     scc_hashtab_set_bkoff(*newtab, base->ht_fwoff);
@@ -297,6 +298,9 @@ void *scc_hashtab_impl_init(struct scc_hashtab_base *base, scc_eq eq, scc_hash h
     base->ht_capacity = cap;
     base->ht_fwoff = scc_hashtab_calcpad(coff);
     unsigned char *tab = (unsigned char *)base + coff;
+    SCC_ON_PERFTRACK(
+        base->ht_perf.ev_bytesz = mdoff + (cap + scc_hashtab_impl_guardsz()) * sizeof(scc_hashtab_metatype)
+    );
     scc_hashtab_set_bkoff(tab, base->ht_fwoff);
     return tab;
 }

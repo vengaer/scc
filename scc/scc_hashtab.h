@@ -18,24 +18,28 @@ typedef unsigned char scc_hashtab_metatype;
  * Counters for tracking performance-
  * related events.
  *
- * size_t ev_n_rehashes;
+ * size_t ev_n_rehashes
  *      Number of times the hash table
  *      hash been rehashed
  *
- * size_t ev_n_eqs;
+ * size_t ev_n_eqs
  *      Number of calls to eq performed
  *
- * size_t ev_n_hash;
+ * size_t ev_n_hash
  *      Number of calls to hash performed
  *
  * size_t ev_n_inserts
  *      Number of successful insertions performed
+ *
+ * size_t ev_bytesz
+ *      Total size of the table, in bytes
  */
 struct scc_hashtab_perfevts {
     size_t ev_n_rehashes;
     size_t ev_n_eqs;
     size_t ev_n_hash;
     size_t ev_n_inserts;
+    size_t ev_bytesz;
 };
 
 /* struct scc_hashtab_base
