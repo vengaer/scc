@@ -23,17 +23,17 @@ check:
 fuzz_hashtab:
   stage: fuzz
   script:
-    - make fuzz SCC_FUZZ=hashtab FUZZTIME=10
+    - make fuzz SCC_FUZZ_TARGET=hashtab SCC_FUZZTIME=10
 
 fuzz_rbtree:
   stage: fuzz
   script:
-    - make fuzz SCC_FUZZ=rbtree FUZZTIME=10
+    - make fuzz SCC_FUZZ_TARGET=rbtree SCC_FUZZTIME=10
 
 fuzz_svec:
   stage: fuzz
   script:
-    - make fuzz SCC_FUZZ=svec FUZZTIME=10
+    - make fuzz SCC_FUZZ_TARGET=svec SCC_FUZZTIME=10
 
 lint:
   stage: lint
