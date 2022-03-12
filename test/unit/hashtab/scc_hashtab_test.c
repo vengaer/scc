@@ -129,7 +129,7 @@ void test_scc_hashtab_reserve_retains_values(void) {
  * verify that no values are lost
  */
 void test_scc_hashtab_interleaved_insert_find(void) {
-    enum { TESTSIZE = 2048 };
+    enum { TESTSIZE = 4096 };
     scc_hashtab(int) tab = scc_hashtab_init(int, eq);
 
     int const *elem;
@@ -141,5 +141,15 @@ void test_scc_hashtab_interleaved_insert_find(void) {
             TEST_ASSERT_EQUAL_INT32(j, *elem);
         }
     }
+    scc_hashtab_free(tab);
+}
+
+void test_scc_hashtab_remove(void) {
+    enum { VAL = 234 };
+    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+    TEST_ASSERT_FALSE(scc_hashtab_remove(tab, VAL));
+    TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, VAL));
+    TEST_ASSERT_TRUE(scc_hashtab_remove(tab, VAL));
+    TEST_ASSERT_FALSE(scc_hashtab_remove(tab, VAL));
     scc_hashtab_free(tab);
 }
