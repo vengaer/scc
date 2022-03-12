@@ -9,7 +9,7 @@
 #
 # Return:
 #   \r0: The result of \r0 & ~(\r0 - 1)
-.macro isolsbl  r0, r1
+.macro isolssbl  r0, r1
     leal    -1(\r0), \r1
     notl    \r1
     andl    \r1, \r0
@@ -187,7 +187,7 @@
     vpcmpeqb    %ymm0, %ymm13, %ymm3        # All ones for probe end
     vpmovmskb   %ymm3, %r9d                 # Extract bitmask
 
-    isolsbl  %r9d, %r10d                    # Isolate rightmost set bit
+    isolssbl  %r9d, %r10d                   # Isolate rightmost set bit
     subl    $1, %r9d                        # Compute hash match mask
     andl    %r9d, %r8d                      # Mask out matches beyond probe end
     jz      1f                              # ZF set if no match
@@ -259,7 +259,7 @@
     vpcmpeqb    %ymm0, %ymm13, %ymm3        # All ones for probe end
     vpmovmskb   %ymm3, %r9d                 # Extract bitmask
 
-    isolsbl  %r9d, %r10d                    # Isolate rightmost set bit
+    isolssbl  %r9d, %r10d                   # Isolate rightmost set bit
     subl    $1, %r9d                        # Compute hash match mask
     andl    %r9d, %r15d                     # Mask out matches beyond probe end
     jz      1f                              # ZF set if no match
