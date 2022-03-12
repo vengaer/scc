@@ -269,12 +269,12 @@
 
 1:  # no matching hash in vector
     testl   %r14d, %r14d
-    jz      5f
+    jnz     5f
 
-    leaq    0x20(%rbx), %rbx                # Adavance and wrap offset
+    leaq    0x20(%rbx), %rbx                # Advance and wrap offset
     wrapq   %rdi, %rbx, %rcx
 
-    jmp     3b
+    jmp     6b
 
 5:
     tzcntl  %r14d, %edx                     # Vector offset of first vacant
