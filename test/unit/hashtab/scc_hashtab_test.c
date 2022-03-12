@@ -144,6 +144,12 @@ void test_scc_hashtab_interleaved_insert_find(void) {
     scc_hashtab_free(tab);
 }
 
+/* test_scc_hashtab_remove
+ *
+ * Verify that removing values in the table succeeds
+ * and that attempting to remove nonexistent ones does
+ * not
+ */
 void test_scc_hashtab_remove(void) {
     enum { VAL = 234 };
     scc_hashtab(int) tab = scc_hashtab_init(int, eq);
@@ -151,5 +157,38 @@ void test_scc_hashtab_remove(void) {
     TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, VAL));
     TEST_ASSERT_TRUE(scc_hashtab_remove(tab, VAL));
     TEST_ASSERT_FALSE(scc_hashtab_remove(tab, VAL));
+    scc_hashtab_free(tab);
+}
+
+/* test_scc_hashtab_interleaved_remove_find
+ *
+ * Insert a large number of elements and remove them
+ * one by one. After each removal, verify that removed
+ * values are not found by calls to scc_hashtab_find whereas
+ * values that have yet to be removed are.
+ */
+void test_scc_hashtab_interleaved_remove_find(void) {
+    enum { TESTSIZE = 2048 };
+    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+
+    for(int i = 0; i < TESTSIZE; ++i) {
+        TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, i));
+    }
+
+    for(int i = 0; i < TESTSIZE; ++i) {
+        TEST_ASSERT_TRUE(scc_hashtab_remove(tab, i));
+
+        /* Values not present */
+        for(int j = 0; j <= i; ++j) {
+            TEST_ASSERT_FALSE(!!scc_hashtab_find(tab, j));
+            TEST_ASSERT_FALSE(scc_hashtab_remove(tab, j));
+        }
+
+        /* Values still present */
+        for(int j = i + 1; j < TESTSIZE; ++j) {
+            TEST_ASSERT_TRUE(!!scc_hashtab_find(tab, j));
+        }
+    }
+
     scc_hashtab_free(tab);
 }
