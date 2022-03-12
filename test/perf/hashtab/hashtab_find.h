@@ -11,10 +11,10 @@ extern "C" {
 #endif
 
 void *hashtab_find_init();
-void hashtab_find_free(void *table);
-void hashtab_find_insert_all(void **table, bm_type const *data, size_t size);
-void hashtab_find_clear(void *table);
-bool hashtab_find_benchmark(void *table, bm_type const *data, size_t size);
+void hashtab_find_free(void *tab);
+void hashtab_find_insert_all(void **tab, bm_type const *data, size_t size);
+void hashtab_find_clear(void *tab);
+bool hashtab_find_benchmark(void *tab, bm_type const *data, size_t size);
 
 #ifdef __cplusplus
 }

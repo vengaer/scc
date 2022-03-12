@@ -12,8 +12,8 @@ extern "C" {
 #endif
 
 void *hashtab_insertion_init();
-void hashtab_insertion_free(void *table);
-bool hashtab_insertion_benchmark(void **table, bm_type const* data, size_t size);
+void hashtab_insertion_free(void *tab);
+bool hashtab_insertion_benchmark(void **tab, bm_type const* data, size_t size);
 
 #ifdef __cplusplus
 }
