@@ -21,6 +21,13 @@ size_t scc_hashtab_capacity(void const *handle);
 size_t scc_hashtab_size(void const *handle);
 size_t scc_hashtab_impl_bkpad(void const *handle);
 
+/* scc_hashtab_next_power_of_2
+ *
+ * Round given value up to the next power of 2
+ *
+ * unsigned long long val
+ *      Value to round up
+ */
 static inline unsigned long long scc_hashtab_next_power_of_2(unsigned long long val) {
     --val;
     val |= val >> 1ull;
