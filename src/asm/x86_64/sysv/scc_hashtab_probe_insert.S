@@ -120,7 +120,7 @@
     testl   %eax, %eax                      # Check return value
     jnz     \dupl
 
-    leaq    -1(%r15d), %r8d                 # Clear rightmost set bit
+    leal    -1(%r15d), %r8d                 # Clear rightmost set bit
     andl    %r8d, %r15d
     tzcntl  %r15d, %r9d                     # Vector index of next matching slot
     jnc     0b                              # Loop if more matches
