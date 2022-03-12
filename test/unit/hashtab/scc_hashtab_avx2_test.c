@@ -155,4 +155,17 @@ void test_insertion_probe_until_stop(void) {
     scc_hashtab_free(tab);
 }
 
+/* test_find_probe_empty
+ *
+ * Probe empty hash table and verify that the returned index is -1
+ */
+void test_find_probe_empty(void) {
+    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+    struct scc_hashtab_base *base = scc_hashtab_inspect_base(tab);
+    *tab = 32;
+    unsigned long long hash = scc_hashtab_fnv1a(tab, sizeof(*tab));
+    TEST_ASSERT_EQUAL_INT64(-1ll, scc_hashtab_probe_find(base, tab, sizeof(int), hash));
+    scc_hashtab_free(tab);
+}
+
 #endif
