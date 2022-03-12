@@ -79,16 +79,30 @@ void test_scc_hashtab_values_retained_on_rehash(void) {
     scc_hashtab_free(tab);
 }
 
+/* test_scc_hashtab_reserve
+ *
+ * Initialize a hash table, reserve a capacity larger than
+ * the initial one and verify that the capacity was indeed
+ * increased
+ */
 void test_scc_hashtab_reserve(void) {
     scc_hashtab(int) tab = scc_hashtab_init(int, eq);
     size_t const cap = scc_hashtab_capacity(tab);
 
+    void const *origaddr = tab;
     TEST_ASSERT_TRUE(scc_hashtab_reserve(&tab, 2lu * cap));
     TEST_ASSERT_GREATER_THAN_UINT64(cap, scc_hashtab_capacity(tab));
+    TEST_ASSERT_FALSE(origaddr == tab);
 
     scc_hashtab_free(tab);
 }
 
+/* test_scc_hashtab_reserve_retains_values
+ *
+ * Insert a number of values in the hash table, reserve
+ * a capacity large enough that the table has to be rehashed
+ * and verify that the values are still present
+ */
 void test_scc_hashtab_reserve_retains_values(void) {
     enum { TESTSIZE = 256 };
     scc_hashtab(int) tab = scc_hashtab_init(int, eq);
@@ -105,6 +119,27 @@ void test_scc_hashtab_reserve_retains_values(void) {
 
     for(int i = 0; i < TESTSIZE; ++i) {
         TEST_ASSERT_TRUE(scc_hashtab_find(tab, i));
+    }
+    scc_hashtab_free(tab);
+}
+
+/* test_scc_hashtab_interleaved_insert_find
+ *
+ * Perform repeated insertions and, after each insertion,
+ * verify that no values are lost
+ */
+void test_scc_hashtab_interleaved_insert_find(void) {
+    enum { TESTSIZE = 2048 };
+    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+
+    int const *elem;
+    for(int i = 0; i < TESTSIZE; ++i) {
+        TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, i));
+        for(int j = 0; j <= i; ++j) {
+            elem = scc_hashtab_find(tab, j);
+            TEST_ASSERT_TRUE(!!elem);
+            TEST_ASSERT_EQUAL_INT32(j, *elem);
+        }
     }
     scc_hashtab_free(tab);
 }
