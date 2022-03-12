@@ -155,6 +155,52 @@ void test_insertion_probe_until_stop(void) {
     scc_hashtab_free(tab);
 }
 
+/* test_insertion_probe_no_end_in_vector
+ *
+ * Find value that would hash to lower vector of table,
+ * insert a vector's worth of elements at the would-be
+ * index and verify that probing returns the next
+ * index beyond the vector
+ */
+void test_insertion_probe_no_end_in_vector(void) {
+    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+
+    /* Reserve enough space to require multiple vector loads */
+    size_t const cap = scc_hashtab_capacity(tab) << 2u;
+    TEST_ASSERT_GREATER_OR_EQUAL_INT32(SCC_VECSIZE << 1u, cap);
+    TEST_ASSERT_TRUE(scc_hashtab_reserve(&tab, cap));
+    scc_hashtab_metatype *md = scc_hashtab_inspect_metadata(tab);
+    struct scc_hashtab_base *base = scc_hashtab_inspect_base(tab);
+    int *data = scc_hashtab_inspect_data(tab);
+
+    /* Pick element that hashes to lower half */
+    unsigned long long hash;
+    size_t index = SIZE_MAX;
+    int elem;
+    for(elem = 0; index >= SCC_VECSIZE; ++elem) {
+        hash = scc_hashtab_fnv1a(&elem, sizeof(elem));
+        index = hash & (scc_hashtab_capacity(tab) - 1u);
+    }
+
+    scc_hashtab_metatype meta = (scc_hashtab_metatype)(0x80 | (hash >> 57));
+
+    size_t slot;
+    /* Set slots to occupied, forcing multiple vector loads */
+    for(int i = 0; i < SCC_VECSIZE; ++i) {
+        slot = i + index;
+        md[slot] = meta;
+        if(slot < scc_hashtab_impl_guardsz()) {
+            md[slot + scc_hashtab_capacity(tab)] = meta;
+        }
+        /* Ensure eq returns false */
+        data[slot] = ~elem;
+    }
+
+    TEST_ASSERT_EQUAL_INT64(index + SCC_VECSIZE + 0ll, scc_hashtab_probe_insert(base, tab, sizeof(int), hash));
+
+    scc_hashtab_free(tab);
+}
+
 /* test_find_probe_empty
  *
  * Probe empty hash table and verify that the returned index is -1
@@ -168,6 +214,11 @@ void test_find_probe_empty(void) {
     scc_hashtab_free(tab);
 }
 
+/* test_find_probe_no_match
+ *
+ * Insert a number of elements in the hash table, probe for one that was not
+ * inserted and verify that -1 is returned
+ */
 void test_find_probe_no_match(void) {
     enum { SIZE = 10 };
     scc_hashtab(int) tab = scc_hashtab_init(int, eq);
@@ -194,6 +245,11 @@ void test_find_probe_no_match(void) {
     scc_hashtab_free(tab);
 }
 
+/* test_find_probe_single_value
+ *
+ * Insert a single value, probe for it and verify that the
+ * returned index is correct
+ */
 void test_find_probe_single_value(void) {
     enum { VAL = 10 };
     scc_hashtab(int) tab = scc_hashtab_init(int, eq);
