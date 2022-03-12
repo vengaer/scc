@@ -221,6 +221,7 @@
 3:  # probing required
     vmovdqu %ymm15, 0x30(%rsp)              # Preserve bcasted hash across eq calls
 
+6:
     eqloop  \pwr2, 2b                       # Do eq loop
 
                                             # No match found, probe again
@@ -253,7 +254,7 @@
     tzcntl  %r15d, %r9d                     # Vector index of next matching slot
 
     testl   %r14d, %r14d                    # Check for at least one vacant in next 32 slots
-    jz      3b                              # No vacant, repeat
+    jz      6b                              # No vacant, repeat
 
     eqloop  \pwr2, 2b                       # Do eq loop
 
