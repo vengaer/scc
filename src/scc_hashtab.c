@@ -69,8 +69,10 @@ static inline void scc_hashtab_set_bkoff(void *handle, unsigned char bkoff) {
  *      Address of the hash table base
  */
 static inline bool scc_hashtab_should_rehash(struct scc_hashtab_base const *base) {
-    /* Rehash at 50% */
-    return (base->ht_size << 1u) >= base->ht_capacity;
+    /* Rehash at 87.5% */
+    return base->ht_size > (base->ht_capacity >> 1u) +
+                           (base->ht_capacity >> 2u) +
+                           (base->ht_capacity >> 3u);
 }
 
 /* scc_hashtab_sizeup
