@@ -95,24 +95,6 @@ pipeline {
                 }
             }
         }
-        stage("Docs") {
-            when {
-                beforeAgent true
-                expression {
-                    return env.BUILDTYPE != "fuzz"
-                }
-            }
-            agent {
-                docker {
-                    image "${IMAGE}"
-                }
-            }
-            steps {
-                script {
-                    sh "make doc"
-                }
-            }
-        }
         stage("Lint") {
             when {
                 beforeAgent true

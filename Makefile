@@ -68,7 +68,6 @@ alib         := $(builddir)/lib$(scc).$(aext)
 all: $(alib) $(solink)
 
 $(call include-node,arch)
-$(call include-node,docs)
 $(call include-node,src,scc)
 $(call include-node,submodules)
 $(call include-node,test)

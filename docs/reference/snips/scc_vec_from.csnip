@@ -1,3 +1,0 @@
-scc_vec(unsigned) vec = scc_vec_from(unsigned, 0u, 1u, 2u, 3u);
-/* Do something */
-scc_vec_free(vec);

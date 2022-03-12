@@ -1,8 +1,0 @@
-scc_vec(unsigned) vec = scc_vec_init(unsigned);
-scc_vec_reserve(vec, 4u);
-scc_vec_push(vec, 0u);
-scc_vec_push(vec, 1u);
-scc_vec_push(vec, 2u);
-scc_vec_push(vec, 3u);
-/* Do something */
-scc_vec_free(vec);

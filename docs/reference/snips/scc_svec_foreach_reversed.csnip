@@ -1,9 +1,0 @@
-scc_svec(short) svec = scc_svec_from(short, 2, 12, 0, 1, 0);
-short *iter;
-
-scc_svec_foreach_reversed(iter, svec) {
-    printf("%hd ", *iter);
-}
-puts("");
-
-scc_svec_free(svec);

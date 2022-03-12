@@ -1,9 +1,0 @@
-scc_vec(int) vec = scc_vec_from(int, 1, 2, 3);
-
-int *iter;
-scc_vec_foreach(iter, vec) {
-    printf("%d ", *iter);
-}
-puts("");
-
-scc_vec_free(vec);

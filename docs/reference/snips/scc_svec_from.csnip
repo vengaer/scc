@@ -1,3 +1,0 @@
-scc_svec(int) svec = scc_svec_from(int, 1, 2, 3, 4, 5);
-/* Use the vector */
-scc_svec_free(svec);

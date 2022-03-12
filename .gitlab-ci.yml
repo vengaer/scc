@@ -39,8 +39,3 @@ lint:
   stage: lint
   script:
     - make -j$(nproc) lint
-
-docs:
-  stage: doc
-  script:
-    - make -j$(nproc) doc
