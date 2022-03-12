@@ -31,6 +31,10 @@ bool hashtab_fuzz_removal(
                 fprintf(stderr, "Error on find during removal, expected %" PRIu32 ", got %" PRIu32 "\n", data[j], *elem);
                 return false;
             }
+            if(scc_hashtab_insert(tab, data[j])) {
+                fprintf(stderr, "Allowed to insert %" PRIu32 " before it was removed\n", data[j]);
+                return false;
+            }
         }
     }
 
