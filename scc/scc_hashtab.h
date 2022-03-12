@@ -391,7 +391,7 @@ void const *scc_hashtab_impl_find(void const *handle, size_t elemsize);
  * Reserve storage for specified number of slots. Return true on success,
  * otherwise false. On failure, *(void **)handleaddr remains untouched.
  *
- * void *handleaddr
+ * type *handleaddr
  *      Address of the handle used for referring to the hash table
  *
  * size_t capacity
@@ -407,7 +407,7 @@ _Bool scc_hashtab_impl_reserve(void *handleaddr, size_t capacity, size_t elemsiz
  * expands to true. Otherwise, the macro expands to false and
  * **handleaddr remains untouched.
  *
- * void *handleaddr
+ * type *handleaddr
  *      Address of the handle used for referring to the hash table
  *
  * size_t capacity
@@ -416,3 +416,32 @@ _Bool scc_hashtab_impl_reserve(void *handleaddr, size_t capacity, size_t elemsiz
 #define scc_hashtab_reserve(handleaddr, capacity)                           \
     scc_hashtab_impl_reserve(handleaddr, capacity, sizeof(**(handleaddr)))
 #endif /* SCC_HASHTAB_H */
+
+/* scc_hashtab_impl_remove
+ *
+ * Internal use only
+ *
+ * Remove the value stored in the handle from the hash table
+ *
+ * void *handle
+ *      Handle used to refer to the hash table
+ *
+ * size_t elemsize
+ *      Size of each value stored in the table
+ */
+_Bool scc_hashtab_impl_remove(void *handle, size_t elemsize);
+
+/* scc_hashtab_remove
+ *
+ * Remove an element from the hash table. Return true if the
+ * operation was successfully performed
+ *
+ * type *handle
+ *      Handle used for referring to the hash table in question
+ *
+ * type' value
+ *      Value to remove. Subject to implicit conversion should type and
+ *      type' not be the same
+ */
+#define scc_hashtab_remove(handle, value)                                   \
+    scc_hashtab_impl_remove((*(handle) = (value), (handle)), sizeof(*(handle)))

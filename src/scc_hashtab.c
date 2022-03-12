@@ -11,6 +11,7 @@
 #include <string.h>
 
 enum { SCC_HASHTAB_OCCUPIED = 0x80 };
+enum { SCC_HASHTAB_VACATED = 0x7f };
 enum { SCC_HASHTAB_HASHSHIFT = 57 };
 
 #define scc_hashtab_is_power_of_2(val) \
@@ -99,7 +100,7 @@ static inline scc_hashtab_metatype *scc_hashtab_metadata(struct scc_hashtab_base
  * Attempt to emplace the value referred to by the given handle
  * into the hash table. Return true if the value was emplaced
  *
- * void *handle:
+ * void *handle
  *      Handle to the hash table
  *
  * struct scc_hashtab_base *base
@@ -212,7 +213,7 @@ static struct scc_hashtab_base *scc_hashtab_realloc(
  * *handle is updated to refer to the new table and true is
  * returned. On failure, *handle remains unchanged.
  *
- * void **handle:
+ * void **handle
  *      Address of the handle used to refer to hash table
  *
  * struct scc_hashtab_base *base
@@ -282,6 +283,8 @@ void const *scc_hashtab_impl_find(void const *handle, size_t elemsize) {
     if(index == -1ll) {
         return 0;
     }
+    assert(base->ht_size);
+    assert(index >= 0ll && (size_t)index < base->ht_capacity);
 
     /* handle holds &base->ht_data[-1] */
     return (void const *)((unsigned char const *)handle + (index + 1ull) * elemsize);
@@ -333,3 +336,22 @@ bool scc_hashtab_impl_reserve(void *handleaddr, size_t capacity, size_t elemsize
     return true;
 }
 
+bool scc_hashtab_impl_remove(void *handle, size_t elemsize) {
+    struct scc_hashtab_base *base = scc_hashtab_impl_base(handle);
+    unsigned long long const hash = base->ht_hash(handle, elemsize);
+    long long const index = scc_hashtab_probe_find(base, handle, elemsize, hash);
+    if(index == -1ll) {
+        return false;
+    }
+
+    assert(base->ht_size);
+    assert(index >= 0ll && (size_t)index < base->ht_capacity);
+
+    scc_hashtab_metatype *md = scc_hashtab_metadata(base);
+    md[index] = SCC_HASHTAB_VACATED;
+    if(index < scc_hashtab_impl_guardsz()) {
+        md[index + base->ht_capacity] = SCC_HASHTAB_VACATED;
+    }
+    --base->ht_size;
+    return true;
+}
