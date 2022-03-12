@@ -12,6 +12,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef NDEBUG
+#error NDEBUG defined, assertions won't trigger
+#endif
+
 static unsigned partition(uint32_t *data, size_t size) {
     bool unique = true;
     unsigned unique_end = 0u;
@@ -36,7 +40,7 @@ static bool eq(void const *left, void const *right) {
 }
 
 int LLVMFuzzerTestOneInput(uint8_t const *data, size_t size) {
-    size >>= 2u;
+    size /= sizeof(uint32_t);
     if(!size) {
         return 0;
     }
