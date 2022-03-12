@@ -15,21 +15,6 @@
     andl    \r1, \r0
 .endm
 
-# Clear rightmost 1-bit in 32-bit register
-#
-# Sets ZF if the result is 0
-#
-# Params:
-#   \r0: Register to clear the rightmost set bit in
-#   \r1: Scratch
-#
-# Return:
-#   \r0: The result of \r0 & (\r0 - 1)
-.macro clrlsbl  r0, r1
-    leal    -1(\r0), \r1
-    andl    \r1, \r0
-.endm
-
 # Wrap index of slot computation
 #
 # Sets ZF if result is 0
@@ -135,7 +120,8 @@
     testl   %eax, %eax                      # Check return value
     jnz     \dupl
 
-    clrlsbl %r15d, %r8d                     # Clear rightmost set bit
+    leaq    -1(%r15d), %r8d                 # Clear rightmost set bit
+    andl    %r8d, %r15d
     tzcntl  %r15d, %r9d                     # Vector index of next matching slot
     jnc     0b                              # Loop if more matches
 .endm
