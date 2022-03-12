@@ -88,3 +88,23 @@ void test_scc_hashtab_reserve(void) {
 
     scc_hashtab_free(tab);
 }
+
+void test_scc_hashtab_reserve_retains_values(void) {
+    enum { TESTSIZE = 256 };
+    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+    for(int i = 0; i < TESTSIZE; ++i) {
+        TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, i));
+
+        for(int j = 0; j <= i; ++j) {
+            TEST_ASSERT_TRUE(!!scc_hashtab_find(tab, i));
+        }
+    }
+    size_t const cap = scc_hashtab_capacity(tab);
+    TEST_ASSERT_TRUE(scc_hashtab_reserve(&tab, (cap << 1u) + 1u));
+    TEST_ASSERT_GREATER_THAN_UINT64(cap, scc_hashtab_capacity(tab));
+
+    for(int i = 0; i < TESTSIZE; ++i) {
+        TEST_ASSERT_TRUE(scc_hashtab_find(tab, i));
+    }
+    scc_hashtab_free(tab);
+}
