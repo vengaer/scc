@@ -10,6 +10,10 @@ static bool eq(void const *left, void const *right) {
     return *(int const *)left == *(int const *)right;
 }
 
+static bool ueq(void const *left, void const *right) {
+    return *(unsigned const *)left == *(unsigned const *)right;
+}
+
 static bool contains(int *tab, int value) {
     scc_hashtab_metatype *md = scc_hashtab_inspect_metadata(tab);
     int *data = scc_hashtab_inspect_data(tab);
@@ -90,7 +94,7 @@ void test_scc_hashtab_reserve(void) {
     size_t const cap = scc_hashtab_capacity(tab);
 
     void const *origaddr = tab;
-    TEST_ASSERT_TRUE(scc_hashtab_reserve(&tab, 2lu * cap));
+    TEST_ASSERT_TRUE(scc_hashtab_reserve(&tab, 2ul * cap));
     TEST_ASSERT_GREATER_THAN_UINT64(cap, scc_hashtab_capacity(tab));
     TEST_ASSERT_FALSE(origaddr == tab);
 
@@ -192,3 +196,26 @@ void test_scc_hashtab_interleaved_remove_find(void) {
 
     scc_hashtab_free(tab);
 }
+
+/* test_scc_hashtab_fuzzer_fail0
+ *
+ * First failure case detected by fuzzer
+ */
+void test_scc_hashtab_fuzzer_fail0(void) {
+    static unsigned const data[] = {
+        420351502, 722330393, 2147341328, 77660160,
+        690563338, 688549161, 3727239465, 2749835747,
+        3823577571, 14879295
+    };
+    scc_hashtab(unsigned) tab = scc_hashtab_init(unsigned, ueq);
+
+    for(unsigned i = 0u; i < scc_arrsize(data); ++i) {
+        TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, data[i]));
+        TEST_ASSERT_EQUAL_UINT64(i + 1ul, scc_hashtab_size(tab));
+        for(unsigned j = 0u; j <= i; ++j) {
+            TEST_ASSERT_TRUE(scc_hashtab_find(tab, data[j]));
+        }
+    }
+    scc_hashtab_free(tab);
+}
+
