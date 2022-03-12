@@ -20,6 +20,17 @@ size_t scc_hashtab_capacity(void const *handle);
 size_t scc_hashtab_size(void const *handle);
 size_t scc_hashtab_impl_bkpad(void const *handle);
 
+static inline unsigned long long scc_hashtab_next_power_of_2(unsigned long long val) {
+    --val;
+    val |= val >> 1ull;
+    val |= val >> 2ull;
+    val |= val >> 4ull;
+    val |= val >> 8ull;
+    val |= val >> 16ull;
+    val |= val >> 32ull;
+    return val + 1ull;
+}
+
 /* scc_hashtab_calcpad
  *
  * Calculate the number of padding bytes between ht_fwoff and ht_curr
@@ -308,5 +319,17 @@ void scc_hashtab_free(void *handle) {
     if(base->ht_dynalloc) {
         free(base);
     }
+}
+
+bool scc_hashtab_impl_reserve(void *handleaddr, size_t capacity, size_t elemsize) {
+    struct scc_hashtab_base *base = scc_hashtab_impl_base(*(void **)handleaddr);
+    if(!scc_hashtab_is_power_of_2(capacity)) {
+        capacity = scc_hashtab_next_power_of_2(capacity);
+    }
+    if(!scc_hashtab_rehash(handleaddr, base, elemsize, capacity)) {
+        return false;
+    }
+
+    return true;
 }
 

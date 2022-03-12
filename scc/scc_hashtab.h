@@ -384,4 +384,35 @@ void const *scc_hashtab_impl_find(void const *handle, size_t elemsize);
 #define scc_hashtab_find(handle, value)                                     \
     scc_hashtab_impl_find((*(handle) = (value), (handle)), sizeof(*(handle)))
 
+/* scc_hashtab_impl_reserve
+ *
+ * Internal use only
+ *
+ * Reserve storage for specified number of slots. Return true on success,
+ * otherwise false. On failure, *(void **)handleaddr remains untouched.
+ *
+ * void *handleaddr
+ *      Address of the handle used for referring to the hash table
+ *
+ * size_t capacity
+ *      The desired capacity. If it is not a power of 2, it is
+ *      rounded up to the next such power.
+ */
+_Bool scc_hashtab_impl_reserve(void *handleaddr, size_t capacity, size_t elemsize);
+
+/* scc_hashtab_reserve
+ *
+ * Reserve storage for at least the specified number of slots.
+ * If the table could be successfully reallocated, the macro
+ * expands to true. Otherwise, the macro expands to false and
+ * **handleaddr remains untouched.
+ *
+ * void *handleaddr
+ *      Address of the handle used for referring to the hash table
+ *
+ * size_t capacity
+ *      The desired capacity
+ */
+#define scc_hashtab_reserve(handleaddr, capacity)                           \
+    scc_hashtab_impl_reserve(handleaddr, capacity, sizeof(**(handleaddr)))
 #endif /* SCC_HASHTAB_H */
