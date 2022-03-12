@@ -130,7 +130,7 @@ static bool scc_hashtab_emplace(void *handle, struct scc_hashtab_base *base, siz
     md[index] = ent;
 
     /* Duplicate low entries in guard */
-    if(index <= scc_hashtab_impl_guardsz()) {
+    if(index < scc_hashtab_impl_guardsz()) {
         md[index + base->ht_capacity] = ent;
     }
     return true;
