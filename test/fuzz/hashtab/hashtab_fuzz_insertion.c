@@ -11,7 +11,7 @@ bool hashtab_fuzz_insertion(
 ) {
     uint32_t const *elem;
     for(unsigned i = 0u; i < unique_end; ++i) {
-        if(!scc_hashtab_insert(*tab, data[i])) {
+        if(!scc_hashtab_insert(tab, data[i])) {
             fprintf(stderr, "Error inserting %" PRIu32 "\n", data[i]);
             return false;
         }
@@ -35,7 +35,7 @@ bool hashtab_fuzz_insertion(
     }
 
     for(unsigned i = unique_end; i < size; ++i) {
-        if(scc_hashtab_insert(*tab, data[i])) {
+        if(scc_hashtab_insert(tab, data[i])) {
             fprintf(stderr, "Successfully inserted %" PRIu32 " already present in table\n", data[i]);
             return false;
         }
