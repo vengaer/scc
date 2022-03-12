@@ -121,7 +121,7 @@
     movq    %r12, %rcx                      # Shift for offset
     shlq    %cl, %rax
 .else
-    mul     %r12                            # Multiply for offset
+    mulq     %r12                           # Multiply for offset
 .endif
 
     movq    %r13, %rsi                      # Address of value pending insertion
