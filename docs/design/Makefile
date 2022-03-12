@@ -1,7 +1,7 @@
 ifdef __node
 
 $(__node_builddir)/%.$(htmlext): $(__node_path)/%.$(adocext) $(__all_mkfiles) | $(__node_builddir)
-	$(info [ADOC] $(notdir $@))
+	$(call echo-gen,$(notdir $@))
 	$(ADOC) $(ADOCFLAGS) -o $@ $<
 
 $(docindex): $(call wildcard-artifacts,$(__node_path),$(adocext),$(htmlext))

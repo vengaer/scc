@@ -3,7 +3,7 @@ ifdef __node
 inspectbuilddir := $(__node_builddir)
 
 $(__node_builddir)/%.$(oext): $(__node_path)/%.$(cext) | $(__node_builddir)
-	$(info [CC]   $(notdir $@))
+	$(call echo-cc,$(notdir $@))
 	$(CC) -o $@ $< $(CFLAGS) $(CPPFLAGS)
 
 else

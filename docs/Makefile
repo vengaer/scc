@@ -7,7 +7,7 @@ $(call include-node,design)
 $(call include-node,reference)
 
 $(__node_builddir)/%.$(htmlext): $(__node_path)/%.$(adocext) $(__all_mkfiles) | $(__node_builddir)
-	$(info [ADOC] $(notdir $@))
+	$(call echo-gen,$(notdir $@))
 	$(ADOC) -o $@ $< $(ADOCFLAGS)
 
 .PHONY: doc

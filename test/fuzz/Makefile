@@ -41,23 +41,23 @@ $(eval
     $(eval fuzztarget := $(__node_builddir)/fuzz_$(__node))
 
     $(__node_builddir)/%.$(oext): $(srcdir)/%.$(cext) | $(__node_builddir)
-	    $$(info [CC]   $(__node)/$$(notdir $$@))
+	    $$(call echo-cc,$(__node)/$$(notdir $$@))
 	    $$(CC) -o $$@ $$< $(CFLAGS) $(CPPFLAGS)
 
     $(__node_builddir)/%.$(oext): $(__node_path)/%.$(cext) | $(__node_builddir)
-	    $$(info [CC]   $(__node)/$$(notdir $$@))
+	    $$(call echo-cc,$(__node)/$$(notdir $$@))
 	    $$(CC) -o $$@ $$< $(CFLAGS) $(CPPFLAGS)
 
     $(__node_builddir)/%.$(oext): $(inspectdir)/%.$(cext) | $(__node_builddir)
-	    $$(info [CC]   $(__node)/$$(notdir $$@))
+	    $$(call echo-cc,$(__node)/$$(notdir $$@))
 	    $$(CC) -o $$@ $$< $(CFLAGS) $(CPPFLAGS)
 
     $(__node_builddir)/%.$(oext): $(asdir)/%.$(asext) | $(__node_builddir)
-	    $$(info [AS]   $(__node)/$$(notdir $$@))
+	    $$(call echo-as,$(__node)/$$(notdir $$@))
 	    $$(AS) -o $$@ $$< $(ASFLAGS)
 
     $(fuzztarget): $(call __fuzz-obj)
-	    $$(info [LD]   $(__node)/$$(notdir $$@))
+	    $$(call echo-ld,$(__node)/$$(notdir $$@))
 	    $$(CC) -o $$@ $$^ $(LDFLAGS) $(LDLIBS)
 
     fuzz: $(fuzztarget)

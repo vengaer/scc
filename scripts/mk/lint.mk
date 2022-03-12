@@ -13,7 +13,7 @@ __comma    :=,
 tidychecks := $(subst $(subst ,, ),$(__comma),$(addsuffix -*,$(tidyenable)) $(addprefix -,$(tidyignore)))
 
 $(__lint_py): $$(patsubst $(builddir)/.lint.%.stamp,$(pyscripts)/%,$$@) $(__all_mkfiles) | $(builddir)
-	$(info [LINT] $(notdir $<))
+	$(call echo-lint,$(notdir $<))
 	$(PYLINT) $(PYLINTFLAGS) $<
 	$(TOUCH) $@
 
@@ -26,7 +26,7 @@ $(eval
             $(eval __lint_$(__s) := $(__node_builddir)/.lint.$(notdir $(__s)).stamp)
 
             $(__lint_$(__s)): $(__s) $(__all_mkfiles) | $(__node_builddir) $(submodules)
-	            $$(info [TIDY] $$(notdir $$<))
+	            $$(call echo-lint,$$(notdir $$<))
 	            $(TIDY) $(TIDYFLAGS) $$< -- $(CPPFLAGS) $(CFLAGS)
 	            $(TOUCH) $$@
 

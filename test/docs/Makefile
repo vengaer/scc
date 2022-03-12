@@ -24,15 +24,15 @@ $(__chk_docs): $(snipbins) $(wildcard $(__node_path)/*.$(pyext))
 	$(TOUCH) $@
 
 $(snipbins): $$@.$(oext) $(call __snip-deps,$$@)
-	$(info [LD]   $(notdir $@))
+	$(call echo-ld,$(notdir $@))
 	$(LD) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
 $(snipobj): $$(patsubst %.$(oext),%.$(cext),$$@)
-	$(info [CC]   $(notdir $@))
+	$(call echo-cc,$(notdir $@))
 	$(CC) -o $@ $< -c $(CPPFLAGS)
 
 $(__node_builddir)/%.$(cext): $(snipdir)/%.$(snipext) | $(__node_builddir)
-	$(info [PY]   $(notdir $@))
+	$(call echo-gen,$(notdir $@))
 	$(snipgen) -o $@ -s $(symmap) -f $(funcdefs) $<
 
 # Don't remove temporary files

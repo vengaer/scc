@@ -17,23 +17,23 @@ $(eval
                                   $(wildcard $(asdir)/*$(__node)*.$(asext))))
 
     $(__node_builddir)/%.$(oext): $(srcdir)/%.$(cext) | $(__node_builddir)
-	    $$(info [CC]   $(__node)/$$(notdir $$@))
+	    $$(call echo-cc,$(__node)/$$(notdir $$@))
 	    $(CC) -o $$@ $$< $(CFLAGS) $(CPPFLAGS)
 
     $(__node_builddir)/%.$(oext): $(__node_path)/%.$(cext) | $(__node_builddir)
-	    $$(info [CC]   $(__node)/$$(notdir $$@))
+	    $$(call echo-cc,$(__node)/$$(notdir $$@))
 	    $(CC) -o $$@ $$< $(CFLAGS) $(CPPFLAGS)
 
     $(__node_builddir)/%.$(oext): $(__node_path)/%.$(cxxext) | $(__node_builddir)
-	    $$(info [CXX]  $(__node)/$$(notdir $$@))
+	    $$(call echo-cxx,$(__node)/$$(notdir $$@))
 	    $(CXX) -o $$@ $$< $(CXXFLAGS) $(CPPFLAGS)
 
     $(__node_builddir)/%.$(oext): $(asdir)/%.$(asext) | $(__node_builddir)
-	    $$(info [AS]   $(__node)/$$(notdir $$@))
+	    $$(call echo-as,$(__node)/$$(notdir $$@))
 	    $(AS) -o $$@ $$< $(ASFLAGS)
 
     $(benchmarktarget): $(__node_obj) $(benchmarkalib) $(benchmarkmain_alib)
-	    $$(info [LD]   $(__node)/$$(notdir $$@))
+	    $$(call echo-ld,$(__node)/$$(notdir $$@))
 	    $(LD) -o $$@ $$^ $(LDFLAGS) $(LDLIBS)
 
     benchmark: $(benchmarktarget)

@@ -97,7 +97,7 @@ clean:
 distclean: clean
 
 tags: FORCE
-	$(info [GEN]  $@)
+	$(call echo-gen,$@)
 	$(CTAGS) $(CTAGSFLAGS)
 
 FORCE:
