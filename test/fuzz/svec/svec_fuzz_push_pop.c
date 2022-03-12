@@ -7,7 +7,7 @@
 
 static bool svec_fuzz_push_pop_test(scc_svec(uint32_t) *vec, uint32_t const *data, size_t size, size_t initsize) {
     for(unsigned i = 0; i < size; ++i) {
-        if(!scc_svec_push(*vec, data[i])) {
+        if(!scc_svec_push(vec, data[i])) {
             fprintf(stderr, "Insertion error at element %u\n", i);
             return false;
         }
@@ -43,7 +43,7 @@ static bool svec_fuzz_push_pop_test(scc_svec(uint32_t) *vec, uint32_t const *dat
 
 static bool svec_fuzz_push_pop_test_reserve(uint32_t const *data, size_t size) {
     scc_svec(uint32_t) svec = scc_svec_init(uint32_t);
-    if(!scc_svec_reserve(svec, size)) {
+    if(!scc_svec_reserve(&svec, size)) {
         fputs("Allocation failure on reserve\n", stderr);
         return false;
     }

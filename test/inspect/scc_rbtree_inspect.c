@@ -165,7 +165,7 @@ scc_inspect_mask scc_rbtree_inspect_properties(void const *handle) {
     scc_stack(struct nodectx) stack
         = scc_stack_init(struct nodectx);
 
-    scc_stack_push(stack, ((struct nodectx) {
+    scc_stack_push(&stack, ((struct nodectx) {
         .ct_node = tree->rb_root,
         .ct_left = NOT_TRAVERSED,
         .ct_right = NOT_TRAVERSED
@@ -180,7 +180,7 @@ scc_inspect_mask scc_rbtree_inspect_properties(void const *handle) {
             curr->ct_left = scc_rbtree_inspect_black(curr->ct_node);
             if(scc_rbtree_inspect_has_child(curr->ct_node, SCC_RBTREE_INSPECT_LEFT)) {
                 /* For computing height of left subtree */
-                scc_stack_push(stack, ((struct nodectx) {
+                scc_stack_push(&stack, ((struct nodectx) {
                     .ct_node = curr->ct_node->rn_left,
                     .ct_pval = &curr->ct_left,
                     .ct_left = NOT_TRAVERSED,
@@ -193,7 +193,7 @@ scc_inspect_mask scc_rbtree_inspect_properties(void const *handle) {
             curr->ct_right = scc_rbtree_inspect_black(curr->ct_node);
             if(scc_rbtree_inspect_has_child(curr->ct_node, SCC_RBTREE_INSPECT_RIGHT)) {
                 /* For computing height of right subtree */
-                scc_stack_push(stack, ((struct nodectx) {
+                scc_stack_push(&stack, ((struct nodectx) {
                     .ct_node = curr->ct_node->rn_right,
                     .ct_pval = &curr->ct_right,
                     .ct_left = NOT_TRAVERSED,
