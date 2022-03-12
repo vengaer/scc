@@ -449,3 +449,12 @@ _Bool scc_hashtab_impl_remove(void *handle, size_t elemsize);
  */
 #define scc_hashtab_remove(handle, value)                                   \
     scc_hashtab_impl_remove((*(handle) = (value), (handle)), sizeof(*(handle)))
+
+/* scc_hashtab_clear
+ *
+ * Remove all entries in a hash table
+ *
+ * void *handle
+ *      Handle used for referring to the hash table
+ */
+void scc_hashtab_clear(void *handle);
