@@ -194,4 +194,25 @@ void test_find_probe_no_match(void) {
     scc_hashtab_free(tab);
 }
 
+void test_find_probe_single_value(void) {
+    enum { VAL = 10 };
+    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+    struct scc_hashtab_base *base = scc_hashtab_inspect_base(tab);
+    scc_hashtab_metatype *md = scc_hashtab_inspect_metadata(tab);
+    int *data = scc_hashtab_inspect_data(tab);
+
+    *tab = VAL;
+    unsigned long long hash = scc_hashtab_fnv1a(tab, sizeof(*tab));
+    size_t index = hash & (scc_hashtab_capacity(tab) - 1u);
+    md[index] = (scc_hashtab_metatype)((hash >> 57) | 0x80);
+    if(index < scc_hashtab_impl_guardsz()) {
+        md[index + scc_hashtab_capacity(tab)] = (scc_hashtab_metatype)((hash >> 57) | 0x80);
+    }
+    data[index] = VAL;
+
+    TEST_ASSERT_EQUAL_INT64((long long)index, scc_hashtab_probe_find(base, tab, sizeof(int), hash));
+
+    scc_hashtab_free(tab);
+}
+
 #endif
