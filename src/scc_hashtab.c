@@ -326,6 +326,9 @@ void scc_hashtab_free(void *handle) {
 
 bool scc_hashtab_impl_reserve(void *handleaddr, size_t capacity, size_t elemsize) {
     struct scc_hashtab_base *base = scc_hashtab_impl_base(*(void **)handleaddr);
+    if(capacity <= base->ht_capacity) {
+        return true;
+    }
     if(!scc_hashtab_is_power_of_2(capacity)) {
         capacity = scc_hashtab_next_power_of_2(capacity);
     }
