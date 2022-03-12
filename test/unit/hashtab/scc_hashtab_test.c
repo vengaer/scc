@@ -78,3 +78,13 @@ void test_scc_hashtab_values_retained_on_rehash(void) {
 
     scc_hashtab_free(tab);
 }
+
+void test_scc_hashtab_reserve(void) {
+    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+    size_t const cap = scc_hashtab_capacity(tab);
+
+    TEST_ASSERT_TRUE(scc_hashtab_reserve(&tab, 2lu * cap));
+    TEST_ASSERT_GREATER_THAN_UINT64(cap, scc_hashtab_capacity(tab));
+
+    scc_hashtab_free(tab);
+}
