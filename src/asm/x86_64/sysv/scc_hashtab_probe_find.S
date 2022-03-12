@@ -120,8 +120,8 @@
     jnz     \dupl
 
     leal    -1(%r15d), %r14d                # Clear rightmost set bit
-    andl    %r8d, %r15d
-    tzcntl  %r15d, %r8d                     # Vector offset of next match
+    andl    %r14d, %r15d
+    tzcntl  %r15d, %r14d                    # Vector offset of next match
     jnc     0b
 .endm
 
