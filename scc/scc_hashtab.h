@@ -322,9 +322,9 @@ _Bool scc_hashtab_impl_insert(void *handleaddr, size_t elemsize);
  * type **handleaddr
  *      Address of the handle used for referring to the hash table.
  *
- * value_type value
+ * type' value
  *      The value to insert. Subject to implicit conversion should type
- *      and value_type not be the same.
+ *      and type' not be the same.
  */
 #define scc_hashtab_insert(handleaddr, value)                               \
     scc_hashtab_impl_insert((**(handleaddr) = (value), (handleaddr)), sizeof(**(handleaddr)))
@@ -352,5 +352,36 @@ inline size_t scc_hashtab_size(void const *handle) {
     struct scc_hashtab_base const *base = scc_hashtab_impl_base_qual(handle, const);
     return base->ht_size;
 }
+
+/* scc_hashtab_impl_find
+ *
+ * Internal use only
+ *
+ * Probe for the value in *handle in the table. Return a pointer to
+ * the element if found, NULL otherwise
+ *
+ * void const *handle
+ *      Handle to the hash table in question
+ *
+ * size_t elemsize
+ *      Size of the elements stored in the hash table
+ */
+void const *scc_hashtab_impl_find(void const *handle, size_t elemsize);
+
+/* scc_hashtab_find
+ *
+ * Probe for value in the hash table
+ *
+ * Expands to the address of the found element on success, NULL otherwise
+ *
+ * type *handleaddr
+ *      Address of the handle used for referring to the hash table.
+ *
+ * type' value
+ *      The value to probe for. Subject to implicit conversion should type
+ *      and type' not be the same.
+ */
+#define scc_hashtab_find(handle, value)                                     \
+    scc_hashtab_impl_find((*(handle) = (value), (handle)), sizeof(*(handle)))
 
 #endif /* SCC_HASHTAB_H */

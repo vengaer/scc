@@ -264,6 +264,18 @@ bool scc_hashtab_impl_insert(void *handleaddr, size_t elemsize) {
     return true;
 }
 
+void const *scc_hashtab_impl_find(void const *handle, size_t elemsize) {
+    struct scc_hashtab_base const *base = scc_hashtab_impl_base_qual(handle, const);
+    unsigned long long const hash = base->ht_hash(handle, elemsize);
+    long long const index = scc_hashtab_probe_find(base, handle, elemsize, hash);
+    if(index == -1ll) {
+        return 0;
+    }
+
+    /* handle holds &base->ht_data[-1] */
+    return (void const *)((unsigned char const *)handle + (index + 1ull) * elemsize);
+}
+
 void *scc_hashtab_impl_init(struct scc_hashtab_base *base, scc_eq eq, scc_hash hash, size_t coff, size_t mdoff, size_t cap) {
     base->ht_eq = eq;
     base->ht_hash = hash;
