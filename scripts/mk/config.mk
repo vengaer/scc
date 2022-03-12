@@ -7,6 +7,7 @@ include $(mkscripts)/expr.mk
 SCC_EXPAND_ASM   := $(call is-set,$(CONFIG_EXPAND_ASM))
 CPPFLAGS         += $(if $(call is-set,$(CONFIG_PERFEVENTS)),-DSCC_PERFEVTS)
 CPPFLAGS         += $(if $(call is-set,$(CONFIG_FUZZ_DEBUG)),-DSCC_FUZZ_DEBUG)
+CPPFLAGS         += $(if $(call is-set,$(CONFIG_BENCHMARK_STD)),-DSCC_BENCHMARK_STD)
 
 # Fuzzing
 SCC_FUZZ_TARGET  := $(CONFIG_FUZZ_TARGET)
