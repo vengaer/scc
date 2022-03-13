@@ -173,6 +173,9 @@
     vpcmpeqb    %ymm0, %ymm13, %ymm3        # All ones for probe end
     vpmovmskb   %ymm3, %r9d                 # Extract bitmask
 
+    testl   %r9d, %r9d                      # Check if probe end in vector
+    jz      7f
+
     isolssbl  %r9d, %r10d                   # Isolate rightmost set bit
     subl    $1, %r9d                        # Compute hash match mask
     andl    %r9d, %r8d                      # Mask out matches beyond probe end
@@ -218,18 +221,30 @@
     vzeroupper
     ret
 
+8: # no match, no eq calls
+    leaq    0x20(%rax), %rax                # No match in vector, advance and wrap
+    wrapq   %rdi, %rax, %rcx
+    jmp  9b
+
+7: # probing required, no end in vector
+    testl   %r8d, %r8d                      # Check for matching hash
+    jz      8b
+
+    framesetup
+    tzcntl  %r15d, %r9d                     # Vector offset of first match
+
 3:  # probing required
-    vmovdqu %ymm15, 0x30(%rsp)              # Preserve bcasted hash across eq calls
+    vmovdqu %ymm15, 0x30(%rsp)              # Preserve broadcasted hash across eq calls
 
 6:
     eqloop  \pwr2, 2b                       # Do eq loop
 
                                             # No match found, probe again
-    vmovdqu 0x30(%rsp), %ymm15              # Restore bcasted hash
+    vmovdqu 0x30(%rsp), %ymm15              # Restore broadcasted hash
     vpcmpeqb    %ymm14, %ymm14, %ymm14      # All ones
     vpxor   %ymm13, %ymm13, %ymm13          # All zeroes
 
-    leaq    0x20(%rbx), %rbx                # Advance and wrapindex
+    leaq    0x20(%rbx), %rbx                # Advance and wrap index
     wrapq   %rbp, %rbx, %rcx
 
     movq    mdoff(%rbp), %r8                # Load ht_mdoff
