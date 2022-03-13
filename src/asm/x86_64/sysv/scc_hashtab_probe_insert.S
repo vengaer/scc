@@ -231,12 +231,14 @@
     jz      8b
 
     framesetup
-    tzcntl  %r15d, %r9d                     # Vector offset of first match
 
 3:  # probing required
     vmovdqu %ymm15, 0x30(%rsp)              # Preserve broadcasted hash across eq calls
 
 6:
+    tzcntl  %r15d, %r9d                     # Vector offset of next matching slot
+    jc      7f                              # Skip eq if no match
+
     eqloop  \pwr2, 2b                       # Do eq loop
 
                                             # No match found, probe again
@@ -244,6 +246,7 @@
     vpcmpeqb    %ymm14, %ymm14, %ymm14      # All ones
     vpxor   %ymm13, %ymm13, %ymm13          # All zeroes
 
+7:
     leaq    0x20(%rbx), %rbx                # Advance and wrap index
     wrapq   %rbp, %rbx, %rcx
 
@@ -261,15 +264,15 @@
     vpcmpeqb    %ymm0, %ymm13, %ymm3        # All ones for probe end
     vpmovmskb   %ymm3, %r9d                 # Extract bitmask
 
-    isolssbl  %r9d, %r10d                   # Isolate rightmost set bit
+    isolssbl    %r9d, %r10d                 # Isolate rightmost set bit
     subl    $1, %r9d                        # Compute hash match mask
     andl    %r9d, %r15d                     # Mask out matches beyond probe end
     jz      1f                              # ZF set if no match
 
-    tzcntl  %r15d, %r9d                     # Vector index of next matching slot
-
     testl   %r14d, %r14d                    # Check for at least one vacant in next 32 slots
     jz      6b                              # No vacant, repeat
+
+    tzcntl  %r15d, %r9d                     # Vector index of next matching slot
 
     eqloop  \pwr2, 2b                       # Do eq loop
 
@@ -283,18 +286,60 @@
     ret
 
 1:  # no matching hash in vector
-    testl   %r14d, %r14d
+    testl   %r14d, %r14d                    # Check for vacant slot
     jnz     5f
-
-    leaq    0x20(%rbx), %rbx                # Advance and wrap offset
-    wrapq   %rdi, %rbx, %rcx
-
     jmp     6b
 
-5:
+5: # vacant found, no match in vector
     tzcntl  %r14d, %edx                     # Vector offset of first vacant
-    leaq    (%rbx, %rdx), %rax              # Compute and wrap index
-    wrapq   %rbp, %rax, %rcx
+    leaq    (%rbx, %rdx), %r14              # Compute and wrap index
+    wrapq   %rbp, %r14, %rcx
+
+    addl    $1, %r9d                        # Set ZF if probe end in vector
+    jz      7f
+
+7:
+    leaq    0x20(%rbx), %rbx                # Advance and wrap index
+    wrapq   %rbp, %rbx, %rcx
+
+    movq    mdoff(%rbp), %r8                # Load ht_mdoff
+    leaq    (%rbx, %r8), %rcx               # Offset of metadata entry relative base
+
+    vmovdqu (%rbp, %rcx), %ymm0
+
+    vpcmpeqb    %ymm0, %ymm15, %ymm1        # All ones for occupied with matching hash
+    vpmovmskb   %ymm1, %r15d                # Extract bitmask
+
+    vpcmpeqb    %ymm0, %ymm13, %ymm2        # All ones for probe end
+    vpmovmskb   %ymm2, %r9d                 # Extract bitmask
+
+    testl   %r9d, %r9d                      # Check for probe end in vector
+    jnz     6f
+
+    tzcntl  %r15d, %r9d                     # Vector offset of next match
+    jc      7b                              # Skip eq loop if no match
+
+    eqloop  \pwr2, 2b
+
+    vmovdqu 0x30(%rsp), %ymm15              # Restore broadcasted hash
+    vpcmpeqb    %ymm14, %ymm14, %ymm14      # All ones
+    vpxor   %ymm13, %ymm13, %ymm13          # All zeroes
+    jmp     7b
+
+6: # final eq checks
+    testl   %r15d, %r15d                    # Check for hash match
+    jz      7f
+
+    isolssbl    %r9d, %r10d                 # Isolate rightmost set bit
+    subl    $1, %r9d                        # Compute hash match mask
+    andl    %r9d, %r15d                     # Mask out matches beyond probe end
+    jz      7f                              # ZF set if no match
+
+    tzcntl  %r15d, %r9d                     # Vector offset of next match
+
+    eqloop  \pwr2, 2b
+7:
+    movq    %r14, %rax                      # Return value
     framerst                                # Reset stack frame
     vzeroupper
     ret
