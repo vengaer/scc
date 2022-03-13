@@ -276,14 +276,10 @@
 
     eqloop  \pwr2, 2b                       # Do eq loop
 
-                                            # No match found
-    tzcntl  %r14d, %ecx                     # Vector offset of first vacant, at least one
-    leaq    (%rbx, %rcx), %rax              # Compute index
-
-    wrapq   %rbp, %rax, %rcx                # Wrap for return
-    framerst                                # Restore stack
-    vzeroupper
-    ret
+    tzcntl  %r14d, %edx                     # Vector offset of first vacant
+    leaq    (%rbx, %rdx), %r14              # Compute and wrap index
+    wrapq   %rbp, %r14, %rcx
+    jmp     7f
 
 1:  # no matching hash in vector
     testl   %r14d, %r14d                    # Check for vacant slot
