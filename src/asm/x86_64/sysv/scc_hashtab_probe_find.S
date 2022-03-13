@@ -204,6 +204,7 @@
 
 4:
     tzcntl  %r15d, %r14d                    # Vector offset of match
+    jc      7f                              # No match in vector, skip eq loop
 
     eqloop  \pwr2, 2b
 
@@ -211,6 +212,7 @@
     vpcmpeqb    %ymm14, %ymm14, %ymm14      # All ones
     vpxor   %ymm13, %ymm13, %ymm13          # All zeroes
 
+7:
     leaq    0x20(%rbx), %rbx                # Advance and wrap
     wrapq   %rbp, %rbx, %rcx
 
