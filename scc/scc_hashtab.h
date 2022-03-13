@@ -5,15 +5,42 @@
 
 #include <stddef.h>
 
+/* scc_hashtab
+ *
+ * Expands to a pointer suitable for
+ * storing a hash table handle for the given
+ * type
+ *
+ * type
+ *      The type stored in the table
+ */
 #define scc_hashtab(type) type *
 
 enum { SCC_HASHTAB_STACKCAP = 32 };
 
+/* scc_eq
+ *
+ * Signature of function used for equality comparisons
+ */
 typedef _Bool(*scc_eq)(void const *, void const *);
+
+/* scc_hash
+ *
+ * Signature of function used for hashing
+ */
 typedef unsigned long long(*scc_hash)(void const*, size_t);
+
+/* scc_hashtab_metatype
+ *
+ * Internal use only
+ *
+ * Type used for storing hash table metadata
+ */
 typedef unsigned char scc_hashtab_metatype;
 
 /* struct scc_hashtab_perfevts
+ *
+ * Internal use only
  *
  * Counters for tracking performance-
  * related events.
@@ -310,7 +337,7 @@ void scc_hashtab_free(void *handle);
  * on success.
  *
  * void *handleaddr
- *      Address of the handle used to refer to the hash table.
+ *      Address of the handle used to refer to the hash table
  *
  * size_t elemsize
  *      Size of the elements stored in the hash table
