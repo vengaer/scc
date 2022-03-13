@@ -109,7 +109,7 @@
 .endif
 
     movq    %r13, %rsi                      # Address of value pending insertion
-    leaq    (%r13, %rax), %rdi              # Address of potential matchi in table
+    leaq    (%r13, %rax), %rdi              # Address of potential match in table
 
     movq    (%rbp), %rax                    # Call eq
     call    *%rax
@@ -147,7 +147,7 @@
     movq    %rcx, %rax                      # Compute slot
     wrapq   %rdi, %rax, %r8
 
-    shrq    $57, %rcx                       # Broadcast high 7 bits of hash to ymm15
+    shrq    $57, %rcx                       # Broadcast high 7 bits of hash to %ymm15
     orl     $0x80, %ecx                     # Set high bit for comparison with occupied slots
     vmovd   %ecx, %xmm0
     vpbroadcastb    %xmm0, %ymm15
@@ -162,7 +162,7 @@
     vmovdqu (%rdi, %rcx), %ymm0             # Load ymmword's worth of metadata
 
     vpcmpeqb    %ymm0, %ymm15, %ymm1        # All ones for occupied with match
-    vpmovmskb   %ymm1, %ecx                 # Exract bitmask
+    vpmovmskb   %ymm1, %ecx                 # Extract bitmask
 
     vpcmpeqb    %ymm0, %ymm13, %ymm2        # All ones for probe end
     vpmovmskb   %ymm2, %r8d                 # Extract bitmask
@@ -207,7 +207,7 @@
 
     eqloop  \pwr2, 2b
 
-    vmovdqu 0x20(%rsp), %ymm15              # Restore bcasted hash
+    vmovdqu 0x30(%rsp), %ymm15              # Restore broadcasted hash
     vpcmpeqb    %ymm14, %ymm14, %ymm14      # All ones
     vpxor   %ymm13, %ymm13, %ymm13          # All zeroes
 
@@ -220,7 +220,7 @@
     vmovdqu (%rbp, %rcx), %ymm0             # Load ymmword's worth of metadata
 
     vpcmpeqb    %ymm0, %ymm15, %ymm1        # All ones for occupied with match
-    vpmovmskb   %ymm1, %r15d                # Exract bitmask
+    vpmovmskb   %ymm1, %r15d                # Extract bitmask
 
     vpcmpeqb    %ymm0, %ymm13, %ymm2        # All ones for probe end
     vpmovmskb   %ymm2, %r8d                 # Extract bitmask
