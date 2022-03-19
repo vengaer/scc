@@ -233,13 +233,37 @@
     framesetup
 
 3:  # probing required
+    movq    mdoff(%rbp), %rdi               # Offset of meatdata relative base
+    leaq    -1(%rbx), %rax                  # Compute index of last entry to probe
+    movq    cap(%rbp), %rsi                 # Capacity
+
+    leaq    -1(%rsi), %rcx                  # Wrap index
+    andq    %rcx, %rax
+
+    leaq    (%rdi, %rax), %rsi              # Offset of last metadata entry to probe relative base
+
+    movzbl  (%rbp, %rsi), %edx              # Load metadata entry
+
+    shlq    $56, %rdx                       # Store offset in low 7 bytes
+    orq     %rax, %rdx
+
+    movq    %rdx, 0x30(%rsp)
+
+    movb    $0, (%rbp, %rsi)                # Ensure presence of probe end
+    cmpq    $vecsize, %rax
+    jnb     3f
+
+    leaq    1(%rsi, %rcx), %rdi             # Offset of guard entry relative base
+    movb    $0, (%rbp, %rdi)
+
+3:
     vmovdqu %ymm15, 0x38(%rsp)              # Preserve broadcasted hash across eq calls
 
 6:
     tzcntl  %r15d, %r9d                     # Vector offset of next matching slot
     jc      7f                              # Skip eq if no match
 
-    eqloop  \pwr2, 2b                       # Do eq loop
+    eqloop  \pwr2, 2f                       # Do eq loop
 
                                             # No match found, probe again
     vmovdqu 0x38(%rsp), %ymm15              # Restore broadcasted hash
@@ -274,7 +298,7 @@
 
     tzcntl  %r15d, %r9d                     # Vector index of next matching slot
 
-    eqloop  \pwr2, 2b                       # Do eq loop
+    eqloop  \pwr2, 2f                       # Do eq loop
 
     tzcntl  %r14d, %edx                     # Vector offset of first vacant
     leaq    (%rbx, %rdx), %r14              # Compute and wrap index
@@ -315,7 +339,7 @@
     tzcntl  %r15d, %r9d                     # Vector offset of next match
     jc      7b                              # Skip eq loop if no match
 
-    eqloop  \pwr2, 2b
+    eqloop  \pwr2, 2f
 
     vmovdqu 0x38(%rsp), %ymm15              # Restore broadcasted hash
     vpcmpeqb    %ymm14, %ymm14, %ymm14      # All ones
@@ -333,12 +357,35 @@
 
     tzcntl  %r15d, %r9d                     # Vector offset of next match
 
-    eqloop  \pwr2, 2b
+    eqloop  \pwr2, 2f
 8:
+    movq    0x30(%rsp), %rdx                # Load backed up metadata entry
+
+    movq    %rdx, %rcx                      # Extract entry
+    shrq    $56, %rcx
+
+    movq    $0xffffffffffffff, %rdi         # Mask out entry for metadata index
+    andq    %rdi, %rdx
+
+    movq    mdoff(%rbp), %rsi               # Offset of metadata relative base
+    leaq    (%rsi, %rdx), %rdi              # Offset of metadata entry relative base
+    movb    %cl, (%rbp, %rdi)
+
+    cmpq    $vecsize, %rdx
+    jnb     1f
+
+    movq    cap(%rbp), %rsi                 # Capacity
+    leaq    (%rdi, %rsi), %rdx
+    movb    %cl, (%rbp, %rdx)
+1:
     movq    %r14, %rax                      # Return value
     framerst                                # Reset stack frame
     vzeroupper
     ret
+
+2:
+    movq    $-1, %r14
+    jmp     8b
 
 .endm
 
@@ -359,6 +406,7 @@ scc_hashtab_probe_insert:
 .equ    mdoff,   0x10                       # Offset of ht_mdoff relative base address
 .equ    cap,     0x20                       # Offset of ht_capacity relative base address
 .equ    framesz, 0x58                       # Size of stack frame
+.equ    vecsize, SCC_VECSIZE
 #ifdef SCC_PERFEVTS
 .equ    neqs,    0x28                       # Offset of ev_n_eqs in perf member, relative base
 #endif
