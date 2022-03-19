@@ -274,3 +274,129 @@ void test_scc_hashtab_fuzzer_failure5(void) {
     }
     scc_hashtab_free(tab);
 }
+
+/* test_scc_hashtab_fuzzer_failure6
+ *
+ * Seventh failure case detected by fuzzer
+ */
+void test_scc_hashtab_fuzzer_failure6(void) {
+    static unsigned const data[] = {
+        435286510, 170, 4294967081
+    };
+    scc_hashtab(unsigned) tab = scc_hashtab_init(unsigned, eq);
+
+    unsigned const *elem;
+    for(unsigned i = 0u; i < scc_arrsize(data); ++i) {
+        TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, data[i]));
+        TEST_ASSERT_EQUAL_UINT64(i + 1ull, scc_hashtab_size(tab));
+        for(unsigned j = 0u; j <= i; ++j) {
+            elem = scc_hashtab_find(tab, data[j]);
+            TEST_ASSERT_TRUE(!!elem);
+            TEST_ASSERT_EQUAL_UINT32(data[j], *elem);
+        }
+    }
+
+    for(unsigned i = 0u; i < scc_arrsize(data); ++i) {
+        TEST_ASSERT_TRUE(scc_hashtab_remove(tab, data[i]));
+        TEST_ASSERT_EQUAL_UINT64(scc_arrsize(data) - i - 1u, scc_hashtab_size(tab));
+        for(unsigned j = i + 1u; j < scc_arrsize(data); ++j) {
+            elem = scc_hashtab_find(tab, data[j]);
+            TEST_ASSERT_TRUE(!!elem);
+            TEST_ASSERT_EQUAL_UINT32(data[j], *elem);
+            TEST_ASSERT_FALSE(scc_hashtab_insert(&tab, data[j]));
+        }
+    }
+    scc_hashtab_free(tab);
+}
+
+/* test_scc_hashtab_fuzzer_failure7
+ *
+ * Eighth failure case detected by fuzzer
+ */
+void test_scc_hashtab_fuzzer_failure7(void) {
+    static unsigned const data[] = {
+        873336334,  421061527,  3823311129, 668387,
+        4,          69074944,   3705922425, 4294967245,
+        703275561,  170068531,  114154723,  235856654,
+        3818337294, 421075225,  870573027,  8970,
+        973078528,  789248762,  587140554,  171125219,
+        4280093219, 33554431,   3677436828, 841210843,
+        249760499,  2536771086, 421075427,  3823362841,
+        2296371,    1024,       0,          3812260100,
+        4294954460, 623191551,  690559525,  3688571433,
+        3688618971, 702742747,  870523658,  114154506,
+        3453805322, 688549472,  1831414057, 690607852,
+        3878282025, 171901155,  3705922531, 174982861,
+        690563369,  701951085,  702753065,  171959271,
+        1162167788, 14934784,   84215046,   3676554501,
+        2161837311
+    };
+    scc_hashtab(unsigned) tab = scc_hashtab_init(unsigned, eq);
+
+    unsigned const *elem;
+    for(unsigned i = 0u; i < scc_arrsize(data); ++i) {
+        TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, data[i]));
+        TEST_ASSERT_EQUAL_UINT64(i + 1ull, scc_hashtab_size(tab));
+        for(unsigned j = 0u; j <= i; ++j) {
+            elem = scc_hashtab_find(tab, data[j]);
+            TEST_ASSERT_TRUE(!!elem);
+            TEST_ASSERT_EQUAL_UINT32(data[j], *elem);
+        }
+    }
+
+    for(unsigned i = 0u; i < scc_arrsize(data); ++i) {
+        TEST_ASSERT_TRUE(scc_hashtab_remove(tab, data[i]));
+        TEST_ASSERT_EQUAL_UINT64(scc_arrsize(data) - i - 1u, scc_hashtab_size(tab));
+        for(unsigned j = i + 1u; j < scc_arrsize(data); ++j) {
+            elem = scc_hashtab_find(tab, data[j]);
+            TEST_ASSERT_TRUE(!!elem);
+            TEST_ASSERT_EQUAL_UINT32(data[j], *elem);
+            TEST_ASSERT_FALSE(scc_hashtab_insert(&tab, data[j]));
+        }
+    }
+    scc_hashtab_free(tab);
+}
+
+/* test_scc_hashtab_fuzzer_failure8
+ *
+ * Ninth failure case detected by fuzzer
+ */
+void test_scc_hashtab_fuzzer_failure8(void) {
+    static unsigned const data[] = {
+        102170378,  872418062,  690563369,  493,
+        434341904,  689510681,  14935011,   0,
+        3200122880, 12486590,   7929856,    2044950788,
+        3453805539, 452984831,  573122857,  536871139,
+        247381504,  2536967694, 421075427,  3810124771,
+        690618367,  908714786,  3943310090, 235326940,
+        235802339,  471604421,  234881024,  702746126,
+        3487819721, 33619926,   436207616,  134217863,
+        589105699,  3809145650, 873336334,  702944919,
+        587916083,  3453805322, 3705866758, 175005901,
+        690563371,  1831414252, 517163,     24944,
+        170517475,  235278079,  691273739,  1831414057,
+        452984577,  3823312099, 2296371,    3693732649,
+        9165,       3808428036, 171321600,
+    };
+    scc_hashtab(unsigned) tab = scc_hashtab_init(unsigned, eq);
+
+    unsigned const *elem;
+    for(unsigned i = 0u; i < scc_arrsize(data); ++i) {
+        TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, data[i]));
+        for(unsigned j = 0u; j <= i; ++j) {
+            TEST_ASSERT_FALSE(scc_hashtab_insert(&tab, data[j]));
+        }
+    }
+
+    for(unsigned i = 0u; i < scc_arrsize(data); ++i) {
+        TEST_ASSERT_TRUE(scc_hashtab_remove(tab, data[i]));
+        for(unsigned j = i + 1u; j < scc_arrsize(data); ++j) {
+            elem = scc_hashtab_find(tab, data[j]);
+            TEST_ASSERT_TRUE(!!elem);
+            TEST_ASSERT_EQUAL_UINT32(data[j], *elem);
+            TEST_ASSERT_FALSE(scc_hashtab_insert(&tab, data[j]));
+        }
+    }
+    scc_hashtab_free(tab);
+}
+

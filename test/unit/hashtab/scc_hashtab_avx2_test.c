@@ -89,11 +89,14 @@ void test_insertion_probe_finds_single_vacant(void) {
     /* Mark all slots as occupied */
     memset(md, 0x80, scc_hashtab_capacity(tab) + SCC_HASHTAB_GUARDSZ);
 
-    size_t insert_slot = slot ? slot - 1u: scc_hashtab_capacity(tab) - 1u;
-    /* Clear the very last slot to be probed */
-    md[insert_slot] = 0u;
-    if(insert_slot < SCC_HASHTAB_GUARDSZ) {
-        md[insert_slot + scc_hashtab_capacity(tab)] = 0u;
+    size_t insert_slot;
+    /* Clear the very last two slots to be probed */
+    for(unsigned i = 0u; i < 2u; ++i) {
+        insert_slot = (slot - i - 1u) & (base->ht_capacity - 1u);
+        md[insert_slot] = 0u;
+        if(insert_slot < SCC_HASHTAB_GUARDSZ) {
+            md[insert_slot + base->ht_capacity] = 0u;
+        }
     }
     *tab = 32;
     TEST_ASSERT_EQUAL_INT64((long long)insert_slot, scc_hashtab_probe_insert(base, tab, sizeof(int), hash));

@@ -194,6 +194,13 @@ void test_scc_hashtab_interleaved_remove_find(void) {
     scc_hashtab_free(tab);
 }
 
+/* test_scc_hahstab_probe_stop
+ *
+ * Repeatedly insert and remove values
+ * until all slots have been occupied at least
+ * once. Insert another value and verify that
+ * it workds
+ */
 void test_scc_hashtab_probe_stop(void) {
     scc_hashtab(int) tab = scc_hashtab_init(int, eq);
     scc_hashtab_metatype *md = scc_hashtab_inspect_metadata(tab);
