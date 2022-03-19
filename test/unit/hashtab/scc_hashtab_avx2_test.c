@@ -30,7 +30,7 @@ void test_insertion_probe_detects_duplicate(void) {
     int *data = scc_hashtab_inspect_data(tab);
 
     md[index] = ent;
-    if(index < scc_hashtab_impl_guardsz()) {
+    if(index < SCC_HASHTAB_GUARDSZ) {
         md[index + scc_hashtab_capacity(tab)] = ent;
     }
 
@@ -62,7 +62,7 @@ void test_insertion_probe_functional_up_to_full_capacity(void) {
         TEST_ASSERT_FALSE(md[index] & 0x80);
         ent = (scc_hashtab_metatype)((hash >> 57) | 0x80);
         md[index] = ent;
-        if(index < scc_hashtab_impl_guardsz()) {
+        if(index < SCC_HASHTAB_GUARDSZ) {
             md[index + scc_hashtab_capacity(tab)] = ent;
         }
         data[index] = i;
@@ -87,12 +87,12 @@ void test_insertion_probe_finds_single_vacant(void) {
     size_t slot = hash & (scc_hashtab_capacity(tab) - 1u);
     scc_hashtab_metatype *md = scc_hashtab_inspect_metadata(tab);
     /* Mark all slots as occupied */
-    memset(md, 0x80, scc_hashtab_capacity(tab) + scc_hashtab_impl_guardsz());
+    memset(md, 0x80, scc_hashtab_capacity(tab) + SCC_HASHTAB_GUARDSZ);
 
     size_t insert_slot = slot ? slot - 1u: scc_hashtab_capacity(tab) - 1u;
     /* Clear the very last slot to be probed */
     md[insert_slot] = 0u;
-    if(insert_slot < scc_hashtab_impl_guardsz()) {
+    if(insert_slot < SCC_HASHTAB_GUARDSZ) {
         md[insert_slot + scc_hashtab_capacity(tab)] = 0u;
     }
     *tab = 32;
@@ -124,7 +124,7 @@ void test_insertion_probe_until_stop(void) {
     scc_hashtab_metatype *md = scc_hashtab_inspect_metadata(tab);
     /* Mark primary slot as occupied */
     md[slot] = 0x80;
-    if(slot < scc_hashtab_impl_guardsz()) {
+    if(slot < SCC_HASHTAB_GUARDSZ) {
         md[slot + scc_hashtab_capacity(tab)] = 0x80;
     }
 
@@ -132,7 +132,7 @@ void test_insertion_probe_until_stop(void) {
     TEST_ASSERT_EQUAL_INT64((slot + 1ll) & (scc_hashtab_capacity(tab) - 1ll), index);
 
     md[index] = (scc_hashtab_metatype)((hash >> 57) | 0x80);
-    if(slot < scc_hashtab_impl_guardsz()) {
+    if(slot < SCC_HASHTAB_GUARDSZ) {
         md[index + scc_hashtab_capacity(tab)] = (scc_hashtab_metatype)((hash >> 57) | 0x80);
     }
 
@@ -144,7 +144,7 @@ void test_insertion_probe_until_stop(void) {
 
     /* Vacate primary slot */
     md[slot] = 0x7fu;
-    if(slot < scc_hashtab_impl_guardsz()) {
+    if(slot < SCC_HASHTAB_GUARDSZ) {
         md[slot + scc_hashtab_capacity(tab)] = 0x7fu;
     }
 
@@ -189,7 +189,7 @@ void test_insertion_probe_no_end_in_vector(void) {
     for(int i = 0; i < SCC_VECSIZE; ++i) {
         slot = i + index;
         md[slot] = meta;
-        if(slot < scc_hashtab_impl_guardsz()) {
+        if(slot < SCC_HASHTAB_GUARDSZ) {
             md[slot + scc_hashtab_capacity(tab)] = meta;
         }
         /* Ensure eq returns false */
@@ -233,7 +233,7 @@ void test_find_probe_no_match(void) {
         hash = scc_hashtab_fnv1a(tab, sizeof(*tab));
         index = hash & (scc_hashtab_capacity(tab) - 1u);
         md[index] = (scc_hashtab_metatype)((hash >> 57) | 0x80);
-        if(index < scc_hashtab_impl_guardsz()) {
+        if(index < SCC_HASHTAB_GUARDSZ) {
             md[index + scc_hashtab_capacity(tab)] = (scc_hashtab_metatype)((hash >> 57) | 0x80);
         }
         data[index] = i;
@@ -261,7 +261,7 @@ void test_find_probe_single_value(void) {
     unsigned long long hash = scc_hashtab_fnv1a(tab, sizeof(*tab));
     size_t index = hash & (scc_hashtab_capacity(tab) - 1u);
     md[index] = (scc_hashtab_metatype)((hash >> 57) | 0x80);
-    if(index < scc_hashtab_impl_guardsz()) {
+    if(index < SCC_HASHTAB_GUARDSZ) {
         md[index + scc_hashtab_capacity(tab)] = (scc_hashtab_metatype)((hash >> 57) | 0x80);
     }
     data[index] = VAL;

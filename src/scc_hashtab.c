@@ -64,7 +64,7 @@ static inline void scc_hashtab_set_mdent(
     size_t capacity
 ) {
     md[index] = val;
-    if(index < scc_hashtab_impl_guardsz()) {
+    if(index < SCC_HASHTAB_GUARDSZ) {
         md[index + capacity] = val;
     }
 }
@@ -217,7 +217,7 @@ static struct scc_hashtab_base *scc_hashtab_realloc(
     mdoff = (mdoff + align - 1) & ~(align - 1);
     assert((mdoff & ~(align - 1)) == mdoff);
 
-    size_t const size = mdoff + (cap + scc_hashtab_impl_guardsz()) * sizeof(scc_hashtab_metatype);
+    size_t const size = mdoff + (cap + SCC_HASHTAB_GUARDSZ) * sizeof(scc_hashtab_metatype);
 
     /* Allocate new hash table
      * Ignore clang tidy complaining about struct scc_hashtab_base being
@@ -334,7 +334,7 @@ void *scc_hashtab_impl_init(struct scc_hashtab_base *base, scc_eq eq, scc_hash h
     base->ht_fwoff = scc_hashtab_calcpad(coff);
     unsigned char *tab = (unsigned char *)base + coff;
     SCC_ON_PERFTRACK(
-        base->ht_perf.ev_bytesz = mdoff + (cap + scc_hashtab_impl_guardsz()) * sizeof(scc_hashtab_metatype)
+        base->ht_perf.ev_bytesz = mdoff + (cap + SCC_HASHTAB_GUARDSZ) * sizeof(scc_hashtab_metatype)
     );
     scc_hashtab_set_bkoff(tab, base->ht_fwoff);
     return tab;
@@ -399,6 +399,6 @@ bool scc_hashtab_impl_remove(void *handle, size_t elemsize) {
 void scc_hashtab_clear(void *handle) {
     struct scc_hashtab_base *base = scc_hashtab_impl_base(handle);
     scc_hashtab_metatype *md = scc_hashtab_metadata(base);
-    memset(md, 0, (base->ht_capacity + scc_hashtab_impl_guardsz()) * sizeof(*md));
+    memset(md, 0, (base->ht_capacity + SCC_HASHTAB_GUARDSZ) * sizeof(*md));
     base->ht_size = 0u;
 }

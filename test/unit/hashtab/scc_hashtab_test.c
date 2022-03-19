@@ -198,7 +198,7 @@ void test_scc_hashtab_probe_stop(void) {
     scc_hashtab(int) tab = scc_hashtab_init(int, eq);
     scc_hashtab_metatype *md = scc_hashtab_inspect_metadata(tab);
     /* Simulate all slots having been previously occupied */
-    memset(md, 0x7f, (scc_hashtab_capacity(tab) + scc_hashtab_impl_guardsz()) * sizeof(*md));
+    memset(md, 0x7f, (scc_hashtab_capacity(tab) + SCC_HASHTAB_GUARDSZ) * sizeof(*md));
 
     /* Should not cause infinite loop*/
     TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, 1));

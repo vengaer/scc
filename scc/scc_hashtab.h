@@ -17,6 +17,7 @@
 #define scc_hashtab(type) type *
 
 enum { SCC_HASHTAB_STACKCAP = 32 };
+enum { SCC_HASHTAB_GUARDSZ = SCC_VECSIZE - 1 };
 
 /* scc_eq
  *
@@ -127,16 +128,6 @@ struct scc_hashtab_base {
     unsigned char ht_buffer[];
 };
 
-/* scc_hashtab_impl_guardsz
- *
- * Internal use only
- *
- * Size of the guard placed after the metadata array to
- * avoid SIMD probes reading out of bounds
- */
-#define scc_hashtab_impl_guardsz()                                          \
-    (SCC_VECSIZE - 1u)
-
 #ifdef SCC_PERFEVTS
 #define SCC_HASHTAB_INJECT_PERFEVTS(name)                                   \
     struct scc_hashtab_perfevts name;
@@ -189,9 +180,9 @@ struct scc_hashtab_base {
  *      corresponding slot in the data array. This is used for
  *      avoiding unnecessary calls to eq.
  *
- * scc_hashtab_metatype ht_guard[scc_hashtab_impl_guardsz()];
+ * scc_hashtab_metatype ht_guard[SCC_HASHTAB_GUARDSZ];
  *      Guard to allow for unaligned vector loads without risking
- *      reads from potential guard pages. The scc_hashtab_impl_guardsz()
+ *      reads from potential guard pages. The SCC_HASHTAB_GUARDSZ
  *      low bytes of ht_meta are mirrored in the guard.
  */
 #define scc_hashtab_impl_layout(type)                                       \
@@ -208,7 +199,7 @@ struct scc_hashtab_base {
         type ht_curr;                                                       \
         type ht_data[SCC_HASHTAB_STACKCAP];                                 \
         scc_hashtab_metatype ht_meta[SCC_HASHTAB_STACKCAP];                 \
-        scc_hashtab_metatype ht_guard[scc_hashtab_impl_guardsz()];          \
+        scc_hashtab_metatype ht_guard[SCC_HASHTAB_GUARDSZ];                 \
     }
 
 /* scc_hashtab_impl_init
