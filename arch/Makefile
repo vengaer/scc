@@ -42,6 +42,7 @@ $(if $(simd_isa),$(vecinfo)): $(vecscript) $(simdinfo) $(call reeval,simd_isa,$(
 	$< -o $@ $(simd_isa)
 
 simd_isa ?= UNSUPPORTED
+ASFLAGS  += -DSCC_VECSIZE=$(vecsize)
 CPPFLAGS += -DSCC_$(bitarch)BIT -DSCC_SIMD_ISA_$(simd_isa)    \
             -DSCC_HOST_OS_$(hostos) -DSCC_ARCH_$(arch)  -DSCC_VECSIZE=$(vecsize)
 else
