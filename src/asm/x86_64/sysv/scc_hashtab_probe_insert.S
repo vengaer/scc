@@ -292,7 +292,7 @@
     wrapq   %rbp, %r14, %rcx
 
     addl    $1, %r9d                        # Set ZF if probe end in vector
-    jz      7f
+    jnz     8f
 
 7:
     leaq    0x20(%rbx), %rbx                # Advance and wrap index
@@ -324,17 +324,17 @@
 
 6: # final eq checks
     testl   %r15d, %r15d                    # Check for hash match
-    jz      7f
+    jz      8f
 
     isolssbl    %r9d, %r10d                 # Isolate rightmost set bit
     subl    $1, %r9d                        # Compute hash match mask
     andl    %r9d, %r15d                     # Mask out matches beyond probe end
-    jz      7f                              # ZF set if no match
+    jz      8f                              # ZF set if no match
 
     tzcntl  %r15d, %r9d                     # Vector offset of next match
 
     eqloop  \pwr2, 2b
-7:
+8:
     movq    %r14, %rax                      # Return value
     framerst                                # Reset stack frame
     vzeroupper
