@@ -7,7 +7,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-bool hashtab_fuzz_removal(
+void hashtab_fuzz_removal(
     scc_hashtab(uint32_t) *tab,
     uint32_t const *restrict data,
     size_t unique_end,
