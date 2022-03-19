@@ -233,7 +233,7 @@
     framesetup
 
 3:  # probing required
-    vmovdqu %ymm15, 0x30(%rsp)              # Preserve broadcasted hash across eq calls
+    vmovdqu %ymm15, 0x38(%rsp)              # Preserve broadcasted hash across eq calls
 
 6:
     tzcntl  %r15d, %r9d                     # Vector offset of next matching slot
@@ -242,7 +242,7 @@
     eqloop  \pwr2, 2b                       # Do eq loop
 
                                             # No match found, probe again
-    vmovdqu 0x30(%rsp), %ymm15              # Restore broadcasted hash
+    vmovdqu 0x38(%rsp), %ymm15              # Restore broadcasted hash
     vpcmpeqb    %ymm14, %ymm14, %ymm14      # All ones
     vpxor   %ymm13, %ymm13, %ymm13          # All zeroes
 
@@ -317,7 +317,7 @@
 
     eqloop  \pwr2, 2b
 
-    vmovdqu 0x30(%rsp), %ymm15              # Restore broadcasted hash
+    vmovdqu 0x38(%rsp), %ymm15              # Restore broadcasted hash
     vpcmpeqb    %ymm14, %ymm14, %ymm14      # All ones
     vpxor   %ymm13, %ymm13, %ymm13          # All zeroes
     jmp     7b
