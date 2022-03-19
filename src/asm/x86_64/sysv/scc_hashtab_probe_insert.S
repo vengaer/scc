@@ -53,7 +53,7 @@
     movl    %r8d, %r15d                     # Hash match mask
 
     movq    %r14, 0x20(%rsp)
-    movl    %ecx, %r14d                     # Vacant mask
+    movq    %rcx, %r14                      # Vacant or vacant mask
 
     movq    %r13, 0x18(%rsp)
     movq    %rsi, %r13                      # Address of ht_curr
@@ -79,8 +79,8 @@
     addq    $framesz, %rsp
 .endm
 
-# Main eq loop. Calls eq on each slot whose corresponding
-# bit is set in %r15d.
+# Main eq loop. Calls eq # on each slot whose
+# corresponding bit is set in %r15d.
 #
 # Prerequisites:
 #   %r9d: 0-based index of low bit in %r15d (i.e. tzcntl %r15d, %r9d)
@@ -91,13 +91,13 @@
 #   %r15: Hash match mask
 #
 # Params:
-#   \pwr2: 1 if element size is a power of 2, 0 otherwise
-#   \dupl: Label to jump to on identified duplicate
+#   \pwr2:  1 if element size is a power of 2, 0 otherwise
+#   \label: Loop label
+#   \dupl:  Label to jump to on identified duplicate
 #
 # Return:
 #   -
-.macro eqloop pwr2, dupl
-0:
+.macro eqloop pwr2, label, dupl
     leaq    (%rbx, %r9), %rdx               # Array index
     wrapq   %rbp, %rdx, %rcx                # Wrap index
     leaq    1(%rdx), %rax                   # Compensate for %r13 holding &ht_data[-1]
@@ -123,12 +123,12 @@
     leal    -1(%r15d), %r8d                 # Clear rightmost set bit
     andl    %r8d, %r15d
     tzcntl  %r15d, %r9d                     # Vector index of next matching slot
-    jnc     0b                              # Loop if more matches
+    jnc     \label                          # Loop if more matches
 .endm
 
 # The actual probing logic. The capacity of the hash table
 # is not considered at iteration - there must always be at
-# least one vacant slot.
+# least two vacant slots.
 #
 # Prerequisites:
 #   %rdi: Base address of hash table
@@ -148,7 +148,10 @@
 .endif
 
     movq    %rcx, %rax                      # Compute slot
-    wrapq   %rdi, %rax, %r8
+    movq    cap(%rdi), %r11                 # Capacity
+
+    subq    $1, %r11                        # Wrap index
+    andq    %r11, %rax
 
     shrq    $57, %rcx                       # Broadcast high 7 bits of hash to ymm15
     orl     $0x80, %ecx                     # Set MSB for comparison with occupied slots
@@ -158,9 +161,8 @@
     vpcmpeqb    %ymm14, %ymm14, %ymm14      # All ones
     vpxor   %ymm13, %ymm13, %ymm13          # All zeroes
 
-9:
-    movq    mdoff(%rdi), %r8                # Load ht_mdoff
-    leaq    (%rax, %r8), %rcx               # Offset of metadata entry relative base
+    movq    mdoff(%rdi), %r10               # Load ht_mdoff
+    leaq    (%rax, %r10), %rcx              # Offset of metadata entry relative base
 
     vmovdqu (%rdi, %rcx), %ymm0             # Load ymmword's worth of metadata
 
@@ -168,164 +170,257 @@
     vpmovmskb   %ymm1, %ecx                 # Extract bitmask
 
     vpcmpeqb    %ymm0, %ymm15, %ymm2        # All ones for occupied with matching hash
-    vpmovmskb   %ymm2, %r8d                 # Extract bitmask
 
     vpcmpeqb    %ymm0, %ymm13, %ymm3        # All ones for probe end
     vpmovmskb   %ymm3, %r9d                 # Extract bitmask
 
-    testl   %r9d, %r9d                      # Check if probe end in vector
+    testl   %r9d, %r9d                      # Check for probe end
+    jz      8f
+
+    isolssbl    %r9d, %r8d                  # Isolate rigthmost 1 bit
+
+    vpmovmskb   %ymm2, %r8d                 # Extract bitmask
+
+    subl    $1, %r9d                        # Create mask
+    andl    %r9d, %r8d                      # Mask out matches beyond probe end
     jz      7f
 
-    isolssbl  %r9d, %r10d                   # Isolate rightmost set bit
-    subl    $1, %r9d                        # Compute hash match mask
-    andl    %r9d, %r8d                      # Mask out matches beyond probe end
-    jz      1f                              # ZF set if no match
-
-    tzcntl  %r8d, %r9d                      # Vector index of next matching slot
-
     framesetup                              # Must call eq at least once
+    tzcntl  %r8d, %r9d                      # Vector offset of first hash match
 
-    testl   %ecx, %ecx                      # Check for at least one vacant in next 32 slots
-    jz      3f                              # No vacant, must probe again
+0: # At least one match, end (and vacant) in vector
+    eqloop  \pwr2, 0b, 6f                   # Equality loop
 
-    eqloop  \pwr2, 2f                       # Do eq loop, at most 31 iters
-
-                                            # No match found
-    tzcntl  %r14d, %ecx                     # Vector offset of first vacant, at least one
-    leaq    (%rbx, %rcx), %rax              # Compute index
-
-    wrapq   %rbp, %rax, %rcx                # Wrap for return
-    framerst                                # Restore stack
+    tzcntl  %r14d, %edx                     # No match, compute offset in vector
+    leaq    (%rbx, %rdx), %rax              # Return value
+    wrapq   %rbp, %rax, %rbx
+    framerst
     vzeroupper
-    ret
+    retq
 
-1:  # no matching hash in vector
-    testl   %ecx, %ecx                      # Check for at least one vacant
-    jnz     4f
-
-    leaq    0x20(%rax), %rax                # Advance and wrap offset
+7: # Vacant found
+    tzcntl  %ecx, %edx                      # Offset in vector
+    leaq    (%rax, %rdx), %rax
     wrapq   %rdi, %rax, %rcx
-    jmp     9b
-
-4:
-    tzcntl  %ecx, %edx                      # Vector offset of first vacant
-    leaq    (%rax, %rdx), %rax              # Compute and wrap index
-    wrapq   %rdi, %rax, %rcx
-
     vzeroupper
-    ret
+    retq
 
-2:  # duplicate found
-    framerst                                # Restore stack
-    movq    $-1, %rax                       # Return value
+6: # Duplicate found
+    framerst                                # Restore stack frame
+    movq    $-1, %rax
     vzeroupper
-    ret
+    retq
 
-8: # no match, no eq calls
-    leaq    0x20(%rax), %rax                # No match in vector, advance and wrap
-    wrapq   %rdi, %rax, %rcx
-    jmp  9b
+8: # No probe end
+    vpmovmskb   %ymm2, %r8d                 # Extract bitmask
 
-7: # probing required, no end in vector
-    testl   %r8d, %r8d                      # Check for matching hash
-    jz      8b
+    leaq    -1(%rax), %r9                   # Compute index of entry to be probed last
+    andq    %r11, %r9                       # Wrap
 
-    framesetup
+    cmpq    $vecsize, %r9                   # Check if duplicate in guard
 
-3:  # probing required
-    movq    mdoff(%rbp), %rdi               # Offset of meatdata relative base
-    leaq    -1(%rbx), %rax                  # Compute index of last entry to probe
-    movq    cap(%rbp), %rsi                 # Capacity
+    leaq    (%r10, %r9), %r10               # Offset of metadata element to be probed last
+    movzbl  (%rdi, %r10), %r9d              # Load last entry
+    movb    $0, (%rdi, %r10)                # Ensure there exists at least one probe end
 
-    leaq    -1(%rsi), %rcx                  # Wrap index
-    andq    %rcx, %rax
+    jnb     8f                              # Skip if no duplicate in guard
 
-    leaq    (%rdi, %rax), %rsi              # Offset of last metadata entry to probe relative base
+    leaq    1(%r10, %r11), %r11             # Offset of guard entry relative base
+    movb    $0, (%rdi, %r11)                # Clear entry in guard
+8:
+    testl   %ecx, %ecx                      # Check for vacant
+    jnz     7f
 
-    movzbl  (%rbp, %rsi), %edx              # Load metadata entry
+    testl   %r8d, %r8d                      # Check for match
+    jnz     9f
 
-    shlq    $56, %rdx                       # Store offset in low 7 bytes
-    orq     %rax, %rdx
+0:
+    leaq    0x20(%rax), %rax                # Advance
+    wrapq   %rdi, %rax, %r8
 
-    movq    %rdx, 0x30(%rsp)
+    movq    mdoff(%rdi), %r11               # Offset of metadata array
+    leaq    (%r11, %rax), %r8               # Offset of metadata entry
 
-    movb    $0, (%rbp, %rsi)                # Ensure presence of probe end
-    cmpq    $vecsize, %rax
-    jnb     3f
+    vmovdqu (%rdi, %r8), %ymm0              # Load ymmword
 
-    leaq    1(%rsi, %rcx), %rdi             # Offset of guard entry relative base
-    movb    $0, (%rbp, %rdi)
+    vpxor   %ymm0, %ymm14, %ymm1            # High bit set for vacant
+    vpmovmskb   %ymm1, %ecx                 # Extract bitmask
 
-3:
-    vmovdqu %ymm15, 0x38(%rsp)              # Preserve broadcasted hash across eq calls
+    vpcmpeqb    %ymm0, %ymm15, %ymm2        # All ones for hash match
+    vpmovmskb   %ymm2, %r8d                 # Bitmask
 
-6:
-    tzcntl  %r15d, %r9d                     # Vector offset of next matching slot
-    jc      7f                              # Skip eq if no match
+    vpcmpeqb    %ymm0, %ymm13, %ymm3        # All ones for probe end
+    vpmovmskb   %ymm3, %r11d                # Bitmask
 
-    eqloop  \pwr2, 2f                       # Do eq loop
+    testl   %r11d, %r11d                    # Check for probe end
+    jnz     8b
 
-                                            # No match found, probe again
+    testl   %ecx, %ecx                      # Check for vacant
+    jnz     7f
+
+    testl   %r8d, %r8d                      # Check for match
+    jz      0b
+
+9: # Match, no vacant
+    framesetup                              # Must call eq, set up frame
+    shlq    $56, %r9                        # Store end offset in low 7 bytes
+    orq     %r10, %r9
+    movq    %r9, 0x30(%rsp)                 # End byte and offset to stack
+
+    vmovdqu %ymm15, 0x38(%rsp)              # Preserve broadcasted hash mask
+
+8:
+    tzcntl  %r15d, %r9d                     # Vector offset of first match
+0:
+    eqloop  \pwr2, 0b, 1f
+
     vmovdqu 0x38(%rsp), %ymm15              # Restore broadcasted hash
     vpcmpeqb    %ymm14, %ymm14, %ymm14      # All ones
     vpxor   %ymm13, %ymm13, %ymm13          # All zeroes
 
-7:
-    leaq    0x20(%rbx), %rbx                # Advance and wrap index
+5:
+    leaq    0x20(%rbx), %rbx                # Advance
     wrapq   %rbp, %rbx, %rcx
 
-    movq    mdoff(%rbp), %r8                # Load ht_mdoff
-    leaq    (%rbx, %r8), %rcx               # Offset of metadata entry relative base
+    movq    mdoff(%rbp), %r8                # Offset of metadata array relative base
+    leaq    (%r8, %rbx), %rax               # Offset of slot relative base
 
-    vmovdqu (%rbp, %rcx), %ymm0
+    vmovdqu (%rbp, %rax), %ymm0             # Load metadata
 
-    vpxor   %ymm0, %ymm14, %ymm1            # MSB 1 for vacant slots
+    vpxor   %ymm0, %ymm14, %ymm1            # High bit set for vacant
     vpmovmskb   %ymm1, %r14d                # Extract bitmask
 
-    vpcmpeqb    %ymm0, %ymm15, %ymm2        # All ones for occupied with matching hash
-    vpmovmskb   %ymm2, %r15d                # Extract bitmask
+    vpcmpeqb    %ymm0, %ymm15, %ymm2        # All ones for hash match
+    vpmovmskb   %ymm2, %r15d                # Bitmask
 
     vpcmpeqb    %ymm0, %ymm13, %ymm3        # All ones for probe end
-    vpmovmskb   %ymm3, %r9d                 # Extract bitmask
+    vpmovmskb   %ymm3, %r8d                 # Bitmask
 
-    isolssbl    %r9d, %r10d                 # Isolate rightmost set bit
-    subl    $1, %r9d                        # Compute hash match mask
-    andl    %r9d, %r15d                     # Mask out matches beyond probe end
-    jz      1f                              # ZF set if no match
+    testl   %r8d, %r8d                      # Check for probe end
+    jz      3f
 
-    testl   %r14d, %r14d                    # Check for at least one vacant in next 32 slots
-    jz      6b                              # No vacant, repeat
+    isolssbl    %r8d, %ecx                  # Isolate rigthmost 1 bit
+    subl    $1, %r8d                        # Create mask
+    andl    %r8d, %r15d                     # Mask out matches beyond probe end
+    jz      4f
 
-    tzcntl  %r15d, %r9d                     # Vector index of next matching slot
+    tzcntl  %r15d, %r9d                     # Vector index of first match
+2:
+    eqloop  \pwr2, 2b, 1f
 
-    eqloop  \pwr2, 2f                       # Do eq loop
+4: # End in vector, no match
+    movq    0x30(%rsp), %rax                # End byte and offset
 
-    tzcntl  %r14d, %edx                     # Vector offset of first vacant
-    leaq    (%rbx, %rdx), %r14              # Compute and wrap index
+    movq    %rax, %rdx                      # Extract end byte
+    shrq    $56, %rdx
+
+    movq    $0xffffffffffffff, %rcx         # Mask out byte from index
+    andq    %rcx, %rax
+    leaq    (%rbp, %rax), %rdi              # Address of metadata byte
+
+    movb    %dl, (%rdi)                     # Restore metadata byte
+
+    movq    mdoff(%rbp), %rsi               # Metadata offset
+    leaq    vecsize(%rbp, %rsi), %rax       # Offset of first duplicated byte
+
+    cmpq    %rax, %rdi                      # Check if byte was duplicated
+    jnb     4f
+
+    movq    cap(%rbp), %rsi                 # Capacity
+    movb    %dl, (%rdi, %rsi)               # Restore byte in guard
+4:
+    tzcntl  %r14d, %r9d                     # Index in vector
+    leaq    (%rbx, %r9), %rax
+    wrapq   %rbp, %rax, %rcx
+
+    framerst
+    vzeroupper
+    retq
+
+2: # No vacant
+    tzcntl  %r15d, %r9d                     # Index in vector
+    jc      5b
+    jmp     0b
+
+3: # No probe end
+    testl   %r14d, %r14d                    # Check for vacant
+    jz      2b
+5:
+    tzcntl  %r14d, %ecx                     # Vector offset of vacant
+    leaq    (%rbx, %rcx), %r14              # Index
     wrapq   %rbp, %r14, %rcx
-    jmp     7f
+    jmp     5f
 
-1:  # no matching hash in vector
-    testl   %r14d, %r14d                    # Check for vacant slot
-    jnz     5f
-    jmp     6b
+6: # Vacant found, no probe end, no match
+    leaq    0x20(%rax), %rax                # Advance and wrap
+    wrapq   %rdi, %rax, %r8
 
-5: # vacant found, no match in vector
-    tzcntl  %r14d, %edx                     # Vector offset of first vacant
-    leaq    (%rbx, %rdx), %r14              # Compute and wrap index
-    wrapq   %rbp, %r14, %rcx
+    movq    mdoff(%rdi), %r8                # Offset of metadata relative base
+    leaq    (%r8, %rax), %r11               # Offset of entry relative base
 
-    addl    $1, %r9d                        # Set ZF if probe end in vector
+    vmovdqu (%rdi, %r11), %ymm0             # Load metadata
+
+    vpcmpeqb    %ymm0, %ymm15, %ymm1        # All ones for matching hash
+    vpmovmskb   %ymm1, %r8                  # Extract bitmask
+
+    vpcmpeqb    %ymm0, %ymm13, %ymm2        # All ones for probe end
+    vpmovmskb   %ymm2, %r11                 # Extract bitmask
+
+    testl   %r11d, %r11d                    # Check for probe end
+    jz      8f
+
+    testl   %r8d, %r8d                      # Check for match
     jnz     8f
 
-7:
-    leaq    0x20(%rbx), %rbx                # Advance and wrap index
+    movq    %rcx, %rax                      # Return value
+    movb    %r9b, (%rdi, %r10)              # Restore metadata entry
+
+    movq    mdoff(%rdi), %rsi               # Offset of metadata
+    leaq    vecsize(%rsi), %rsi             # Offset of first byte not mirrored
+
+    movq    cap(%rdi), %rdx
+    leaq    (%r10, %rdx), %rdx
+
+    cmpq    %rsi, %r10
+    cmovbq  %rdx, %r10
+
+    movb    %r9b, (%rdi, %r10)
+    vzeroupper
+    retq
+
+7: # Vacant found, no probe end
+    tzcntl  %ecx, %r11d                     # Vector offset
+    leaq    (%rax, %r11), %rcx              # Index of vacant
+    wrapq   %rdi, %rcx, %r11
+
+    testl   %r8d, %r8d                      # Check for match
+    jz  6b
+
+8:
+    framesetup
+
+    shlq    $56, %r9                        # Store end offset in low 7 bytes
+    orq     %r10, %r9
+    movq    %r9, 0x30(%rsp)                 # End byte and offset to stack
+
+    vmovdqu %ymm15, 0x38(%rsp)              # Preserve broadcasted hash mask
+
+5:
+    tzcntl  %r15d, %r9d                     # Vector offset of first match
+    jc      6f
+0:
+    eqloop  \pwr2, 0b, 1f
+
+    vmovdqu 0x38(%rsp), %ymm15              # Restore broadcasted hash
+    vpxor   %ymm13, %ymm13, %ymm13          # All zeroes
+6:
+    leaq    0x20(%rbx), %rbx                # Advance and wrap
     wrapq   %rbp, %rbx, %rcx
 
-    movq    mdoff(%rbp), %r8                # Load ht_mdoff
-    leaq    (%rbx, %r8), %rcx               # Offset of metadata entry relative base
+    movq    mdoff(%rbp), %rdi               # Offset of metadata array relative base
+    leaq    (%rdi, %rbx), %rsi              # Offset of metadata entry relative base
 
-    vmovdqu (%rbp, %rcx), %ymm0
+    vmovdqu (%rbp, %rsi), %ymm0             # Load metadata
 
     vpcmpeqb    %ymm0, %ymm15, %ymm1        # All ones for occupied with matching hash
     vpmovmskb   %ymm1, %r15d                # Extract bitmask
@@ -333,64 +428,70 @@
     vpcmpeqb    %ymm0, %ymm13, %ymm2        # All ones for probe end
     vpmovmskb   %ymm2, %r9d                 # Extract bitmask
 
-    testl   %r9d, %r9d                      # Check for probe end in vector
-    jnz     6f
+    testl   %r9d, %r9d                      # Check for probe end
+    jz      5b
 
-    tzcntl  %r15d, %r9d                     # Vector offset of next match
-    jc      7b                              # Skip eq loop if no match
+    tzcntl  %r15d, %r9d                     # Offset of first match in vector
+    jc      6f
 
-    eqloop  \pwr2, 2f
+0: # Last eq iteration
+    eqloop  \pwr2, 0b, 1f
 
-    vmovdqu 0x38(%rsp), %ymm15              # Restore broadcasted hash
-    vpcmpeqb    %ymm14, %ymm14, %ymm14      # All ones
-    vpxor   %ymm13, %ymm13, %ymm13          # All zeroes
-    jmp     7b
+6: # No match, index in %r14
+    movq    0x30(%rsp), %rax                # End byte and offset
 
-6: # final eq checks
-    testl   %r15d, %r15d                    # Check for hash match
-    jz      8f
+    movq    %rax, %rdx                      # Extract end byte
+    shrq    $56, %rdx
 
-    isolssbl    %r9d, %r10d                 # Isolate rightmost set bit
-    subl    $1, %r9d                        # Compute hash match mask
-    andl    %r9d, %r15d                     # Mask out matches beyond probe end
-    jz      8f                              # ZF set if no match
+    movq    $0xffffffffffffff, %rcx         # Mask out byte from index
+    andq    %rcx, %rax
+    leaq    (%rbp, %rax), %rdi              # Address of metadata byte
 
-    tzcntl  %r15d, %r9d                     # Vector offset of next match
+    movb    %dl, (%rdi)                     # Restore metadata byte
 
-    eqloop  \pwr2, 2f
-8:
-    movq    0x30(%rsp), %rdx                # Load backed up metadata entry
+    movq    mdoff(%rbp), %rsi               # Metadata offset
+    leaq    vecsize(%rbp, %rsi), %rax       # Offset of first duplicated byte
 
-    movq    %rdx, %rcx                      # Extract entry
-    shrq    $56, %rcx
-
-    movq    $0xffffffffffffff, %rdi         # Mask out entry for metadata index
-    andq    %rdi, %rdx
-
-    movq    mdoff(%rbp), %rsi               # Offset of metadata relative base
-    leaq    (%rsi, %rdx), %rdi              # Offset of metadata entry relative base
-    movb    %cl, (%rbp, %rdi)
-
-    cmpq    $vecsize, %rdx
-    jnb     1f
+    cmpq    %rax, %rdi                      # Check if byte was duplicated
+    jnb     4f
 
     movq    cap(%rbp), %rsi                 # Capacity
-    leaq    (%rdi, %rsi), %rdx
-    movb    %cl, (%rbp, %rdx)
-1:
+    movb    %dl, (%rdi, %rsi)               # Restore byte in guard
+4:
     movq    %r14, %rax                      # Return value
-    framerst                                # Reset stack frame
+    framerst                                # Restore stack
     vzeroupper
     ret
 
-2:
-    movq    $-1, %r14
-    jmp     8b
+1: # Duplicate found
+    movq    0x30(%rsp), %rax                # End byte and offset
 
+    movq    %rax, %rdx                      # Extract end byte
+    shrq    $56, %rdx
+
+    movq    $0xffffffffffffff, %rcx         # Mask out byte from index
+    andq    %rcx, %rax
+    leaq    (%rbp, %rax), %rdi              # Address of metadata byte
+
+    movb    %dl, (%rdi)                     # Restore metadata byte
+
+    movq    mdoff(%rbp), %rsi               # Metadata offset
+    leaq    vecsize(%rbp, %rsi), %rax       # Offset of first duplicated byte
+
+    cmpq    %rax, %rdi                      # Check if byte was duplicated
+    jnb     4f
+
+    movq    cap(%rbp), %rsi                 # Capacity
+    movb    %dl, (%rdi, %rsi)               # Restore byte in guard
+4:
+    framerst                                # Restore stack
+    movq    $-1, %rax
+    vzeroupper
+    ret
 .endm
 
 # Probe for empty slot to insert in. The hash table is
-# assumed to have at least one vacant slot.
+# assumed to have at least two vacant slots.
 #
 # Params:
 #   %rdi: Base address of hash table
