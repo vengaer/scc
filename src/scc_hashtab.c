@@ -149,8 +149,18 @@ static inline scc_hashtab_metatype *scc_hashtab_metadata(struct scc_hashtab_base
  *      The size of the elements stored in the table
  */
 static bool scc_hashtab_emplace(void *handle, struct scc_hashtab_base *base, size_t elemsize) {
-    unsigned long long hash = base->ht_hash(handle, elemsize);
+    scc_hashtab_metatype *md = scc_hashtab_metadata(base);
+    unsigned long long const hash = base->ht_hash(handle, elemsize);
+
+    size_t const slot = hash & (base->ht_capacity - 1u);
+    size_t const prev = (slot - 1u) & (base->ht_capacity - 1u);
+    scc_hashtab_metatype ent = md[prev];
+
+    /* Force probe end into table */
+    scc_hashtab_set_mdent(md, prev, 0, base->ht_capacity);
+
     long long index = scc_hashtab_probe_insert(base, handle, elemsize, hash);
+    scc_hashtab_set_mdent(md, prev, ent, base->ht_capacity);
 
     SCC_ON_PERFTRACK(++base->ht_perf.ev_n_hash);
 
@@ -163,10 +173,7 @@ static bool scc_hashtab_emplace(void *handle, struct scc_hashtab_base *base, siz
     memcpy((unsigned char *)handle + (index + 1ll) * elemsize, handle, elemsize);
 
     /* Mark slot as occupied */
-    scc_hashtab_metatype *md = scc_hashtab_metadata(base);
-    scc_hashtab_metatype const ent =
-        (scc_hashtab_metatype)(SCC_HASHTAB_OCCUPIED | (hash >> SCC_HASHTAB_HASHSHIFT));
-
+    ent = (scc_hashtab_metatype)(SCC_HASHTAB_OCCUPIED | (hash >> SCC_HASHTAB_HASHSHIFT));
     scc_hashtab_set_mdent(md, index, ent, base->ht_capacity);
     return true;
 }
