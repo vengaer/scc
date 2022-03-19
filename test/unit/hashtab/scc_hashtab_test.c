@@ -197,8 +197,20 @@ void test_scc_hashtab_interleaved_remove_find(void) {
 void test_scc_hashtab_probe_stop(void) {
     scc_hashtab(int) tab = scc_hashtab_init(int, eq);
     scc_hashtab_metatype *md = scc_hashtab_inspect_metadata(tab);
-    /* Simulate all slots having been previously occupied */
-    memset(md, 0x7f, (scc_hashtab_capacity(tab) + SCC_HASHTAB_GUARDSZ) * sizeof(*md));
+
+    /* Insert and remove until all slots have been
+     * used at least once */
+    for(unsigned i = 0u;; ++i) {
+        TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, i));
+        TEST_ASSERT_TRUE(scc_hashtab_remove(tab, i));
+
+        for(unsigned j = 0u; j < scc_hashtab_capacity(tab); ++j) {
+            if(!md[j]) {
+                continue;
+            }
+        }
+        break;
+    }
 
     /* Should not cause infinite loop*/
     TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, 1));
