@@ -39,6 +39,36 @@ static inline unsigned long long scc_hashtab_next_power_of_2(unsigned long long 
     return val + 1ull;
 }
 
+/* scc_hashtab_set_mdent
+ *
+ * Set metadata entry at given index, duplicating
+ * low entries in the guard
+ *
+ * scc_hashtab_metatype *md
+ *      Address of the first element in the metadata
+ *      array
+ *
+ * size_t index
+ *      The index in which the value is to be set
+ *
+ * scc_hashtab_metatype val
+ *      The value to write to the given index
+ *
+ * size_t capacity
+ *      Table capacity for calculating guard offset
+ */
+static inline void scc_hashtab_set_mdent(
+    scc_hashtab_metatype *md,
+    size_t index,
+    scc_hashtab_metatype val,
+    size_t capacity
+) {
+    md[index] = val;
+    if(index < scc_hashtab_impl_guardsz()) {
+        md[index + capacity] = val;
+    }
+}
+
 /* scc_hashtab_calcpad
  *
  * Calculate the number of padding bytes between ht_fwoff and ht_curr
@@ -136,12 +166,8 @@ static bool scc_hashtab_emplace(void *handle, struct scc_hashtab_base *base, siz
     scc_hashtab_metatype *md = scc_hashtab_metadata(base);
     scc_hashtab_metatype const ent =
         (scc_hashtab_metatype)(SCC_HASHTAB_OCCUPIED | (hash >> SCC_HASHTAB_HASHSHIFT));
-    md[index] = ent;
 
-    /* Duplicate low entries in guard */
-    if(index < scc_hashtab_impl_guardsz()) {
-        md[index + base->ht_capacity] = ent;
-    }
+    scc_hashtab_set_mdent(md, index, ent, base->ht_capacity);
     return true;
 }
 
@@ -365,10 +391,7 @@ bool scc_hashtab_impl_remove(void *handle, size_t elemsize) {
     assert(index >= 0ll && (size_t)index < base->ht_capacity);
 
     scc_hashtab_metatype *md = scc_hashtab_metadata(base);
-    md[index] = SCC_HASHTAB_VACATED;
-    if(index < scc_hashtab_impl_guardsz()) {
-        md[index + base->ht_capacity] = SCC_HASHTAB_VACATED;
-    }
+    scc_hashtab_set_mdent(md, index, SCC_HASHTAB_VACATED, base->ht_capacity);
     --base->ht_size;
     return true;
 }
