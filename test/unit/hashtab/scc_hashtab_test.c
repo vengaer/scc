@@ -194,33 +194,68 @@ void test_scc_hashtab_interleaved_remove_find(void) {
     scc_hashtab_free(tab);
 }
 
-/* test_scc_hahstab_probe_stop
+/* test_scc_hahstab_insertion_probe_stop
  *
  * Repeatedly insert and remove values
  * until all slots have been occupied at least
  * once. Insert another value and verify that
- * it workds
+ * it does not cause an inifinite loop
  */
-void test_scc_hashtab_probe_stop(void) {
+void test_scc_hashtab_insertion_probe_stop(void) {
     scc_hashtab(int) tab = scc_hashtab_init(int, eq);
     scc_hashtab_metatype *md = scc_hashtab_inspect_metadata(tab);
 
     /* Insert and remove until all slots have been
      * used at least once */
-    for(unsigned i = 0u;; ++i) {
+    bool done = false;
+    for(unsigned i = 0u; !done; ++i) {
+        done = true;
         TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, i));
         TEST_ASSERT_TRUE(scc_hashtab_remove(tab, i));
 
         for(unsigned j = 0u; j < scc_hashtab_capacity(tab); ++j) {
             if(!md[j]) {
-                continue;
+                done = false;
+                break;
             }
         }
-        break;
     }
 
     /* Should not cause infinite loop*/
     TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, 1));
+
+    scc_hashtab_free(tab);
+}
+
+/* test_scc_hahstab_find_probe_stop
+ *
+ * Repeatedly insert and remove values
+ * until all slots have been occupied at least
+ * once. Run find on the table and verify
+ * that it does not cause an infinite loop
+ */
+void test_scc_hashtab_find_probe_stop(void) {
+    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+    scc_hashtab_metatype *md = scc_hashtab_inspect_metadata(tab);
+
+    /* Insert and remove until all slots have been
+     * used at least once */
+    bool done = false;
+    for(unsigned i = 0u; !done; ++i) {
+        done = true;
+        TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, i));
+        TEST_ASSERT_TRUE(scc_hashtab_remove(tab, i));
+
+        for(unsigned j = 0u; j < scc_hashtab_capacity(tab); ++j) {
+            if(!md[j]) {
+                done = false;
+                break;
+            }
+        }
+    }
+
+    /* Should not cause infinite loop*/
+    TEST_ASSERT_FALSE(scc_hashtab_find(tab, 1));
 
     scc_hashtab_free(tab);
 }
