@@ -324,15 +324,15 @@ void const *scc_hashtab_impl_find(void const *handle, size_t elemsize) {
     return (void const *)((unsigned char const *)handle + (index + 1ull) * elemsize);
 }
 
-void *scc_hashtab_impl_init(struct scc_hashtab_base *base, scc_eq eq, scc_hash hash, size_t coff, size_t mdoff, size_t cap) {
+void *scc_hashtab_impl_init(struct scc_hashtab_base *base, scc_eq eq, scc_hash hash, size_t coff, size_t mdoff) {
     base->ht_eq = eq;
     base->ht_hash = hash;
     base->ht_mdoff = mdoff;
-    base->ht_capacity = cap;
+    base->ht_capacity = SCC_HASHTAB_STACKCAP;
     base->ht_fwoff = scc_hashtab_calcpad(coff);
     unsigned char *tab = (unsigned char *)base + coff;
     SCC_ON_PERFTRACK(
-        base->ht_perf.ev_bytesz = mdoff + (cap + SCC_HASHTAB_GUARDSZ) * sizeof(scc_hashtab_metatype)
+        base->ht_perf.ev_bytesz = mdoff + (SCC_HASHTAB_STACKCAP + SCC_HASHTAB_GUARDSZ) * sizeof(scc_hashtab_metatype)
     );
     scc_hashtab_set_bkoff(tab, base->ht_fwoff);
     return tab;

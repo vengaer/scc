@@ -20,17 +20,23 @@
 
 enum { SCC_HASHTAB_STACKCAP = 32 };
 
+#ifndef SCC_EQ_TYPEDEF
+#define SCC_EQ_TYPEDEF
 /* scc_eq
  *
  * Signature of function used for equality comparisons
  */
 typedef _Bool(*scc_eq)(void const *, void const *);
+#endif /* SCC_EQ_TYPEDEF */
 
+#ifndef SCC_HASH_TYPEDEF
+#define SCC_HASH_TYPEDEF
 /* scc_hash
  *
  * Signature of function used for hashing
  */
 typedef unsigned long long(*scc_hash)(void const*, size_t);
+#endif /* SCC_HASH_TYPEDEF */
 
 /* scc_hashtab_metatype
  *
@@ -79,23 +85,23 @@ struct scc_hashtab_perfevts {
  * through the API. Instead, all "public" functions operate
  * on a fat pointer referred to as a handle. Given a struct
  * scc_hashtab_base base, the address of said pointer is
- * obtained by computing &base.ht_fwoff + base.ht_fwoff - 1.
+ * obtained by computing &base.ht_fwoff + base.ht_fwoff + 1.
  *
  * scc_eq ht_eq;
  *      Pointer to function used for equality comparison
  *
- * scc_hash ht_hash;
+ * scc_hash ht_hash
  *      Pointer to hash function.
  *
- * size_t ht_mdoff;
+ * size_t ht_mdoff
  *      Offset of metadata array relative base address. This
  *      is used to access the metadata in the FAM part of the
  *      struct.
  *
- * size_t ht_size;
+ * size_t ht_size
  *      Size of the hash table
  *
- * size_t ht_capacity;
+ * size_t ht_capacity
  *      Capacity of the hash table. Always a power of two to
  *      allow for efficient modulo computation.
  *
@@ -136,7 +142,7 @@ struct scc_hashtab_base {
 #define SCC_HASHTAB_INJECT_PERFEVTS(name)
 #endif
 
-/* scc_hashtab_impl_layout(type)
+/* scc_hashtab_impl_layout
  *
  * Internal use only
  *
@@ -224,11 +230,8 @@ struct scc_hashtab_base {
  *
  * size_t mdoff
  *      Offset of ht_meta relative the address of *base
- *
- * size_t cap
- *      The capacity allocated for *base
  */
-void *scc_hashtab_impl_init(struct scc_hashtab_base *base, scc_eq eq, scc_hash hash, size_t coff, size_t mdoff, size_t cap);
+void *scc_hashtab_impl_init(struct scc_hashtab_base *base, scc_eq eq, scc_hash hash, size_t coff, size_t mdoff);
 
 /* scc_hashtab_init_with_hash
  *
@@ -249,8 +252,7 @@ void *scc_hashtab_impl_init(struct scc_hashtab_base *base, scc_eq eq, scc_hash h
         eq,                                                                 \
         hash,                                                               \
         offsetof(scc_hashtab_impl_layout(type), ht_curr),                   \
-        offsetof(scc_hashtab_impl_layout(type), ht_meta),                   \
-        SCC_HASHTAB_STACKCAP                                                \
+        offsetof(scc_hashtab_impl_layout(type), ht_meta)                    \
     )
 
 /* scc_hashtab_init
