@@ -8,6 +8,7 @@ __conf := $(__node_path)/conf.$(pyext)
 $(__docs)&: $(wildcard $(__node_path)/*.$(rstext)) $(__conf) $(__all_mkfiles) | $(__node_builddir)
 	$(call echo-gen,$(notdir $@))
 	$(SPHINX) -b html $(dir $<) $(dir $@)
+	$(TOUCH) $(__docs)
 
 docs: $(__docs)
 
