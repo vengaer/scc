@@ -64,9 +64,9 @@ int LLVMFuzzerTestOneInput(uint8_t const *data, size_t size) {
 
     scc_hashtab(uint32_t) tab = scc_hashtab_init(uint32_t, eq);
 
+    hashtab_fuzz_probing(&tab, buf, end);
     hashtab_fuzz_insertion(&tab, buf, end, size);
     hashtab_fuzz_removal(&tab, buf, end, size);
-    hashtab_fuzz_probing(&tab, buf, end);
 
     scc_hashtab_free(tab);
     free(buf);
