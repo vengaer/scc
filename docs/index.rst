@@ -2,8 +2,7 @@ Welcome to scc's documentation!
 ===============================
 
 .. toctree::
-    :maxdepth: 1
-    :titlesonly:
-    :hidden:
+    :maxdepth: 3
 
     intro
+    hashtab/index

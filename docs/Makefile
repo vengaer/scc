@@ -2,6 +2,7 @@ ifdef __node
 
 SPHINX := sphinx-build
 
+#TODO: Recursive wildcard for subdirectories
 __docs := $(call wildcard-artifacts,$(__node_path),$(rstext),$(htmlext))
 __conf := $(__node_path)/conf.$(pyext)
 
