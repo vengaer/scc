@@ -16,8 +16,9 @@
  */
 #define scc_hashtab(type) type *
 
+#define SCC_HASHTAB_GUARDSZ ((unsigned)SCC_VECSIZE - 1u)
+
 enum { SCC_HASHTAB_STACKCAP = 32 };
-enum { SCC_HASHTAB_GUARDSZ = SCC_VECSIZE - 1 };
 
 /* scc_eq
  *
