@@ -12,5 +12,6 @@ echo-ld    = $(call echo-raw,LD,  $(1))
 echo-lint  = $(call echo-raw,LINT,$(1))
 echo-ln    = $(call echo-raw,LN,  $(1))
 echo-ar    = $(call echo-raw,AR,  $(1))
+echo-exec  = $(call-echo-raw,EXEC,$(1))
 
 endif

@@ -102,6 +102,10 @@ tags: FORCE
 
 FORCE:
 
+docker-image:
+docker:
+
+
 $(VERBOSE).SILENT:
 
 $(__all_obj): $(__all_mkfiles) $(wildcard $(mkscripts)/*.$(mkext)) $(wildcard $(root)/.config)
