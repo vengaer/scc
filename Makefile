@@ -25,7 +25,7 @@ builddir     := $(root)/build
 dirs         += $(builddir)
 srcdir       := $(root)/src
 
-ASFLAGS      := -c -g -x assembler
+ASFLAGS      := -c -g -x assembler -MD -MP
 CFLAGS       := -std=c99 -c -MD -MP -g -Wall -Wextra -Wpedantic -Waggregate-return   \
                 -Wbad-function-cast -Wcast-qual -Wfloat-equal -Wmissing-include-dirs \
                 -Wnested-externs -Wpointer-arith -Wshadow -Wunknown-pragmas -Wswitch \
