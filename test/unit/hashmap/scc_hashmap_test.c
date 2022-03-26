@@ -99,3 +99,24 @@ void test_scc_hashmap_duplicate_insert(void) {
 
     scc_hashmap_free(map);
 }
+
+/* test_scc_hashmap_insert_overrides_existing
+ *
+ * Insert a value for key 0 and verify that it
+ * is found. Insert another values for key 0 and
+ * verify that it overwrite the original one
+ */
+void test_scc_hashmap_insert_overrides_exisiting(void) {
+    scc_hashmap(int, unsigned short) map = scc_hashmap_init(int, unsigned short, eq);
+    TEST_ASSERT_TRUE(scc_hashmap_insert(&map, 0, 123));
+    unsigned short *val = scc_hashmap_find(map, 0);
+    TEST_ASSERT_TRUE(!!val);
+    TEST_ASSERT_EQUAL_UINT16(123, *val);
+
+    TEST_ASSERT_TRUE(scc_hashmap_insert(&map, 0, 321));
+    val = scc_hashmap_find(map, 0);
+    TEST_ASSERT_TRUE(!!val);
+    TEST_ASSERT_EQUAL_UINT16(321, *val);
+
+    scc_hashmap_free(map);
+}
