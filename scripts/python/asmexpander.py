@@ -3,6 +3,7 @@
 ''' Recursively expand assembler macros for ease of debugging '''
 
 import argparse
+import os
 import re
 
 from wrhandle import FileWrHandle, StdoutWrHandle
@@ -78,6 +79,52 @@ class DoubleBuffer():
             self._back.append(arg)
         else:
             self._back += arg
+
+def expand_cpp_includes(file, content, verbose):
+    ''' Include cpp-stype #includes '''
+    def include_file(filename, fdir):
+        path = None
+        for fpath in [filename, os.path.join(fdir, filename)]:
+            if verbose:
+                print(f'Trying {fpath}... ', end='')
+            if os.path.exists(fpath):
+                path = fpath
+                if verbose:
+                    print('ok')
+                break
+
+            if verbose:
+                print('not found')
+
+        if path is None:
+            raise FileNotFoundError(f'Could not find {filename}')
+
+        with open(path, 'r', encoding='ascii') as handle:
+            return [s.rstrip() for s in handle.readlines()]
+
+    processed = -1
+
+    # Check same dir as source file
+    fdir = os.path.dirname(file)
+
+    dbuf = DoubleBuffer(content)
+
+    while processed != 0:
+        processed = 0
+        for line in dbuf.front:
+            if line.startswith('#include'):
+                filename = re.sub(r'#include\s*["<]([^ ]+)[">]', r'\1', line)
+                if verbose:
+                    print(f'Expanding {filename}')
+                dbuf.append_back(include_file(filename, fdir))
+                processed += 1
+            else:
+                dbuf.append_back(line)
+                continue
+        dbuf.swap()
+        dbuf.back.clear()
+
+    return dbuf.front
 
 def parse_macros(content, verbose):
     ''' Parse macro definitions from the assembly file '''
@@ -207,6 +254,7 @@ def main(file, outfile, verbose):
     ''' Main function '''
     with open(file, 'r', encoding='ascii') as handle:
         content = list(map(lambda s: s.rstrip(), handle.readlines()))
+    content = expand_cpp_includes(file, content, verbose)
     macros = parse_macros(content, verbose)
     expanded = expand_all(macros, content, verbose)
     stripped = strip_macros(expanded, verbose)
