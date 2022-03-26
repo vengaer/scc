@@ -1,7 +1,10 @@
+#include <inspect/scc_hashmap_inspect.h>
+
 #include <scc/scc_hashmap.h>
 #include <scc/scc_mem.h>
 
 #include <stdbool.h>
+#include <limits.h>
 
 #include <unity.h>
 
@@ -50,5 +53,49 @@ void test_scc_hashmap_find(void) {
             TEST_ASSERT_TRUE(!!val);
         }
     }
+    scc_hashmap_free(map);
+}
+
+/* test_scc_hashmap_find
+ *
+ * Insert a value for key 0, find another key that hashes to
+ * the same slot and insert a different value. Run find and
+ * verify that the returned values were the respectively
+ * inserted ones
+ */
+void test_scc_hashmap_duplicate_insert(void) {
+    scc_hashmap(int, unsigned short) map = scc_hashmap_init(int, unsigned short, eq);
+    struct scc_hashmap_base *base = scc_hashmap_inspect_base(map);
+
+    unsigned long long hash = base->hm_hash(&(int){ 0 }, sizeof(int));
+    int dupl = INT_MAX;
+    for(int i = 1; i < INT_MAX; ++i) {
+        if((base->hm_hash(&(int){ i }, sizeof(int)) & 0x1f) == (hash & 0x1f)) {
+            dupl = i;
+            break;
+        }
+    }
+    TEST_ASSERT_NOT_EQUAL_INT32(INT_MAX, dupl);
+
+    unsigned short *val;
+    /* Insert */
+    TEST_ASSERT_TRUE(scc_hashmap_insert(&map, 0, 38));
+    val = scc_hashmap_find(map, 0);
+    TEST_ASSERT_TRUE(!!val);
+    TEST_ASSERT_EQUAL_UINT16(38, *val);
+
+    /* Insert for key that hashes to same slot */
+    TEST_ASSERT_TRUE(scc_hashmap_insert(&map, dupl, 22));
+
+    /* Check that first insertion remains valid */
+    val = scc_hashmap_find(map, 0);
+    TEST_ASSERT_TRUE(!!val);
+    TEST_ASSERT_EQUAL_UINT16(38, *val);
+
+    /* Find for duplicate */
+    val = scc_hashmap_find(map, dupl);
+    TEST_ASSERT_TRUE(!!val);
+    TEST_ASSERT_EQUAL_UINT16(22, *val);
+
     scc_hashmap_free(map);
 }
