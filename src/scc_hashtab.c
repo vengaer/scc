@@ -253,10 +253,10 @@ static struct scc_hashtab_base *scc_hashtab_realloc(
  * struct scc_hashtab_base *base
  *      Base address of the hash table referred to by *handle
  *
- *  size_t elemsize
+ * size_t elemsize
  *      Size of each element stored in the table
  *
- *  size_t cap
+ * size_t cap
  *      Capacity of the new table
  */
 static bool scc_hashtab_rehash(

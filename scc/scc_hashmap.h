@@ -19,7 +19,7 @@
  *      The value type to be stored in the map
  */
 #define scc_hashmap_impl_pair(keytype, valuetype)                                       \
-    struct { keytype key; valuetype value; }
+    struct { keytype hp_key; valuetype hp_val; }
 
 /* scc_hashmap
  *
@@ -36,7 +36,7 @@
 #define scc_hashmap(keytype, valuetype)                                                 \
     scc_hashmap_impl_pair(keytype, valuetype) *
 
-#define SCC_HASHMAP_IMPL_GUARDSZ ((unsigned)SCC_VECSIZE - 1u)
+#define SCC_HASHMAP_GUARDSZ ((unsigned)SCC_VECSIZE - 1u)
 
 enum { SCC_HASHMAP_STACKCAP = 32 };
 
@@ -60,6 +60,37 @@ typedef unsigned long long(*scc_hash)(void const*, size_t);
 
 typedef unsigned char scc_hashmap_metatype;
 
+/* struct scc_hashmap_perfevts
+ *
+ * Internal use only
+ *
+ * Counters for tracking performance-
+ * related events.
+ *
+ * size_t ev_n_rehashes
+ *      Number of times the hash map
+ *      has been rehashed
+ *
+ * size_t ev_n_eqs
+ *      Number of calls to eq performed
+ *
+ * size_t ev_n_hash
+ *      Number of calls to hash performed
+ *
+ * size_t ev_n_inserts
+ *      Number of successful insertions performed
+ *
+ * size_t ev_bytesz
+ *      Total size of the map, in bytes
+ */
+struct scc_hashmap_perfevts {
+    size_t ev_n_rehashes;
+    size_t ev_n_eqs;
+    size_t ev_n_hash;
+    size_t ev_n_inserts;
+    size_t ev_bytesz;
+};
+
 /* struct scc_hashmap_base
  *
  * Internal use only
@@ -77,18 +108,30 @@ typedef unsigned char scc_hashmap_metatype;
  *
  * size_t hm_valoff
  *      Offset of the value array relative the base address.
- *      Used to access the values in the FAM part of the struct.
+ *      Used to access the values in the FAM part of the struct
  *
  * size_t hm_mdoff
  *      Offset of metadata array relative the base address. This
  *      is used to access the metadata in the FAM part of the
- *      struct.
+ *      struct
  *
  * size_t hm_size
  *      Size of the hash map
  *
  * size_t hm_capacity
  *      Capacity of the map. Always a power of 2.
+ *
+ * size_t hm_pairsize
+ *      Size of the key-value pair handle
+ *
+ * struct scc_hashmap_perfevts hm_perf
+ *      Performance counters
+ *
+ * unsigned short hm_keyalign
+ *      Alignment of the key type
+ *
+ * unsigned short hm_valalign
+ *      Alignment of the value type
  *
  * unsigned char hm_dynalloc
  *      Set to 1 if the map was allocated dynamically.
@@ -114,11 +157,24 @@ struct scc_hashmap_base {
     size_t hm_mdoff;
     size_t hm_size;
     size_t hm_capacity;
+    size_t hm_pairsize;
+#ifdef SCC_PERFEVTS
+    struct scc_hashmap_perfevts hm_perf;
+#endif
+    unsigned short hm_keyalign;
+    unsigned short hm_valalign;
     unsigned char hm_dynalloc;
     unsigned char hm_valpad;
     unsigned char hm_fwoff;
     unsigned char hm_buffer[];
 };
+
+#ifdef SCC_PERFEVTS
+#define SCC_HASHMAP_INJECT_PERFEVTS(name)                                   \
+    struct scc_hashmap_perfevts name;
+#else
+#define SCC_HASHMAP_INJECT_PERFEVTS(name)
+#endif
 
 /* scc_hashmap_impl_layout
  *
@@ -167,9 +223,9 @@ struct scc_hashmap_base {
  *      corresponding slot in the data array. This is used for
  *      avoiding unnecessary calls to eq.
  *
- * scc_hashmap_metatype hm_guard[SCC_HASHMAP_IMPL_GUARDSZ];
+ * scc_hashmap_metatype hm_guard[SCC_HASHMAP_GUARDSZ];
  *      Guard to allow for unaligned vector loads without risking
- *      reads from potential guard pages. The SCC_HASHMAP_IMPL_GUARDSZ
+ *      reads from potential guard pages. The SCC_HASHMAP_GUARDSZ
  *      low bytes of hm_meta are mirrored in the guard.
  */
 #define scc_hashmap_impl_layout(keytype, valuetype)                                         \
@@ -180,6 +236,10 @@ struct scc_hashmap_base {
         size_t hm_mdoff;                                                                    \
         size_t hm_size;                                                                     \
         size_t hm_capacity;                                                                 \
+        size_t hm_pairsize;                                                                 \
+        SCC_HASHMAP_INJECT_PERFEVTS(hm_perf)                                                \
+        unsigned short hm_keyalign;                                                         \
+        unsigned short hm_valalign;                                                         \
         unsigned char hm_dynalloc;                                                          \
         unsigned char hm_valpad;                                                            \
         unsigned char hm_fwoff;                                                             \
@@ -188,7 +248,7 @@ struct scc_hashmap_base {
         keytype hm_keys[SCC_HASHMAP_STACKCAP];                                              \
         valuetype hm_vals[SCC_HASHMAP_STACKCAP];                                            \
         scc_hashmap_metatype hm_meta[SCC_HASHMAP_STACKCAP];                                 \
-        scc_hashmap_metatype hm_guard[SCC_HASHMAP_IMPL_GUARDSZ];                            \
+        scc_hashmap_metatype hm_guard[SCC_HASHMAP_GUARDSZ];                                 \
     }
 
 
@@ -234,12 +294,15 @@ void *scc_hashmap_impl_init(struct scc_hashmap_base *base, size_t coff, size_t v
         (void *)&(scc_hashmap_impl_layout(keytype, valuetype)){                             \
             .hm_eq = eq,                                                                    \
             .hm_hash = hash,                                                                \
-            .hm_capacity = SCC_HASHMAP_STACKCAP,                                            \
             .hm_valoff = offsetof(scc_hashmap_impl_layout(keytype, valuetype), hm_vals),    \
-            .hm_mdoff = offsetof(scc_hashmap_impl_layout(keytype, valuetype), hm_meta)      \
+            .hm_mdoff = offsetof(scc_hashmap_impl_layout(keytype, valuetype), hm_meta),     \
+            .hm_capacity = SCC_HASHMAP_STACKCAP,                                            \
+            .hm_pairsize = sizeof(scc_hashmap_impl_pair(keytype, valuetype)),               \
+            .hm_keyalign = scc_alignof(keytype),                                            \
+            .hm_valalign = scc_alignof(valuetype)                                           \
         },                                                                                  \
         offsetof(scc_hashmap_impl_layout(keytype, valuetype), hm_curr),                     \
-        offsetof(scc_hashmap_impl_pair(keytype, valuetype), value),                         \
+        offsetof(scc_hashmap_impl_pair(keytype, valuetype), hp_val),                        \
         sizeof(keytype)                                                                     \
     )
 
@@ -314,6 +377,53 @@ unsigned long long scc_hashmap_fnv1a(void const *data, size_t size);
  * Reclaim memory used by the given hash map
  */
 void scc_hashmap_free(void *map);
+
+/* scc_hashmap_impl_insert
+ *
+ * Internal use only
+ *
+ * Insert the key-value pair in ht_curr in the table. Return true
+ * on success.
+ *
+ * void *mapaddr
+ *      Address of the map handle
+ *
+ * size_t keysize
+ *      Size of the key type
+ *
+ * size_t valsize
+ *      Size of the value type
+ */
+_Bool scc_hashmap_impl_insert(void *mapaddr, size_t keysize, size_t valsize);
+
+
+/* scc_hashmap_insert
+ *
+ * Insert a key-value pair in the hash map, replacing existing
+ * values if present. May result in reallocation.
+ *
+ * Expands to true if the pair was successfully inserted
+ *
+ * scc_hashmap(keytype, valuetype) *mapaddr
+ *      Address of the map handle
+ *
+ * keytype' key
+ *      The key for which the value is to be inserted. Subject to
+ *      implicit conversion should keytype and keytype' not be the same.
+ *
+ * valuetype' value
+ *      The value to insert. Subject to implicit conversion should valuetype
+ *      and valuetype' not be the same.
+ */
+#define scc_hashmap_insert(mapaddr, key, value)                             \
+    scc_hashmap_impl_insert((                                               \
+            (*(mapaddr))->hp_key = key,                                     \
+            (*(mapaddr))->hp_val = value,                                   \
+            (mapaddr)                                                       \
+        ),                                                                  \
+        sizeof((*(mapaddr))->hp_key),                                       \
+        sizeof((*(mapaddr))->hp_val)                                        \
+    )
 
 /* scc_hashmap_capacity
  *

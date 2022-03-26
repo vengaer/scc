@@ -2,6 +2,7 @@ ifdef __node
 
 __node_obj  := $(call wildcard-obj,$(__node_path),$(asext))
 asmexpander := $(pyscripts)/asmexpander.py
+asmsrcdir   := $(__node_path)
 
 $(solib) $(alib): $(__node_obj)
 
@@ -11,7 +12,7 @@ __srcdir := $(if $(SCC_EXPAND_ASM),\
 
 $(__node_builddir)/%.$(oext): $(__srcdir)/%.$(asext) | $(__node_builddir)
 	$(call echo-as,$(notdir $@))
-	$(AS) -o $@ $< $(ASFLAGS) $(CPPFLAGS)
+	$(AS) -o $@ $< $(ASFLAGS) $(CPPFLAGS) -I$(asmsrcdir)
 
 .SECONDARY: $(call wildcard-artifacts,$(__node_path),$(asext),$(asext))
 

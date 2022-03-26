@@ -55,7 +55,7 @@ typedef unsigned char scc_hashtab_metatype;
  *
  * size_t ev_n_rehashes
  *      Number of times the hash table
- *      hash been rehashed
+ *      has been rehashed
  *
  * size_t ev_n_eqs
  *      Number of calls to eq performed
@@ -105,19 +105,19 @@ struct scc_hashtab_perfevts {
  *      Capacity of the hash table. Always a power of two to
  *      allow for efficient modulo computation.
  *
- * struct scc_hashtab_perfevts ht_perf;
- *      Performance counters.
+ * struct scc_hashtab_perfevts ht_perf
+ *      Performance counters
  *
- * unsigned char ht_dynalloc;
+ * unsigned char ht_dynalloc
  *      Set to 1 if the current table was allocated dynamically.
  *      Upon initial construction, the table is allocated on the
  *      stack. This field is set on the first rehash.
  *
- * unsigned char ht_fwoff;
+ * unsigned char ht_fwoff
  *      Offset of the pointer exposed through the API. The offset
  *      is relative to the field itself.
  *
- * unsigned char ht_buffer[];
+ * unsigned char ht_buffer[]
  *      FAM hiding type-specific details. For the exact layout,
  *      refer to scc_hashtab_impl_layout.
  */
@@ -344,7 +344,7 @@ _Bool scc_hashtab_impl_insert(void *handleaddr, size_t elemsize);
  *
  * Expands to true if the value was successfully inserted
  *
- * type **handleaddr
+ * scc_hashtab(type) *handleaddr
  *      Address of the handle used for referring to the hash table.
  *
  * type' value

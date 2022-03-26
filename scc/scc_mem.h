@@ -10,9 +10,12 @@
     scc_container_qual(addr, type, member,)
 
 #define scc_alignof(type)                               \
-    offsetof(struct { unsigned char b; type e; }, e);
+    offsetof(struct { unsigned char b; type e; }, e)
 
 #define scc_arrsize(addr)                               \
     (sizeof(addr) / sizeof((addr)[0]))
+
+#define scc_align(addr, bound)                          \
+    (((addr) + (bound) - 1u) & ~((bound) - 1u))
 
 #endif /* SCC_MEM_H */

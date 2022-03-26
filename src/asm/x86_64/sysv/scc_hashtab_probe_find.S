@@ -392,7 +392,7 @@ scc_hashtab_probe_find:
 .equ    framesz, 0x58                       # Size of stack frame
 .equ    vecsize, SCC_VECSIZE
 #ifdef SCC_PERFEVTS
-.equ    neqs,    0x28                       # Offset of ev_n_eqs in perf member, relative base
+.equ    neqs,    0x30                       # Offset of ev_n_eqs in perf member, relative base
 #endif
 
     popcntq %rdx, %rax                      # Check if element size is power of 2
