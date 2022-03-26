@@ -204,7 +204,8 @@
 6: # Duplicate found
 .if \map
     tzcntl  %r15d, %ecx                     # Offset in vector
-    leaq    (%rbx, %rcx), %rax              # Index
+    leaq    (%rbx, %rcx), %rax              # Compute and wrap index
+    wrapq   %rbp, %rax, %rdi
 
     movq    $0x8000000000000000, %rcx       # Set high bit for duplicate
     orq     %rcx, %rax
