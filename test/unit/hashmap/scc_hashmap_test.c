@@ -33,3 +33,22 @@ void test_scc_hashmap_insert_changes_size(void) {
     }
     scc_hashmap_free(map);
 }
+
+/* test_scc_hashmap_find
+ *
+ * Insert values and verify that every value in
+ * the map can be found
+ */
+void test_scc_hashmap_find(void) {
+    enum { TESTSIZE = 512 };
+    scc_hashmap(int, unsigned short) map = scc_hashmap_init(int, unsigned short, eq);
+    unsigned short *val;
+    for(int i = 0; i < TESTSIZE; ++i) {
+        TEST_ASSERT_TRUE(scc_hashmap_insert(&map, i, (unsigned short)i));
+        for(int j = 0; j <= i; ++j) {
+            val = scc_hashmap_find(map, j);
+            TEST_ASSERT_TRUE(!!val);
+        }
+    }
+    scc_hashmap_free(map);
+}
