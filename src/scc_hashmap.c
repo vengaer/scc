@@ -10,6 +10,7 @@
 #include <string.h>
 
 enum { SCC_HASHMAP_OCCUPIED = 0x80 };
+enum { SCC_HASHMAP_VACATED = 0x7f };
 enum { SCC_HASHMAP_HASHSHIFT = 57 };
 
 #define scc_hashmap_is_power_of_2(val) \
@@ -361,10 +362,27 @@ void *scc_hashmap_impl_find(void *map, size_t keysize, size_t valsize) {
         return 0;
     }
     assert(base->hm_size);
-
-    assert(index >= 0ll);
-    assert((size_t)index < base->hm_capacity);
+    assert(index >= 0ll && (size_t)index < base->hm_capacity);
 
     unsigned char *valbase = scc_hashmap_vals(base);
     return (void *)(valbase + index * valsize);
 }
+
+bool scc_hashmap_impl_remove(void *map, size_t keysize) {
+    struct scc_hashmap_base *base = scc_hashmap_impl_base(map);
+
+    unsigned long long const hash = base->hm_hash(map, keysize);
+    long long const index = scc_hashmap_probe_find(base, map, keysize, hash);
+    if(index == -1ll) {
+        return false;
+    }
+
+    assert(base->hm_size);
+    assert(index >= 0ll && (size_t)index < base->hm_capacity);
+
+    scc_hashmap_metatype *md = scc_hashmap_metadata(base);
+    scc_hashmap_set_mdent(md, index, SCC_HASHMAP_VACATED, base->hm_capacity);
+    --base->hm_size;
+    return true;
+}
+

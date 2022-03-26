@@ -445,7 +445,9 @@ _Bool scc_hashtab_impl_reserve(void *handleaddr, size_t capacity, size_t elemsiz
  *
  * Internal use only
  *
- * Remove the value stored in the handle from the hash table
+ * Remove the value stored in the handle from the hash
+ * table. Return true if the value was found, otherwise
+ * false
  *
  * void *handle
  *      Handle used to refer to the hash table
@@ -458,7 +460,7 @@ _Bool scc_hashtab_impl_remove(void *handle, size_t elemsize);
 /* scc_hashtab_remove
  *
  * Remove an element from the hash table. Return true if the
- * operation was successfully performed
+ * value was found in the table
  *
  * scc_hashtab(type) handle
  *      Handle used for referring to the hash table in question

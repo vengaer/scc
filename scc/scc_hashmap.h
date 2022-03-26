@@ -491,4 +491,31 @@ void *scc_hashmap_impl_find(void *map, size_t keysize, size_t valsize);
         sizeof((map)->hp_val)                                           \
     )
 
+/* scc_hashmap_impl_remove
+ *
+ * Internal use only
+ *
+ * Remove the key-value stored in the handle from the hash
+ * map. Return true if a key was found, otherwise false
+ *
+ * void *map
+ *      The map handle
+ */
+_Bool scc_hashmap_impl_remove(void *map, size_t keysize);
+
+/* scc_hashmap_remove
+ *
+ * Remove a key-value pair from the hash map. Return true if the
+ * key was found in the map
+ *
+ * scc_hashmap(keytype, valuetype) map
+ *      The map handle
+ *
+ * keytype' key
+ *      Key to remove. Subject to implicit conversion should keytype and
+ *      keytype' not be the same
+ */
+#define scc_hashmap_remove(map, value)                                      \
+    scc_hashmap_impl_remove(((map)->hp_key = (value), (map)), sizeof((map)->hp_key))
+
 #endif /* SCC_HASHMAP_H */
