@@ -399,3 +399,9 @@ bool scc_hashmap_impl_remove(void *map, size_t keysize) {
     return true;
 }
 
+void scc_hashmap_clear(void *map) {
+    struct scc_hashmap_base *base = scc_hashmap_impl_base(map);
+    scc_hashmap_metatype *md = scc_hashmap_metadata(base);
+    memset(md, 0, (base->hm_capacity + SCC_HASHMAP_GUARDSZ) * sizeof(*md));
+    base->hm_size = 0u;
+}

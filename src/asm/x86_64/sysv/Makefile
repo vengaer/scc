@@ -6,9 +6,7 @@ asmsrcdir   := $(__node_path)
 
 $(solib) $(alib): $(__node_obj)
 
-__srcdir := $(if $(SCC_EXPAND_ASM),\
-                $(__node_builddir),\
-              $(__node_path))
+__srcdir := $(if $(SCC_EXPAND_ASM),$(__node_builddir),$(__node_path))
 
 $(__node_builddir)/%.$(oext): $(__srcdir)/%.$(asext) | $(__node_builddir)
 	$(call echo-as,$(notdir $@))
