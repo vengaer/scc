@@ -52,8 +52,7 @@ int LLVMFuzzerTestOneInput(uint8_t const *data, size_t size) {
 
     unsigned end = partition(buf, size);
 
-    unsigned *it;
-
+    uint32_t *it;
     dbg_pr("Data:\n");
     dbg_pr_n(it, buf, size, "%u ", *it);
     dbg_pr("\n");
