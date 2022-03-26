@@ -1,4 +1,5 @@
 #include "hashmap_fuzz_insertion.h"
+#include "hashmap_fuzz_removal.h"
 
 #include <fuzzer/dbg.h>
 
@@ -68,6 +69,7 @@ int LLVMFuzzerTestOneInput(uint8_t const *data, size_t size) {
     dbg_pr("\n");
 
     hashmap_fuzz_insertion(&map, keys, vals, end, size);
+    hashmap_fuzz_removal(&map, keys, end, size);
 
     success = true;
 epilogue:
