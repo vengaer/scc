@@ -24,7 +24,7 @@ void test_scc_hashmap_init(void) {
 
 /* test_scc_hashmap_insert_changes_size
  *
- * Repeatedly insert elements in the hash table and
+ * Repeatedly insert elements in the hash map and
  * verify that its size is increased
  */
 void test_scc_hashmap_insert_changes_size(void) {
@@ -141,6 +141,34 @@ void test_scc_hashmap_values_retained_across_rehash(void) {
         val = scc_hashmap_find(map, j);
         TEST_ASSERT_TRUE(!!val);
         TEST_ASSERT_EQUAL_UINT16((unsigned short)j, *val);
+    }
+
+    scc_hashmap_free(map);
+}
+
+/* test_scc_hashmap_elements_erased_on_remove
+ *
+ * Insert a number of values, erase each in order
+ * while verifying that the remaining values remain
+ * in the map
+ */
+void test_scc_hashmap_elements_erased_on_remove(void) {
+    enum { TESTSIZE = 312 };
+    scc_hashmap(int, unsigned short) map = scc_hashmap_init(int, unsigned short, eq);
+    for(int i = 0; i < TESTSIZE; ++i) {
+        TEST_ASSERT_TRUE(scc_hashmap_insert(&map, i, i));
+    }
+
+    unsigned short *val;
+    for(int i = 0; i < TESTSIZE; ++i) {
+        TEST_ASSERT_TRUE(scc_hashmap_remove(map, i));
+        TEST_ASSERT_EQUAL_UINT64(TESTSIZE - i - 1ull, scc_hashmap_size(map));
+
+        for(int j = i + 1; j < TESTSIZE; ++j) {
+            val = scc_hashmap_find(map, j);
+            TEST_ASSERT_TRUE(!!val);
+            TEST_ASSERT_EQUAL_UINT16((unsigned short)j, *val);
+        }
     }
 
     scc_hashmap_free(map);
