@@ -30,13 +30,15 @@ void hashmap_fuzz_insertion(
     }
 
     uint16_t *old;
+    size_t cap;
     for(unsigned i = unique_end; i < size; ++i) {
         old = scc_hashmap_find(*m, keys[i]);
+        cap = scc_hashmap_capacity(*m);
         fuzz_assert(scc_hashmap_insert(m, keys[i], vals[i]),
                    "Could not overwrite value for key %" PRIu32, keys[i]);
         elem = scc_hashmap_find(*m, keys[i]);
         fuzz_assert(!!elem, "{ %" PRIu32 ", %" PRIu16 " } lost when overwriting entry", keys[i], vals[i]);
-        fuzz_assert(elem == old, "Pointers returned for find %" PRIu32 " differ", keys[i]);
+        fuzz_assert(cap != scc_hashmap_capacity(*m) || elem == old, "Pointers returned for find %" PRIu32 " differ", keys[i]);
         fuzz_assert(scc_hashmap_size(*m) == unique_end,
                     "Incorrect size on override insertion, expected %zu, got %zu", unique_end, scc_hashmap_size(*m));
         for(unsigned j = 0u; j < unique_end; ++j) {
