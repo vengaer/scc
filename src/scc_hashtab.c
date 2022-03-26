@@ -312,6 +312,9 @@ bool scc_hashtab_impl_insert(void *handleaddr, size_t elemsize) {
 
 void const *scc_hashtab_impl_find(void const *handle, size_t elemsize) {
     struct scc_hashtab_base const *base = scc_hashtab_impl_base_qual(handle, const);
+    if(!base->ht_size) {
+        return 0;
+    }
     unsigned long long const hash = base->ht_hash(handle, elemsize);
     long long const index = scc_hashtab_probe_find(base, handle, elemsize, hash);
     if(index == -1ll) {
@@ -378,6 +381,10 @@ bool scc_hashtab_impl_reserve(void *handleaddr, size_t capacity, size_t elemsize
 
 bool scc_hashtab_impl_remove(void *handle, size_t elemsize) {
     struct scc_hashtab_base *base = scc_hashtab_impl_base(handle);
+    if(!base->ht_size) {
+        return false;
+    }
+
     unsigned long long const hash = base->ht_hash(handle, elemsize);
 
     long long const index = scc_hashtab_probe_find(base, handle, elemsize, hash);
