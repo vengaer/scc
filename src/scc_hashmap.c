@@ -352,3 +352,19 @@ bool scc_hashmap_impl_insert(void *mapaddr, size_t keysize, size_t valsize) {
     ++base->hm_size;
     return true;
 }
+
+void *scc_hashmap_impl_find(void *map, size_t keysize, size_t valsize) {
+    struct scc_hashmap_base *base = scc_hashmap_impl_base(map);
+    unsigned long long hash = base->hm_hash(map, keysize);
+    long long const index = scc_hashmap_probe_find(base, map, keysize, hash);
+    if(index == -1ll) {
+        return 0;
+    }
+    assert(base->hm_size);
+
+    assert(index >= 0ll);
+    assert((size_t)index < base->hm_capacity);
+
+    unsigned char *valbase = scc_hashmap_vals(base);
+    return (void *)(valbase + index * valsize);
+}

@@ -399,8 +399,8 @@ void const *scc_hashtab_impl_find(void const *handle, size_t elemsize);
  *
  * Expands to the address of the found element on success, NULL otherwise
  *
- * type *handleaddr
- *      Address of the handle used for referring to the hash table.
+ * scc_hashtab(type) handle
+ *      The handle used for referring to the hash table.
  *
  * type' value
  *      The value to probe for. Subject to implicit conversion should type
@@ -416,7 +416,7 @@ void const *scc_hashtab_impl_find(void const *handle, size_t elemsize);
  * Reserve storage for specified number of slots. Return true on success,
  * otherwise false. On failure, *(void **)handleaddr remains untouched.
  *
- * type *handleaddr
+ * void *handleaddr
  *      Address of the handle used for referring to the hash table
  *
  * size_t capacity
@@ -432,7 +432,7 @@ _Bool scc_hashtab_impl_reserve(void *handleaddr, size_t capacity, size_t elemsiz
  * expands to true. Otherwise, the macro expands to false and
  * **handleaddr remains untouched.
  *
- * type *handleaddr
+ * scc_hashtab(type) *handleaddr
  *      Address of the handle used for referring to the hash table
  *
  * size_t capacity
@@ -460,7 +460,7 @@ _Bool scc_hashtab_impl_remove(void *handle, size_t elemsize);
  * Remove an element from the hash table. Return true if the
  * operation was successfully performed
  *
- * type *handle
+ * scc_hashtab(type) handle
  *      Handle used for referring to the hash table in question
  *
  * type' value

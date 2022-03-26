@@ -76,21 +76,31 @@
 #
 # Params:
 #   \pwr2:  1 if element size is a power of 2, 0 otherwise
+#   \map:   1 if probing a map, 0 if probing a table
 #   \label: Name of loop label
 #   \dupl:  Label to jump to on identified duplicate
 #
 # Return:
 #   -
-.macro eqloop pwr2, label, dupl
-    leaq    (%rbx, %r14), %rdx              # Array index
-    wrapq   %rbp, %rdx, %rcx                # Wrap index
-    leaq    1(%rdx), %rax                   # Compensate for %r13 holding &ht_data[-1]
+.macro eqloop pwr2, map, label, dupl
+    leaq    (%rbx, %r14), %rax              # Array index
+    wrapq   %rbp, %rax, %rcx                # Wrap index
+
+.if \map
+    movq    pairsz(%rbp), %rdx              # Size of key-value pair
+.else
+    leaq    1(%rax), %rax                   # Compensate for %r13 holding &ht_data[-1]
+.endif
 
 .if \pwr2
     movq    %r12, %rcx                      # Shift for offset
     shlq    %cl, %rax
 .else
     mulq    %r12
+.endif
+
+.if \map
+    leaq    (%rax, %rdx), %rax              # Compensate for size of key-value pair
 .endif
 
     movq    %r13, %rsi                      # Address of value pending insertion
@@ -119,12 +129,13 @@
 #   %rcx: Hash of ht_curr
 #
 # Params:
-#   pwr2: 1 if element size is a power of 2, 0 otherwise
+#   \pwr2: 1 if element size is a power of 2, 0 otherwise
+#   \map:  1 if probing a map, 0 if probing a table
 #
 # Return:
 #   %rax: Index of slot, or -1 if element
 #         is already present
-.macro generic_hash_find_probe pwr2
+.macro generic_hash_find_probe pwr2, map
 .if \pwr2
     tzcntq  %rdx, %rdx                      # Element size power of 2, use bit index for efficient mult
 .endif
@@ -165,7 +176,7 @@
     tzcntl  %r15d, %r14d                    # Vector offset of first match
 
 0: # Match exists, probe end in vector
-    eqloop  \pwr2, 0b, 2f
+    eqloop  \pwr2, \map, 0b, 2f
 
     framerst
 
@@ -254,7 +265,7 @@
     tzcntl  %r15d, %r14d                    # Vector index of first match
 
 0: # No probe end, match exists
-    eqloop  \pwr2, 0b, 4f
+    eqloop  \pwr2, \map, 0b, 4f
 
     vmovdqu 0x38(%rsp), %ymm15              # Restore hash
     vpxor   %ymm14, %ymm14, %ymm14          # All zeroes
@@ -300,7 +311,7 @@
 
     tzcntl  %r15d, %r14d                    # Vector index of first match
 0:
-    eqloop  \pwr2, 0b, 4f
+    eqloop  \pwr2, \map, 0b, 4f
 
 3:
     movq    0x30(%rsp), %rcx                # Restore metadata

@@ -260,7 +260,7 @@ struct scc_hashmap_base {
  *
  * struct scc_hashmap_base *base
  *      Address of hash map base. The handle returned by the function
- *      refers to the hm_curr entry in this table
+ *      refers to the hm_curr entry in this map
  *
  * size_t coff
  *      Offset of hm_curr relative the address of *base
@@ -382,7 +382,7 @@ void scc_hashmap_free(void *map);
  *
  * Internal use only
  *
- * Insert the key-value pair in ht_curr in the table. Return true
+ * Insert the key-value pair in ht_curr in the map. Return true
  * on success.
  *
  * void *mapaddr
@@ -450,5 +450,45 @@ inline size_t scc_hashmap_size(void const *map) {
         scc_hashmap_impl_base_qual(map, const);
     return base->hm_size;
 }
+
+/* scc_hashmap_impl_find
+ *
+ * Internal use only
+ *
+ * Probe for the value in *handle in the map. Return a pointer to
+ * the address of the value slot corresponding to the given key
+ * if found, NULL otherwise
+ *
+ * void const *map
+ *      Handle to the hash map in question
+ *
+ * size_t keysize
+ *      Size of the key type
+ *
+ * size_t valsize
+ *      Size of the value type
+ */
+void *scc_hashmap_impl_find(void *map, size_t keysize, size_t valsize);
+
+/* scc_hashmap_find
+ *
+ * Probe for value in the hash map
+ *
+ * Expands to the address of the value slot corresponding to the
+ * given key if found, otherwise NULL
+ *
+ * scc_hashmap(keytype, valuetype) map
+ *      The map handle
+ *
+ * keytype' key
+ *      The key to probe for. Subject to implicit conversion should keytype
+ *      and keytype' not be the same.
+ */
+#define scc_hashmap_find(map, key)                                      \
+    scc_hashmap_impl_find(                                              \
+        ((map)->hp_key = (key), (map)),                                 \
+        sizeof((map)->hp_key),                                          \
+        sizeof((map)->hp_val)                                           \
+    )
 
 #endif /* SCC_HASHMAP_H */

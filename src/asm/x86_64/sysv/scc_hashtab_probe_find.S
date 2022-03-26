@@ -10,7 +10,7 @@
 #
 # Return:
 #   %rax: Index of slot, or -1 if element
-#         is already present
+#         is not found
 .globl scc_hashtab_probe_find
 scc_hashtab_probe_find:
 .equ    mdoff,   0x10                       # Offset of ht_mdoff relative base address
@@ -24,6 +24,6 @@ scc_hashtab_probe_find:
     popcntq %rdx, %rax                      # Check if element size is power of 2
     cmpq    $1, %rax
     je      .Lpwr2
-    generic_hash_find_probe 0
+    generic_hash_find_probe 0, 0
 .Lpwr2:
-    generic_hash_find_probe 1
+    generic_hash_find_probe 1, 0
