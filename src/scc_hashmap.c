@@ -13,6 +13,8 @@ enum { SCC_HASHMAP_OCCUPIED = 0x80 };
 enum { SCC_HASHMAP_VACATED = 0x7f };
 enum { SCC_HASHMAP_HASHSHIFT = 57 };
 
+#define SCC_HASHMAP_DUPLICATE (~(~0ull >> 1ull))
+
 #define scc_hashmap_is_power_of_2(val) \
     (((val) & ~((val) - 1)) == (val))
 
@@ -129,7 +131,8 @@ static inline scc_hashmap_metatype *scc_hashmap_metadata(struct scc_hashmap_base
 
 /* scc_hashmap_emplace
  *
- * Emplace the given key-value pair in the map
+ * Emplace the given key-value pair in the map. Return true
+ * if the key already existed in the table
  *
  * void *map
  *      Handle to the hash map
@@ -143,9 +146,11 @@ static inline scc_hashmap_metatype *scc_hashmap_metadata(struct scc_hashmap_base
  * size_t valsize
  *      Size of the value type
  */
-void scc_hashmap_emplace(void *map, struct scc_hashmap_base *base, size_t keysize, size_t valsize) {
+bool scc_hashmap_emplace(void *map, struct scc_hashmap_base *base, size_t keysize, size_t valsize) {
     unsigned long long hash = base->hm_hash(map, keysize);
     unsigned long long index = scc_hashmap_probe_insert(base, map, keysize, hash);
+    bool duplicate = index & SCC_HASHMAP_DUPLICATE;
+    index &= ~SCC_HASHMAP_DUPLICATE;
 
     assert(index < base->hm_capacity);
 
@@ -161,6 +166,7 @@ void scc_hashmap_emplace(void *map, struct scc_hashmap_base *base, size_t keysiz
     scc_hashmap_metatype ent = (scc_hashmap_metatype)(SCC_HASHMAP_OCCUPIED | (hash >> SCC_HASHMAP_HASHSHIFT));
     scc_hashmap_metatype *md = scc_hashmap_metadata(base);
     scc_hashmap_set_mdent(md, index, ent, base->hm_capacity);
+    return duplicate;
 }
 
 /* scc_hashmap_realloc
@@ -290,7 +296,7 @@ static bool scc_hashmap_rehash(
             memcpy(newmap, keybase + i * keysize, keysize);
             /* Copy value */
             memcpy((unsigned char *)newmap + keysize + base->hm_valpad, valbase + i * valsize, valsize);
-            scc_hashmap_emplace(newmap, newbase, keysize, valsize);
+            (void)scc_hashmap_emplace(newmap, newbase, keysize, valsize);
             --base->hm_size;
         }
     }
@@ -348,9 +354,9 @@ bool scc_hashmap_impl_insert(void *mapaddr, size_t keysize, size_t valsize) {
         /* Map has been reallocated */
         base = scc_hashmap_impl_base(*(void **)mapaddr);
     }
-    scc_hashmap_emplace(*(void **)mapaddr, base, keysize, valsize);
-
-    ++base->hm_size;
+    if(!scc_hashmap_emplace(*(void **)mapaddr, base, keysize, valsize)) {
+        ++base->hm_size;
+    }
     return true;
 }
 

@@ -205,6 +205,9 @@
 .if \map
     tzcntl  %r15d, %ecx                     # Offset in vector
     leaq    (%rbx, %rcx), %rax              # Index
+
+    movq    $0x8000000000000000, %rcx       # Set high bit for duplicate
+    orq     %rcx, %rax
 .else
     movq    $-1, %rax
 .endif
@@ -488,6 +491,9 @@
 .if \map
     tzcntl  %r15d, %ecx                     # Offset in vector
     leaq    (%rbx, %rcx), %rax              # Return value
+
+    movq    $0x8000000000000000, %rcx       # Set high bit for duplicate
+    orq     %rcx, %rax
 .else
     movq    $-1, %rax
 .endif
