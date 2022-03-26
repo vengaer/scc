@@ -63,6 +63,8 @@ $(eval
     $(eval __all_obj        += $(filter-out $(__node_obj),$(call wildcard-obj,$(__node_path),$(cext))))
     $(eval __all_obj        += $(filter-out $(__node_obj),$(call wildcard-obj,$(__node_path),$(asext))))
 
+    $(eval __all_rstsrc     += $(wildcard $(__node_path)/*.$(rstext)))
+
     $(eval __all_c_cxx_src  += $(wildcard $(__node_path)/*.$(cext)))
     $(eval __all_c_cxx_src  += $(wildcard $(__node_path)/*.$(cxxext)))
     $(eval __all_c_cxx_src  += $(wildcard $(__node_path)/*.$(hext)))

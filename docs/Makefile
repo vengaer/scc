@@ -1,14 +1,16 @@
 ifdef __node
 
-SPHINX := sphinx-build
+SPHINX   := sphinx-build
 
-#TODO: Recursive wildcard for subdirectories
-__docs := $(call wildcard-artifacts,$(__node_path),$(rstext),$(htmlext))
-__conf := $(__node_path)/conf.$(pyext)
+$(call include-node,hashtab)
 
-$(__docs)&: $(wildcard $(__node_path)/*.$(rstext)) $(__conf) $(__all_mkfiles) | $(__node_builddir)
+__conf   := $(__node_path)/conf.$(pyext)
+__docdir := $(__node_path)
+__docs   := $(patsubst %.$(rstext),$(__node_builddir)/$(notdir %).$(htmlext),$(__all_rstsrc))
+
+$(__docs)&: $(__all_rstsrc) $(__conf) $(__all_mkfiles) | $(__node_builddir)
 	$(call echo-gen,$(notdir $@))
-	$(SPHINX) -b html $(dir $<) $(dir $@)
+	$(SPHINX) -b html $(__docdir) $(dir $@)
 	$(TOUCH) $(__docs)
 
 docs: $(__docs)
