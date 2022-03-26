@@ -17,7 +17,9 @@ $(__node_builddir)/%.$(oext): $(__srcdir)/%.$(asext) | $(__node_builddir)
 
 $(__node_builddir)/%.$(asext): $(__node_path)/%.$(asext) | $(__node_builddir)
 	$(call echo-gen,$(notdir $@))
-	$(asmexpander) -o $@ $<
+	$(asmexpander) -o $@ $< -d $(patsubst %.$(asext),%.exp.$(dext),$@)
+
+-include $(patsubst %.$(oext),%.exp.$(dext),$(__node_obj))
 
 else
 # Recurse to top level
