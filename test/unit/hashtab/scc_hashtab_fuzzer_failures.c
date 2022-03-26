@@ -9,7 +9,6 @@ static bool eq(void const *left, void const *right) {
     return *(unsigned const *)left == *(unsigned const *)right;
 }
 
-
 /* test_scc_hashtab_fuzzer_failure0
  *
  * First failure case detected by fuzzer
