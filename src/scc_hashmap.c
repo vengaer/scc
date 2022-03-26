@@ -13,7 +13,7 @@ enum { SCC_HASHMAP_OCCUPIED = 0x80 };
 enum { SCC_HASHMAP_VACATED = 0x7f };
 enum { SCC_HASHMAP_HASHSHIFT = 57 };
 
-#define SCC_HASHMAP_DUPLICATE (~(~0ull >> 1ull))
+#define SCC_HASHMAP_DUPLICATE (~(~0ull >> 1u))
 
 #define scc_hashmap_is_power_of_2(val) \
     (((val) & ~((val) - 1)) == (val))
