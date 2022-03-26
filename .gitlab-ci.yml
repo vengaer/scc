@@ -20,6 +20,11 @@ check:
   script:
     - make -j$(nproc) check
 
+fuzz_hashmap:
+  stage: fuzz
+  script:
+    - make fuzz SCC_FUZZ_TARGET=hashmap SCC_FUZZTIME=10
+
 fuzz_hashtab:
   stage: fuzz
   script:
