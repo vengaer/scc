@@ -120,3 +120,28 @@ void test_scc_hashmap_insert_overrides_exisiting(void) {
 
     scc_hashmap_free(map);
 }
+
+/* test_scc_hashmap_values_retained_across_rehash
+ *
+ * Repeatedly insert values until a rehash is triggered.
+ * Ensure all inserted values are found and correspond to
+ * the correct value
+ */
+void test_scc_hashmap_values_retained_across_rehash(void) {
+    scc_hashmap(int, unsigned short) map = scc_hashmap_init(int, unsigned short, eq);
+    size_t orig_cap = scc_hashmap_capacity(map);
+
+    int i;
+    for(i = 0; scc_hashmap_capacity(map) == orig_cap; ++i) {
+        TEST_ASSERT_TRUE(scc_hashmap_insert(&map, i, i));
+    }
+
+    unsigned short *val;
+    for(int j = 0; j < i; ++j) {
+        val = scc_hashmap_find(map, j);
+        TEST_ASSERT_TRUE(!!val);
+        TEST_ASSERT_EQUAL_UINT16((unsigned short)j, *val);
+    }
+
+    scc_hashmap_free(map);
+}
