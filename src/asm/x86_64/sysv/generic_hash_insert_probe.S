@@ -492,6 +492,7 @@
 .if \map
     tzcntl  %r15d, %ecx                     # Offset in vector
     leaq    (%rbx, %rcx), %rax              # Return value
+    wrapq   %rbp, %rax, %rdi
 
     movq    $0x8000000000000000, %rcx       # Set high bit for duplicate
     orq     %rcx, %rax
