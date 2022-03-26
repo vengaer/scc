@@ -82,6 +82,7 @@ class DoubleBuffer():
 
 def expand_cpp_includes(file, content, verbose):
     ''' Include cpp-stype #includes '''
+    deps = [file]
     def include_file(filename, fdir):
         path = None
         for fpath in [filename, os.path.join(fdir, filename)]:
@@ -91,6 +92,7 @@ def expand_cpp_includes(file, content, verbose):
                 path = fpath
                 if verbose:
                     print('ok')
+                deps.append(path)
                 break
 
             if verbose:
@@ -124,7 +126,7 @@ def expand_cpp_includes(file, content, verbose):
         dbuf.swap()
         dbuf.back.clear()
 
-    return dbuf.front
+    return dbuf.front, deps
 
 def parse_macros(content, verbose):
     ''' Parse macro definitions from the assembly file '''
@@ -250,11 +252,21 @@ def eval_conditionals(content):
 
     return content
 
-def main(file, outfile, verbose):
+def write_depfile(outfile, depfile, deps, verbose):
+    ''' Write dependency file to allow make to track dependencies '''
+    with FileWrHandle(depfile) as handle:
+        handle.write(f'{outfile}:')
+        for dep in deps:
+            if verbose:
+                print(f'Recording dependency {dep} for {outfile}')
+            handle.write(f' \\\n  {dep}')
+        handle.write('\n')
+
+def main(file, outfile, verbose, depfile=None):
     ''' Main function '''
     with open(file, 'r', encoding='ascii') as handle:
         content = list(map(lambda s: s.rstrip(), handle.readlines()))
-    content = expand_cpp_includes(file, content, verbose)
+    content, deps = expand_cpp_includes(file, content, verbose)
     macros = parse_macros(content, verbose)
     expanded = expand_all(macros, content, verbose)
     stripped = strip_macros(expanded, verbose)
@@ -264,9 +276,14 @@ def main(file, outfile, verbose):
         for line in final:
             handle.writeln(line)
 
+    if None not in (outfile, depfile):
+        write_depfile(outfile, depfile, deps, verbose)
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Recursively expand assember macros')
     parser.add_argument('file', metavar='FILE', type=str, help='Path to the assembly file')
     parser.add_argument('-o', '--outfile', type=str, default=None, help='Desired output file')
     parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose output')
+    # pylint: disable=line-too-long
+    parser.add_argument('-d', '--depfile', type=str, default=None, help='Dependency file to generate')
     main(**vars(parser.parse_args()))
