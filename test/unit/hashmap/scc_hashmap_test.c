@@ -173,3 +173,69 @@ void test_scc_hashmap_elements_erased_on_remove(void) {
 
     scc_hashmap_free(map);
 }
+
+/* test_scc_hashmap_insertion_probe_stop
+ *
+ * Repeatedly insert and remove values
+ * until all slots have been occupied at least
+ * once. Insert another value and verify that
+ * it does not cause an inifinite loop
+ */
+void test_scc_hashmap_insertion_probe_stop(void) {
+    scc_hashmap(int, unsigned short) map = scc_hashmap_init(int, unsigned short, eq);
+    scc_hashmap_metatype *md = scc_hashmap_inspect_metadata(map);
+
+    /* Insert and remove until all slots have been
+     * used at least once */
+    bool done = false;
+    for(unsigned i = 0u; !done; ++i) {
+        done = true;
+        TEST_ASSERT_TRUE(scc_hashmap_insert(&map, i, i));
+        TEST_ASSERT_TRUE(scc_hashmap_remove(map, i));
+
+        for(unsigned j = 0u; j < scc_hashmap_capacity(map); ++j) {
+            if(!md[j]) {
+                done = false;
+                break;
+            }
+        }
+    }
+
+    /* Should not cause infinite loop*/
+    TEST_ASSERT_TRUE(scc_hashmap_insert(&map, 1, 1));
+
+    scc_hashmap_free(map);
+}
+
+/* test_scc_hashmap_find_probe_stop
+ *
+ * Repeatedly insert and remove values
+ * until all slots have been occupied at least
+ * once. Run find on the map and verify
+ * that it does not cause an infinite loop
+ */
+void test_scc_hashmap_find_probe_stop(void) {
+    scc_hashmap(int, unsigned short) map = scc_hashmap_init(int, unsigned short, eq);
+    scc_hashmap_metatype *md = scc_hashmap_inspect_metadata(map);
+
+    /* Insert and remove until all slots have been
+     * used at least once */
+    bool done = false;
+    for(unsigned i = 0u; !done; ++i) {
+        done = true;
+        TEST_ASSERT_TRUE(scc_hashmap_insert(&map, i, i));
+        TEST_ASSERT_TRUE(scc_hashmap_remove(map, i));
+
+        for(unsigned j = 0u; j < scc_hashmap_capacity(map); ++j) {
+            if(!md[j]) {
+                done = false;
+                break;
+            }
+        }
+    }
+
+    /* Should not cause infinite loop*/
+    TEST_ASSERT_FALSE(scc_hashmap_find(map, 1));
+
+    scc_hashmap_free(map);
+}

@@ -194,7 +194,7 @@ void test_scc_hashtab_interleaved_remove_find(void) {
     scc_hashtab_free(tab);
 }
 
-/* test_scc_hahstab_insertion_probe_stop
+/* test_scc_hashtab_insertion_probe_stop
  *
  * Repeatedly insert and remove values
  * until all slots have been occupied at least
@@ -227,7 +227,7 @@ void test_scc_hashtab_insertion_probe_stop(void) {
     scc_hashtab_free(tab);
 }
 
-/* test_scc_hahstab_find_probe_stop
+/* test_scc_hashtab_find_probe_stop
  *
  * Repeatedly insert and remove values
  * until all slots have been occupied at least
