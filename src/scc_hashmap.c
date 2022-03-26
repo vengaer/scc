@@ -5,7 +5,9 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-size_t scc_hashmap_impl_bkpad(void const *handle);
+size_t scc_hashmap_impl_bkpad(void const *map);
+size_t scc_hashmap_capacity(void const *map);
+size_t scc_hashmap_size(void const *map);
 
 /* scc_hashmap_calcpad
  *

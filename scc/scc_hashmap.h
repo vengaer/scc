@@ -263,10 +263,10 @@ void *scc_hashmap_impl_init(struct scc_hashmap_base *base, size_t coff, size_t v
  *
  * Internal use only
  *
- * Compute number of padding bytes between ht_curr and hm_fwoff
+ * Compute number of padding bytes between hm_curr and hm_fwoff
  */
-inline size_t scc_hashmap_impl_bkpad(void const *handle) {
-    return ((unsigned char const *)handle)[-1] + sizeof(((struct scc_hashmap_base *)0)->hm_fwoff);
+inline size_t scc_hashmap_impl_bkpad(void const *map) {
+    return ((unsigned char const *)map)[-1] + sizeof(((struct scc_hashmap_base *)0)->hm_fwoff);
 }
 
 /* scc_hashmap_impl_base_qual
@@ -274,11 +274,11 @@ inline size_t scc_hashmap_impl_bkpad(void const *handle) {
  * Internal use only
  *
  * Obtain qualified pointer to the struct scc_hashmap_base
- * corresponding to the given handle
+ * corresponding to the given map
  */
-#define scc_hashmap_impl_base_qual(handle, qual)                            \
+#define scc_hashmap_impl_base_qual(map, qual)                               \
     scc_container_qual(                                                     \
-        (unsigned char qual *)(handle) - scc_hashmap_impl_bkpad(handle),    \
+        (unsigned char qual *)(map) - scc_hashmap_impl_bkpad(map),          \
         struct scc_hashmap_base,                                            \
         hm_fwoff,                                                           \
         qual                                                                \
@@ -289,10 +289,10 @@ inline size_t scc_hashmap_impl_bkpad(void const *handle) {
  * Internal use only
  *
  * Obtain unqualified pointer to the struct scc_hashmap_base
- * corresponding to the given handle
+ * corresponding to the given map
  */
-#define scc_hashmap_impl_base(handle)                                       \
-    scc_hashmap_impl_base_qual(handle,)
+#define scc_hashmap_impl_base(map)                                          \
+    scc_hashmap_impl_base_qual(map,)
 
 /* scc_hashmap_fnv1a
  *
@@ -314,5 +314,31 @@ unsigned long long scc_hashmap_fnv1a(void const *data, size_t size);
  * Reclaim memory used by the given hash map
  */
 void scc_hashmap_free(void *map);
+
+/* scc_hashmap_capacity
+ *
+ * Return the current capacity of the hash map
+ *
+ * void const *map
+ *      Handle to the hash map in question
+ */
+inline size_t scc_hashmap_capacity(void const *map) {
+    struct scc_hashmap_base const *base =
+        scc_hashmap_impl_base_qual(map, const);
+    return base->hm_capacity;
+}
+
+/* scc_hashmap_size
+ *
+ * Return the current size of the hash map
+ *
+ * void const *map
+ *      Handle to the hash map in question
+ */
+inline size_t scc_hashmap_size(void const *map) {
+    struct scc_hashmap_base const *base =
+        scc_hashmap_impl_base_qual(map, const);
+    return base->hm_size;
+}
 
 #endif /* SCC_HASHMAP_H */
