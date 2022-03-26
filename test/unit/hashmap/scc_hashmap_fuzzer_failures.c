@@ -67,7 +67,7 @@ void test_scc_hashmap_fuzzer_failure1(void) {
     }
 
     unsigned i = scc_arrsize(keys) - 1u;
-    uint16_t *old = scc_hashmap_find(map, keys[i]);
+    unsigned short *old = scc_hashmap_find(map, keys[i]);
     TEST_ASSERT_TRUE(scc_hashmap_insert(&map, keys[i], vals[i]));
     elem = scc_hashmap_find(map, keys[i]);
     TEST_ASSERT_TRUE(!!elem);
@@ -76,6 +76,51 @@ void test_scc_hashmap_fuzzer_failure1(void) {
     for(unsigned j = 0u; j < i; ++j) {
         elem = scc_hashmap_find(map, keys[j]);
         TEST_ASSERT_TRUE(!!elem);
+    }
+
+    scc_hashmap_free(map);
+}
+
+/* test_scc_hashmap_fuzzer_failure2
+ *
+ * Third failure case detected by fuzzer
+ */
+void test_scc_hashmap_fuzzer_failure2(void) {
+    static unsigned const keys[] = {
+        0, 9043968, 512, 11,
+    };
+    static unsigned const dkeys[] = {
+        512, 11
+    };
+    static unsigned short const vals[] = {
+        0, 0, 0, 0
+    };
+    static unsigned short const dvals[] = {
+        0, 138
+    };
+    scc_hashmap(unsigned, unsigned short) map = scc_hashmap_init(unsigned, unsigned short, eq);
+
+    unsigned short *elem;
+    for(unsigned i = 0u; i < scc_arrsize(keys); ++i) {
+        TEST_ASSERT_TRUE(scc_hashmap_insert(&map, keys[i], vals[i]));
+        TEST_ASSERT_EQUAL_UINT64(i + 1ull, scc_hashmap_size(map));
+        elem = scc_hashmap_find(map, keys[i]);
+        TEST_ASSERT_TRUE(!!elem);
+        TEST_ASSERT_EQUAL_UINT16(vals[i], *elem);
+    }
+
+    unsigned short *old;
+    for(unsigned i = 0u; i < scc_arrsize(dkeys); ++i) {
+        old = scc_hashmap_find(map, dkeys[i]);
+        TEST_ASSERT_TRUE(scc_hashmap_insert(&map, dkeys[i], dvals[i]));
+        elem = scc_hashmap_find(map, dkeys[i]);
+        TEST_ASSERT_TRUE(!!elem);
+        TEST_ASSERT_EQUAL_PTR(old, elem);
+        TEST_ASSERT_EQUAL_UINT64(scc_arrsize(keys), scc_hashmap_size(map));
+        for(unsigned j = 0u; j < scc_arrsize(keys); ++j) {
+            elem = scc_hashmap_find(map, keys[j]);
+            TEST_ASSERT_TRUE(!!elem);
+        }
     }
 
     scc_hashmap_free(map);
