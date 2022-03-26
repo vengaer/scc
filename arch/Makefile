@@ -32,7 +32,7 @@ $(if $(arch_lower)$(abi_lower),$(isa_query)): $(__node_obj) | $(archinfo) $(__no
 
 $(__node_builddir)/%.$(oext): $(query_srcdir)/%.$(asext) | $(__node_builddir)
 	$(call echo-as,$(notdir $@))
-	$(AS) -o $@ $< $(ASFLAGS)
+	$(AS) -o $@ $< $(ASFLAGS) $(CPPFLAGS)
 
 $(if $(and $(call not,$(__skip_arch)),$(wildcard $(query_srcdir)/*.$(asext))), \
     $(eval -include $(simdinfo)))
@@ -42,7 +42,6 @@ $(if $(simd_isa),$(vecinfo)): $(vecscript) $(simdinfo) $(call reeval,simd_isa,$(
 	$< -o $@ $(simd_isa)
 
 simd_isa ?= UNSUPPORTED
-ASFLAGS  += -DSCC_VECSIZE=$(vecsize)
 CPPFLAGS += -DSCC_$(bitarch)BIT -DSCC_SIMD_ISA_$(simd_isa)    \
             -DSCC_HOST_OS_$(hostos) -DSCC_ARCH_$(arch)  -DSCC_VECSIZE=$(vecsize)
 else

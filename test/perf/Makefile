@@ -30,7 +30,7 @@ $(eval
 
     $(__node_builddir)/%.$(oext): $(asdir)/%.$(asext) | $(__node_builddir)
 	    $$(call echo-as,$(__node)/$$(notdir $$@))
-	    $(AS) -o $$@ $$< $(ASFLAGS)
+	    $(AS) -o $$@ $$< $(ASFLAGS) $(CPPFLAGS)
 
     $(benchmarktarget): $(__node_obj) $(benchmarkalib) $(benchmarkmain_alib)
 	    $$(call echo-ld,$(__node)/$$(notdir $$@))

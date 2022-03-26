@@ -11,7 +11,7 @@ __srcdir := $(if $(SCC_EXPAND_ASM),\
 
 $(__node_builddir)/%.$(oext): $(__srcdir)/%.$(asext) | $(__node_builddir)
 	$(call echo-as,$(notdir $@))
-	$(AS) -o $@ $< $(ASFLAGS)
+	$(AS) -o $@ $< $(ASFLAGS) $(CPPFLAGS)
 
 .SECONDARY: $(call wildcard-artifacts,$(__node_path),$(asext),$(asext))
 
