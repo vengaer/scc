@@ -515,8 +515,8 @@ _Bool scc_hashmap_impl_remove(void *map, size_t keysize);
  *      Key to remove. Subject to implicit conversion should keytype and
  *      keytype' not be the same
  */
-#define scc_hashmap_remove(map, value)                                      \
-    scc_hashmap_impl_remove(((map)->hp_key = (value), (map)), sizeof((map)->hp_key))
+#define scc_hashmap_remove(map, key)                                    \
+    scc_hashmap_impl_remove(((map)->hp_key = (key), (map)), sizeof((map)->hp_key))
 
 /* scc_hashmap_clear
  *
