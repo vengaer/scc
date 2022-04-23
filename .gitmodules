@@ -6,3 +6,7 @@
 	path = submodules/benchmark
 	url = https://github.com/google/benchmark
 	ignore = dirty
+[submodule "submodules/conftool"]
+	path = submodules/conftool
+	url = https://gitlab.com/vengaer/conftool
+	ignore = dirty
