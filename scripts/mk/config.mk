@@ -8,6 +8,10 @@ CONFTOOL          := conftool
 
 __validate_config := $(builddir)/.config.valid.stamp
 
+$(root)/.config:
+	$(call echo-gen,$(notdir $@))
+	$(CONFTOOL) -c $@ generate defconfig
+
 $(__validate_config): $(root)/.config $(__all_mkfiles) | $(builddir)
 	$(CONFTOOL) -c $< validate
 	$(TOUCH) $@
