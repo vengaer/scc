@@ -30,25 +30,25 @@ fuzz_hashmap:
   stage: fuzz
   script:
     - conftool set CONFIG_FUZZ_TARGET hashmap
-    - make fuzz
+    - make -j$(nproc) fuzz
 
 fuzz_hashtab:
   stage: fuzz
   script:
     - conftool set CONFIG_FUZZ_TARGET hashtab
-    - make fuzz
+    - make -j$(nproc) fuzz
 
 fuzz_rbtree:
   stage: fuzz
   script:
     - conftool set CONFIG_FUZZ_TARGET rbtree
-    - make fuzz
+    - make -j$(nproc) fuzz
 
 fuzz_svec:
   stage: fuzz
   script:
     - conftool set CONFIG_FUZZ_TARGET svec
-    - make fuzz
+    - make -j$(nproc) fuzz
 
 lint:
   stage: lint
