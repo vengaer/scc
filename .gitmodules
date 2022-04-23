@@ -1,4 +1,4 @@
-[submodule "Unity"]
+[submodule "unity"]
 	path = submodules/unity
 	url = https://github.com/ThrowTheSwitch/Unity.git
 	ignore = dirty
@@ -6,7 +6,7 @@
 	path = submodules/benchmark
 	url = https://github.com/google/benchmark
 	ignore = dirty
-[submodule "submodules/conftool"]
+[submodule "conftool"]
 	path = submodules/conftool
 	url = https://gitlab.com/vengaer/conftool
 	ignore = dirty
