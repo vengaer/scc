@@ -6,9 +6,9 @@ include $(mkscripts)/echo.mk
 IMAGE         := scc/build
 __image_stamp := $(builddir)/.docker.image.stamp
 
-$(__image_stamp): $(builddir)
+$(__image_stamp): $(root)/Dockerfile $(submodules) $(__all_mkfiles) | $(builddir)
 	$(call echo-gen,$(IMAGE))
-	docker build . -t$(IMAGE) --network=host
+	docker build $(root) -t$(IMAGE) --network=host
 	$(TOUCH) $@
 
 docker-image: $(__image_stamp)

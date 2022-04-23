@@ -1,14 +1,14 @@
 FROM archlinux:latest
 LABEL maintainer="vilhelm.engstrom@tuta.io"
-ENV PATH="/root/.local/bin:${PATH}"
+ENV PATH="/root/.cargo/bin:/root/.local.bin:${PATH}"
 
-RUN pacman -Syu --noconfirm --needed make clang gcc git python{,-sphinx} llvm ruby cmake
+COPY . /scc
 
-RUN python -m ensurepip
-RUN python -m pip install --upgrade pip
+RUN pacman -Syu --noconfirm --needed make clang gcc git python{,-sphinx,-pip} llvm ruby cmake rust
+RUN cargo install --path /scc/submodules/conftool
+
 RUN pip install --no-cache setuptools sphinx-rtd-theme pylint pytest
 
 ENV CC=clang
 
-COPY . /scc
 WORKDIR /scc
