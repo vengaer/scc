@@ -1,14 +1,20 @@
 image: archlinux:latest
 
 before_script:
-  - pacman -Syu --needed --noconfirm make clang gcc git python{,-pytest,-pylint} llvm asciidoc ruby cmake
+  - pacman -Syu --needed --noconfirm make clang gcc git python{,-pytest,-pylint} llvm asciidoc ruby cmake rust
+  - git submodule update --init
+  - cargo install --path submodules/conftool
+  - export PATH="$HOME/.cargo/bin:$PATH"
+  - conftool generate defconfig
+  - conftool set CONFIG_FUZZ_TIME 10
+  - conftool set CONFIG_FUZZ_LENGTH 32768
+  - conftool set CONFIG_FUZZ_TIMEOUT 10
 
 stages:
   - build
   - test
   - fuzz
   - lint
-  - doc
 
 build_lib:
   stage: build
@@ -23,22 +29,26 @@ check:
 fuzz_hashmap:
   stage: fuzz
   script:
-    - make fuzz SCC_FUZZ_TARGET=hashmap SCC_FUZZTIME=10
+    - conftool set CONFIG_FUZZ_TARGET hashmap
+    - make fuzz
 
 fuzz_hashtab:
   stage: fuzz
   script:
-    - make fuzz SCC_FUZZ_TARGET=hashtab SCC_FUZZTIME=10
+    - conftool set CONFIG_FUZZ_TARGET hashtab
+    - make fuzz
 
 fuzz_rbtree:
   stage: fuzz
   script:
-    - make fuzz SCC_FUZZ_TARGET=rbtree SCC_FUZZTIME=10
+    - conftool set CONFIG_FUZZ_TARGET rbtree
+    - make fuzz
 
 fuzz_svec:
   stage: fuzz
   script:
-    - make fuzz SCC_FUZZ_TARGET=svec SCC_FUZZTIME=10
+    - conftool set CONFIG_FUZZ_TARGET svec
+    - make fuzz
 
 lint:
   stage: lint
