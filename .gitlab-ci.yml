@@ -1,7 +1,7 @@
 image: archlinux:latest
 
 before_script:
-  - pacman -Syu --needed --noconfirm make clang gcc git python{,-pytest,-pylint} llvm asciidoc ruby cmake rust
+  - pacman -Syu --needed --noconfirm make clang gcc git python{,-pytest,-pylint} llvm ruby cmake rust
   - git submodule update --init
   - cargo install --path submodules/conftool -j$(nproc)
   - export PATH="$HOME/.cargo/bin:$PATH"
