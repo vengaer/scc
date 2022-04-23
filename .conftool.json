@@ -8,6 +8,13 @@
             "help": "Set to unhide recipe output while building"
         },
         {
+            "name": "CONFIG_SIMD",
+            "depends": [],
+            "entrytype": "switch",
+            "default": "y",
+            "help": "Set to enable SIMD optimizations. Ignored if hardware support is insufficient"
+        },
+        {
             "name": "CONFIG_DEVEL",
             "depends": [],
             "entrytype": "switch",

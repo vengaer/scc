@@ -12,6 +12,8 @@ $(__validate_config): $(root)/.config $(__all_mkfiles) | $(builddir)
 	$(CONFTOOL) -c $< validate
 	$(TOUCH) $@
 
+__simd_enable := $(call is-set,$(CONFIG_SIMD))
+
 # Instrumentation
 SCC_EXPAND_ASM   := $(call is-set,$(CONFIG_EXPAND_ASM))
 CPPFLAGS         += $(if $(call is-set,$(CONFIG_PERFEVENTS)),-DSCC_PERFEVTS)

@@ -17,6 +17,7 @@ def main(isa, outfile):
 
     with FileWrHandle(outfile) if outfile is not None else StdoutWrHandle() as handle:
         handle.writeln(f'vecsize := {VECSIZES.get(isa.lower(), fallback)}')
+        handle.writeln(f'ullsize := {fallback}')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generate processor information given SIMD ISA')
