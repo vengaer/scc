@@ -8,5 +8,5 @@
 	ignore = dirty
 [submodule "conftool"]
 	path = submodules/conftool
-	url = https://gitlab.com/vengaer/conftool
+	url = https://gitlab.com/vengaer/conftool.git
 	ignore = dirty
