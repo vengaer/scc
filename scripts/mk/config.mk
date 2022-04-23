@@ -29,4 +29,7 @@ SCC_FUZZ_CORPORA := $(CONFIG_FUZZ_CORPORA)
 SCC_BM_TARGET    := $(CONFIG_BENCHMARK_TARGET)
 SCC_BM_TYPE      := $(CONFIG_BENCHMARK_TYPE)
 
+# Build options
+VERBOSE          ?= $(call is-set,$(CONFIG_VERBOSE))
+
 endif

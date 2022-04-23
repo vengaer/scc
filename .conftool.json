@@ -1,6 +1,13 @@
 {
     "entries": [
         {
+            "name": "CONFIG_VERBOSE",
+            "depends": [],
+            "entrytype": "switch",
+            "default": "n",
+            "help": "Set to unhide recipe output while building"
+        },
+        {
             "name": "CONFIG_DEVEL",
             "depends": [],
             "entrytype": "switch",
