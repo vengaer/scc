@@ -2,6 +2,15 @@ ifndef __Config_mk
 __Config_mk := _
 
 include $(mkscripts)/expr.mk
+include $(mkscripts)/refl.mk
+
+CONFTOOL          := conftool
+
+__validate_config := $(builddir)/.config.valid.stamp
+
+$(__validate_config): $(root)/.config $(__all_mkfiles) | $(builddir)
+	$(CONFTOOL) -c $< validate
+	$(TOUCH) $@
 
 # Instrumentation
 SCC_EXPAND_ASM   := $(call is-set,$(CONFIG_EXPAND_ASM))
