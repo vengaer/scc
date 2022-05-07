@@ -16,9 +16,9 @@ $(archinfo): $(archscript) | $(__node_builddir)
 	$(call echo-gen,$(notdir $@))
 	$< -o $@
 
-$(if $(call not,$(__skip_arch)), \
-    $(eval -include $(archinfo))   \
-    $(eval -include $(vecinfo)))
+$(if $(call not,$(__skip_arch)),                \
+    $(call __include-barrier-rel,$(archinfo))   \
+    $(call __include-barrier-rel,$(vecinfo)))
 
 query_srcdir := $(__node_path)/$(arch_lower)/$(abi_lower)
 __node_obj   := $(call wildcard-obj,$(query_srcdir),$(asext))
@@ -27,7 +27,7 @@ $(simdinfo): $(isa_query)
 	$(call echo-gen,$(notdir $@))
 	$< $@
 
-$(if $(arch_lower)$(abi_lower),$(isa_query)): $(__node_obj) | $(archinfo) $(__node_builddir)
+$(call __include-barrier-acq,$(archinfo),$(isa_query)): $(__node_obj) | $(archinfo) $(__node_builddir)
 	$(call echo-ld,$(notdir $@))
 	$(LD) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
@@ -36,9 +36,9 @@ $(__node_builddir)/%.$(oext): $(query_srcdir)/%.$(asext) | $(__node_builddir)
 	$(AS) -o $@ $< $(ASFLAGS) $(CPPFLAGS)
 
 $(if $(and $(call not,$(__skip_arch)),$(wildcard $(query_srcdir)/*.$(asext))), \
-    $(eval -include $(simdinfo)))
+    $(call __include-barrier-rel,$(simdinfo)))
 
-$(if $(simd_isa),$(vecinfo)): $(vecscript) $(simdinfo) $(call reeval,simd_isa,$(vecinfo))| $(__node_builddir)
+$(call __include-barrier-acq,$(simdinfo),$(vecinfo)): $(vecscript) $(simdinfo) $(call reeval,simd_isa,$(vecinfo))| $(__node_builddir)
 	$(call echo-gen,$(notdir $@))
 	$< -o $@ $(simd_isa)
 
