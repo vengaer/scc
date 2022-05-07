@@ -265,7 +265,7 @@ void *scc_hashmap_impl_init(struct scc_hashmap_base *base, size_t coff, size_t v
 //!
 //!     Initializes a hash map using the specified hash function. The macro expands
 //!     to a handle to a hash map with automatic storage duration. See
-//!     :ref:`Scope and Lifetimes <scope_and_lifetimes__map>` for an in-depth explanation of how to
+//!     :ref:`Scope and Lifetimes <scope_and_lifetimes>` for an in-depth explanation of how to
 //!     safely manage the handle.
 //!
 //!     The call cannot fail.

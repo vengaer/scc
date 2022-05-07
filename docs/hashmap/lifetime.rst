@@ -1,4 +1,0 @@
-.. _scope_and_lifetimes__map:
-
-Scope and Lifetimes
-===================

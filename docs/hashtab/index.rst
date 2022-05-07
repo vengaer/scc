@@ -7,5 +7,4 @@ scc_hashtab
 
 .. toctree::
 
-    lifetime
     reference
