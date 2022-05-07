@@ -10,3 +10,4 @@ Welcome to scc's documentation!
     intro
     collections
     lifetime
+    configuration
