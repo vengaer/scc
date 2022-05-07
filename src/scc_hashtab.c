@@ -327,7 +327,7 @@ void const *scc_hashtab_impl_find(void const *handle, size_t elemsize) {
     return (void const *)((unsigned char const *)handle + (index + 1ull) * elemsize);
 }
 
-void *scc_hashtab_impl_init(struct scc_hashtab_base *base, scc_eq eq, scc_hash hash, size_t coff, size_t mdoff) {
+void *scc_hashtab_impl_init(struct scc_hashtab_base *base, scc_hashtab_eq eq, scc_hashtab_hash hash, size_t coff, size_t mdoff) {
     base->ht_eq = eq;
     base->ht_hash = hash;
     base->ht_mdoff = mdoff;

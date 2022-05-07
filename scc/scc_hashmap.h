@@ -35,23 +35,15 @@
 
 enum { SCC_HASHMAP_STACKCAP = 32 };
 
-#ifndef SCC_EQ_TYPEDEF
-#define SCC_EQ_TYPEDEF
-//! .. _scc_eq:
-//! .. c:type:: _Bool(*scc_eq)(void const *, void const *)
+//! .. c:type:: _Bool(*scc_hashmap_eq)(void const *, void const *)
 //!
 //!     Signature of the function used for equality comparisons.
-typedef _Bool(*scc_eq)(void const *, void const *);
-#endif /* SCC_EQ_TYPEDEF */
+typedef _Bool(*scc_hashmap_eq)(void const *, void const *);
 
-#ifndef SCC_HASH_TYPEDEF
-#define SCC_HASH_TYPEDEF
-//! .. _scc_hash:
-//! .. c:type:: unsigned long long(*scc_hash)(void const *, size_t)
+//! .. c:type:: unsigned long long(*scc_hashmap_hash)(void const *, size_t)
 //!
 //!     Signature of the hash function used.
-typedef unsigned long long(*scc_hash)(void const *, size_t);
-#endif /* SCC_HASH_TYPEDEF */
+typedef unsigned long long(*scc_hashmap_hash)(void const *, size_t);
 
 typedef unsigned char scc_hashmap_metatype;
 
@@ -95,10 +87,10 @@ struct scc_hashmap_perfevts {
  * base, the address of said pointer is obtained by computing
  * &base.hm_fwoff + base.hm_fwoff + 1.
  *
- * scc_eq hm_eq
+ * scc_hashmap_eq hm_eq
  *      Pointer to function used for equality comparison
  *
- * scc_hash hm_hash
+ * scc_hashmap_hash hm_hash
  *      Pointer to hash function.
  *
  * size_t hm_valoff
@@ -146,8 +138,8 @@ struct scc_hashmap_perfevts {
  *      refer to scc_hashmap_impl_layout.
  */
 struct scc_hashmap_base {
-    scc_eq hm_eq;
-    scc_hash hm_hash;
+    scc_hashmap_eq hm_eq;
+    scc_hashmap_hash hm_hash;
     size_t hm_valoff;
     size_t hm_mdoff;
     size_t hm_size;
@@ -225,8 +217,8 @@ struct scc_hashmap_base {
  */
 #define scc_hashmap_impl_layout(keytype, valuetype)                                         \
     struct {                                                                                \
-        scc_eq hm_eq;                                                                       \
-        scc_hash hm_hash;                                                                   \
+        scc_hashmap_eq hm_eq;                                                               \
+        scc_hashmap_hash hm_hash;                                                           \
         size_t hm_valoff;                                                                   \
         size_t hm_mdoff;                                                                    \
         size_t hm_size;                                                                     \
@@ -269,7 +261,7 @@ struct scc_hashmap_base {
 void *scc_hashmap_impl_init(struct scc_hashmap_base *base, size_t coff, size_t valoff, size_t keysize);
 
 //! .. _scc_hashmap_init_with_hash:
-//! .. c:function:: void *scc_hashmap_init_with_hash(keytype, valuetype, scc_eq eq, scc_hash hash)
+//! .. c:function:: void *scc_hashmap_init_with_hash(keytype, valuetype, scc_hashmap_eq eq, scc_hashmap_hash hash)
 //!
 //!     Initializes a hash map using the specified hash function. The macro expands
 //!     to a handle to a hash map with automatic storage duration. See
@@ -283,10 +275,8 @@ void *scc_hashmap_impl_init(struct scc_hashmap_base *base, size_t coff, size_t v
 //!
 //!     :param keytype: Type of the keys to be stored in the map
 //!     :param valuetype: Type of the values to be stored in the map
-//!     :param eq: Pointer to function with signature :ref:`scc_eq <scc_eq>` to be
-//!                used for equality comparison
-//!     :param hash: Pointer to function with signature :ref:`scc_hash <scc_hash>` to
-//!                  be used for key hashing
+//!     :param eq: Pointer to function to be used for equality comparison
+//!     :param hash: Pointer to function to be used for key hashing
 //!     :returns: Handle to a newly created hash map. The map is allocated in the stack
 //!               frame of the current function and its lifetime tied to the scope in
 //!               which :c:texpr:`scc_hashmap_init_with_hash` is invoked.
@@ -321,7 +311,7 @@ void *scc_hashmap_impl_init(struct scc_hashmap_base *base, size_t coff, size_t v
     )
 
 //! .. _scc_hashmap_init:
-//! .. c:function:: void *scc_hashmap_init(keytype, valuetype, scc_eq eq)
+//! .. c:function:: void *scc_hashmap_init(keytype, valuetype, scc_hashmap_eq eq)
 //!
 //!     Initializes a hash map using the default :ref:`Fowler-Noll-Vo <scc_hashmap_fnv1a>`
 //!     hash function. Exactly equivalent to calling
@@ -336,8 +326,7 @@ void *scc_hashmap_impl_init(struct scc_hashmap_base *base, size_t coff, size_t v
 //!
 //!     :param keytype: Type of the keys to be stored in the map
 //!     :param valuetype: Type of the values to be stored in the map
-//!     :param eq: Pointer to function with signature :ref:`scc_eq <scc_eq>` to be
-//!                used for equality comparison
+//!     :param eq: Pointer to function to be used for equality comparison
 //!     :returns: Handle to a newly created hash map. The map is allocated in the stack
 //!               frame of the current function and its lifetime tied to the scope in
 //!               which :c:texpr:`scc_hashmap_init` is invoked.

@@ -5,38 +5,27 @@
 
 #include <stddef.h>
 
-/* scc_hashtab
- *
- * Expands to a pointer suitable for
- * storing a hash table handle for the given
- * type
- *
- * type
- *      The type stored in the table
- */
+//! .. c:macro:: scc_hashtab(type)
+//!
+//!     Expands to an opaque pointer suitable for storing a handle to
+//!     a hash tab holding instances of the given type
+//!
+//!     :param type: Type of the elements to be stored in the table
 #define scc_hashtab(type) type *
 
 #define SCC_HASHTAB_GUARDSZ ((unsigned)SCC_VECSIZE - 1u)
 
 enum { SCC_HASHTAB_STACKCAP = 32 };
 
-#ifndef SCC_EQ_TYPEDEF
-#define SCC_EQ_TYPEDEF
-/* scc_eq
- *
- * Signature of function used for equality comparisons
- */
-typedef _Bool(*scc_eq)(void const *, void const *);
-#endif /* SCC_EQ_TYPEDEF */
+//! .. c:type:: _Bool(*scc_hashtab_eq)(void const *, void const *)
+//!
+//!     Signature of the function used for equality comparisons.
+typedef _Bool(*scc_hashtab_eq)(void const *, void const *);
 
-#ifndef SCC_HASH_TYPEDEF
-#define SCC_HASH_TYPEDEF
-/* scc_hash
- *
- * Signature of function used for hashing
- */
-typedef unsigned long long(*scc_hash)(void const*, size_t);
-#endif /* SCC_HASH_TYPEDEF */
+//! .. c:type:: unsigned long long(*scc_hashtab_hash)(void const *, size_t)
+//!
+//!     Signature of the hash function used.
+typedef unsigned long long(*scc_hashtab_hash)(void const*, size_t);
 
 /* scc_hashtab_metatype
  *
@@ -87,10 +76,10 @@ struct scc_hashtab_perfevts {
  * scc_hashtab_base base, the address of said pointer is
  * obtained by computing &base.ht_fwoff + base.ht_fwoff + 1.
  *
- * scc_eq ht_eq;
+ * scc_hashtab_eq ht_eq;
  *      Pointer to function used for equality comparison
  *
- * scc_hash ht_hash
+ * scc_hashtab_hash ht_hash
  *      Pointer to hash function.
  *
  * size_t ht_mdoff
@@ -122,8 +111,8 @@ struct scc_hashtab_perfevts {
  *      refer to scc_hashtab_impl_layout.
  */
 struct scc_hashtab_base {
-    scc_eq ht_eq;
-    scc_hash ht_hash;
+    scc_hashtab_eq ht_eq;
+    scc_hashtab_hash ht_hash;
     size_t ht_mdoff;
     size_t ht_size;
     size_t ht_capacity;
@@ -194,8 +183,8 @@ struct scc_hashtab_base {
  */
 #define scc_hashtab_impl_layout(type)                                       \
     struct {                                                                \
-        scc_eq ht_eq;                                                       \
-        scc_hash ht_hash;                                                   \
+        scc_hashtab_eq ht_eq;                                               \
+        scc_hashtab_hash ht_hash;                                           \
         size_t ht_mdoff;                                                    \
         size_t ht_size;                                                     \
         size_t ht_capacity;                                                 \
@@ -219,10 +208,10 @@ struct scc_hashtab_base {
  *      Address of hash table base. The handle returned by the function
  *      refers to the ht_curr entry in this table
  *
- * scc_eq eq
+ * scc_hashtab_eq eq
  *      Pointer to the equality function to use
  *
- * scc_hash
+ * scc_hashtab_hash hash
  *      Pointer to the hash function to use
  *
  * size_t coff
@@ -231,7 +220,7 @@ struct scc_hashtab_base {
  * size_t mdoff
  *      Offset of ht_meta relative the address of *base
  */
-void *scc_hashtab_impl_init(struct scc_hashtab_base *base, scc_eq eq, scc_hash hash, size_t coff, size_t mdoff);
+void *scc_hashtab_impl_init(struct scc_hashtab_base *base, scc_hashtab_eq eq, scc_hashtab_hash hash, size_t coff, size_t mdoff);
 
 /* scc_hashtab_init_with_hash
  *
@@ -240,10 +229,10 @@ void *scc_hashtab_impl_init(struct scc_hashtab_base *base, scc_eq eq, scc_hash h
  * type
  *      Type the hash table is to store
  *
- * scc_eq eq
+ * scc_hashtab_eq eq
  *      Pointer to function to use for equality comparisons
  *
- * scc_hash hash
+ * scc_hashtab_hash hash
  *      Pointer to function to use for hashing
  */
 #define scc_hashtab_init_with_hash(type, eq, hash)                          \
@@ -262,7 +251,7 @@ void *scc_hashtab_impl_init(struct scc_hashtab_base *base, scc_eq eq, scc_hash h
  * type
  *      Type the hash table is to store
  *
- * scc_eq eq
+ * scc_hashtab_eq eq
  *      Pointer to function to use for equality comparisons
  */
 #define scc_hashtab_init(type, eq)                                          \
