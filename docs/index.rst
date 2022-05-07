@@ -1,8 +1,11 @@
 Welcome to scc's documentation!
 ===============================
 
+.. default-domain:: C
+
 .. toctree::
-    :maxdepth: 3
+    :includehidden:
+    :maxdepth: 5
 
     intro
     collections

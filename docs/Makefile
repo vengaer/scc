@@ -13,6 +13,13 @@ __rstsrc     := $(wildcard $(__node_path)/*.$(rstext))
 
 .SECONDARY: $(__docgen)
 
+$(call include-node,hashmap)
+$(call include-node,hashtab)
+$(call include-node,rbtree)
+$(call include-node,stack)
+$(call include-node,svec)
+$(call include-node,vec)
+
 $(__docs)&: $(__rstsrc) $(__all_rstsrc) $(__docgen) $(__conf) $(__all_mkfiles) | $(__node_builddir)
 	$(call echo-gen,docs)
 	$(SPHINX) -b html $(__docdir) $(dir $@)

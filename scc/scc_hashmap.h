@@ -21,18 +21,13 @@
 #define scc_hashmap_impl_pair(keytype, valuetype)                                       \
     struct { keytype hp_key; valuetype hp_val; }
 
-/* scc_hashmap
- *
- * Expands to a pointer suitable for
- * storing a hash map handle for the given
- * key and value types
- *
- * keytype
- *      The key type to be stored in the map
- *
- * valuetype
- *      The value type to be stored in the map
- */
+//! .. c:macro:: scc_hashmap(keytype, valuetype)
+//!
+//!     Expands to an opaque pointer suitable for storing a handle to
+//!     a hash map holding instances of the given key- and value types.
+//!
+//!     :param keytype: Type of the keys to be stored in the map
+//!     :param valuetype: Type of the values to be stored in the map
 #define scc_hashmap(keytype, valuetype)                                                 \
     scc_hashmap_impl_pair(keytype, valuetype) *
 
@@ -42,20 +37,20 @@ enum { SCC_HASHMAP_STACKCAP = 32 };
 
 #ifndef SCC_EQ_TYPEDEF
 #define SCC_EQ_TYPEDEF
-/* scc_eq
- *
- * Signature of function used for equality comparisons
- */
+//! .. _scc_eq:
+//! .. c:type:: _Bool(*scc_eq)(void const *, void const *)
+//!
+//!     Signature of the function used for equality comparisons.
 typedef _Bool(*scc_eq)(void const *, void const *);
 #endif /* SCC_EQ_TYPEDEF */
 
 #ifndef SCC_HASH_TYPEDEF
 #define SCC_HASH_TYPEDEF
-/* scc_hash
- *
- * Signature of function used for hashing
- */
-typedef unsigned long long(*scc_hash)(void const*, size_t);
+//! .. _scc_hash:
+//! .. c:type:: unsigned long long(*scc_hash)(void const *, size_t)
+//!
+//!     Signature of the hash function used.
+typedef unsigned long long(*scc_hash)(void const *, size_t);
 #endif /* SCC_HASH_TYPEDEF */
 
 typedef unsigned char scc_hashmap_metatype;
@@ -273,22 +268,41 @@ struct scc_hashmap_base {
  */
 void *scc_hashmap_impl_init(struct scc_hashmap_base *base, size_t coff, size_t valoff, size_t keysize);
 
-/* scc_hashmap_init_with_hash
- *
- * Initialize hash map with a specified hash function.
- *
- * keytype
- *      The key type the hash map is to store
- *
- * valuetype
- *      The value type the hash map is to store
- *
- * scc_eq eq
- *      Pointer to function to use for equality comparisons
- *
- * scc_hash hash
- *      Pointer to function to use for hashing
- */
+//! .. _scc_hashmap_init_with_hash:
+//! .. c:function:: void *scc_hashmap_init_with_hash(keytype, valuetype, scc_eq eq, scc_hash hash)
+//!
+//!     Initializes a hash map using the specified hash function. The macro expands
+//!     to a handle to a hash map with automatic storage duration. See
+//!     :ref:`Scope and Lifetimes <scope_and_lifetimes__map>` for an in-depth explanation of how to
+//!     safely manage the handle.
+//!
+//!     The call cannot fail.
+//!
+//!     The returned pointer must be passed to :ref:`scc_hashmap_free <scc_hashmap_free>` to ensure
+//!     allocated memory is reclaimed.
+//!
+//!     :param keytype: Type of the keys to be stored in the map
+//!     :param valuetype: Type of the values to be stored in the map
+//!     :param eq: Pointer to function with signature :ref:`scc_eq <scc_eq>` to be
+//!                used for equality comparison
+//!     :param hash: Pointer to function with signature :ref:`scc_hash <scc_hash>` to
+//!                  be used for key hashing
+//!     :returns: Handle to a newly created hash map. The map is allocated in the stack
+//!               frame of the current function and its lifetime tied to the scope in
+//!               which :c:texpr:`scc_hashmap_init_with_hash` is invoked.
+//!
+//!     .. code-block:: C
+//!         :caption: Example usage
+//!
+//!         extern _Bool eq(void const *l, void const *r);
+//!         extern unsigned long long hash(void const *data, size_t size);
+//!
+//!         scc_hashmap(int, _Bool) map;
+//!         {
+//!             map = scc_hashmap_init_with_hash(int, _Bool, eq, hash);
+//!             /* map is valid */
+//!         }
+//!         /* map is no longer valid */
 #define scc_hashmap_init_with_hash(keytype, valuetype, eq, hash)                            \
     scc_hashmap_impl_init(                                                                  \
         (void *)&(scc_hashmap_impl_layout(keytype, valuetype)){                             \
@@ -306,19 +320,29 @@ void *scc_hashmap_impl_init(struct scc_hashmap_base *base, size_t coff, size_t v
         sizeof(keytype)                                                                     \
     )
 
-/* scc_hashmap_init
- *
- * Initialize a hash map. The hash function is set to an fnv1a.
- *
- * keytype
- *      The key type the hash map is to store
- *
- * valuetype
- *      The value type the hash map is to store
- *
- * scc_eq eq
- *      Pointer to function to use for equality comparisons
- */
+//! .. _scc_hashmap_init:
+//! .. c:function:: void *scc_hashmap_init(keytype, valuetype, scc_eq eq)
+//!
+//!     Initializes a hash map using the default :ref:`Fowler-Noll-Vo <scc_hashmap_fnv1a>`
+//!     hash function. Exactly equivalent to calling
+//!     :code:`scc_hashmap_init_with_hash(keytype, valuetype, eq, scc_hashmap_fnv1a)`. See
+//!     :ref:`its documentation <scc_hashmap_init_with_hash>` for restrictions and common
+//!     pitfalls.
+//!
+//!     The call cannot fail.
+//!
+//!     The returned pointer must be passed to :ref:`scc_hashmap_free <scc_hashmap_free>` to ensure
+//!     allocated memory is reclaimed.
+//!
+//!     :param keytype: Type of the keys to be stored in the map
+//!     :param valuetype: Type of the values to be stored in the map
+//!     :param eq: Pointer to function with signature :ref:`scc_eq <scc_eq>` to be
+//!                used for equality comparison
+//!     :returns: Handle to a newly created hash map. The map is allocated in the stack
+//!               frame of the current function and its lifetime tied to the scope in
+//!               which :c:texpr:`scc_hashmap_init` is invoked.
+//!
+//!     .. seealso:: :ref:`scc_hashmap_init_with_hash <scc_hashmap_init_with_hash>`
 #define scc_hashmap_init(keytype, valuetype, eq)                                            \
     scc_hashmap_init_with_hash(keytype, valuetype, eq, scc_hashmap_fnv1a)
 
@@ -357,25 +381,31 @@ inline size_t scc_hashmap_impl_bkpad(void const *map) {
 #define scc_hashmap_impl_base(map)                                          \
     scc_hashmap_impl_base_qual(map,)
 
-/* scc_hashmap_fnv1a
- *
- * Simple alternative Fowler-Voll-No implementation
- *
- * void const *data
- *      Address of data to be hashed. The data is treated as a
- *      consecutive array of bytes. Potential padding in structs
- *      must be explicitly initialized to avoid hash mismatches.
- *
- * size_t size
- *      Size of data, in bytes
- */
+//! .. _scc_hashmap_fnv1a:
+//! .. c:function:: unsigned long long scc_hashmap_fnv1a(void const *data, size_t size)
+//!
+//!     Simple `alternative Fowler-Noll-Vo hash
+//!     <https://en.wikipedia.org/wiki/Fowler-Noll-Vo_hash_function#FNV-1a_hash>`_
+//!     implementation. Used as the default hash function.
+//!
+//!     :param data: Address of the data to be hashed. The data
+//!                  is treated as a consecutive array of bytes.
+//!                  Potential padding in structs must therefore
+//!                  be explicitly initialized to avoid erratic
+//!                  hashing behavior.
+//!     :param size: The size of the data to be hashed, in bytes
+//!     :returns: The alternative Fowler-Noll-Vo hash of the given :c:texpr:`data`
 unsigned long long scc_hashmap_fnv1a(void const *data, size_t size);
 
-
-/* scc_hashmap_free
- *
- * Reclaim memory used by the given hash map
- */
+//! .. _scc_hashmap_free:
+//! .. c:function:: void scc_hashmap_free(void *map)
+//!
+//!     Reclaim memory used by the given hash map. The :c:texpr:`map`
+//!     parameter must refer to a valid hash map handle returned by either
+//!     :ref:`scc_hashmap_init <scc_hashmap_init>` or
+//!     :ref:`scc_hashmap_init_with_hash <scc_hashmap_init_with_hash>`.
+//!
+//!     :param map: Handle to the hash map to free
 void scc_hashmap_free(void *map);
 
 /* scc_hashmap_impl_insert
@@ -396,25 +426,44 @@ void scc_hashmap_free(void *map);
  */
 _Bool scc_hashmap_impl_insert(void *mapaddr, size_t keysize, size_t valsize);
 
-
-/* scc_hashmap_insert
- *
- * Insert a key-value pair in the hash map, replacing existing
- * values if present. May result in reallocation.
- *
- * Expands to true if the pair was successfully inserted
- *
- * scc_hashmap(keytype, valuetype) *mapaddr
- *      Address of the map handle
- *
- * keytype' key
- *      The key for which the value is to be inserted. Subject to
- *      implicit conversion should keytype and keytype' not be the same.
- *
- * valuetype' value
- *      The value to insert. Subject to implicit conversion should valuetype
- *      and valuetype' not be the same.
- */
+//! .. c:function:: _Bool scc_hashmap_insert(void *mapaddr, keytype key, valuetype value)
+//!
+//!     Insert a key-value pair in the hash map. If :c:texpr:`key` is already present
+//!     in the hash map, its associated value is replaced with the given
+//!     :c:texpr:`value`. If :c:texpr:`key` is not found in the table, the pair
+//!     is inserted.
+//!
+//!     The call may result in the hash map being reallocated.
+//!
+//!     The return value does not indicate whether the given :c:texpr:`key` was already
+//!     present in the table or not. For determining whether a key is present in the
+//!     map, refer to :ref:`scc_hashmap_find <scc_hashmap_find>`.
+//!
+//!     :param mapaddr: Address of the handle used for referring to the hash map. Should
+//!                     the map have to be reallocated to accomodate the insertion, :c:texpr:`*mapaddr`
+//!                     is changed to refer to the newly allocated hash map.
+//!     :param key: The key used for comparison with ones existing in the map. Must be implicitly
+//!                 convertible to the key type for which the table was instantiated.
+//!     :param value: The associated value to insert a the slot computed from the :c:texpr:`key`.
+//!     :returns: A :c:texpr:`_Bool` indicating whether the insertion was successful.
+//!     :retval true: The key-value pair was successfully inserted.
+//!     :retval false: Memory allocation failure
+//!
+//!     .. code-block:: C
+//!         :caption: Insert the value 38 with key 1 in a map
+//!
+//!         extern _Bool eq(void const *l, void const *r);
+//!
+//!         scc_hashmap(int, int) map = scc_hashmap_init(int, int, eq);
+//!
+//!         if(!scc_hashmap_insert(&map, 1, 38)) {
+//!             fputs("Insertion failure\n", stderr);
+//!             exit(1);
+//!         }
+//!
+//!         /* Use map */
+//!
+//!         scc_hashmap_free(map);
 #define scc_hashmap_insert(mapaddr, key, value)                             \
     scc_hashmap_impl_insert((                                               \
             (*(mapaddr))->hp_key = key,                                     \
@@ -425,26 +474,26 @@ _Bool scc_hashmap_impl_insert(void *mapaddr, size_t keysize, size_t valsize);
         sizeof((*(mapaddr))->hp_val)                                        \
     )
 
-/* scc_hashmap_capacity
- *
- * Return the current capacity of the hash map
- *
- * void const *map
- *      Handle to the hash map in question
- */
+//! .. c:function:: size_t scc_hashmap_capacity(void const *map)
+//!
+//!     Return the current capacity of the given hash map.
+//!
+//!     :param map: Handle to the hash map
+//!     :returns: The number of elements the hash map is able to
+//!               store at the time of the call. Note that the hash
+//!               map *will* be reallocated before the capacity is
+//!               reached.
 inline size_t scc_hashmap_capacity(void const *map) {
     struct scc_hashmap_base const *base =
         scc_hashmap_impl_base_qual(map, const);
     return base->hm_capacity;
 }
 
-/* scc_hashmap_size
- *
- * Return the current size of the hash map
- *
- * void const *map
- *      Handle to the hash map in question
- */
+//! .. c:function:: size_t scc_hashmap_size(void const *map)
+//!
+//!     Return the current size of the given hash map.
+//!     :param map: Handle to the hash map
+//!     :returns: The number of elements stored in the hash map at the time of the call.
 inline size_t scc_hashmap_size(void const *map) {
     struct scc_hashmap_base const *base =
         scc_hashmap_impl_base_qual(map, const);
@@ -470,20 +519,36 @@ inline size_t scc_hashmap_size(void const *map) {
  */
 void *scc_hashmap_impl_find(void *map, size_t keysize, size_t valsize);
 
-/* scc_hashmap_find
- *
- * Probe for value in the hash map
- *
- * Expands to the address of the value slot corresponding to the
- * given key if found, otherwise NULL
- *
- * scc_hashmap(keytype, valuetype) map
- *      The map handle
- *
- * keytype' key
- *      The key to probe for. Subject to implicit conversion should keytype
- *      and keytype' not be the same.
- */
+//! .. _scc_hashmap_find:
+//! .. c:function:: void *scc_hashmap_find(void *map, keytype key)
+//!
+//!     Probe for value identified by the given :c:texpr:`key` in the hash map.
+//!
+//!     :param map: Handle for identifying the hash map
+//!     :param key: The :c:texpr:`key` to probe for
+//!     :returns: Address of the value associated with the :c:texpr:`key`, if any
+//!     :retval NULL: If :c:texpr:`key` was not found in :c:texpr:`map`.
+//!     :retval Address of associated value: The :c:texpr:`map` contains :c:texpr:`key`. The
+//!             returned element may be modified provided that the :c:texpr:`valuetype` the
+//!             map was instantiated with was const :code:`const`-qualified.
+//!
+//!     .. code-block:: C
+//!         :caption: Find and modify value in hash map
+//!
+//!         extern _Bool eq(void const *l, void const *r);
+//!
+//!         scc_hashmap(int, short) map = scc_hashmap_init(int, short, eq);
+//!         assert(scc_hashmap_insert(&map, 12, 2345));
+//!
+//!         short *val = scc_hashmap_find(map, 12);
+//!         assert(val);
+//!
+//!         /* Modify value in hash map */
+//!         *val = 1111;
+//!
+//!         assert(1111 == *scc_hashmap_find(map, 12));
+//!
+//!         scc_hashmap_free(map);
 #define scc_hashmap_find(map, key)                                      \
     scc_hashmap_impl_find(                                              \
         ((map)->hp_key = (key), (map)),                                 \
@@ -503,28 +568,39 @@ void *scc_hashmap_impl_find(void *map, size_t keysize, size_t valsize);
  */
 _Bool scc_hashmap_impl_remove(void *map, size_t keysize);
 
-/* scc_hashmap_remove
- *
- * Remove a key-value pair from the hash map. Return true if the
- * key was found in the map
- *
- * scc_hashmap(keytype, valuetype) map
- *      The map handle
- *
- * keytype' key
- *      Key to remove. Subject to implicit conversion should keytype and
- *      keytype' not be the same
- */
+//! .. c:function:: _Bool scc_hashmap_remove(void *map, keytype key)
+//!
+//!     Remove a key-value pair from the given hash map. Return :c:texpr:`true` if
+//!     the key was found while probing.
+//!
+//!     :param map: Handle for identifying the hash map
+//!     :param key: The :c:texpr:`key` to probe for and remove
+//!     :returns: Whether the operation was successful
+//!     :retval true: :c:texpr:`map` did contain :c:texpr:`key` before the call and
+//!                   it has now been removed along with its associated value.
+//!     :retval false: :c:texpr:`map` did not contain :c:texpr:`key` at the time of the
+//!                    call.
+//!
+//!     .. code-block:: C
+//!         :caption: Insert and immediately remove a key-value pair
+//!
+//!         extern _Bool eq(void const *l, void const *r);
+//!
+//!         scc_hashmap(int, short) map = scc_hashmap_init(int, short, eq);
+//!
+//!         assert(scc_hashmap_insert(&map, 12, 2345));
+//!         assert(scc_hashmap_remove(map, 12));
+//!         assert(!scc_hashmap_find(map, 12));
+//!
+//!         scc_hashmap_free(map);
 #define scc_hashmap_remove(map, key)                                    \
     scc_hashmap_impl_remove(((map)->hp_key = (key), (map)), sizeof((map)->hp_key))
 
-/* scc_hashmap_clear
- *
- * Remove all entries in a hash map
- *
- * void *map
- *      The map handle
- */
+//! .. c:function:: void scc_hashmap_clear(void *map)
+//!
+//!     Clear all entries in the given hash map.
+//!
+//!     :param map: Handle for identifying the hash map
 void scc_hashmap_clear(void *map);
 
 #endif /* SCC_HASHMAP_H */
