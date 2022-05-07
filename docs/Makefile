@@ -9,7 +9,7 @@ __docs       := $(call wildcard-artifacts,$(__node_path),$(rstext),$(htmlext)) \
                 $(patsubst %.$(rstext),%.$(htmlext),$(__docgen))
 __rstref     := $(__node_path)/reference.rst
 __sccdoc     := $(pyscripts)/sccdoc.py
-__rstsrc     := $(wildcard $(__node_path)/*.$(rstext))
+__node_src   := $(wildcard $(__node_path)/*.$(rstext)) $(__docgen)
 
 .SECONDARY: $(__docgen)
 
@@ -20,7 +20,7 @@ $(call include-node,stack)
 $(call include-node,svec)
 $(call include-node,vec)
 
-$(__docs)&: $(__rstsrc) $(__all_rstsrc) $(__docgen) $(__conf) $(__all_mkfiles) | $(__node_builddir)
+$(__docs)&: $(__node_src) $(__all_rstsrc) $(__docgen) $(__conf) $(__all_mkfiles) | $(__node_builddir)
 	$(call echo-gen,docs)
 	$(SPHINX) -b html $(__docdir) $(dir $@)
 	$(TOUCH) $(__docs)
