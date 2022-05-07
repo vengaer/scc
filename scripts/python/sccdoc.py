@@ -12,10 +12,15 @@ def extract_doc_lines(file):
     with open(file, 'r', encoding='ascii') as handle:
         content = handle.readlines()
 
+    in_block = False
     doc = []
     for line in content:
         if not (mat := rgx.match(line)):
+            if in_block:
+                doc.append('')
+            in_block = False
             continue
+        in_block = True
         doc.append(mat.group(1))
 
     return doc
