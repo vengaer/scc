@@ -2,16 +2,23 @@ ifdef __node
 
 SPHINX   := sphinx-build
 
-$(call include-node,hashtab)
-
 __conf   := $(__node_path)/conf.$(pyext)
 __docdir := $(__node_path)
-__docs   := $(patsubst %.$(rstext),$(__node_builddir)/$(notdir %).$(htmlext),$(__all_rstsrc))
+__docgen := $(patsubst %.$(hext),$(__node_builddir)/%.$(rstext),$(notdir $(__public_headers)))
+__docs   := $(call wildcard-artifacts,$(__node_path),$(rstext),$(htmlext)) \
+            $(patsubst %.$(rstext),%.$(htmlext),$(__docgen))
+__sccdoc := $(pyscripts)/sccdoc.py
 
-$(__docs)&: $(__all_rstsrc) $(__conf) $(__all_mkfiles) | $(__node_builddir)
+.SECONDARY: $(__docgen)
+
+$(__docs)&: $(__all_rstsrc) $(__docgen) $(__conf) $(__all_mkfiles) | $(__node_builddir)
 	$(call echo-gen,$(notdir $@))
 	$(SPHINX) -b html $(__docdir) $(dir $@)
 	$(TOUCH) $(__docs)
+
+$(__node_builddir)/%.$(rstext): $(__scc_incdir)/%.$(hext) | $(__node_builddir)
+	$(call echo-gen,$(notdir $@))
+	$(__sccdoc) $< -o $@
 
 docs: $(__docs)
 

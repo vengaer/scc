@@ -68,10 +68,11 @@ alib         := $(builddir)/lib$(scc).$(aext)
 all: $(alib) $(solink)
 
 $(call include-node,arch)
-$(call include-node,docs)
+$(call include-node,scc,inc)
 $(call include-node,src,scc)
 $(call include-node,submodules)
 $(call include-node,test)
+$(call include-node,docs)
 
 $(dirs):
 	$(MKDIR) $(MKDIRFLAGS) $@
@@ -95,6 +96,9 @@ clean:
 
 .PHONY: distclean
 distclean: clean
+
+.PHONY: docs
+docs:
 
 tags: FORCE
 	$(call echo-gen,$@)
