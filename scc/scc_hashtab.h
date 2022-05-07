@@ -222,19 +222,38 @@ struct scc_hashtab_base {
  */
 void *scc_hashtab_impl_init(struct scc_hashtab_base *base, scc_hashtab_eq eq, scc_hashtab_hash hash, size_t coff, size_t mdoff);
 
-/* scc_hashtab_init_with_hash
- *
- * Initialize hash table with a specified hash function.
- *
- * type
- *      Type the hash table is to store
- *
- * scc_hashtab_eq eq
- *      Pointer to function to use for equality comparisons
- *
- * scc_hashtab_hash hash
- *      Pointer to function to use for hashing
- */
+//! .. _scc_hashtab_init_with_hash:
+//! .. c:function:: void *scc_hashtab_init_with_hash(type, scc_hashtab_eq eq, scc_hashtab_hash hash)
+//!
+//!     Initializes a hash table using the specified hash function. The macro expands
+//!     to a handle to a table with automatic storage duration. See
+//!     :ref:`Scope and Lifetimes <scope_and_lifetimes__tab>` for an in-depth explanation of how to
+//!     safely manage the handle.
+//!
+//!     The call cannot fail.
+//!
+//!     The returned pointer must be passed to :ref:`scc_hashtab_free <scc_hashtab_free>` to ensure
+//!     allocated memory is reclaimed.
+//!
+//!     :param type: Type of the elements to be stored in the table
+//!     :param eq: Pointer to function to be used for equality comparison
+//!     :param hash: Pointer to function to be used for key hashing
+//!     :returns: Handle to a newly created hash table. The table is allocated in the stack
+//!               frame of the current function and its lifetime tied to the scope in
+//!               which :c:texpr:`scc_hashtab_init_with_hash` is invoked.
+//!
+//!     .. code-block:: C
+//!         :caption: Example usage
+//!
+//!         extern _Bool eq(void const *l, void const *r);
+//!         extern unsigned long long hash(void const *data, size_t size);
+//!
+//!         scc_hashtab(int) tab;
+//!         {
+//!             tab = scc_hashtab_init_with_hash(int, eq, hash);
+//!             /* tab is valid */
+//!         }
+//!         /* tab is no longer valid */
 #define scc_hashtab_init_with_hash(type, eq, hash)                          \
     scc_hashtab_impl_init(                                                  \
         (void *)&(scc_hashtab_impl_layout(type)){ 0 },                      \
@@ -244,16 +263,27 @@ void *scc_hashtab_impl_init(struct scc_hashtab_base *base, scc_hashtab_eq eq, sc
         offsetof(scc_hashtab_impl_layout(type), ht_meta)                    \
     )
 
-/* scc_hashtab_init
- *
- * Initialize a hash table. The hash function is set to an fnv1a.
- *
- * type
- *      Type the hash table is to store
- *
- * scc_hashtab_eq eq
- *      Pointer to function to use for equality comparisons
- */
+//! .. _scc_hashtab_init:
+//! .. c:function:: void *scc_hashtab_init(type, scc_hashtab_eq eq)
+//!
+//!     Initializes a hash table using the default :ref:`Fowler-Noll-Vo <scc_hashtab_fnv1a>`
+//!     hash function. Exactly equivalent to calling
+//!     :code:`scc_hashtab_init_with_hash(keytype, valuetype, eq, scc_hashtab_fnv1a)`. See
+//!     :ref:`its documentation <scc_hashtab_init_with_hash>` for restrictions and common
+//!     pitfalls.
+//!
+//!     The call cannot fail.
+//!
+//!     The returned pointer must be passed to :ref:`scc_hashtab_free <scc_hashtab_free>` to ensure
+//!     allocated memory is reclaimed.
+//!
+//!     :param type: Type of the elements to be stored in the table
+//!     :param eq: Pointer to function to be used for equality comparison
+//!     :returns: Handle to a newly created hash table. The table is allocated in the stack
+//!               frame of the current function and its lifetime tied to the scope in
+//!               which :c:texpr:`scc_hashtab_init` is invoked.
+//!
+//!     .. seealso:: :ref:`scc_hashtab_init_with_hash <scc_hashtab_init_with_hash>`
 #define scc_hashtab_init(type, eq)                                          \
     scc_hashtab_init_with_hash(type, eq, scc_hashtab_fnv1a)
 
@@ -292,24 +322,31 @@ inline size_t scc_hashtab_impl_bkpad(void const *handle) {
 #define scc_hashtab_impl_base(handle)                                       \
     scc_hashtab_impl_base_qual(handle,)
 
-/* scc_hashtab_fnv1a
- *
- * Simple alternative Fowler-Voll-No implementation
- *
- * void const *data
- *      Address of data to be hashed. The data is treated as a
- *      consecutive array of bytes. Potential padding in structs
- *      must be explicitly initialized to avoid hash mismatches.
- *
- * size_t size
- *      Size of data, in bytes
- */
+//! .. _scc_hashtab_fnv1a:
+//! .. c:function:: unsigned long long scc_hashtab_fnv1a(void const *data, size_t size)
+//!
+//!     Simple `alternative Fowler-Noll-Vo hash
+//!     <https://en.wikipedia.org/wiki/Fowler-Noll-Vo_hash_function#FNV-1a_hash>`_
+//!     implementation. Used as the default hash function.
+//!
+//!     :param data: Address of the data to be hashed. The data
+//!                  is treated as a consecutive array of bytes.
+//!                  Potential padding in structs must therefore
+//!                  be explicitly initialized to avoid erratic
+//!                  hashing behavior.
+//!     :param size: The size of the data to be hashed, in bytes
+//!     :returns: The alternative Fowler-Noll-Vo hash of the given :c:texpr:`data`
 unsigned long long scc_hashtab_fnv1a(void const *data, size_t size);
 
-/* scc_hashtab_free
- *
- * Reclaim memory used by the given hash table
- */
+//! .. _scc_hashtab_free:
+//! .. c:function:: void scc_hashtab_free(void *tab)
+//!
+//!     Reclaim memory used by the given hash table. The :c:texpr:`tab`
+//!     parameter must refer to a valid hash table handle returned by either
+//!     :ref:`scc_hashtab_init <scc_hashtab_init>` or
+//!     :ref:`scc_hashtab_init_with_hash <scc_hashtab_init_with_hash>`.
+//!
+//!     :param tab: Handle to the hash table to free
 void scc_hashtab_free(void *handle);
 
 /* scc_hashtab_impl_insert
@@ -327,41 +364,60 @@ void scc_hashtab_free(void *handle);
  */
 _Bool scc_hashtab_impl_insert(void *handleaddr, size_t elemsize);
 
-/* scc_hashtab_insert
- *
- * Insert a value in the hash table. May result in a reallocation.
- *
- * Expands to true if the value was successfully inserted
- *
- * scc_hashtab(type) *handleaddr
- *      Address of the handle used for referring to the hash table.
- *
- * type' value
- *      The value to insert. Subject to implicit conversion should type
- *      and type' not be the same.
- */
+//! .. c:function:: _Bool scc_hashtab_insert(void *tabaddr, type element)
+//!
+//!     Insert an element in the hash table. Succeeds only if  :c:texpr:`element`
+//!     is not already present in the table.
+//!
+//!     The call may result in the hash table being reallocated.
+//!
+//!     :param tabaddr: Address of the handle used for referring to the hash table. Should
+//!                     the table have to be reallocated to accomodate the insertion, :c:texpr:`*tabaddr`
+//!                     is changed to refer to the newly allocated hash table.
+//!     :param element: The element to be inserted. Must be implicitly convertible to
+//!                     the type with which the table was instantiated.
+//!     :returns: A :c:texpr:`_Bool` indicating whether the insertion was successful.
+//!     :retval true: The element was successfully inserted.
+//!     :retval false: :c:texpr:`element` already present in table.
+//!     :retval false: Memory allocation failure
+//!
+//!     .. code-block:: C
+//!         :caption: Insert the value 111 in a table if ints
+//!
+//!         extern _Bool eq(void const *l, void const *r);
+//!
+//!         scc_hashtab(int) tab = scc_hash_init(int, eq);
+//!
+//!         if(!scc_hashtab_insert(&tab, 111)) {
+//!             fputs("Insertion failure\n", stderr);
+//!             exit(1);
+//!         }
+//!
+//!         /* Use tab */
+//!
+//!         scc_hashtab_free(tab);
 #define scc_hashtab_insert(handleaddr, value)                               \
     scc_hashtab_impl_insert((**(handleaddr) = (value), (handleaddr)), sizeof(**(handleaddr)))
 
-/* scc_hashtab_capacity
- *
- * Return the current capacity of the hash table
- *
- * void const *handle
- *      Handle to the hash table in question
- */
+//! .. c:function:: size_t scc_hashtab_capacity(void const *tab)
+//!
+//!     Return the current capacity of the given hash table.
+//!
+//!     :param tab: Handle to the hash table
+//!     :returns: The number of elements the hash table is able to
+//!               store at the time of the call. Note that the hash
+//!               table *will* be reallocated before the capacity is
+//!               reached.
 inline size_t scc_hashtab_capacity(void const *handle) {
     struct scc_hashtab_base const *base = scc_hashtab_impl_base_qual(handle, const);
     return base->ht_capacity;
 }
 
-/* scc_hashtab_size
- *
- * Return the current size of the hash table
- *
- * void const *handle
- *      Handle to the hash table in question
- */
+//! .. c:function:: size_t scc_hashtab_size(void const *tab)
+//!
+//!     Return the current size of the given hash table.
+//!     :param tab: Handle to the hash table
+//!     :returns: The number of elements stored in the hash table at the time of the call.
 inline size_t scc_hashtab_size(void const *handle) {
     struct scc_hashtab_base const *base = scc_hashtab_impl_base_qual(handle, const);
     return base->ht_size;
@@ -382,19 +438,31 @@ inline size_t scc_hashtab_size(void const *handle) {
  */
 void const *scc_hashtab_impl_find(void const *handle, size_t elemsize);
 
-/* scc_hashtab_find
- *
- * Probe for value in the hash table
- *
- * Expands to the address of the found element on success, NULL otherwise
- *
- * scc_hashtab(type) handle
- *      The handle used for referring to the hash table.
- *
- * type' value
- *      The value to probe for. Subject to implicit conversion should type
- *      and type' not be the same.
- */
+//! .. c:function:: void *scc_hashtab_find(void *tab, type value)
+//!
+//!     Probe for :c:texpr:`value` in the given hash table.
+//!
+//!     :param tab: Handle for identifying the hash table
+//!     :param value: The element to probe for
+//!     :returns: :code:`const`-qualified pointer to the element found in the table, if any.
+//!     :retval NULL: If :c:texpr:`value` was not found in :c:texpr:`tab`.
+//!     :retval Address of element in table: The :c:texpr:`table` contains :c:texpr:`value`.
+//!
+//!     .. code-block:: C
+//!         :caption: Check if a hash table contains a specific string literal
+//!
+//!         extern _Bool eq(void const *l, void const *r);
+//!         char const *str = "a waste of time";
+//!
+//!         scc_hashtab(char const *) tab = scc_hashtab_init(char const *, eq);
+//!         assert(scc_hashtab_insert(&tab, str));
+//!
+//!         /* Note: Probing is based on address of string literal
+//!          * rather than strcmp here. This is safe but error prone */
+//!         char const *found = scc_hashtab_find(tab, str);
+//!         assert(!strcmp(found, str));
+//!
+//!         scc_hashtab_free(tab);
 #define scc_hashtab_find(handle, value)                                     \
     scc_hashtab_impl_find((*(handle) = (value), (handle)), sizeof(*(handle)))
 
@@ -427,6 +495,29 @@ _Bool scc_hashtab_impl_reserve(void *handleaddr, size_t capacity, size_t elemsiz
  * size_t capacity
  *      The desired capacity
  */
+//! .. c:function:: _Bool scc_hashtab_reserve(void *tabaddr, size_t capacity)
+//!
+//!     Reserve storage for at least :c:texpr:`capacity` elements in the table.
+//!     If the table is successfully reallocated, :c:texpr:`*tabaddr` is updated
+//!     to refer to the newly allocate table. If the reallocation fails, :c:texpr:`*tabaddr`
+//!     is left untouched.
+//!
+//!     :param handleaddr: Address of the handle used to refer to the hash table
+//!     :param capacity: The desired capacity
+//!     :returns: A :c:texpr:`_Bool` indicating whether the demand could be carried out
+//!     :retval true: The table capacity was already sufficiently large. :c:texpr:`*tabaddr` is not modified.
+//!     :retval true: The table was successfully reallocated. :c:texpr:`*tabaddr` was updated.
+//!     :retval false: The table has to be reallocated and but the allocation failed
+//!
+//!     .. code-block:: C
+//!         :caption: Reserving a table capacity of 256 slots
+//!
+//!         extern _Bool eq(void const *l, void const *r);
+//!
+//!         scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+//!         assert(scc_hashtab_reserve(&tab, 256));
+//!
+//!         scc_hashtab_free(tab);
 #define scc_hashtab_reserve(handleaddr, capacity)                           \
     scc_hashtab_impl_reserve(handleaddr, capacity, sizeof(**(handleaddr)))
 
@@ -446,28 +537,39 @@ _Bool scc_hashtab_impl_reserve(void *handleaddr, size_t capacity, size_t elemsiz
  */
 _Bool scc_hashtab_impl_remove(void *handle, size_t elemsize);
 
-/* scc_hashtab_remove
- *
- * Remove an element from the hash table. Return true if the
- * value was found in the table
- *
- * scc_hashtab(type) handle
- *      Handle used for referring to the hash table in question
- *
- * type' value
- *      Value to remove. Subject to implicit conversion should type and
- *      type' not be the same
- */
+//! .. c:function:: _Bool scc_hashtab_remove(void *tab, type value)
+//!
+//!     Remove an element from the given hash table. Return :c:texpr:`true` if
+//!     the element was found while probing.
+//!
+//!     :param tab: Handle identifying the hash table
+//!     :param value: The value to probe for and remove
+//!     :returns: Whether the operation was successful
+//!     :retval true: :c:texpr:`tab` did contain :c:texpr:`value` before the call and
+//!                   it has now been removed.
+//!     :retval false: :c:texpr:`tab` did not contain :c:texpr:`value` at the time of the
+//!                    call.
+//!
+//!     .. code-block:: C
+//!         :caption: Insert and immediately remove an element in a hash table
+//!
+//!         extern _Bool eq(void const *l, void const *r);
+//!
+//!         scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+//!
+//!         assert(scc_hashtab_insert(&tab, 18));
+//!         assert(scc_hashtab_remove(tab, 18));
+//!         assert(!scc_hashtab_find(tab, 18));
+//!
+//!         scc_hashtab_free(tab);
 #define scc_hashtab_remove(handle, value)                                   \
     scc_hashtab_impl_remove((*(handle) = (value), (handle)), sizeof(*(handle)))
 
-/* scc_hashtab_clear
- *
- * Remove all entries in a hash table
- *
- * void *handle
- *      Handle used for referring to the hash table
- */
+//! .. c:function:: void scc_hashtab_clear(void *tab)
+//!
+//!     Clear all entries in the given hash table.
+//!
+//!     :param tab: Handle identifying the hash table
 void scc_hashtab_clear(void *handle);
 
 #endif /* SCC_HASHTAB_H */
