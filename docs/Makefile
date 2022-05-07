@@ -2,17 +2,19 @@ ifdef __node
 
 SPHINX   := sphinx-build
 
-__conf   := $(__node_path)/conf.$(pyext)
-__docdir := $(__node_path)
-__docgen := $(patsubst %.$(hext),$(__node_builddir)/%.$(rstext),$(notdir $(__public_headers)))
-__docs   := $(call wildcard-artifacts,$(__node_path),$(rstext),$(htmlext)) \
-            $(patsubst %.$(rstext),%.$(htmlext),$(__docgen))
-__sccdoc := $(pyscripts)/sccdoc.py
+__conf       := $(__node_path)/conf.$(pyext)
+__docdir     := $(__node_path)
+__docgen     := $(patsubst %.$(hext),$(__node_builddir)/%.$(rstext),$(notdir $(__public_headers)))
+__docs       := $(call wildcard-artifacts,$(__node_path),$(rstext),$(htmlext)) \
+                $(patsubst %.$(rstext),%.$(htmlext),$(__docgen))
+__rstref     := $(__node_path)/reference.rst
+__sccdoc     := $(pyscripts)/sccdoc.py
+__rstsrc     := $(wildcard $(__node_path)/*.$(rstext))
 
 .SECONDARY: $(__docgen)
 
-$(__docs)&: $(__all_rstsrc) $(__docgen) $(__conf) $(__all_mkfiles) | $(__node_builddir)
-	$(call echo-gen,$(notdir $@))
+$(__docs)&: $(__rstsrc) $(__all_rstsrc) $(__docgen) $(__conf) $(__all_mkfiles) | $(__node_builddir)
+	$(call echo-gen,docs)
 	$(SPHINX) -b html $(__docdir) $(dir $@)
 	$(TOUCH) $(__docs)
 
@@ -25,6 +27,11 @@ docs: $(__docs)
 docshow: $(call require,docshow,BROWSER)
 docshow: $(__node_builddir)/index.$(htmlext) docs
 	$(BROWSER) $<
+
+__clean_rstref:
+	$(RM) $(RMFLAGS) $(__rstref)
+
+clean: __clean_rstref
 
 else
 # Recurse to top level

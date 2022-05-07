@@ -5,3 +5,4 @@ Welcome to scc's documentation!
     :maxdepth: 3
 
     intro
+    collections
