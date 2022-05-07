@@ -128,3 +128,19 @@ def test_secondword(script_dir):
     assert ec == 0
     assert stdout[0] == 'b'
     assert stdout[1] == 'b'
+
+def test_for_in_range(script_dir):
+    ''' Test for-in-range macro '''
+    file = [ f'mkscripts := {script_dir}', 'include $(mkscripts)/expr.mk']
+
+    for i in range(50):
+        file.append(f'$(info $(call for-in-range,{i},a) )')
+
+    file.append('.PHONY: all')
+    file.append('all:')
+
+    ec, stdout, stderr = make.make_supplied(file)
+    assert not stderr
+    assert ec == 0
+    for i in range(50):
+        assert stdout[i].strip() == ('a ' * i).strip()
