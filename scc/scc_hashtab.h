@@ -293,8 +293,8 @@ void *scc_hashtab_impl_init(struct scc_hashtab_base *base, scc_hashtab_eq eq, sc
  *
  * Compute number of padding bytes between ht_curr and ht_fwoff
  */
-inline size_t scc_hashtab_impl_bkpad(void const *handle) {
-    return ((unsigned char const *)handle)[-1] + sizeof(((struct scc_hashtab_base *)0)->ht_fwoff);
+inline size_t scc_hashtab_impl_bkpad(void const *tab) {
+    return ((unsigned char const *)tab)[-1] + sizeof(((struct scc_hashtab_base *)0)->ht_fwoff);
 }
 
 /* scc_hashtab_impl_base_qual
@@ -304,9 +304,9 @@ inline size_t scc_hashtab_impl_bkpad(void const *handle) {
  * Obtain qualified pointer to the struct scc_hashtab_base
  * corresponding to the given handle
  */
-#define scc_hashtab_impl_base_qual(handle, qual)                            \
+#define scc_hashtab_impl_base_qual(tab, qual)                               \
     scc_container_qual(                                                     \
-        (unsigned char qual *)(handle) - scc_hashtab_impl_bkpad(handle),    \
+        (unsigned char qual *)(tab) - scc_hashtab_impl_bkpad(tab),          \
         struct scc_hashtab_base,                                            \
         ht_fwoff,                                                           \
         qual                                                                \
@@ -319,8 +319,8 @@ inline size_t scc_hashtab_impl_bkpad(void const *handle) {
  * Obtain unqualified pointer to the struct scc_hashtab_base
  * corresponding to the given handle
  */
-#define scc_hashtab_impl_base(handle)                                       \
-    scc_hashtab_impl_base_qual(handle,)
+#define scc_hashtab_impl_base(tab)                                          \
+    scc_hashtab_impl_base_qual(tab,)
 
 //! .. _scc_hashtab_fnv1a:
 //! .. c:function:: unsigned long long scc_hashtab_fnv1a(void const *data, size_t size)
@@ -347,7 +347,7 @@ unsigned long long scc_hashtab_fnv1a(void const *data, size_t size);
 //!     :ref:`scc_hashtab_init_with_hash <scc_hashtab_init_with_hash>`.
 //!
 //!     :param tab: Handle to the hash table to free
-void scc_hashtab_free(void *handle);
+void scc_hashtab_free(void *tab);
 
 /* scc_hashtab_impl_insert
  *
@@ -356,13 +356,13 @@ void scc_hashtab_free(void *handle);
  * Insert the value in ht_curr in the table. Return true
  * on success.
  *
- * void *handleaddr
+ * void *tabaddr
  *      Address of the handle used to refer to the hash table
  *
  * size_t elemsize
  *      Size of the elements stored in the hash table
  */
-_Bool scc_hashtab_impl_insert(void *handleaddr, size_t elemsize);
+_Bool scc_hashtab_impl_insert(void *tabaddr, size_t elemsize);
 
 //! .. c:function:: _Bool scc_hashtab_insert(void *tabaddr, type element)
 //!
@@ -396,8 +396,8 @@ _Bool scc_hashtab_impl_insert(void *handleaddr, size_t elemsize);
 //!         /* Use tab */
 //!
 //!         scc_hashtab_free(tab);
-#define scc_hashtab_insert(handleaddr, value)                               \
-    scc_hashtab_impl_insert((**(handleaddr) = (value), (handleaddr)), sizeof(**(handleaddr)))
+#define scc_hashtab_insert(tabaddr, value)                                  \
+    scc_hashtab_impl_insert((**(tabaddr) = (value), (tabaddr)), sizeof(**(tabaddr)))
 
 //! .. c:function:: size_t scc_hashtab_capacity(void const *tab)
 //!
@@ -408,8 +408,8 @@ _Bool scc_hashtab_impl_insert(void *handleaddr, size_t elemsize);
 //!               store at the time of the call. Note that the hash
 //!               table *will* be reallocated before the capacity is
 //!               reached.
-inline size_t scc_hashtab_capacity(void const *handle) {
-    struct scc_hashtab_base const *base = scc_hashtab_impl_base_qual(handle, const);
+inline size_t scc_hashtab_capacity(void const *tab) {
+    struct scc_hashtab_base const *base = scc_hashtab_impl_base_qual(tab, const);
     return base->ht_capacity;
 }
 
@@ -418,8 +418,8 @@ inline size_t scc_hashtab_capacity(void const *handle) {
 //!     Return the current size of the given hash table.
 //!     :param tab: Handle to the hash table
 //!     :returns: The number of elements stored in the hash table at the time of the call.
-inline size_t scc_hashtab_size(void const *handle) {
-    struct scc_hashtab_base const *base = scc_hashtab_impl_base_qual(handle, const);
+inline size_t scc_hashtab_size(void const *tab) {
+    struct scc_hashtab_base const *base = scc_hashtab_impl_base_qual(tab, const);
     return base->ht_size;
 }
 
@@ -427,16 +427,16 @@ inline size_t scc_hashtab_size(void const *handle) {
  *
  * Internal use only
  *
- * Probe for the value in *handle in the table. Return a pointer to
+ * Probe for the value in *tab in the table. Return a pointer to
  * the element if found, NULL otherwise
  *
- * void const *handle
+ * void const *tab
  *      Handle to the hash table in question
  *
  * size_t elemsize
  *      Size of the elements stored in the hash table
  */
-void const *scc_hashtab_impl_find(void const *handle, size_t elemsize);
+void const *scc_hashtab_impl_find(void const *tab, size_t elemsize);
 
 //! .. c:function:: void *scc_hashtab_find(void *tab, type value)
 //!
@@ -463,46 +463,33 @@ void const *scc_hashtab_impl_find(void const *handle, size_t elemsize);
 //!         assert(!strcmp(found, str));
 //!
 //!         scc_hashtab_free(tab);
-#define scc_hashtab_find(handle, value)                                     \
-    scc_hashtab_impl_find((*(handle) = (value), (handle)), sizeof(*(handle)))
+#define scc_hashtab_find(tab, value)                                        \
+    scc_hashtab_impl_find((*(tab) = (value), (tab)), sizeof(*(tab)))
 
 /* scc_hashtab_impl_reserve
  *
  * Internal use only
  *
  * Reserve storage for specified number of slots. Return true on success,
- * otherwise false. On failure, *(void **)handleaddr remains untouched.
+ * otherwise false. On failure, *(void **)tabaddr remains untouched.
  *
- * void *handleaddr
- *      Address of the handle used for referring to the hash table
+ * void *tabaddr
+ *      Address of the tabaddr used for referring to the hash table
  *
  * size_t capacity
  *      The desired capacity. If it is not a power of 2, it is
  *      rounded up to the next such power.
  */
-_Bool scc_hashtab_impl_reserve(void *handleaddr, size_t capacity, size_t elemsize);
+_Bool scc_hashtab_impl_reserve(void *tabaddr, size_t capacity, size_t elemsize);
 
-/* scc_hashtab_reserve
- *
- * Reserve storage for at least the specified number of slots.
- * If the table could be successfully reallocated, the macro
- * expands to true. Otherwise, the macro expands to false and
- * **handleaddr remains untouched.
- *
- * scc_hashtab(type) *handleaddr
- *      Address of the handle used for referring to the hash table
- *
- * size_t capacity
- *      The desired capacity
- */
 //! .. c:function:: _Bool scc_hashtab_reserve(void *tabaddr, size_t capacity)
 //!
 //!     Reserve storage for at least :c:texpr:`capacity` elements in the table.
-//!     If the table is successfully reallocated, :c:texpr:`*tabaddr` is updated
-//!     to refer to the newly allocate table. If the reallocation fails, :c:texpr:`*tabaddr`
+//!     If the table is successfully reallocated, :c:texpr:`*(void **)tabaddr` is updated
+//!     to refer to the newly allocate table. If the reallocation fails, :c:texpr:`*(void **)tabaddr`
 //!     is left untouched.
 //!
-//!     :param handleaddr: Address of the handle used to refer to the hash table
+//!     :param tabaddr: Address of the handle used to refer to the hash table
 //!     :param capacity: The desired capacity
 //!     :returns: A :c:texpr:`_Bool` indicating whether the demand could be carried out
 //!     :retval true: The table capacity was already sufficiently large. :c:texpr:`*tabaddr` is not modified.
@@ -518,8 +505,8 @@ _Bool scc_hashtab_impl_reserve(void *handleaddr, size_t capacity, size_t elemsiz
 //!         assert(scc_hashtab_reserve(&tab, 256));
 //!
 //!         scc_hashtab_free(tab);
-#define scc_hashtab_reserve(handleaddr, capacity)                           \
-    scc_hashtab_impl_reserve(handleaddr, capacity, sizeof(**(handleaddr)))
+#define scc_hashtab_reserve(tabaddr, capacity)                              \
+    scc_hashtab_impl_reserve(tabaddr, capacity, sizeof(**(tabaddr)))
 
 /* scc_hashtab_impl_remove
  *
@@ -529,13 +516,13 @@ _Bool scc_hashtab_impl_reserve(void *handleaddr, size_t capacity, size_t elemsiz
  * table. Return true if the value was found, otherwise
  * false
  *
- * void *handle
+ * void *tab
  *      Handle used to refer to the hash table
  *
  * size_t elemsize
  *      Size of each value stored in the table
  */
-_Bool scc_hashtab_impl_remove(void *handle, size_t elemsize);
+_Bool scc_hashtab_impl_remove(void *tab, size_t elemsize);
 
 //! .. c:function:: _Bool scc_hashtab_remove(void *tab, type value)
 //!
@@ -562,14 +549,14 @@ _Bool scc_hashtab_impl_remove(void *handle, size_t elemsize);
 //!         assert(!scc_hashtab_find(tab, 18));
 //!
 //!         scc_hashtab_free(tab);
-#define scc_hashtab_remove(handle, value)                                   \
-    scc_hashtab_impl_remove((*(handle) = (value), (handle)), sizeof(*(handle)))
+#define scc_hashtab_remove(tab, value)                                      \
+    scc_hashtab_impl_remove((*(tab) = (value), (tab)), sizeof(*(tab)))
 
 //! .. c:function:: void scc_hashtab_clear(void *tab)
 //!
 //!     Clear all entries in the given hash table.
 //!
 //!     :param tab: Handle identifying the hash table
-void scc_hashtab_clear(void *handle);
+void scc_hashtab_clear(void *tab);
 
 #endif /* SCC_HASHTAB_H */
