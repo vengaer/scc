@@ -15,6 +15,7 @@ stages:
   - test
   - fuzz
   - lint
+  - docs
 
 build_lib:
   stage: build
@@ -54,3 +55,8 @@ lint:
   stage: lint
   script:
     - make -j$(nproc) lint
+
+docs:
+  stage: docs
+  script:
+    - make -j$(nproc) docs
