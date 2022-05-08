@@ -223,4 +223,14 @@ inline size_t scc_ringdeque_capacity(void const *deque) {
     return scc_ringdeque_impl_base_qual(deque, const)->rd_capacity;
 }
 
+//! .. c:function:: size_t scc_ringdeque_size(void const *deque)
+//!
+//!     Obtain the size of the given ringdeque
+//!
+//!     :param deque: Handle to the ringdeque for which the size is to be queried
+//!     :returns: Size of the ringdeque correspondign to :c:texpr:`deque`
+inline size_t scc_ringdeque_size(void const *deque) {
+    return scc_ringdeque_impl_base_qual(deque, const)->rd_size;
+}
+
 #endif /* SCC_RINGDEQUE_H */
