@@ -1,4 +1,4 @@
 Reference
 =========
 
-.. include:: ../../build/docs/scc_stack.rst
+.. include:: ../../build/docs/scc_stack_h.rst

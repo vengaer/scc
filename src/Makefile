@@ -3,11 +3,12 @@ ifdef __node
 $(call push,CFLAGS)
 $(call push,LDFLAGS)
 
-CFLAGS      += -fPIC
-LDFLAGS     += -shared -Wl,-soname,lib$(scc).$(soext).$(socompat)
+CFLAGS       += -fPIC
+LDFLAGS      += -shared -Wl,-soname,lib$(scc).$(soext).$(socompat)
 
-__node_obj  := $(call wildcard-obj,$(__node_path),$(cext))
-sccbuilddir := $(__node_builddir)
+__node_obj   := $(call wildcard-obj,$(__node_path),$(cext))
+__scc_srcdir := $(__node_path)
+sccbuilddir  := $(__node_builddir)
 
 $(call include-node,asm)
 
