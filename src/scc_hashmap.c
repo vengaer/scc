@@ -1,3 +1,4 @@
+#include <scc/scc_bits.h>
 #include <scc/scc_hashmap.h>
 #include <scc/scc_perf.h>
 
@@ -14,10 +15,6 @@ enum { SCC_HASHMAP_VACATED = 0x7f };
 enum { SCC_HASHMAP_HASHSHIFT = 57 };
 
 #define SCC_HASHMAP_DUPLICATE (~(~0ull >> 1u))
-
-#define scc_hashmap_is_power_of_2(val) \
-    (((val) & ~((val) - 1)) == (val))
-
 
 size_t scc_hashmap_impl_bkpad(void const *map);
 size_t scc_hashmap_capacity(void const *map);
@@ -201,7 +198,7 @@ static struct scc_hashmap_base *scc_hashmap_realloc(
     size_t valsize,
     size_t cap
 ) {
-    assert(scc_hashmap_is_power_of_2(cap));
+    assert(scc_bits_is_power_of_2(cap));
 
     /* Size of map up to and including hm_curr */
     size_t const hdrsize =
