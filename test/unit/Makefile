@@ -10,7 +10,7 @@ $(call push,LDLIBS)
 CFLAGS          += -fsanitize=address,undefined
 CPPFLAGS        := -I$(unityinc) -I$(testdir) $(filter-out -DNDEBUG,$(CPPFLAGS)) -I$(srcdir)
 LDFLAGS         += -fsanitize=address,undefined -L$(unitydir)
-LDLIBS          += -lunity
+LDLIBS          += -lunity -lm
 
 define __unit-obj
 $(strip
@@ -63,6 +63,7 @@ endef
 
 
 $(call include-node,arena)
+$(call include-node,bits)
 $(call include-node,mem)
 $(call include-node,hashmap)
 $(call include-node,hashtab)
