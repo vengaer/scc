@@ -106,9 +106,11 @@ tags: FORCE
 
 FORCE:
 
+.PHONY: docker-image
 docker-image:
-docker:
 
+.PHONY: docker
+docker:
 
 $(VERBOSE).SILENT:
 
