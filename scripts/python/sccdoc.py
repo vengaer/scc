@@ -46,5 +46,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Convert documentation in headers to rst source')
     parser.add_argument('file', metavar='FILE', type=str, help='Path to header file')
     parser.add_argument('-o', '--outfile', type=str, default=None, help='Desired output file')
-    parser.add_argument('-d', '--devel', action='store_true', help='Pass to include development documentation')
+    parser.add_argument('-d', '--devel', action='store_true',
+                        help='Pass to include development documentation')
     main(**vars(parser.parse_args()))
