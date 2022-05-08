@@ -1,3 +1,4 @@
+#include <scc/scc_bits.h>
 #include <scc/scc_dbg.h>
 #include <scc/scc_hashtab.h>
 #include <scc/scc_mem.h>
@@ -13,9 +14,6 @@
 enum { SCC_HASHTAB_OCCUPIED = 0x80 };
 enum { SCC_HASHTAB_VACATED = 0x7f };
 enum { SCC_HASHTAB_HASHSHIFT = 57 };
-
-#define scc_hashtab_is_power_of_2(val) \
-    (((val) & ~((val) - 1)) == (val))
 
 size_t scc_hashtab_capacity(void const *tab);
 size_t scc_hashtab_size(void const *tab);
@@ -197,7 +195,7 @@ static struct scc_hashtab_base *scc_hashtab_realloc(
     size_t elemsize,
     size_t cap
 ) {
-    assert(scc_hashtab_is_power_of_2(cap));
+    assert(scc_bits_is_power_of_2(cap));
 
     /* Size of table up to and including ht_curr */
     size_t const hdrsize =
@@ -369,7 +367,7 @@ bool scc_hashtab_impl_reserve(void *tabaddr, size_t capacity, size_t elemsize) {
     if(capacity <= base->ht_capacity) {
         return true;
     }
-    if(!scc_hashtab_is_power_of_2(capacity)) {
+    if(!scc_bits_is_power_of_2(capacity)) {
         capacity = scc_hashtab_next_power_of_2(capacity);
     }
     if(!scc_hashtab_rehash(tabaddr, base, elemsize, capacity)) {
