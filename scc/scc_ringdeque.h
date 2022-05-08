@@ -213,4 +213,14 @@ inline size_t scc_ringdeque_impl_npad(void const *deque) {
     return ((unsigned char const *)deque)[-2] + 2 * sizeof(unsigned char);
 }
 
+//! .. c:function:: size_t scc_ringdeque_capacity(void const *deque)
+//!
+//!     Obtain the capacity of the given ringdeque
+//!
+//!     :param deque: Handle to the ringdeque for which the capacity is to be queried
+//!     :returns: Capacity of the ringdeque corresponding to :c:texpr:`deque`
+inline size_t scc_ringdeque_capacity(void const *deque) {
+    return scc_ringdeque_impl_base_qual(deque, const)->rd_capacity;
+}
+
 #endif /* SCC_RINGDEQUE_H */

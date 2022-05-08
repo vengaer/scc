@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 size_t scc_ringdeque_impl_npad(void const *deque);
+size_t scc_ringdeque_capacity(void const *deque);
 
 /* scc_ringdeque_is_allocd
  *
