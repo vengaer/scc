@@ -73,40 +73,42 @@ struct scc_ringdeque_base {
 //?
 //?         Internal use only
 //?
-//?     .. c:var:: size_t rd_size
+//?     .. c:struct:: @layout
 //?
-//?         See :ref:`rd_size <size_t_rd_size>`
+//?         .. c:var:: size_t rd_size
 //?
-//?     .. c:var:: size_t rd_capacity
+//?             See :ref:`rd_size <size_t_rd_size>`
 //?
-//?         See :ref:`rd_capacity <size_t_rd_capacity>`
+//?         .. c:var:: size_t rd_capacity
 //?
-//?     .. c:var:: size_t rd_begin
+//?             See :ref:`rd_capacity <size_t_rd_capacity>`
 //?
-//?         See :ref:`rd_begin <size_t_rd_begin>`
+//?         .. c:var:: size_t rd_begin
 //?
-//?     .. c:var:: size_t rd_end
+//?             See :ref:`rd_begin <size_t_rd_begin>`
 //?
-//?         See :ref:`rd_end <size_t_rd_end>`
+//?         .. c:var:: size_t rd_end
 //?
-//?     .. c:var:: unsigned char rd_npad
+//?             See :ref:`rd_end <size_t_rd_end>`
 //?
-//?          Used for tracking potential padding bytes between :c:texpr:`rd_end`
-//?          and :c:texpr:`rd_data`
+//?         .. c:var:: unsigned char rd_npad
 //?
-//?     .. _unsigned_char_rd_dynalloc:
-//?     .. c:var:: unsigned char rd_dynalloc
+//?              Used for tracking potential padding bytes between :c:texpr:`rd_end`
+//?              and :c:texpr:`rd_data`
 //?
-//?         Field tracking whether the ringdeque was allocated
-//?         dynamically or not
+//?         .. _unsigned_char_rd_dynalloc:
+//?         .. c:var:: unsigned char rd_dynalloc
 //?
-//?     .. _type_rd_data:
-//?     .. c:var:: type rd_data[SCC_RINGDEQUE_STATIC_CAPACITY]
+//?             Field tracking whether the ringdeque was allocated
+//?             dynamically or not
 //?
-//?         Small-size optimized buffer used for storing the
-//?         elements in the ringdeque. Should be capacity grow
-//?         to the point where the buffer is no longer sufficient,
-//?         the ringdeque is moved to the heap.
+//?         .. _type_rd_data:
+//?         .. c:var:: type rd_data[SCC_RINGDEQUE_STATIC_CAPACITY]
+//?
+//?             Small-size optimized buffer used for storing the
+//?             elements in the ringdeque. Should be capacity grow
+//?             to the point where the buffer is no longer sufficient,
+//?             the ringdeque is moved to the heap.
 #define scc_ringdeque_impl_layout(type)                                         \
     struct {                                                                    \
         size_t rd_size;                                                         \
