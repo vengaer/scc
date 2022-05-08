@@ -1,6 +1,8 @@
 #ifndef SCC_RINGDEQUE_H
 #define SCC_RINGDEQUE_H
 
+#include "scc_assert.h"
+#include "scc_bits.h"
 #include "scc_mem.h"
 
 #include <stddef.h>
@@ -15,6 +17,8 @@
 //!     Must be a power of 2
 enum { SCC_RINGDEQUE_STATIC_CAPACITY = 32 };
 #endif
+
+scc_static_assert(scc_bits_is_power_of_2(SCC_RINGDEQUE_STATIC_CAPACITY));
 
 //! .. c:macro:: scc_ringdeque(type)
 //!
