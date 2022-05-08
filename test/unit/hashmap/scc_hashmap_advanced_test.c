@@ -37,3 +37,24 @@ void test_scc_hashmap_find_string(void) {
 
     scc_hashmap_free(map);
 }
+
+void test_scc_hashmap_string_modification(void) {
+    enum { BUFSIZE = 32 };
+    typedef struct {
+        char buffer[BUFSIZE];
+    } strtype;
+    scc_hashmap(char const *, strtype) map =
+        scc_hashmap_init_with_hash(char const *, strtype, streq, strhash);
+
+    TEST_ASSERT_TRUE(scc_hashmap_insert(&map, "key", (strtype){ "value" }));
+
+    strtype *str = scc_hashmap_find(map, "key");
+    TEST_ASSERT_TRUE(str);
+    strcpy(str->buffer, "modified value");
+
+    str = scc_hashmap_find(map, "key");
+    TEST_ASSERT_TRUE(str);
+    TEST_ASSERT_EQUAL_STRING("modified value", str->buffer);
+
+    scc_hashmap_free(map);
+}
