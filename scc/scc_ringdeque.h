@@ -180,7 +180,7 @@ void *scc_ringdeque_impl_init(void *deque, size_t offset, size_t capacity);
 //!     :param type: The type to be stored in the ringdeque
 //!     :returns: A handle used for referring to the instantiated ringdeque
 #define scc_ringdeque_init(type)                                                \
-    scc_ringdeque_init_impl(                                                    \
+    scc_ringdeque_impl_init(                                                    \
         &(union {                                                               \
             struct scc_ringdeque_base rd_base;                                  \
             unsigned char rd_buffer[sizeof(scc_ringdeque_impl_layout(type))];   \
