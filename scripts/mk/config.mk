@@ -5,14 +5,15 @@ include $(mkscripts)/expr.mk
 include $(mkscripts)/refl.mk
 
 CONFTOOL          := conftool
+CONFIG            := $(root)/.config
 
 __validate_config := $(builddir)/.config.valid.stamp
 
-$(root)/.config:
+$(CONFIG):
 	$(call echo-gen,$(notdir $@))
 	$(CONFTOOL) -c $@ generate defconfig
 
-$(__validate_config): $(root)/.config $(__all_mkfiles) | $(builddir)
+$(__validate_config): $(CONFIG) $(__all_mkfiles) | $(builddir)
 	$(CONFTOOL) -c $< validate
 	$(TOUCH) $@
 
