@@ -6,9 +6,15 @@ import re
 
 from wrhandle import FileWrHandle, StdoutWrHandle
 
-def extract_doc_lines(file):
-    ''' Parse header and extract lines starting with //! '''
-    rgx = re.compile(r'//!\s?(.*)')
+def extract_doc_lines(file, devel):
+    ''' Parse header and extract documentation lines. Always include lines starting
+        with //!. If devel is True, include lines with //? too
+    '''
+
+    if devel:
+        rgx = re.compile(r'//(!|\?)\s?(.*)')
+    else:
+        rgx = re.compile(r'//(!)\s?(.*)')
     with open(file, 'r', encoding='ascii') as handle:
         content = handle.readlines()
 
@@ -21,7 +27,7 @@ def extract_doc_lines(file):
             in_block = False
             continue
         in_block = True
-        doc.append(mat.group(1))
+        doc.append(mat.group(2))
 
     return doc
 
@@ -31,13 +37,14 @@ def write_rst(doc, outfile):
         for line in doc:
             handle.writeln(line)
 
-def main(file, outfile):
+def main(file, outfile, devel):
     ''' main '''
-    doc = extract_doc_lines(file)
+    doc = extract_doc_lines(file, devel)
     write_rst(doc, outfile)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Convert documentation in headers to rst source')
     parser.add_argument('file', metavar='FILE', type=str, help='Path to header file')
     parser.add_argument('-o', '--outfile', type=str, default=None, help='Desired output file')
+    parser.add_argument('-d', '--devel', action='store_true', help='Pass to include development documentation')
     main(**vars(parser.parse_args()))

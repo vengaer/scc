@@ -24,9 +24,9 @@ $(__docs)&: $(__node_src) $(__all_rstsrc) $(__docgen) $(__conf) $(__all_mkfiles)
 	$(SPHINX) -b html $(__docdir) $(dir $@)
 	$(TOUCH) $(__docs)
 
-$(__node_builddir)/%.$(rstext): $(__scc_incdir)/%.$(hext) | $(__node_builddir)
+$(__node_builddir)/%.$(rstext): $(__scc_incdir)/%.$(hext) $(__sccdoc) | $(__node_builddir)
 	$(call echo-gen,$(notdir $@))
-	$(__sccdoc) $< -o $@
+	$(__sccdoc) $< -o $@ $(if $(__devel),-d)
 
 docs: $(__docs)
 
