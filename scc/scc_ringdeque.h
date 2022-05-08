@@ -262,7 +262,7 @@ _Bool scc_ringdeque_impl_prepare_push(void *dequeaddr, size_t elemsize);
 //? .. c:function:: size_t scc_ringdeque_impl_push_back_index(void *deque)
 //?
 //?     Obtain the index of the slot just beyond the last in the given ringdeque
-//?     and move the :ref:`rd_end <size_t_rd_end>` forward.
+//?     and move :ref:`rd_end <size_t_rd_end>` forward.
 //?
 //?     .. note::
 //?
@@ -278,13 +278,31 @@ inline size_t scc_ringdeque_impl_push_back_index(void *deque) {
     return index;
 }
 
+//? .. c:function:: size_t scc_ringdeque_impl_push_front_index(void *deque)
+//?
+//?     Obtain the index of the slot just before the first in the given
+//?     ringdeque and move the :ref:`rd_begin <size_t_rd_begin>` backward.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param deque: Handle to the ringdeque in question
+//?     :returns: The index of the slot just before the first one in the ringdeque
+inline size_t scc_ringdeque_impl_push_front_index(void *deque) {
+    struct scc_ringdeque_base *base = scc_ringdeque_impl_base(deque);
+    base->rd_begin = (base->rd_begin - 1u) & (base->rd_capacity - 1u);
+    ++base->rd_size;
+    return base->rd_begin;
+}
+
 //! .. c:function:: _Bool scc_ringdeque_push_back(void *dequeaddr, type value)
 //!
 //!     Push :c:texpr:`value` to the back of the ringdeque, reallocating the
 //!     collection if needed.
 //!
 //!     Any pointers into the ringdeque obtained prior to the call should be treated
-//!     as invalid once the function returns.
+//!     as invalid once the function has returned.
 //!
 //!     :param dequeaddr: Address of the handle to the ringdeque in question. Should
 //!                       the ringdeque have to be reallocated, :c:texpr:`*(void **)dequeaddr`
@@ -298,5 +316,26 @@ inline size_t scc_ringdeque_impl_push_back_index(void *deque) {
 #define scc_ringdeque_push_back(dequeaddr, value)                               \
     (scc_ringdeque_impl_prepare_push(dequeaddr, sizeof(**(dequeaddr))) &&       \
     ((*(dequeaddr))[scc_ringdeque_impl_push_back_index(*(dequeaddr))] = value),1)
+
+//! .. c:function:: _Bool scc_ringdeque_push_front(void *dequeaddr, type value)
+//!
+//!     Push :c:texpr:`value` to the front of the ringdeque, reallocating the
+//!     collection if necessary
+//!
+//!     Any pointers into the ringdeque obtained prior to the call should be treated
+//!     as invalid once the function has returned.
+//!
+//!     :param dequeaddr: Address of the handle to the ringdeque in question. Should
+//!                       the ringdeque have to be reallocated, :c:texpr:`*(void **)dequeaddr`
+//!                       is updated accordingly.
+//!     :param value: Value to push to the front of the ringdeque. Must be
+//!                   implicitly convertible to the type the ringdeque was
+//!                   instantiated for.
+//!     :returns: A :code:`_Bool` indicating whether the push was successful
+//!     :retval true: The push succeeded
+//!     :retval false: Memory allocation failure
+#define scc_ringdeque_push_front(dequeaddr, value)                              \
+    (scc_ringdeque_impl_prepare_push(dequeaddr, sizeof(**(dequeaddr))) &&       \
+    ((*(dequeaddr))[scc_ringdeque_impl_push_front_index(*(dequeaddr))] = value),1)
 
 #endif /* SCC_RINGDEQUE_H */

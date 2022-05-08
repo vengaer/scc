@@ -9,6 +9,7 @@ size_t scc_ringdeque_impl_npad(void const *deque);
 size_t scc_ringdeque_capacity(void const *deque);
 size_t scc_ringdeque_size(void const *deque);
 size_t scc_ringdeque_impl_push_back_index(void *deque);
+size_t scc_ringdeque_impl_push_front_index(void *deque);
 
 //? .. c:function:: bool scc_ringdeque_is_allocd(void const *deque)
 //?
@@ -72,7 +73,7 @@ static struct scc_ringdeque_base *scc_ringdeque_alloc(size_t capacity, size_t si
 //? .. c:function:: bool scc_ringdeque_grow(void **dequeaddr, size_t newcap, size_t elemsize)
 //?
 //?     Reallocate the ringdeque with increased capacity. The elements are repositioned
-//?     such that :ref:`rd_begin <size_t_rd_begin>` is 0
+//?     such that :ref:`rd_begin <size_t_rd_begin>` is 0.
 //?
 //?     .. note::
 //?         Internal use only
