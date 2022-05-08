@@ -296,7 +296,7 @@ inline size_t scc_ringdeque_impl_push_back_index(void *deque) {
 //!     :retval true: The push succeeded
 //!     :retval false: Memory allocation failure
 #define scc_ringdeque_push_back(dequeaddr, value)                               \
-    (scc_ringdeque_impl_prepare_push(dequeaddr, sizeof(**(dequeaddr))) &&    \
+    (scc_ringdeque_impl_prepare_push(dequeaddr, sizeof(**(dequeaddr))) &&       \
     ((*(dequeaddr))[scc_ringdeque_impl_push_back_index(*(dequeaddr))] = value),1)
 
 #endif /* SCC_RINGDEQUE_H */
