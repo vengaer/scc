@@ -1,7 +1,7 @@
 ifdef __node
 
 __scc_incdir := $(__node_path)
-__public_headers := $(addsuffix .h,$(addprefix $(__node_path)/scc_,hashmap hashtab rbtree stack svec vec))
+__public_headers := $(addsuffix .h,$(addprefix $(__node_path)/scc_,hashmap hashtab rbtree ringdeque stack svec vec))
 
 else
 # Recurse to top level
