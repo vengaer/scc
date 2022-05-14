@@ -291,24 +291,6 @@ inline size_t scc_ringdeque_impl_push_back_index(void *deque) {
     return index;
 }
 
-//? .. c:function:: size_t scc_ringdeque_impl_push_front_index(void *deque)
-//?
-//?     Obtain the index of the slot just before the first in the given
-//?     ringdeque and move the :ref:`rd_begin <size_t_rd_begin>` backward.
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param deque: Handle to the ringdeque in question
-//?     :returns: The index of the slot just before the first one in the ringdeque
-inline size_t scc_ringdeque_impl_push_front_index(void *deque) {
-    struct scc_ringdeque_base *base = scc_ringdeque_impl_base(deque);
-    base->rd_begin = (base->rd_begin - 1u) & (base->rd_capacity - 1u);
-    ++base->rd_size;
-    return base->rd_begin;
-}
-
 //! .. c:function:: _Bool scc_ringdeque_push_back(void *dequeaddr, type value)
 //!
 //!     Push :c:texpr:`value` to the back of the ringdeque, reallocating the
@@ -330,6 +312,24 @@ inline size_t scc_ringdeque_impl_push_front_index(void *deque) {
     (scc_ringdeque_impl_prepare_push(dequeaddr, sizeof(**(dequeaddr))) &&       \
     ((*(dequeaddr))[scc_ringdeque_impl_push_back_index(*(dequeaddr))] = value),1)
 
+//? .. c:function:: size_t scc_ringdeque_impl_push_front_index(void *deque)
+//?
+//?     Obtain the index of the slot just before the first in the given
+//?     ringdeque and move the :ref:`rd_begin <size_t_rd_begin>` backward.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param deque: Handle to the ringdeque in question
+//?     :returns: The index of the slot just before the first one in the ringdeque
+inline size_t scc_ringdeque_impl_push_front_index(void *deque) {
+    struct scc_ringdeque_base *base = scc_ringdeque_impl_base(deque);
+    base->rd_begin = (base->rd_begin - 1u) & (base->rd_capacity - 1u);
+    ++base->rd_size;
+    return base->rd_begin;
+}
+
 //! .. c:function:: _Bool scc_ringdeque_push_front(void *dequeaddr, type value)
 //!
 //!     Push :c:texpr:`value` to the front of the ringdeque, reallocating the
@@ -350,5 +350,34 @@ inline size_t scc_ringdeque_impl_push_front_index(void *deque) {
 #define scc_ringdeque_push_front(dequeaddr, value)                              \
     (scc_ringdeque_impl_prepare_push(dequeaddr, sizeof(**(dequeaddr))) &&       \
     ((*(dequeaddr))[scc_ringdeque_impl_push_front_index(*(dequeaddr))] = value),1)
+
+//? .. c:function:: size_t scc_ringdeque_impl_pop_back_index(void *deque)
+//?
+//?     Pop the last element from the ringdeque and return the index of it
+//?     in the ring buffer
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param deque: Handle ot the ringdeque in question
+//?     :returns: The index of the just poped element
+inline size_t scc_ringdeque_impl_pop_back_index(void *deque) {
+    struct scc_ringdeque_base *base = scc_ringdeque_impl_base(deque);
+    base->rd_end = (base->rd_end - 1u) & (base->rd_capacity - 1u);
+    --base->rd_size;
+    return base->rd_end;
+}
+
+//! .. c:function:: type scc_ringdeque_pop_back(void *deque)
+//!
+//!     Pop and return the last element in the ringdeque. No bounds checking
+//!     is performed.
+//!
+//!     :param deque: Handle to the ringdeque in question
+//!     :returns: The element just poped
+#define scc_ringdeque_pop_back(deque)                                           \
+    (deque)[scc_ringdeque_impl_pop_back_index(deque)]
+
 
 #endif /* SCC_RINGDEQUE_H */
