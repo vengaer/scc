@@ -62,6 +62,7 @@ $(eval
 endef
 
 
+$(call include-node,algorithm)
 $(call include-node,arena)
 $(call include-node,bits)
 $(call include-node,btree)
