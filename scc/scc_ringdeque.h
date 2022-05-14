@@ -428,4 +428,31 @@ inline size_t scc_ringdeque_impl_pop_front_index(void *deque) {
 #define scc_ringdeque_pop_front(deque)                                          \
     (deque)[scc_ringdeque_impl_pop_front_index(deque)]
 
+//? .. c:function:: size_t scc_ringdeque_impl_back_index(void const *deque)
+//?
+//?     Compute and return the index of the last element in the given
+//?     ringdeque
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param deque: Ringdeque handle
+//?     :returns: Index of the last element in the ringdeque
+inline size_t scc_ringdeque_impl_back_index(void const *deque) {
+    struct scc_ringdeque_base const *base = scc_ringdeque_impl_base_qual(deque, const);
+    return (base->rd_end - 1u) & (base->rd_capacity - 1u);
+}
+
+//! .. c:function:: type scc_ringdeque_back(void *deque)
+//!
+//!     Expands to an lvalue with the value of the last element
+//!     in the ringdeque. No bounds checking is performed, meaning
+//!     this must never be called on an empty ringdeque
+//!
+//!     :param deque: Handle to the ringdeque
+//!     :returns: The last element in the ringdeque
+#define scc_ringdeque_back(deque)                                               \
+    (deque)[scc_ringdeque_impl_back_index(deque)]
+
 #endif /* SCC_RINGDEQUE_H */
