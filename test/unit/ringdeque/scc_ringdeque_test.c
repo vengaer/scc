@@ -123,3 +123,21 @@ void test_scc_ringdeque_clear(void) {
 
     scc_ringdeque_free(deque);
 }
+
+void test_scc_ringdeque_reserve_size_is_power_of_2(void) {
+    scc_ringdeque(unsigned) deque = scc_ringdeque_init(unsigned);
+    TEST_ASSERT_TRUE(scc_ringdeque_reserve(&deque, scc_ringdeque_capacity(deque) + 1u));
+    TEST_ASSERT_TRUE(scc_bits_is_power_of_2(scc_ringdeque_capacity(deque)));
+    scc_ringdeque_free(deque);
+}
+
+void test_scc_ringdeque_reserve_no_reallocation(void) {
+    scc_ringdeque(unsigned) deque = scc_ringdeque_init(unsigned);
+
+    size_t const cap = scc_ringdeque_capacity(deque);
+    void const *before = deque;
+    TEST_ASSERT_TRUE(scc_ringdeque_reserve(&deque, cap - 1u));
+    TEST_ASSERT_EQUAL_UINT64(cap, scc_ringdeque_capacity(deque));
+    TEST_ASSERT_EQUAL_PTR(before, deque);
+    scc_ringdeque_free(deque);
+}
