@@ -1,3 +1,4 @@
+#include <scc/scc_bits.h>
 #include <scc/scc_ringdeque.h>
 
 #include <assert.h>
@@ -135,4 +136,21 @@ bool scc_ringdeque_impl_prepare_push(void *dequeaddr, size_t elemsize) {
     }
     size_t newcap = base->rd_capacity << 1u;
     return scc_ringdeque_grow(dequeaddr, newcap, elemsize);
+}
+
+bool scc_ringdeque_impl_reserve(void *dequeaddr, size_t capacity, size_t elemsize) {
+    struct scc_ringdeque_base *base = scc_ringdeque_impl_base(*(void **)dequeaddr);
+    if(base->rd_capacity >= capacity) {
+        return true;
+    }
+    if(!scc_bits_is_power_of_2(capacity)) {
+        size_t newcap = base->rd_capacity << 1u;
+        while(newcap < capacity) {
+            newcap <<= 1u;
+        }
+        capacity = newcap;
+    }
+
+    assert(scc_bits_is_power_of_2(capacity));
+    return scc_ringdeque_grow(dequeaddr, capacity, elemsize);
 }

@@ -203,6 +203,7 @@ void *scc_ringdeque_impl_init(void *deque, size_t offset, size_t capacity);
         SCC_RINGDEQUE_STATIC_CAPACITY                                           \
     )
 
+//! .. _scc_ringdeque_free:
 //! .. c:function:: void scc_ringdeque_free(void *deque)
 //!
 //!     Reclaim memory allocated for :c:texpr:`deque`. The parameter must
@@ -477,5 +478,40 @@ inline void scc_ringdeque_clear(void *deque) {
     base->rd_begin = 0u;
     base->rd_end = 0u;
 }
+
+//? .. c:function:: _Bool scc_ringdeque_impl_reserve(void *dequeaddr, size_t capacity, size_t elemsize)
+//?
+//?     Reserve enough memory for storing at least :c:expr:`capacity` elements. See
+//?     :ref:`scc_ringdeque_reserve <scc_ringdeque_reserve>` for details.
+//?
+//?     :param dequeaddr: Address of the ringdeque handle
+//?     :param capacity: Requested capacity
+//?     :param elemsize: Size of each element stored in the ringdeque
+//?     :returns: A :code:`_Bool` indicating whether the request was fulfilled
+//?     :retval true: The ringdeque capacity was already sufficiently large
+//?     :retval true: The ringdeque was successfully reallocated to satisfy the request
+//?     :retval false: Reallocation failed
+_Bool scc_ringdeque_impl_reserve(void *dequeaddr, size_t capacity, size_t elemsize);
+
+//! .. _scc_ringdeque_reserve:
+//! .. c:function:: _Bool scc_ringdeque_reserve(void *dequeaddr, size_t capacity)
+//!
+//!     Reserve enough memory that at least :c:expr:`capacity` elements
+//!     can be stored in the given ringdeque. The actually allocated
+//!     capacity may exceed the requested one.
+//!
+//!     If the ringdeque has to be reallocated, :c:expr:`*(void **)dequeaddr` is
+//!     updated to refer to the new ringdeque. If reallocation fails,
+//!     :c:expr:`*(void **)dequeaddr` is left unchanged and the ringdeque must
+//!     still be passed to :ref:`scc_ringdeque_free <scc_ringdeque_free>`.
+//!
+//!     :param dequeaddr: Address of the ringdeque handle
+//!     :param capacity: Requested capacity
+//!     :returns: A :code:`_Bool` indicating whether the request was fulfilled
+//!     :retval true: The ringdeque capacity was already sufficiently large
+//!     :retval true: The ringdeque was successfully reallocated to satisfy the request
+//!     :retval false: Reallocation failed
+#define scc_ringdeque_reserve(dequeaddr, capacity)                              \
+    scc_ringdeque_impl_reserve(dequeaddr, capacity, sizeof(**(dequeaddr)))
 
 #endif /* SCC_RINGDEQUE_H */
