@@ -27,6 +27,7 @@ Trees
 
 .. toctree::
 
+    btree/index
     rbtree/index
 
 .. _adapter_types:

@@ -1,9 +1,4 @@
-ifdef __node
-
-__scc_incdir := $(__node_path)
-__public_headers := $(addsuffix .h,$(addprefix $(__node_path)/scc_,btree hashmap hashtab rbtree ringdeque stack svec vec))
-
-else
+ifndef __node
 # Recurse to top level
 __recurse := $(if $(MAKECMDGOALS),$(MAKECMDGOALS),__recurse)
 .PHONY: $(__recurse)
