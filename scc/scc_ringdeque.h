@@ -466,4 +466,16 @@ inline size_t scc_ringdeque_impl_back_index(void const *deque) {
 #define scc_ringdeque_front(deque)                                              \
     (deque)[scc_ringdeque_impl_base_qual(deque, const)->rd_begin]
 
+//! .. c:function:: void scc_ringdeque_clear(void *deque)
+//!
+//!     Clear the given ringdeque
+//!
+//!     :param deque: Ringdeque handle
+inline void scc_ringdeque_clear(void *deque) {
+    struct scc_ringdeque_base *base = scc_ringdeque_impl_base(deque);
+    base->rd_size = 0u;
+    base->rd_begin = 0u;
+    base->rd_end = 0u;
+}
+
 #endif /* SCC_RINGDEQUE_H */

@@ -14,6 +14,7 @@ size_t scc_ringdeque_impl_push_front_index(void *deque);
 size_t scc_ringdeque_impl_pop_back_index(void *deque);
 size_t scc_ringdeque_impl_pop_front_index(void *deque);
 size_t scc_ringdeque_impl_back_index(void const *deque);
+void scc_ringdeque_clear(void *deque);
 
 //? .. c:function:: bool scc_ringdeque_is_allocd(void const *deque)
 //?
