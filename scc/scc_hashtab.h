@@ -1,6 +1,8 @@
 #ifndef SCC_HASHTAB_H
 #define SCC_HASHTAB_H
 
+#include "scc_assert.h"
+#include "scc_bits.h"
 #include "scc_mem.h"
 
 #include <stddef.h>
@@ -15,7 +17,19 @@
 
 #define SCC_HASHTAB_GUARDSZ ((unsigned)SCC_VECSIZE - 1u)
 
-enum { SCC_HASHTAB_STACKCAP = 32 };
+#ifndef SCC_HASHTAB_STATIC_CAPACITY
+//! .. c:enumerator:: SCC_HASHTAB_STATIC_CAPACITY
+//!
+//!     Capacity of the buffer used for the hash table small-size
+//!     optimization. The value may be overridden by defining
+//!     it before including the header.
+//!
+//!     Must be a power of 2 and larger than or equal to 32
+enum { SCC_HASHTAB_STATIC_CAPACITY = 32 };
+#endif
+
+scc_static_assert(SCC_HASHTAB_STATIC_CAPACITY >= 32);
+scc_static_assert(scc_bits_is_power_of_2(SCC_HASHTAB_STATIC_CAPACITY));
 
 //! .. c:type:: _Bool(*scc_hashtab_eq)(void const *, void const *)
 //!
@@ -27,37 +41,41 @@ typedef _Bool(*scc_hashtab_eq)(void const *, void const *);
 //!     Signature of the hash function used.
 typedef unsigned long long(*scc_hashtab_hash)(void const*, size_t);
 
-/* scc_hashtab_metatype
- *
- * Internal use only
- *
- * Type used for storing hash table metadata
- */
+//? .. c:type:: unsigned char scc_hashtab_metatype
+//?
+//?     Type used for storing hash table metadata
+//?
+//?     .. note::
+//?         Internal use only
 typedef unsigned char scc_hashtab_metatype;
 
-/* struct scc_hashtab_perfevts
- *
- * Internal use only
- *
- * Counters for tracking performance-
- * related events.
- *
- * size_t ev_n_rehashes
- *      Number of times the hash table
- *      has been rehashed
- *
- * size_t ev_n_eqs
- *      Number of calls to eq performed
- *
- * size_t ev_n_hash
- *      Number of calls to hash performed
- *
- * size_t ev_n_inserts
- *      Number of successful insertions performed
- *
- * size_t ev_bytesz
- *      Total size of the table, in bytes
- */
+//? .. c:struct:: scc_hashtab_perfevts
+//?
+//?     Counters for tracking performance-related events
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     .. c:var:: size_t ev_n_rehashes
+//?
+//?         Number of times the hash table has be rehashed
+//?
+//?     .. c:var:: size_t ev_n_eqs
+//?
+//?         Number of calls to eq performed
+//?
+//?     .. c:var:: size_t ev_n_hash
+//?
+//?         Number of calls to hash performed
+//?
+//?     .. c:var:: size_t ev_n_inserts
+//?
+//?         Number of successful insertions performed
+//?
+//?     .. c:var:: size_t ev_bytesz
+//?
+//?         Total size of the table, in bytes
 struct scc_hashtab_perfevts {
     size_t ev_n_rehashes;
     size_t ev_n_eqs;
@@ -66,50 +84,71 @@ struct scc_hashtab_perfevts {
     size_t ev_bytesz;
 };
 
-/* struct scc_hashtab_base
- *
- * Internal use only
- *
- * Base struct of the hash table. Never exposed directly
- * through the API. Instead, all "public" functions operate
- * on a fat pointer referred to as a handle. Given a struct
- * scc_hashtab_base base, the address of said pointer is
- * obtained by computing &base.ht_fwoff + base.ht_fwoff + 1.
- *
- * scc_hashtab_eq ht_eq;
- *      Pointer to function used for equality comparison
- *
- * scc_hashtab_hash ht_hash
- *      Pointer to hash function.
- *
- * size_t ht_mdoff
- *      Offset of metadata array relative base address. This
- *      is used to access the metadata in the FAM part of the
- *      struct.
- *
- * size_t ht_size
- *      Size of the hash table
- *
- * size_t ht_capacity
- *      Capacity of the hash table. Always a power of two to
- *      allow for efficient modulo computation.
- *
- * struct scc_hashtab_perfevts ht_perf
- *      Performance counters
- *
- * unsigned char ht_dynalloc
- *      Set to 1 if the current table was allocated dynamically.
- *      Upon initial construction, the table is allocated on the
- *      stack. This field is set on the first rehash.
- *
- * unsigned char ht_fwoff
- *      Offset of the pointer exposed through the API. The offset
- *      is relative to the field itself.
- *
- * unsigned char ht_buffer[]
- *      FAM hiding type-specific details. For the exact layout,
- *      refer to scc_hashtab_impl_layout.
- */
+//? .. _scc_hashtab_base:
+//? .. c:struct:: scc_hashtab_base
+//?
+//?     Base struct of the hash table. Never exposed directly
+//?     through the API. Instead, all "public" functions operate
+//?     on a fat pointer referred to as a handle. Given a
+//?     :code:`struct scc_hashtab_base` base, the address of said
+//?     pointer is obtained by computing
+//?     :c:expr:`&base.ht_fwoff + base.ht_fwoff + sizeof(base.ht_fwoff)`.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     .. _scc_hashtab_eq_ht_eq:
+//?     .. c:var:: scc_hashtab_eq ht_eq
+//?
+//?         Pointer to function used for equality comparison
+//?
+//?     .. _scc_hashtab_hash_ht_hash:
+//?     .. c:var:: scc_hashtab_hash ht_hash
+//?
+//?         Pointer to hash function
+//?
+//?     .. _size_t_ht_mdoff:
+//?     .. c:var:: size_t ht_mdoff
+//?
+//?         Offset of metadata array relative base address. This
+//?         is used to access the metadata in the FAM part of the
+//?         struct.
+//?
+//?     .. _size_t_ht_size:
+//?     .. c:var:: size_t ht_size
+//?
+//?         Size of the hash table
+//?
+//?     .. _size_t_ht_capacity:
+//?     .. c:var:: size_t ht_capacity
+//?
+//?         Capacity of the hash table. Always a power fo two to
+//?         allow for efficient module computation.
+//?
+//?     .. _struct_scc_hashtab_perfevts_ht_perf:
+//?     .. c:var:: struct scc_hashtab_perfevts ht_perf
+//?
+//?         Performance counters.Present only if :ref:`CONFIG_PERFEVTS <config_perfevts>`
+//?         is set.
+//?
+//?     .. _unsigned_char_ht_dynalloc:
+//?     .. c:var:: unsigned char ht_dynalloc
+//?
+//?         Set to 1 if the hash table was allocated dynamically.
+//?         Upon initial construction, the table is allocated on the stack,
+//?         meaning this field is set at first rehash.
+//?
+//?     .. _unsigned_char_ht_fwoff:
+//?     .. c:var:: unsigned char ht_fwoff
+//?
+//?         Offset of the pointer exposed through the API relative the
+//?         field itself.
+//?
+//?     .. c:var:: unsigned char ht_buffer[]
+//?
+//?         FAM hiding type-specific details. For the exact layout,
+//?         refer to :ref:`scc_hashtab_impl_layout <scc_hashtab_impl_layout>`.
 struct scc_hashtab_base {
     scc_hashtab_eq ht_eq;
     scc_hashtab_hash ht_hash;
@@ -131,56 +170,102 @@ struct scc_hashtab_base {
 #define SCC_HASHTAB_INJECT_PERFEVTS(name)
 #endif
 
-/* scc_hashtab_impl_layout
- *
- * Internal use only
- *
- * The actual layout of the hash table instantiated for a given
- * type. The ht_eq through ht_fwoff members are the same as for
- * struct scc_hashtab_base.
- *
- * unsigned char ht_bkoff;
- *      Field used for tracking the padding between ht_fwoff and
- *      ht_curr. Just as ht_fwoff is used to compute the address
- *      of ht_curr given a base address, ht_bkoff is used to
- *      compute the base address given the address of ht_curr.
- *
- *      The primary purpose of this field is to force injection of
- *      padding bytes between ht_fwoff and ht_curr. Whether the offset
- *      is actually stored in this field depends on the alignment of
- *      the type parameter. In practice, this occurs only for 1-byte
- *      aligned types. For types with stricter alignment requirements,
- *      the last padding byte is used instead.
- *
- * type ht_curr;
- *      Temporary instance of the type stored in the hash table.
- *      Values to be inserted or used in probing are stored here to
- *      provide rvalue support. The address of this element is the
- *      one exposed through the API.
- *
- * type ht_data[SCC_HASHTAB_STACKCAP];
- *      The data array in which elements in the table are stored.
-
- * scc_hashtab_metatype ht_meta[SCC_HASHTAB_STACKCAP];
- *      Metadata array used for tracking vacant slots. Each slot n
- *      in the metadata array corresponds to slot n in the data array.
- *
- *      A slot is unused if the value of its metadata entry is 0. If the
- *      byte has a non-zero value with the MSB unset, the slot was previously
- *      occupied but has since been vacated. Such slots can be reused during
- *      insertion but cannot be used as probing stops.
- *
- *      An entry with the MSB set signifies that the slot is occupied. In
- *      this case, the remaining bits are the CHAR_BIT - 1 most
- *      significant bytes of the hash computed for the value in the
- *      corresponding slot in the data array. This is used for
- *      avoiding unnecessary calls to eq.
- *
- * scc_hashtab_metatype ht_guard[SCC_HASHTAB_GUARDSZ];
- *      Guard to allow for unaligned vector loads without risking
- *      reads from potential guard pages. The SCC_HASHTAB_GUARDSZ
- *      low bytes of ht_meta are mirrored in the guard.
- */
+//? .. _scc_hashtab_impl_layout:
+//? .. c:macro:: scc_hashtab_impl_layout(type)
+//?
+//?     The actual layout of a hash table storing instances of
+//?     the given :code:`type`. The :c:texpr:`ht_eq` through
+//?     :c:texpr:`ht_fwoff` members are the same as for
+//?     :ref:`struct scc_hashtab_base <scc_hashtab_base>`.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     .. c:struct:: @layout
+//?
+//?         .. c:var:: scc_hashtab_eq ht_eq
+//?
+//?             See :ref:`ht_eq <scc_hashtab_eq_ht_eq>`.
+//?
+//?         .. c:var:: scc_hashtab_hash ht_hash
+//?
+//?             See :ref:`ht_hash <scc_hashtab_hash_ht_hash>`.
+//?
+//?         .. c:var:: size_t ht_mdoff
+//?
+//?             See :ref:`ht_mdoff <size_t_ht_mdoff>`.
+//?
+//?         .. c:var:: size_t ht_size
+//?
+//?             See :ref:`ht_size <size_t_ht_size>`.
+//?
+//?         .. c:var:: size_t ht_capacity
+//?
+//?             See :ref:`ht_capacity <size_t_ht_capacity>`.
+//?
+//?         .. c:var:: struct scc_hashtab_perfevts ht_perfevts
+//?
+//?             See :ref:`ht_perfevts <struct_scc_hashtab_perfevts_ht_perf>`.
+//?
+//?         .. c:var:: unsigned char ht_dynalloc
+//?
+//?             See :ref:`ht_dynalloc <unsigned_char_ht_dynalloc>`.
+//?
+//?         .. c:var:: unsigned char ht_fwoff
+//?
+//?             See :ref:`ht_fwoff <unsigned_char_ht_fwoff>`.
+//?
+//?         .. _unsigned_char_ht_bkoff:
+//?         .. c:var:: unsigned char ht_bkoff
+//?
+//?             Field used for tracking padding between :ref:`ht_fwoff <unsigned_char_ht_fwoff>`
+//?             and :ref:`ht_curr <type_ht_curr>`. Just as :code:`ht_fwoff` is used to
+//?             compute the address of :code:`ht_curr` given a base address, :code:`ht_bkoff` is
+//?             used to compute the base address given the address of :code:`ht_curr`.
+//?
+//?             The primary purpose of the field itself is to force injection of padding bytes
+//?             between :code:`ht_fwoff` and :code:`ht_curr`. Whether the offset is actually
+//?             stored in this field depends on the alignment of the :code:`type` parameter. In
+//?             practice, this is the case only for 1-byte aligned types. For types with stricted
+//?             alignemtn requirements, the last padding byte is used instead.
+//?
+//?
+//?         .. _type_ht_curr:
+//?         .. c:var:: type ht_curr
+//?
+//?             Volatile instance of the type stored in the hash table used as intermediary storage
+//?             for rvalue support. Values to be inserted or used in probing are written to this
+//?             field to allow for operating on an lvalue.
+//?
+//?         .. _type_ht_data:
+//?         .. c:var:: type ht_data[SCC_HASHTAB_STATIC_CAPACITY]
+//?
+//?             The data array in which the actual elements of the table are stored.
+//?
+//?         .. _scc_hashtab_metatype_ht_meta:
+//?         .. c:var:: scc_hashtab_metatype ht_meta[SCC_HAShTAB_STATIC_CAPACITY]
+//?
+//?             Metadata array used for tracking vacant slots. Each slot *n* in the
+//?             metadata array correspons to slot *n* in the :ref:`ht_data array <type_ht_data>`.
+//?
+//?             A slot is vacant if zero-indexed bit 7 in its metadata entry is not set. If the
+//?             entire byte is 0, the slot has never been occupied and serves as a stop marker for
+//?             both :ref:`insertion <scc_hashtab_insert>` and :ref:`find <scc_hashtab_find>` probing.
+//?             The metadata entries of previously used but now vacated slots are assigned the value
+//?             :c:expr:`0x7f`. These slots are used for insertion but serve as probe stops only if
+//?             it is the very last slot searched in the table.
+//?
+//?             An entyre with zero-indexed bit 6 set signifies that a slot is occupied. In this case,
+//?             zero-indexed bits 0-6, inclusive, contain the 7 most significant bits of the hash
+//?             computed for the corresponding entry in the :code:`ht_data` array. This is used
+//?             for avoiding unnecessary calls to :ref:`ht_eq <scc_hashtab_eq_ht_eq>`.
+//?
+//?         .. c:var:: scc_hashtab_metatype ht_guard[SCC_HASHTAB_GUARDSZ]
+//?
+//?             Guard to allow for unaligned vector loads on architectures supporting
+//?             it without risking reads from potential guard pages. The :code:`SCC_HASHTAB_GUARDSZ`
+//?             low bytes of :ref:`ht_meta <scc_hashtab_metatype_ht_meta>` are mirrored in the guard.
 #define scc_hashtab_impl_layout(type)                                       \
     struct {                                                                \
         scc_hashtab_eq ht_eq;                                               \
@@ -193,33 +278,25 @@ struct scc_hashtab_base {
         unsigned char ht_fwoff;                                             \
         unsigned char ht_bkoff;                                             \
         type ht_curr;                                                       \
-        type ht_data[SCC_HASHTAB_STACKCAP];                                 \
-        scc_hashtab_metatype ht_meta[SCC_HASHTAB_STACKCAP];                 \
+        type ht_data[SCC_HASHTAB_STATIC_CAPACITY];                          \
+        scc_hashtab_metatype ht_meta[SCC_HASHTAB_STATIC_CAPACITY];          \
         scc_hashtab_metatype ht_guard[SCC_HASHTAB_GUARDSZ];                 \
     }
 
-/* scc_hashtab_impl_init
- *
- * Internal use only
- *
- * Initialize an empty hash table and return a handle to it.
- *
- * struct scc_hashtab_base *base
- *      Address of hash table base. The handle returned by the function
- *      refers to the ht_curr entry in this table
- *
- * scc_hashtab_eq eq
- *      Pointer to the equality function to use
- *
- * scc_hashtab_hash hash
- *      Pointer to the hash function to use
- *
- * size_t coff
- *      Offset of ht_curr relative the address of *base
- *
- * size_t mdoff
- *      Offset of ht_meta relative the address of *base
- */
+//? .. c:function:: void *scc_hashtab_impl_init(struct scc_hashtab_base *base, scc_hashtab_eq eq, scc_hashtab_hash, size_t coff, size_t mdoff)
+//?
+//?     Initialize the given hash table and return a handle to it.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Address of hash table base. The handle returned yb the function refers to the :ref:`ht_curr <type_ht_curr>`
+//?                  entry in this table.
+//?     :param eq: Pointer to the equality function to use
+//?     :param hash: Pointer to the hash function to use
+//?     :param coff: Offset of :code:`ht_curr` relative the address of :c:expr:`*base`
+//?     :param mdoff: Offset of :code:`ht_meta` relative the address of :c:expr`*base`
 void *scc_hashtab_impl_init(struct scc_hashtab_base *base, scc_hashtab_eq eq, scc_hashtab_hash hash, size_t coff, size_t mdoff);
 
 //! .. _scc_hashtab_init_with_hash:
@@ -287,12 +364,17 @@ void *scc_hashtab_impl_init(struct scc_hashtab_base *base, scc_hashtab_eq eq, sc
 #define scc_hashtab_init(type, eq)                                          \
     scc_hashtab_init_with_hash(type, eq, scc_hashtab_fnv1a)
 
-/* scc_hashtab_impl_bkpad
- *
- * Internal use only
- *
- * Compute number of padding bytes between ht_curr and ht_fwoff
- */
+//? .. c:function:: size_t scc_hashtab_impl_bkpad(void const *tab)
+//?
+//?     Compute number of padding bytes between :ref:`ht_curr <type_ht_curr>` and
+//?     :ref:`ht_fwoff <unsigned_char_ht_fwoff>`.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param tab: Hash table handle
+//?     :returns: The number of padding bytes between :code:`ht_curr` and :code:`ht_fwoff`
 inline size_t scc_hashtab_impl_bkpad(void const *tab) {
     return ((unsigned char const *)tab)[-1] + sizeof(((struct scc_hashtab_base *)0)->ht_fwoff);
 }
@@ -304,6 +386,21 @@ inline size_t scc_hashtab_impl_bkpad(void const *tab) {
  * Obtain qualified pointer to the struct scc_hashtab_base
  * corresponding to the given handle
  */
+//? .. c:macro:: scc_hashtab_impl_base_qual(tab, qual)
+//?
+//?     Obtain qualified pointer to the
+//?     :ref:`struct scc_hashtab_base <scc_hashtab_base>` corresponding
+//?     to the given :c:texpr:`tab`.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param tab: Hash table handle
+//?     :param qual: Oprional qualifiers to apply to the pointer
+//?     :returns: Appropriately qualified address of the
+//?               :ref:`struct scc_hashtab_base <scc_hashtab_base>`
+//?               corresponding th :code:`tab`.
 #define scc_hashtab_impl_base_qual(tab, qual)                               \
     scc_container_qual(                                                     \
         (unsigned char qual *)(tab) - scc_hashtab_impl_bkpad(tab),          \
@@ -312,13 +409,19 @@ inline size_t scc_hashtab_impl_bkpad(void const *tab) {
         qual                                                                \
     )
 
-/* scc_hashtab_impl_base
- *
- * Internal use only
- *
- * Obtain unqualified pointer to the struct scc_hashtab_base
- * corresponding to the given handle
- */
+//? .. c:macro:: scc_hashtab_impl_base(tab)
+//?
+//?     Obtain unqualified pointer to the
+//?     :ref:`struct scc_hashtab_base <scc_hashtab_base>` corresponding
+//?     to the given :code:`tab`.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param tab: Handle to the hash table whose base address is to be obtained
+//?     :returns: Address of the :ref:`struct scc_hashtab_base <scc_hashtab_base>`
+//?               corresponding to the given :code:`tab`.
 #define scc_hashtab_impl_base(tab)                                          \
     scc_hashtab_impl_base_qual(tab,)
 
@@ -349,27 +452,35 @@ unsigned long long scc_hashtab_fnv1a(void const *data, size_t size);
 //!     :param tab: Handle to the hash table to free
 void scc_hashtab_free(void *tab);
 
-/* scc_hashtab_impl_insert
- *
- * Internal use only
- *
- * Insert the value in ht_curr in the table. Return true
- * on success.
- *
- * void *tabaddr
- *      Address of the handle used to refer to the hash table
- *
- * size_t elemsize
- *      Size of the elements stored in the hash table
- */
+//? .. c:function:: _Bool scc_hashtab_impl_insert(void *tabaddr, size_t elemsize)
+//?
+//?     Insert the value in :ref:`ht_curr <type_ht_curr>` in the hash table. See
+//?     :ref:`scc_hashtab_insert <scc_hashtab_insert>` for more info.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param tabaddr: Address of the handle used to refer to the hash table.
+//?     :param elemsize: Size of the elements stored in the hash table
+//?     :returns: A :code:`_Bool` indicating whether the element was successfully
+//?               inserted.
+//?     :retval true: The element was successfully inserted
+//?     :retval false: The given hash table already contains the element in :code:`ht_curr`
+//?     :retval false: Memory allocation faliure
 _Bool scc_hashtab_impl_insert(void *tabaddr, size_t elemsize);
 
+//! .. _scc_hashtab_insert:
 //! .. c:function:: _Bool scc_hashtab_insert(void *tabaddr, type element)
 //!
 //!     Insert an element in the hash table. Succeeds only if  :c:texpr:`element`
 //!     is not already present in the table.
 //!
-//!     The call may result in the hash table being reallocated.
+//!     The call may result in the hash table being reallocated in which case
+//!     :c:expr:`*(void **)tabaddr` is updated to refer to the newly allocated table.
+//!     Should such a reallocation fail, :c:expr:`*(void **)tabaddr` remains unchanged
+//!     and must still be passed to :ref:`scc_hashtab_free <scc_hashtab_free>` in order
+//!     for the its memory to be reclaimed.
 //!
 //!     :param tabaddr: Address of the handle used for referring to the hash table. Should
 //!                     the table have to be reallocated to accomodate the insertion, :c:texpr:`*tabaddr`
@@ -423,22 +534,24 @@ inline size_t scc_hashtab_size(void const *tab) {
     return base->ht_size;
 }
 
-/* scc_hashtab_impl_find
- *
- * Internal use only
- *
- * Probe for the value in *tab in the table. Return a pointer to
- * the element if found, NULL otherwise
- *
- * void const *tab
- *      Handle to the hash table in question
- *
- * size_t elemsize
- *      Size of the elements stored in the hash table
- */
+//? .. c:function:: void const *scc_hashtab_impl_find(void const *tab, size_t elemsize)
+//?
+//?     Probe the given hash table for the value stored in :ref:`ht_curr <type_ht_curr>`.
+//?     See :ref:`scc_hashtab_find <scc_hashtab_find>`.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param tab: Handle to the hash table to search
+//?     :param elemsize: Size of the elements stored in the table
+//?     :returns: Const-qualified address of the element in the table
+//?     :retval NULL: The element was not found in the table
+//?     :retval Valid address: Const-qualified address of the found element
 void const *scc_hashtab_impl_find(void const *tab, size_t elemsize);
 
-//! .. c:function:: void *scc_hashtab_find(void *tab, type value)
+//! .. _scc_hashtab_find:
+//! .. c:function:: void const *scc_hashtab_find(void *tab, type value)
 //!
 //!     Probe for :c:texpr:`value` in the given hash table.
 //!
@@ -466,20 +579,27 @@ void const *scc_hashtab_impl_find(void const *tab, size_t elemsize);
 #define scc_hashtab_find(tab, value)                                        \
     scc_hashtab_impl_find((*(tab) = (value), (tab)), sizeof(*(tab)))
 
-/* scc_hashtab_impl_reserve
- *
- * Internal use only
- *
- * Reserve storage for specified number of slots. Return true on success,
- * otherwise false. On failure, *(void **)tabaddr remains untouched.
- *
- * void *tabaddr
- *      Address of the tabaddr used for referring to the hash table
- *
- * size_t capacity
- *      The desired capacity. If it is not a power of 2, it is
- *      rounded up to the next such power.
- */
+//? .. c:function:: _Bool scc_hashtab_impl_reserve(void *tabaddr, size_t capacity, size_t elemsize)
+//?
+//?     Reserve storage for specified number of slots. If the table is already sufficiently
+//?     large, return immediately. If it is successfully reallocated, :c:expr:`*(void **)tabaddr`
+//?     is updated to refer to the new table. If reallocation fails, :c:expr:`*(void **)tabaddr`
+//?     remains unchanged and must still be passed to :ref:`scc_hashtab_free <scc_hashtab_free>`
+//?     in order to reclaim any memory allocated for it.
+//?
+//?     The actual capacity allocated for the table may exceed the requested one.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param tabaddr: Address of the handle used to refer to the hash table
+//?     :param capacity: The desired capacity
+//?     :param elemsize: Size of each element in the given table
+//?     :returns: A :code:`_Bool` indicating whether the request could be fulfilled
+//?     :retval true: The hash table capacity is already sufficiently large
+//?     :retval true: The hash table was successfully rehashed to accomodate the request
+//?     :retval false: Memory allocation failure
 _Bool scc_hashtab_impl_reserve(void *tabaddr, size_t capacity, size_t elemsize);
 
 //! .. c:function:: _Bool scc_hashtab_reserve(void *tabaddr, size_t capacity)
@@ -508,20 +628,20 @@ _Bool scc_hashtab_impl_reserve(void *tabaddr, size_t capacity, size_t elemsize);
 #define scc_hashtab_reserve(tabaddr, capacity)                              \
     scc_hashtab_impl_reserve(tabaddr, capacity, sizeof(**(tabaddr)))
 
-/* scc_hashtab_impl_remove
- *
- * Internal use only
- *
- * Remove the value stored in the handle from the hash
- * table. Return true if the value was found, otherwise
- * false
- *
- * void *tab
- *      Handle used to refer to the hash table
- *
- * size_t elemsize
- *      Size of each value stored in the table
- */
+//? .. c:function:: _Bool scc_hashtab_impl_remove(void *tab, size_t elemsize)
+//?
+//?     Remove the value stored in :ref:`ht_curr <type_ht_curr>` from the
+//?     hash table.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param tab: Hash table handle
+//?     :param elemsize: Size of each element in the hash table
+//?     :returns: A :code:`_Bool` indicating whether the element was removed
+//?     :retval true: The element was found in and subsequently removed from the hash table
+//?     :retval false: The hash table did not contain the element in question.
 _Bool scc_hashtab_impl_remove(void *tab, size_t elemsize);
 
 //! .. c:function:: _Bool scc_hashtab_remove(void *tab, type value)

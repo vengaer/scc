@@ -13,6 +13,7 @@ __node_src   := $(wildcard $(__node_path)/*.$(rstext)) $(__docgen)
 
 .SECONDARY: $(__docgen)
 
+$(call include-node,configuration)
 $(call include-node,hashmap)
 $(call include-node,hashtab)
 $(call include-node,rbtree)

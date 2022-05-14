@@ -138,11 +138,12 @@ struct scc_ringdeque_base {
 //?     to the given :c:texpr:`deque`.
 //?
 //?     .. note::
+//?
 //?         Internal use only
 //?
 //?     :param deque: Handle to the ringdeque whose base address is to be obtained
 //?     :param qual: Optional qualifiers to apply to the pointer
-//?     :returns: Appropriated qualified address of the
+//?     :returns: Appropriately qualified address of the
 //?               :ref:`struct scc_ringdeque_base <scc_ringdeque_base>`
 //?               corresponding to :c:texpr:`deque`.
 #define scc_ringdeque_impl_base_qual(deque, qual)                               \
@@ -160,6 +161,7 @@ struct scc_ringdeque_base {
 //?     to the given :c:texpr:`deque`.
 //?
 //?     .. note::
+//?
 //?         Internal use only
 //?
 //?     :param deque: Handle to the ringdeque whose base address is to be obtained
