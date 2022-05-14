@@ -448,11 +448,22 @@ inline size_t scc_ringdeque_impl_back_index(void const *deque) {
 //!
 //!     Expands to an lvalue with the value of the last element
 //!     in the ringdeque. No bounds checking is performed, meaning
-//!     this must never be called on an empty ringdeque
+//!     this must never be called on an empty ringdeque.
 //!
 //!     :param deque: Handle to the ringdeque
 //!     :returns: The last element in the ringdeque
 #define scc_ringdeque_back(deque)                                               \
     (deque)[scc_ringdeque_impl_back_index(deque)]
+
+//! .. c:function:: type scc_ringdeque_front(void *deque)
+//!
+//!     Expands to an lvalue with the value of the first element
+//!     in the ringdeque. No bounds cheking is performed, meaning
+//!     this must never be called on an empty ringdeque.
+//!
+//!     :param deque: Ringdeque handle
+//!     :returns: The first element in the ringdeque
+#define scc_ringdeque_front(deque)                                              \
+    (deque)[scc_ringdeque_impl_base_qual(deque, const)->rd_begin]
 
 #endif /* SCC_RINGDEQUE_H */
