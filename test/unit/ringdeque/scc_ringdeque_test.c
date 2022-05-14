@@ -36,3 +36,18 @@ void test_scc_ringdeque_push_front(void) {
 
     scc_ringdeque_free(deque);
 }
+
+void test_scc_ringdeque_pop_back(void) {
+    scc_ringdeque(unsigned) deque = scc_ringdeque_init(unsigned);
+    size_t const cap = scc_ringdeque_capacity(deque);
+    unsigned i;
+    for(i = 0u; i < cap; ++i) {
+        TEST_ASSERT_TRUE(scc_ringdeque_push_back(&deque, i));
+    }
+
+    while(!scc_ringdeque_empty(deque)) {
+        TEST_ASSERT_EQUAL_UINT32(--i, scc_ringdeque_pop_back(deque));
+    }
+
+    scc_ringdeque_free(deque);
+}
