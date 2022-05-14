@@ -9,7 +9,6 @@ LD           := $(CC)
 AR           := ar
 RB           := ruby
 CMAKE        := cmake
-ADOC         := asciidoc
 TIDY         := clang-tidy
 
 MKDIR        := mkdir
