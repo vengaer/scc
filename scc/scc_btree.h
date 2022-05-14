@@ -36,7 +36,7 @@
 //!         :caption: Simple implementation comparing two ints
 //!
 //!         int compare_ints(void const *left, void const *right) {
-//!             return (int const *)left - (int const *)right;
+//!             return *(int const *)left - *(int const *)right;
 //!         }
 typedef int(*scc_bcompare)(void const *, void const *);
 
