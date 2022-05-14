@@ -90,3 +90,36 @@ void test_scc_ringdeque_front(void) {
 
     scc_ringdeque_free(deque);
 }
+
+void test_scc_ringdeque_clear(void) {
+    scc_ringdeque(unsigned) deque = scc_ringdeque_init(unsigned);
+    size_t const cap = 2 * scc_ringdeque_capacity(deque);
+
+    for(unsigned i = 0u; i < cap; ++i) {
+        TEST_ASSERT_TRUE(scc_ringdeque_push_back(&deque, i));
+    }
+
+    TEST_ASSERT_EQUAL_UINT64(cap + 0ull, scc_ringdeque_size(deque));
+
+    scc_ringdeque_clear(deque);
+    TEST_ASSERT_EQUAL_UINT64(0ull, scc_ringdeque_size(deque));
+
+    TEST_ASSERT_TRUE(scc_ringdeque_push_back(&deque, cap + 1u));
+    TEST_ASSERT_EQUAL_UINT32(cap + 1u, scc_ringdeque_back(deque));
+
+    scc_ringdeque_clear(deque);
+
+    for(unsigned i = 0u; i < cap; ++i) {
+        TEST_ASSERT_TRUE(scc_ringdeque_push_front(&deque, i));
+        TEST_ASSERT_EQUAL_UINT32(i, scc_ringdeque_front(deque));
+    }
+
+    TEST_ASSERT_EQUAL_UINT64(cap + 0ull, scc_ringdeque_size(deque));
+    scc_ringdeque_clear(deque);
+    TEST_ASSERT_EQUAL_UINT64(0ull, scc_ringdeque_size(deque));
+
+    TEST_ASSERT_TRUE(scc_ringdeque_push_front(&deque, 2 * cap));
+    TEST_ASSERT_EQUAL_UINT32(2 * cap, scc_ringdeque_front(deque));
+
+    scc_ringdeque_free(deque);
+}
