@@ -64,7 +64,6 @@ endef
 
 $(call include-node,arena)
 $(call include-node,bits)
-$(call include-node,btree)
 $(call include-node,mem)
 $(call include-node,hashmap)
 $(call include-node,hashtab)
