@@ -17,7 +17,7 @@ $(strip
     $(patsubst $(srcdir)/%.$(cext),$(builddir)/scc/%.$(oext),
         $(wildcard $(patsubst %,$(srcdir)/*%*.$(cext),$(__node) $($(__node)_deps))))
     $(patsubst $(inspectdir)/%.$(cext),$(inspectbuilddir)/%.$(oext),
-        $(wildcard $(inspectdir)/*$(__node)*.$(cext)))
+        $(wildcard $(inspectdir)/scc_$(__node)*.$(cext)))
     $(patsubst $(asdir)/%.$(asext),$(asbuilddir)/%.$(oext),
         $(wildcard $(patsubst %,$(asdir)/*%*.$(asext),$(__node) $($(__node)_deps)))))
 endef
@@ -64,6 +64,7 @@ endef
 
 $(call include-node,arena)
 $(call include-node,bits)
+$(call include-node,btree)
 $(call include-node,mem)
 $(call include-node,hashmap)
 $(call include-node,hashtab)
