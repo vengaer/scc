@@ -10,10 +10,12 @@ submodules/*.stamp
 
 test/fuzz/corpora/hashmap/*
 test/fuzz/corpora/hashtab/*
+test/fuzz/corpora/lower_bound/*
 test/fuzz/corpora/rbtree/*
 test/fuzz/corpora/svec/*
 
 !test/fuzz/corpora/hashmap/corpus_*
 !test/fuzz/corpora/hashtab/corpus_*
+test/fuzz/corpora/lower_bound/corpus_*
 !test/fuzz/corpora/rbtree/corpus_*
 !test/fuzz/corpora/svec/corpus_*
