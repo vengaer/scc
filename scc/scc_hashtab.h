@@ -129,7 +129,7 @@ struct scc_hashtab_perfevts {
 //?     .. _struct_scc_hashtab_perfevts_ht_perf:
 //?     .. c:var:: struct scc_hashtab_perfevts ht_perf
 //?
-//?         Performance counters.Present only if :ref:`CONFIG_PERFEVTS <config_perfevts>`
+//?         Performance counters.Present only if :ref:`CONFIG_PERFEVENTS <config_perfevents>`
 //?         is set.
 //?
 //?     .. _unsigned_char_ht_dynalloc:

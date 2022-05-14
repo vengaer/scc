@@ -2,16 +2,20 @@ ifndef __Config_mk
 __Config_mk := _
 
 include $(mkscripts)/expr.mk
+include $(mkscripts)/ext.mk
 include $(mkscripts)/refl.mk
 
 CONFTOOL          := conftool
 CONFIG            := $(root)/.config
+__conftool_spec   := $(root)/.conftool.$(jsonext)
 
 __validate_config := $(builddir)/.config.valid.stamp
 
+# Deliberate omit $(__conftool_spec) dependency here to avoid
+# overwriting .config
 $(CONFIG):
 	$(call echo-gen,$(notdir $@))
-	$(CONFTOOL) -c $@ generate defconfig
+	$(CONFTOOL) -c $@ -s $(__conftool_spec) generate defconfig
 
 $(__validate_config): $(CONFIG) $(__all_mkfiles) | $(builddir)
 	$(CONFTOOL) -c $< validate

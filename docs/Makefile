@@ -9,7 +9,9 @@ __docgen     := $(patsubst %.$(hext),$(__node_builddir)/%_$(hext).$(rstext),$(no
 __docs       := $(call wildcard-artifacts,$(__node_path),$(rstext),$(htmlext)) \
                 $(patsubst %.$(rstext),%.$(htmlext),$(__docgen))
 __sccdoc     := $(pyscripts)/sccdoc.py
+__confdoc    := $(pyscripts)/confdoc.py
 __node_src   := $(wildcard $(__node_path)/*.$(rstext)) $(__docgen)
+__all_rstsrc += $(__node_builddir)/conftool_spec.$(rstext)
 
 .SECONDARY: $(__docgen)
 
@@ -33,6 +35,10 @@ $(__node_builddir)/%_$(hext).$(rstext): $(__scc_incdir)/%.$(hext) $(__sccdoc) $(
 $(__node_builddir)/%_$(cext).$(rstext): $(__scc_srcdir)/%.$(cext) $(__sccdoc) $(CONFIG) $(__all_mkfiles) | $(__node_builddir)
 	$(call echo-gen,$(notdir $@))
 	$(__sccdoc) $< -o $@ $(if $(__devel_docs),-d)
+
+$(__node_builddir)/conftool_spec.$(rstext): $(__conftool_spec) $(__all_mkfiles) | $(__node_builddir)
+	$(call echo-gen,$(notdir $@))
+	$(__confdoc) -s $< -o $@
 
 docs: $(__docs)
 
