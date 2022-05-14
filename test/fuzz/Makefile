@@ -14,6 +14,8 @@ FUZZERFLAGS        := -max_len=$(SCC_FUZZLEN) -max_total_time=$(SCC_FUZZTIME) -u
 fuzzflags          := -fsanitize=fuzzer,undefined,address -fprofile-instr-generate -fcoverage-mapping
 mergeflags         := -merge=1 $(CORPUSDIR) $(SCC_FUZZ_CORPORA)
 
+dirs               += $(CORPUSDIR)
+
 proffile           := LLVM_PROFILE_FILE
 export $(proffile) := $(builddir)/.fuzz.profraw
 profdata           := $(builddir)/.fuzz.profdata
@@ -60,7 +62,7 @@ $(eval
 	    $$(call echo-ld,$(__node)/$$(notdir $$@))
 	    $$(CC) -o $$@ $$^ $(LDFLAGS) $(LDLIBS)
 
-    fuzz: $(fuzztarget)
+    fuzz: $(fuzztarget) | $(CORPUSDIR)
 	    $$< $(FUZZERFLAGS)
 	    $(LLVM_PROFDATA) $(LLVM_PROFFLAGS)
 	    $(LLVM_COV) $(LLVM_COV_SHOW)
