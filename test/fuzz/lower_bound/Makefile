@@ -5,7 +5,7 @@ lower_bound_deps += algorithm
 
 $(call decl-fuzz)
 
-$(call pop,rbtree_deps)
+$(call pop,lower_bound_deps)
 
 else
 # Recurse to top level
