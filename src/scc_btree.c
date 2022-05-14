@@ -4,6 +4,7 @@
 #include <limits.h>
 
 size_t scc_btree_impl_npad(void const *btree);
+size_t scc_btree_order(void const *btree);
 
 //? .. c:function:: void scc_btree_set_bkoff(void *btree, unsigned char bkoff)
 //?

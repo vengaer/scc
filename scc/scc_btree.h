@@ -393,4 +393,15 @@ inline size_t scc_btree_impl_npad(void const *btree) {
 //!     :param btree: B-tree handle
 void scc_btree_free(void *btree);
 
+//! .. c:function:: size_t scc_btree_order(void const *btree)
+//!
+//!     Return the order of the given B-tree
+//!
+//!     :param btree: B-tree handle
+//!     :returns: The order of the given B-tree
+inline size_t scc_btree_order(void const *btree) {
+    struct scc_btree_base const *base = scc_btree_impl_base_qual(btree, const);
+    return base->bt_order;
+}
+
 #endif /* SCC_BTREE_H */
