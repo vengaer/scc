@@ -365,8 +365,8 @@ inline size_t scc_ringdeque_impl_push_front_index(void *deque) {
 
 //? .. c:function:: size_t scc_ringdeque_impl_pop_back_index(void *deque)
 //?
-//?     Pop the last element from the ringdeque and return the index of it
-//?     in the ring buffer
+//?     Pop the last element from the ringdeque and return its index in
+//?     the ring buffer
 //?
 //?     .. note::
 //?
@@ -386,10 +386,46 @@ inline size_t scc_ringdeque_impl_pop_back_index(void *deque) {
 //!     Pop and return the last element in the ringdeque. No bounds checking
 //!     is performed.
 //!
+//!     Due to implementation details, compilers may warn about
+//!     unused result of the expression unless the poped value is
+//!     either assigned to an lvalue or casted to :c:expr:`void`.
+//!
 //!     :param deque: Handle to the ringdeque in question
 //!     :returns: The element just poped
 #define scc_ringdeque_pop_back(deque)                                           \
     (deque)[scc_ringdeque_impl_pop_back_index(deque)]
 
+//? .. c:function:: size_t scc_ringdeque_impl_pop_front_index(void *deque)
+//?
+//?     Pop the first element from the ringdeque and return its index in
+//?     the ring buffer.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param deque: Handle to the ringdeque
+//?     :returns: Index of the poped element
+inline size_t scc_ringdeque_impl_pop_front_index(void *deque) {
+    struct scc_ringdeque_base *base = scc_ringdeque_impl_base(deque);
+    size_t index = base->rd_begin;
+    base->rd_begin = (base->rd_begin + 1u) & (base->rd_capacity - 1u);
+    --base->rd_size;
+    return index;
+}
+
+//! .. c:function:: type scc_ringdeque_pop_front(void *deque)
+//!
+//!     Pop and return the first element in the ringdeque. No bounds
+//!     checking is performed.
+//!
+//!     Due to implementation details, compilers may warn about
+//!     unused result of the expression unless the poped value is
+//!     either assigned to an lvalue or casted to :c:expr:`void`.
+//!
+//!     :param deque: Handle to the ringdeque
+//!     :returns: The element just poped
+#define scc_ringdeque_pop_front(deque)                                          \
+    (deque)[scc_ringdeque_impl_pop_front_index(deque)]
 
 #endif /* SCC_RINGDEQUE_H */
