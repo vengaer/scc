@@ -283,7 +283,7 @@ struct scc_hashtab_base {
         scc_hashtab_metatype ht_guard[SCC_HASHTAB_GUARDSZ];                 \
     }
 
-//? .. c:function:: void *scc_hashtab_impl_init(struct scc_hashtab_base *base, scc_hashtab_eq eq, scc_hashtab_hash, size_t coff, size_t mdoff)
+//? .. c:function:: void *scc_hashtab_impl_init(struct scc_hashtab_base *base, size_t coff, size_t mdoff)
 //?
 //?     Initialize the given hash table and return a handle to it.
 //?
@@ -293,11 +293,9 @@ struct scc_hashtab_base {
 //?
 //?     :param base: Address of hash table base. The handle returned yb the function refers to the :ref:`ht_curr <type_ht_curr>`
 //?                  entry in this table.
-//?     :param eq: Pointer to the equality function to use
-//?     :param hash: Pointer to the hash function to use
 //?     :param coff: Offset of :code:`ht_curr` relative the address of :c:expr:`*base`
 //?     :param mdoff: Offset of :code:`ht_meta` relative the address of :c:expr`*base`
-void *scc_hashtab_impl_init(struct scc_hashtab_base *base, scc_hashtab_eq eq, scc_hashtab_hash hash, size_t coff, size_t mdoff);
+void *scc_hashtab_impl_init(struct scc_hashtab_base *base, size_t coff, size_t mdoff);
 
 //! .. _scc_hashtab_init_with_hash:
 //! .. c:function:: void *scc_hashtab_init_with_hash(type, scc_hashtab_eq eq, scc_hashtab_hash hash)
@@ -333,9 +331,11 @@ void *scc_hashtab_impl_init(struct scc_hashtab_base *base, scc_hashtab_eq eq, sc
 //!         /* tab is no longer valid */
 #define scc_hashtab_init_with_hash(type, eq, hash)                          \
     scc_hashtab_impl_init(                                                  \
-        (void *)&(scc_hashtab_impl_layout(type)){ 0 },                      \
-        eq,                                                                 \
-        hash,                                                               \
+        (void *)&(scc_hashtab_impl_layout(type)){                           \
+            .ht_eq = eq,                                                    \
+            .ht_hash = hash,                                                \
+            .ht_capacity = SCC_HASHTAB_STATIC_CAPACITY                      \
+        },                                                                  \
         offsetof(scc_hashtab_impl_layout(type), ht_curr),                   \
         offsetof(scc_hashtab_impl_layout(type), ht_meta)                    \
     )
