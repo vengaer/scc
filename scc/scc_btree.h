@@ -15,9 +15,29 @@
 //!     :param type: The type to store in the B-tree
 #define scc_btree(type) type *
 
-//! .. c:type:: int(*scc_bcompare)(void const *, void const *)
+//! .. c:type:: int(*scc_bcompare)(void const *left, void const *right)
 //!
-//!     Signature of the function used for comparison
+//!     Signature of the function used for comparison. The return
+//!     value should be as follows
+//!
+//!     .. list-table:: Flag Bits
+//!         :header-rows: 1
+//!
+//!         * - Value
+//!           - Meaning
+//!         * - :code:`< 0`
+//!           - :code:`left < right`
+//!         * - :code:`== 0`
+//!           - :code:`left == right`
+//!         * - :code:`> 0`
+//!           - :code:`left > right`
+//!
+//!     .. code-block:: C
+//!         :caption: Simple implementation comparing two ints
+//!
+//!         int compare_ints(void const *left, void const *right) {
+//!             return (int const *)left - (int const *)right;
+//!         }
 typedef int(*scc_bcompare)(void const *, void const *);
 
 #ifndef SCC_BTREE_DEFAULT_ORDER
