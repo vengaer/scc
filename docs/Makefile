@@ -27,11 +27,11 @@ $(__docs)&: $(__node_src) $(__all_rstsrc) $(__docgen) $(__conf) | $(__node_build
 
 $(__node_builddir)/%_$(hext).$(rstext): $(__scc_incdir)/%.$(hext) $(__sccdoc) $(CONFIG) $(__all_mkfiles) | $(__node_builddir)
 	$(call echo-gen,$(notdir $@))
-	$(__sccdoc) $< -o $@ $(if $(__devel),-d)
+	$(__sccdoc) $< -o $@ $(if $(__devel_docs),-d)
 
 $(__node_builddir)/%_$(cext).$(rstext): $(__scc_srcdir)/%.$(cext) $(__sccdoc) $(CONFIG) $(__all_mkfiles) | $(__node_builddir)
 	$(call echo-gen,$(notdir $@))
-	$(__sccdoc) $< -o $@ $(if $(__devel),-d)
+	$(__sccdoc) $< -o $@ $(if $(__devel_docs),-d)
 
 docs: $(__docs)
 

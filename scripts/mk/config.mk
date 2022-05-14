@@ -19,6 +19,7 @@ $(__validate_config): $(CONFIG) $(__all_mkfiles) | $(builddir)
 
 __simd_enable    := $(call is-set,$(CONFIG_SIMD))
 __devel          := $(call is-set,$(CONFIG_DEVEL))
+__devel_docs     := $(call is-set,$(CONFIG_DEVEL_DOCS))
 
 # Instrumentation
 SCC_EXPAND_ASM   := $(call is-set,$(CONFIG_EXPAND_ASM))
