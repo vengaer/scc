@@ -247,6 +247,18 @@ inline size_t scc_ringdeque_size(void const *deque) {
     return scc_ringdeque_impl_base_qual(deque, const)->rd_size;
 }
 
+//! .. c:function:: _Bool scc_ringdeque_empty(void const *deque)
+//!
+//!     Check whether the given ringdeque is empty
+//!
+//!     :param deque: Handle to the ringdeque in question
+//!     :returns: Value indicating whether the ringdeque is empty
+//!     :retval true: The ringdeque is empty
+//!     :retval false: The ringdeque contains at least one element
+inline _Bool scc_ringdeque_empty(void const *deque) {
+    return !scc_ringdeque_size(deque);
+}
+
 //? .. c:function:: _Bool scc_ringdeque_impl_prepare_push(void *dequeaddr, size_t elemsize)
 //?
 //?     Ensure that the capacity of the ringdeque at :c:texpr:`*(void **)dequeaddr` is
