@@ -19,24 +19,6 @@ size_t scc_hashtab_capacity(void const *tab);
 size_t scc_hashtab_size(void const *tab);
 size_t scc_hashtab_impl_bkpad(void const *tab);
 
-/* scc_hashtab_next_power_of_2
- *
- * Round given value up to the next power of 2
- *
- * unsigned long long val
- *      Value to round up
- */
-static inline unsigned long long scc_hashtab_next_power_of_2(unsigned long long val) {
-    --val;
-    val |= val >> 1ull;
-    val |= val >> 2ull;
-    val |= val >> 4ull;
-    val |= val >> 8ull;
-    val |= val >> 16ull;
-    val |= val >> 32ull;
-    return val + 1ull;
-}
-
 /* scc_hashtab_set_mdent
  *
  * Set metadata entry at given index, duplicating
@@ -368,8 +350,13 @@ bool scc_hashtab_impl_reserve(void *tabaddr, size_t capacity, size_t elemsize) {
         return true;
     }
     if(!scc_bits_is_power_of_2(capacity)) {
-        capacity = scc_hashtab_next_power_of_2(capacity);
+        size_t newcap = base->ht_capacity << 1u;
+        while(newcap < capacity) {
+            newcap <<= 1;
+        }
+        capacity = newcap;
     }
+    assert(scc_bits_is_power_of_2(capacity));
     if(!scc_hashtab_rehash(tabaddr, base, elemsize, capacity)) {
         return false;
     }
