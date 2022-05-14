@@ -14,7 +14,7 @@ isa_query  := $(__node_builddir)/isa_query
 
 $(archinfo): $(archscript) | $(__node_builddir)
 	$(call echo-gen,$(notdir $@))
-	$< -o $@
+	$(PYTHON) $< -o $@
 
 $(if $(call not,$(__skip_arch)),                \
     $(call __include-barrier-rel,$(archinfo))   \
@@ -40,7 +40,7 @@ $(if $(and $(call not,$(__skip_arch)),$(wildcard $(query_srcdir)/*.$(asext))), \
 
 $(call __include-barrier-acq,$(simdinfo),$(vecinfo)): $(vecscript) $(simdinfo) $(call reeval,simd_isa,$(vecinfo))| $(__node_builddir)
 	$(call echo-gen,$(notdir $@))
-	$< -o $@ $(simd_isa)
+	$(PYTHON) $< -o $@ $(simd_isa)
 
 simd_isa ?= UNSUPPORTED
 CPPFLAGS += -DSCC_$(bitarch)BIT -DSCC_SIMD_ISA_$(simd_isa) -DSCC_HOST_OS_$(hostos)        \

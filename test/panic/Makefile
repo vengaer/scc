@@ -22,7 +22,7 @@ $(__chk_panic): $(panicbins) $(__all_mkfiles) $(wildcard $(__node_path)/*.$(pyex
 
 $(panicmanifest): $(wildcard $(__node_path)/*.$(cext)) | $(__node_builddir)
 	$(call echo-gen,$(notdir $@))
-	$(panicparser) -m$(panicsrcvar) -o $(dir $@) $^
+	$(PYTHON) $(panicparser) -m$(panicsrcvar) -o $(dir $@) $^
 
 $(panicbins): $$@.$(oext) $(panicobj) $(__sccobj)
 	$(call echo-ld,$(notdir $@))

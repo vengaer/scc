@@ -8,8 +8,8 @@ __docgen     := $(patsubst %.$(hext),$(__node_builddir)/%_$(hext).$(rstext),$(no
                 $(patsubst %.$(cext),$(__node_builddir)/%_$(cext).$(rstext),$(notdir $(wildcard $(patsubst %.$(hext),%.$(cext),$(addprefix $(__scc_srcdir)/,$(notdir $(__public_headers)))))))
 __docs       := $(call wildcard-artifacts,$(__node_path),$(rstext),$(htmlext)) \
                 $(patsubst %.$(rstext),%.$(htmlext),$(__docgen))
-__sccdoc     := $(pyscripts)/sccdoc.py
-__confdoc    := $(pyscripts)/confdoc.py
+sccdoc       := $(pyscripts)/sccdoc.$(pyext)
+confdoc      := $(pyscripts)/confdoc.$(pyext)
 __node_src   := $(wildcard $(__node_path)/*.$(rstext)) $(__docgen)
 __all_rstsrc += $(__node_builddir)/conftool_spec.$(rstext)
 
@@ -28,17 +28,17 @@ $(__docs)&: $(__node_src) $(__all_rstsrc) $(__docgen) $(__conf) | $(__node_build
 	$(SPHINX) -b html $(__docdir) $(dir $@)
 	$(TOUCH) $(__docs)
 
-$(__node_builddir)/%_$(hext).$(rstext): $(__scc_incdir)/%.$(hext) $(__sccdoc) $(CONFIG) $(__all_mkfiles) | $(__node_builddir)
+$(__node_builddir)/%_$(hext).$(rstext): $(__scc_incdir)/%.$(hext) $(sccdoc) $(CONFIG) $(__all_mkfiles) | $(__node_builddir)
 	$(call echo-gen,$(notdir $@))
-	$(__sccdoc) $< -o $@ $(if $(__devel_docs),-d)
+	$(PYTHON) $(sccdoc) $< -o $@ $(if $(__devel_docs),-d)
 
-$(__node_builddir)/%_$(cext).$(rstext): $(__scc_srcdir)/%.$(cext) $(__sccdoc) $(CONFIG) $(__all_mkfiles) | $(__node_builddir)
+$(__node_builddir)/%_$(cext).$(rstext): $(__scc_srcdir)/%.$(cext) $(sccdoc) $(CONFIG) $(__all_mkfiles) | $(__node_builddir)
 	$(call echo-gen,$(notdir $@))
-	$(__sccdoc) $< -o $@ $(if $(__devel_docs),-d)
+	$(PYTHON) $(sccdoc) $< -o $@ $(if $(__devel_docs),-d)
 
-$(__node_builddir)/conftool_spec.$(rstext): $(__conftool_spec) $(__all_mkfiles) | $(__node_builddir)
+$(__node_builddir)/conftool_spec.$(rstext): $(__conftool_spec) $(confdoc) $(__all_mkfiles) | $(__node_builddir)
 	$(call echo-gen,$(notdir $@))
-	$(__confdoc) -s $< -o $@
+	$(PYTHON) $(confdoc) -s $< -o $@
 
 docs: $(__docs)
 
