@@ -34,7 +34,7 @@
 //?         assert(scc_lower_bound(&(int){ 3 }, seq0, 4, sizeof(int), compare) == 1u);
 //?
 //?         int seq1[] = { 0, 1, 2, 3, 4, 5 };
-//?         /* No values >= 18, returned index is size number of elements in the array */
+//?         /* No values >= 18, returned index is number of elements in the array */
 //?         assert(scc_lower_bound(&(int){ 18 }, seq1, 6, sizeof(int), compare) == 6u);
 //?
 //?         int seq2[] = { 1, 2, 3 };
