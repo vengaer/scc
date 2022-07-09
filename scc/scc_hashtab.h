@@ -379,13 +379,6 @@ inline size_t scc_hashtab_impl_bkpad(void const *tab) {
     return ((unsigned char const *)tab)[-1] + sizeof(((struct scc_hashtab_base *)0)->ht_fwoff);
 }
 
-/* scc_hashtab_impl_base_qual
- *
- * Internal use only
- *
- * Obtain qualified pointer to the struct scc_hashtab_base
- * corresponding to the given handle
- */
 //? .. c:macro:: scc_hashtab_impl_base_qual(tab, qual)
 //?
 //?     Obtain qualified pointer to the
