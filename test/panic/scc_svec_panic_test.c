@@ -1,7 +1,7 @@
 #include <scc/scc_svec.h>
 
 void test_scc_svec_pop_safe_panic(void) {
-    int *svec = scc_svec_init(int);
+    int *svec = scc_svec_new(int);
     scc_svec_pop_safe(svec);
     scc_svec_free(svec);
 }

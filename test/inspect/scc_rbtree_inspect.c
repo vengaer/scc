@@ -163,7 +163,7 @@ scc_inspect_mask scc_rbtree_inspect_properties(void const *handle) {
     };
 
     scc_stack(struct nodectx) stack
-        = scc_stack_init(struct nodectx);
+        = scc_stack_new(struct nodectx);
 
     scc_stack_push(&stack, ((struct nodectx) {
         .ct_node = tree->rb_root,

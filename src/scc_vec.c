@@ -101,7 +101,7 @@ static bool scc_vec_grow(void **vec, size_t capacity, size_t elemsize) {
     return true;
 }
 
-void *scc_vec_impl_init(void *nullvec, size_t offset) {
+void *scc_vec_impl_new(void *nullvec, size_t offset) {
     unsigned char *vec = (unsigned char *)nullvec + offset;
     vec[-1] = offset - sizeof(struct scc_vec_base) - sizeof(*vec);
     return vec;

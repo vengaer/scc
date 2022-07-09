@@ -204,7 +204,7 @@ struct scc_svec_base {
 #define scc_svec_impl_offset(type)                                      \
     offsetof(scc_svec_impl_layout(type), sv_buffer)
 
-//? .. c:function:: void *scc_svec_impl_init(void *initvec, size_t offset, size_t capacity)
+//? .. c:function:: void *scc_svec_impl_new(void *initvec, size_t offset, size_t capacity)
 //?
 //?     Initialize the raw svec at address :c:texpr:`initvec` and return a
 //?     pointer to its :ref:`sv_buffer <type_sv_buffer>` member.
@@ -220,10 +220,10 @@ struct scc_svec_base {
 //?                    given vector
 //?     :param capacity: Capacity of the stack-allocated buffer
 //?     :returns: A fat pointer for referring to the newly initialized svec
-void *scc_svec_impl_init(void *initvec, size_t offset, size_t capacity);
+void *scc_svec_impl_new(void *initvec, size_t offset, size_t capacity);
 
-//! .. _scc_svec_init:
-//! .. c:function:: void *scc_svec_init(type)
+//! .. _scc_svec_new:
+//! .. c:function:: void *scc_svec_new(type)
 //!
 //!     Instantiate a small-size optimized vector for storing instances
 //!     of the given type and return a fat pointer referring to it.
@@ -236,8 +236,8 @@ void *scc_svec_impl_init(void *initvec, size_t offset, size_t capacity);
 //!
 //!     :param type: The type for which to instantiate the vector
 //!     :returns: A handle to the new svec
-#define scc_svec_init(type)                                             \
-    scc_svec_impl_init(                                                 \
+#define scc_svec_new(type)                                              \
+    scc_svec_impl_new(                                                  \
         &scc_svec_impl_initvec(type),                                   \
         scc_svec_impl_offset(type),                                     \
         SCC_SVEC_STATIC_CAPACITY                                        \
@@ -301,7 +301,7 @@ void *scc_svec_impl_from(
 //!         scc_svec_free(svec);
 #define scc_svec_from(type, ...)                                        \
     scc_svec_impl_from(                                                 \
-        scc_svec_init(type),                                            \
+        scc_svec_new(type),                                             \
         (type[]){ __VA_ARGS__ },                                        \
         scc_arrsize(((type[]){ __VA_ARGS__ })),                         \
         sizeof(type)                                                    \

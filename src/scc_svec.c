@@ -127,7 +127,7 @@ static bool scc_svec_grow(void *restrict *svec, size_t capacity, size_t elemsize
     return true;
 }
 
-void *scc_svec_impl_init(void *initvec, size_t offset, size_t capacity) {
+void *scc_svec_impl_new(void *initvec, size_t offset, size_t capacity) {
     struct scc_svec_base *svec = initvec;
     svec->sv_capacity = capacity;
     unsigned char *buffer = (unsigned char *)initvec + offset;

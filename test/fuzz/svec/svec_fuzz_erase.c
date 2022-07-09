@@ -7,7 +7,7 @@
 
 bool svec_fuzz_erase(uint32_t const *data, size_t size) {
     bool success = false;
-    scc_svec(uint32_t) svec = scc_svec_init(uint32_t);
+    scc_svec(uint32_t) svec = scc_svec_new(uint32_t);
     if(!scc_svec_reserve(&svec, size)) {
         fputs("Allocation failure\n", stderr);
         goto epilogue;

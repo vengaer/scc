@@ -1,7 +1,7 @@
 #include <scc/scc_vec.h>
 
 void test_scc_vec_pop_safe_panic(void) {
-    int *vec = scc_vec_init(int);
+    int *vec = scc_vec_new(int);
     scc_vec_pop_safe(vec);
     scc_vec_free(vec);
 }

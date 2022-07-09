@@ -126,7 +126,7 @@ struct scc_vec_base {
 #define scc_vec_impl_base(vec)                                          \
     scc_vec_impl_base_qual(vec,)
 
-/* scc_vec_impl_init
+/* scc_vec_impl_new
  *
  * Internal use only
  *
@@ -140,9 +140,9 @@ struct scc_vec_base {
  * size_t offset
  *      Base-relative offset of the data array in the given vector
  */
-void *scc_vec_impl_init(void *nullvec, size_t offset);
+void *scc_vec_impl_new(void *nullvec, size_t offset);
 
-/* scc_vec_init
+/* scc_vec_new
  *
  * Instantiate a vector for storing instances
  * of the given type and return a fat pointer to it. The
@@ -151,8 +151,8 @@ void *scc_vec_impl_init(void *nullvec, size_t offset);
  * type
  *      The type for which to instantiate the vector
  */
-#define scc_vec_init(type)                                              \
-    scc_vec_impl_init(                                                  \
+#define scc_vec_new(type)                                               \
+    scc_vec_impl_new(                                                   \
         &scc_vec_impl_nullvec(type),                                    \
         scc_vec_impl_dataoff(type)                                      \
     )

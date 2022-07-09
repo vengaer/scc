@@ -26,14 +26,14 @@
 //!     :param type: The type to store in the stack
 #define scc_stack(type) scc_pp_expand(SCC_STACK_CONTAINER)(type)
 
-//! .. c:function:: void *scc_stack_init(type)
+//! .. c:function:: void *scc_stack_new(type)
 //!
 //!     Initializes a stack holding instances of the given :c:texpr:`type`.
 //!     The lifetime of the stack is determined by the underlying container.
 //!
 //!     :param type: The type to be stored in the stack
 //!     :returns: A handle to the underlying container
-#define scc_stack_init(type) scc_pp_cat_expand(SCC_STACK_CONTAINER,_init)(type)
+#define scc_stack_new(type) scc_pp_cat_expand(SCC_STACK_CONTAINER,_new)(type)
 
 //! .. c:function:: void scc_stack_free(void *stack)
 //!
