@@ -20,7 +20,7 @@ static inline void scc_btree_set_bkoff(void *btree, unsigned char bkoff) {
     ((unsigned char *)btree)[-1] = bkoff;
 }
 
-void *scc_btree_impl_init(void *base, size_t coff) {
+void *scc_btree_impl_new(void *base, size_t coff) {
 #define base ((struct scc_btree_base *)base)
     size_t fwoff = coff - offsetof(struct scc_btree_base, bt_fwoff) - sizeof(base->bt_fwoff);
     assert(fwoff <= UCHAR_MAX);

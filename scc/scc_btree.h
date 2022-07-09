@@ -45,11 +45,11 @@ typedef int(*scc_bcompare)(void const *, void const *);
 //! .. c:enumerator:: SCC_BTREE_DEFAULT_ORDER
 //!
 //!     Default :ref:`order <btree_order>` of B-trees
-//!     instantiated using :ref:`scc_btree_init <scc_btree_init>`.
+//!     instantiated using :ref:`scc_btree_new <scc_btree_new>`.
 //!
 //!     The value may be overridden by defining it before including
 //!     the header. B-trees of a specific order may be instantiated
-//!     using :ref:`scc_btree_init_with_order <scc_btree_init_with_order>`
+//!     using :ref:`scc_btree_with_order <scc_btree_with_order>`
 //!
 //!     Must be greater than 1
 enum { SCC_BTREE_DEFAULT_ORDER = 5 };
@@ -295,7 +295,7 @@ struct scc_btree_base {
         type bt_curr;                                                               \
     }
 
-//? .. c:function:: void *scc_btree_impl_init(void *base, size_t coff)
+//? .. c:function:: void *scc_btree_impl_new(void *base, size_t coff)
 //?
 //?     Initialize the given B-tree base struct and return the address of its
 //?     :ref:`bt_curr <type_bt_curr>` member
@@ -308,10 +308,10 @@ struct scc_btree_base {
 //?                  of the tree
 //?     :param coff: Offset of the :ref:`bt_curr <type_bt_curr>` member in the :code:`base` struct
 //?     :returns: Address of a handle suitable for referring to the given B-tree
-void *scc_btree_impl_init(void *base, size_t coff);
+void *scc_btree_impl_new(void *base, size_t coff);
 
-//! .. _scc_btree_init_with_order:
-//! .. c:function:: void *scc_btree_init_with_order(type, scc_bcompare compare, unsigned order)
+//! .. _scc_btree_with_order:
+//! .. c:function:: void *scc_btree_with_order(type, scc_bcompare compare, unsigned order)
 //!
 //!     Instantiate a B-tree of :ref:`order <btree_order>` :code:`order`, storing instances
 //!     of type :code:`type`, each compared using the supplied :code:`compare` function.
@@ -325,8 +325,8 @@ void *scc_btree_impl_init(void *base, size_t coff);
 //!     :param compare: Pointer to the comparison function to use
 //!     :param order: The :ref:`order <btree_order>` of the B-tree
 //!     :returns: An opaque pointer to a B-tree allocated in the frame of the calling function
-#define scc_btree_init_with_order(type, compare, order)                             \
-    scc_btree_impl_init(&(scc_btree_impl_layout(type)) {                            \
+#define scc_btree_with_order(type, compare, order)                                  \
+    scc_btree_impl_new(&(scc_btree_impl_layout(type)) {                             \
             .bt_order = order,                                                      \
             .bt_dataoff = offsetof(scc_btnode_impl_layout(type, order), bt_data),   \
             .bt_linkoff = offsetof(scc_btnode_impl_layout(type, order), bt_links),  \
@@ -336,15 +336,15 @@ void *scc_btree_impl_init(void *base, size_t coff);
         offsetof(scc_btree_impl_layout(type), bt_curr)                              \
     )
 
-//! .. _scc_btree_init:
-//! .. c:function:: void *scc_btree_init(type, scc_bcompare compare)
+//! .. _scc_btree_new:
+//! .. c:function:: void *scc_btree_new(type, scc_bcompare compare)
 //!
 //!     Instantiate a B-tree of the configured :ref:`default order <scc_btree_default_order>`
 //!     storing instances of the given :code:`type` and using :code:`compare` for comparison.
 //!
-//!     Calling :code:`scc_btree_init` is entirely equivalent to calling
-//!     :code:`scc_btree_init_with_order` with the :code:`order` parameter set to
-//!     :code:`SCC_BTREE_DEFAULT_ORDER`. See :ref:`scc_btree_init_with_order <scc_btree_init_with_order>`
+//!     Calling :code:`scc_btree_new` is entirely equivalent to calling
+//!     :code:`scc_btree_with_order` with the :code:`order` parameter set to
+//!     :code:`SCC_BTREE_DEFAULT_ORDER`. See :ref:`scc_btree_with_order <scc_btree_with_order>`
 //!     for more information.
 //!
 //!     The call cannot fail.
@@ -352,8 +352,8 @@ void *scc_btree_impl_init(void *base, size_t coff);
 //!     :param type: The type to be stored in the B-tree
 //!     :param compare: Pointer to the comparison function to use
 //!     :returns: An opaque pointer to a B-tree allocated in the frame of the calling function
-#define scc_btree_init(type, compare)                                               \
-    scc_btree_init_with_order(type, compare, SCC_BTREE_DEFAULT_ORDER)
+#define scc_btree_new(type, compare)                                                \
+    scc_btree_with_order(type, compare, SCC_BTREE_DEFAULT_ORDER)
 
 //? .. c:function:: size_t scc_btree_impl_npad(void const *btree)
 //?
@@ -407,8 +407,8 @@ inline size_t scc_btree_impl_npad(void const *btree) {
 //! .. c:function:: void scc_btree_free(void *btree)
 //!
 //!     Reclaim memory allocated for :c:expr:`btree`. The parameter must
-//!     refer to a valid B-tree returned by :ref:`scc_btree_init <scc_btree_init>` or
-//!     :ref:`scc_btree_init_with_order <scc_btree_init_with_order>`.
+//!     refer to a valid B-tree returned by :ref:`scc_btree_new <scc_btree_new>` or
+//!     :ref:`scc_btree_with_order <scc_btree_with_order>`.
 //!
 //!     :param btree: B-tree handle
 void scc_btree_free(void *btree);
