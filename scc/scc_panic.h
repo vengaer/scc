@@ -10,7 +10,7 @@
     do {                                                                \
         (void)fprintf(stderr, "SCC panic at %s:%s: " fmt "%s\n",        \
                 __FILE__, scc_pp_str_expand(__LINE__), __VA_ARGS__);    \
-        exit(1);                                                        \
+        exit(EXIT_FAILURE);                                             \
     } while(0)
 
 #define scc_panic(...)  \

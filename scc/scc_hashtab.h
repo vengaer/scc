@@ -496,7 +496,7 @@ _Bool scc_hashtab_impl_insert(void *tabaddr, size_t elemsize);
 //!
 //!         if(!scc_hashtab_insert(&tab, 111)) {
 //!             fputs("Insertion failure\n", stderr);
-//!             exit(1);
+//!             exit(EXIT_FAILURE);
 //!         }
 //!
 //!         /* Use tab */

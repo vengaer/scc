@@ -614,7 +614,7 @@ _Bool scc_hashmap_impl_insert(void *mapaddr, size_t keysize, size_t valsize);
 //!
 //!         if(!scc_hashmap_insert(&map, 1, 38)) {
 //!             fputs("Insertion failure\n", stderr);
-//!             exit(1);
+//!             exit(EXIT_FAILURE);
 //!         }
 //!
 //!         /* Use map */
