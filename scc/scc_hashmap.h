@@ -1,23 +1,23 @@
 #ifndef SCC_HASHMAP_H
 #define SCC_HASHMAP_H
 
+#include "scc_assert.h"
+#include "scc_bits.h"
 #include "scc_mem.h"
 
 #include <stddef.h>
 
-/* scc_hashmap_impl_pair
- *
- * Internal use only
- *
- * Expands to a struct appropriate for storing
- * pairs of key-value types
- *
- * keytype
- *      The key type to be stored in the map
- *
- * valuetype
- *      The value type to be stored in the map
- */
+//? .. c:macro:: scc_hashmap_impl_pair(keytype, valuetype)
+//?
+//?     Expands to a struct appropriate for storing pairs of
+//?     the supplied key-value types
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param keytype: The key type of the hashmap
+//?     :param valuetype: The value type of the hashmap
 #define scc_hashmap_impl_pair(keytype, valuetype)                                       \
     struct { keytype hp_key; valuetype hp_val; }
 
@@ -31,9 +31,28 @@
 #define scc_hashmap(keytype, valuetype)                                                 \
     scc_hashmap_impl_pair(keytype, valuetype) *
 
+//? .. c:macro:: SCC_HASHMAP_GUARDSZ
+//?
+//?     Size of the vector guard placed after the
+//?     :ref:`metadata array <scc_hashmap_metatype_hm_meta>`.
+//?
+//?     .. note::
+//?
+//?         Internal use only
 #define SCC_HASHMAP_GUARDSZ ((unsigned)SCC_VECSIZE - 1u)
 
+//? .. c:enumerator:: SCc_HASHMAP_STACKCAP
+//?
+//?     Capacity of the on-stack buffer used initially by the
+//?     hash map. Must be a power of 2 >= 32
+//?
+//?     .. note::
+//?
+//?         Internal use only
 enum { SCC_HASHMAP_STACKCAP = 32 };
+
+scc_static_assert(SCC_HASHMAP_STACKCAP >= 32);
+scc_static_assert(scc_bits_is_power_of_2(SCC_HASHMAP_STACKCAP));
 
 //! .. c:type:: _Bool(*scc_hashmap_eq)(void const *, void const *)
 //!
@@ -45,31 +64,41 @@ typedef _Bool(*scc_hashmap_eq)(void const *, void const *);
 //!     Signature of the hash function used.
 typedef unsigned long long(*scc_hashmap_hash)(void const *, size_t);
 
+//? .. c:type:: unsigned char scc_hashmap_metatype
+//?
+//?     Type used for storing hash map metadata
+//?
+//?     .. note::
+//?         Internal use only
 typedef unsigned char scc_hashmap_metatype;
 
-/* struct scc_hashmap_perfevts
- *
- * Internal use only
- *
- * Counters for tracking performance-
- * related events.
- *
- * size_t ev_n_rehashes
- *      Number of times the hash map
- *      has been rehashed
- *
- * size_t ev_n_eqs
- *      Number of calls to eq performed
- *
- * size_t ev_n_hash
- *      Number of calls to hash performed
- *
- * size_t ev_n_inserts
- *      Number of successful insertions performed
- *
- * size_t ev_bytesz
- *      Total size of the map, in bytes
- */
+//? .. c:struct:: scc_hashmap_perfevts
+//?
+//?     Counters for tracking performance-related events
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     .. c:var:: size_t ev_n_rehashes
+//?
+//?         Number of times the hash map has been rehashed
+//?
+//?     .. c:var:: size_t ev_n_eqs
+//?
+//?         Number of calls to eq performed
+//?
+//?     .. c:var:: size_t ev_n_hash
+//?
+//?         Number of calls to hash performed
+//?
+//?     .. c:var:: size_t ev_n_inserts
+//?
+//?         Number of successful insertions performed
+//?
+//?     .. c:var:: size_t ev_bytesz
+//?
+//?         Total size of the map, in bytes
 struct scc_hashmap_perfevts {
     size_t ev_n_rehashes;
     size_t ev_n_eqs;
@@ -78,65 +107,95 @@ struct scc_hashmap_perfevts {
     size_t ev_bytesz;
 };
 
-/* struct scc_hashmap_base
- *
- * Internal use only
- *
- * Base struct of the hash map. Exposed only indirectly
- * through a fat pointer. Given a struct scc_hashmap_base
- * base, the address of said pointer is obtained by computing
- * &base.hm_fwoff + base.hm_fwoff + 1.
- *
- * scc_hashmap_eq hm_eq
- *      Pointer to function used for equality comparison
- *
- * scc_hashmap_hash hm_hash
- *      Pointer to hash function.
- *
- * size_t hm_valoff
- *      Offset of the value array relative the base address.
- *      Used to access the values in the FAM part of the struct
- *
- * size_t hm_mdoff
- *      Offset of metadata array relative the base address. This
- *      is used to access the metadata in the FAM part of the
- *      struct
- *
- * size_t hm_size
- *      Size of the hash map
- *
- * size_t hm_capacity
- *      Capacity of the map. Always a power of 2.
- *
- * size_t hm_pairsize
- *      Size of the key-value pair handle
- *
- * struct scc_hashmap_perfevts hm_perf
- *      Performance counters
- *
- * unsigned short hm_keyalign
- *      Alignment of the key type
- *
- * unsigned short hm_valalign
- *      Alignment of the value type
- *
- * unsigned char hm_dynalloc
- *      Set to 1 if the map was allocated dynamically.
- *      Upon initial construction, the map is allocated on the
- *      stack. This field is set on the first rehash.
- *
- * unsigned char hm_valpad
- *      Tracks the number of padding bytes between the key and value
- *      in the internal pair struct.
- *
- * unsigned char hm_fwoff
- *      Offset of the pointer exposed through the API. The offset
- *      is relative to the field itself.
- *
- * unsigned char hm_buffer[]
- *      FAM hiding type-specific details. For the exact layout,
- *      refer to scc_hashmap_impl_layout.
- */
+//? .. _scc_hashmap_base:
+//? .. c:struct:: scc_hashmap_base
+//?
+//?     Base struct of the hash map. Exposed only indirectly
+//?     through fat pointers. Given a :code:`struct scc_hashmap_base`,
+//?     the address of said pointer is obtained by computing
+//?     :c:texpr:`&base.hm_fwoff + base.hw_fwoff + sizeof(base.hw_fwoff)`
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     .. _scc_hashmap_eq_hm_eq:
+//?     .. c:var:: scc_hashmap_eq hm_eq
+//?
+//?         Pointer to function used for equalify comparison
+//?
+//?     .. _scc_hashmap_hash_hm_hash:
+//?     .. c:var:: scc_hashmap_hash hm_hash
+//?
+//?         Pointer to hash function
+//?
+//?     .. _size_t_hm_valoff:
+//?     .. c:var:: size_t hm_valoff
+//?
+//?         Offset of value array relative the base address. Used
+//?         to access the values in the FAM
+//?
+//?     .. _size_t_hm_mdoff:
+//?     .. c:var:: size_t hm_mdoff
+//?
+//?         Offset of metadata array relative the base address. Used
+//?         to access the metadata in the FAM.
+//?
+//?     .. _size_t_hm_size:
+//?     .. c:var:: size_t hm_size
+//?
+//?         Size of the hash map
+//?
+//?     .. _size_t_hm_capacity:
+//?     .. c:var:: size_t hm_capacity
+//?
+//?         Capacity of the map. Always a power of 2.
+//?
+//?     .. _size_t_hm_pairsize:
+//?     .. c:var:: size_t hm_pairsize
+//?
+//?         Size of the key-value pair at the address of the handle
+//?
+//?     .. _struct_scc_hashmap_perfevts_hm_perf:
+//?     .. c:var:: struct scc_hashmap_perfevts hm_perf
+//?
+//?         Performance counters. Present only if CONFIG_PERFEVENTS
+//?         is defined
+//?
+//?     .. _unsigned_short_hm_keyalign:
+//?     .. c:var:: unsigned short hm_keyalign
+//?
+//?         Key type alignment
+//?
+//?     .. _unsigned_short_hm_valalign:
+//?     .. c:var:: unsigned short hm_valalign
+//?
+//?         Value type alignment
+//?
+//?     .. _unsigned_char_hm_dynalloc:
+//?     .. c:var:: unsigned char hm_dynalloc
+//?
+//?         Holds the value 1 if the map was allocated dynamically.
+//?         Set at first rehash as the map is initially allocated on the
+//?         stack
+//?
+//?     .. _unsigned_char_hm_valpad:
+//?     .. c:var:: unsigned char hm_valpad
+//?
+//?         Tracks the number of padding bytes between the key and value in the
+//?         internal pair struct
+//?
+//?     .. _unsigned_char_hm_fwoff:
+//?     .. c:var:: unsigned char hm_fwoff
+//?
+//?         Offset of the pointer exposed through the API relative the field
+//?         itself
+//?
+//?     .. _unsigned_char_hm_buffer:
+//?     .. c:var:: unsigned char hm_buffer[]
+//?
+//?         FAM hiding type-specific details. For exact layout, refer to
+//?         :ref:`scc_hashmap_impl_layout <scc_hashmap_impl_layout>`.
 struct scc_hashmap_base {
     scc_hashmap_eq hm_eq;
     scc_hashmap_hash hm_hash;
@@ -163,58 +222,133 @@ struct scc_hashmap_base {
 #define SCC_HASHMAP_INJECT_PERFEVTS(name)
 #endif
 
-/* scc_hashmap_impl_layout
- *
- * Internal use only
- *
- * The actual layout of the hash map instantiated for a given
- * key-value type pair. The hm_eq through hm_fwoff members are
- * the same as for struct scc_hashmap_base.
- *
- * unsigned char hm_bkoff;
- *      Field used for tracking the padding between hm_fwoff and
- *      hm_curr. Just as hm_fwoff is used to compute the address
- *      of hm_curr given a base address, hm_bkoff is used to
- *      compute the base address given the address of hm_curr.
- *
- *      The primary purpose of this field is to force injection of
- *      padding bytes between hm_fwoff and hm_curr. Whether the offset
- *      is actually stored in this field depends on the alignment of
- *      the type parameter. In practice, this occurs only for 1-byte
- *      aligned types. For types with stricter alignment requirements,
- *      the last padding byte is used instead.
- *
- * scc_hashmap_impl_pair(keytype, valuetype) hm_curr
- *      Volatile instance of the pair stored in the hash map. Used
- *      for temporary storage of values to be inserted or probed
- *      for in order to provide rvalue support.
- *
- * keytype hm_keys[SCC_HASHMAP_STACKCAP]
- *      The keys array
- *
- * valuetype hm_vals[SCC_HASHMAP_STACKCAP]
- *      The value array
- *
- * scc_hashmap_metatype hm_meta[SCC_HASHMAP_STACKCAP]
- *      Metadata array used for tracking vacant slots. Each slot n
- *      in the metadata array corresponds to slot n in the data array.
- *
- *      A slot is unused if the value of its metadata entry is 0. If the
- *      byte has a non-zero value with the MSB unset, the slot was previously
- *      occupied but has since been vacated. Such slots can be reused during
- *      insertion but cannot be used as probing stops.
- *
- *      An entry with the MSB set signifies that the slot is occupied. In
- *      this case, the remaining bits are the CHAR_BIT - 1 most
- *      significant bytes of the hash computed for the value in the
- *      corresponding slot in the data array. This is used for
- *      avoiding unnecessary calls to eq.
- *
- * scc_hashmap_metatype hm_guard[SCC_HASHMAP_GUARDSZ];
- *      Guard to allow for unaligned vector loads without risking
- *      reads from potential guard pages. The SCC_HASHMAP_GUARDSZ
- *      low bytes of hm_meta are mirrored in the guard.
- */
+//? .. _scc_hashmap_impl_layout:
+//? .. c:macro:: scc_hashmap_impl_layout(keytype, valuetype)
+//?
+//?     The actual layout of the hash map instantiated for a given
+//?     key-value type pair. The hm_eq through hm_fwoff members are
+//?     the same as for :ref:`struct scc_hashmap_base <scc_hashmap_base>`.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param keytype: Key type of the hash map
+//?     :param valuetype: Value type of the hash map
+//?
+//?     .. c:struct:: @layout
+//?
+//?         .. c:var:: scc_hashmap_eq hm_eq
+//?
+//?             See :ref:`hm_eq <scc_hashmap_eq_hm_eq>`.
+//?
+//?         .. c:var:: scc_hashmap_hash hm_hash
+//?
+//?             See :ref:`hm_hash <scc_hashmap_hash_hm_hash>`.
+//?
+//?         .. c:var:: size_t hm_valoff
+//?
+//?             See :ref:`hm_valoff <size_t_hm_valoff>`.
+//?
+//?         .. c:var:: size_t hm_mdoff
+//?
+//?             See :ref:`hm_mdoff <size_t_hm_mdoff>`.
+//?
+//?         .. c:var:: size_t hm_size
+//?
+//?             See :ref:`hm_size <size_t_hm_size>`.
+//?
+//?         .. c:var:: size_t hm_capacity
+//?
+//?             See :ref:`hm_capacity <size_t_hm_capacity>`.
+//?
+//?         .. c:var:: size_t hm_pairsize
+//?
+//?             See :ref:`hm_pairsize <size_t_hm_pairsize>`.
+//?
+//?         .. c:var:: struct scc_hashmap_perfevts hm_perf
+//?
+//?             See :ref:`hm_perf <struct_scc_hashmap_perfevts_hm_perf>`.
+//?
+//?         .. c:var:: unsigned short hm_keyalign
+//?
+//?             See :ref:`hm_keyalign <unsigned_short_hm_keyalign>`..
+//?
+//?         .. c:var:: unsigned short hm_valalign
+//?
+//?             See :ref:`hm_valalign <unsigned_short_hm_valalign>`.
+//?
+//?         .. c:var:: unsigned char hm_dynalloc
+//?
+//?             See :ref:`hm_dynalloc <unsigned_char_hm_dynalloc>`.
+//?
+//?         .. c:var:: unsigned char hm_valpad
+//?
+//?             See :ref:`hm_valpad <unsigned_char_hm_valpad>`
+//?
+//?         .. c:var:: unsigned char hm_fwoff
+//?
+//?             See :ref:`hm_fwoff <unsigned_char_hm_fwoff>`.
+//?
+//?         .. _unsigned_char_hm_bkoff:
+//?         .. c:var:: unsigned char hm_bkoff
+//?
+//?             Field used for tracking the padding between :code:`hm_fwoff`
+//?             and :ref:`hm_curr <scc_hashmap_impl_pair_hm_curr>`. Just as :code:`hm_fwoff`
+//?             is used to compute the address of :code:`hm_curr` given the
+//?             base address, :code:`hm_bkoff` is used to compute the base
+//?             address given the address of :code:`hm_curr`:
+//?
+//?             The primary purpose of this field is to force injection of
+//?             padding bytes between :code:`hm_fwoff` and :code:`hm_curr`.
+//?             Whether the offset is actually stored in this field depends
+//?             on the alignment of the :code:`type` parameter. In practice,
+//?             this occurs only for 1-byte aligned types. For types with
+//?             stricter alignment requirements, the last padding byte is
+//?             used instead.
+//?
+//?
+//?         .. _scc_hashmap_impl_pair_hm_curr:
+//?         .. c:var:: kvpair hm_curr
+//?
+//?             Where :code:`struct kvpair` is defined as
+//?             :code:`typedef scc_hashmap_impl_pair(keytype, valuetype) kvpair`.
+//?
+//?             Volatile instance of the pair stored in the hash map. Used
+//?             for temporary storage of values to be inserted or probed for
+//?             in order to provide rvalue support.
+//?
+//?         .. c:var:: keytype hm_keys[SCC_HASHMAP_STACKCAP]
+//?
+//?             The key array.
+//?
+//?         .. c:var:: valuetype hm_vals[SCC_HASHMAP_STACKCAP]
+//?
+//?             The value array.
+//?
+//?         .. _scc_hashmap_metatype_hm_meta:
+//?         .. c:var:: scc_hashmap_metatype hm_meta[SCC_HASHMAP_STACKCAP]
+//?
+//?             Metadata array used for tracking vacant slots. A slot at index :code:`n`
+//?             in the metadata array corresponds to slot :code:`n` in the key and value
+//?             arrays.
+//?
+//?             A slot is unused if the value of its metadata entry is 0. If the byte has
+//?             a non-zero value with the MSG unset, the slot was previously
+//?             occupied but has since been vacated. Such slots are reused during insertion
+//?             but must not serve as probing stops.
+//?
+//?             An entry with the MSG set signifies that the slot is occupied. In this case,
+//?             the remaining bites are the :c:texpr:`CHAR_BIT - 1` most significant bits
+//?             of the hash computed for the value in the corresponding slot in the key array.
+//?             This is used for optimizing away unnecessary calls to
+//?             :ref:`eq <scc_hashmap_eq_hm_eq>`
+//?
+//?         .. c:var:: scc_hashmap_metatype hm_guard[SCC_HASHMAP_GUARDSZ]
+//?
+//?             Guard to allow for unaligned vector loads without risking reads from
+//?             potential guard pages. The :code:`SCC_HASHMAP_GUARDSZ` low bytes of the
+//?             :code:`hm_meta` field are mirrored in the guard.
 #define scc_hashmap_impl_layout(keytype, valuetype)                                         \
     struct {                                                                                \
         scc_hashmap_eq hm_eq;                                                               \
@@ -238,26 +372,22 @@ struct scc_hashmap_base {
         scc_hashmap_metatype hm_guard[SCC_HASHMAP_GUARDSZ];                                 \
     }
 
-
-/* scc_hashmap_impl_new
- *
- * Internal use only
- *
- * Initialize an empty hash map and return a handle to it.
- *
- * struct scc_hashmap_base *base
- *      Address of hash map base. The handle returned by the function
- *      refers to the hm_curr entry in this map
- *
- * size_t coff
- *      Offset of hm_curr relative the address of *base
- *
- * size_t valoff
- *      Offset of the value type in the key-value pair
- *
- * size_t keysize
- *      Size of the key type
- */
+//? .. c:function:: void *scc_hashmap_impl_new(\
+//?        struct scc_hashmap_base *base, size_t coff, size_t valoff, size_t keysize)
+//?
+//?     Initialize an empty hash map and return a handle to it.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Base address of the hash map. The handle returned by the function
+//?                  refers to the :ref:`hm_curr <scc_hashmap_impl_pair_hm_curr>` field
+//?                  in this map.
+//?     :param coff: Base-relative offset of :code:`hm_curr`.
+//?     :param valoff: Internal offset of the value type in the key-value pair
+//?     :param keysize: Size of the key type
+//?     :returns: A handle to the initialized hash map
 void *scc_hashmap_impl_new(struct scc_hashmap_base *base, size_t coff, size_t valoff, size_t keysize);
 
 //! .. _scc_hashmap_with_hash:
@@ -337,23 +467,36 @@ void *scc_hashmap_impl_new(struct scc_hashmap_base *base, size_t coff, size_t va
 #define scc_hashmap_new(keytype, valuetype, eq)                                            \
     scc_hashmap_with_hash(keytype, valuetype, eq, scc_hashmap_fnv1a)
 
-/* scc_hashmap_impl_bkpad
- *
- * Internal use only
- *
- * Compute number of padding bytes between hm_curr and hm_fwoff
- */
+//? .. c:function:: size_t scc_hashmap_impl_bkpad(void const *map)
+//?
+//?     Compute number of padding bytes between the
+//?     :ref:`hm_curr <scc_hashmap_impl_pair_hm_curr>` and
+//?     :ref:`hm_fwoff <unsigned_char_hm_fwoff>` fields in the given map.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param map: Hash map handle
+//?     :returns: Number of padding bytes between the :code:`hm_curr` and
+//?               :code:`hm_fwoff` fields in the map.
 inline size_t scc_hashmap_impl_bkpad(void const *map) {
     return ((unsigned char const *)map)[-1] + sizeof(((struct scc_hashmap_base *)0)->hm_fwoff);
 }
 
-/* scc_hashmap_impl_base_qual
- *
- * Internal use only
- *
- * Obtain qualified pointer to the struct scc_hashmap_base
- * corresponding to the given map
- */
+//? .. c:macro:: scc_hashmap_impl_base_qual(map, qual)
+//?
+//?     Obtain qualified pointer to the
+//?     :ref:`struct scc_hashmap_base <scc_hashmap_base>` corresponding
+//?     to the given map.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param map: Hash map handle
+//?     :param qual: Qualifiers to apply to the pointer
+//?     :returns: Qualified pointer to the base struct of the map
 #define scc_hashmap_impl_base_qual(map, qual)                               \
     scc_container_qual(                                                     \
         (unsigned char qual *)(map) - scc_hashmap_impl_bkpad(map),          \
@@ -362,13 +505,18 @@ inline size_t scc_hashmap_impl_bkpad(void const *map) {
         qual                                                                \
     )
 
-/* scc_hashmap_impl_base
- *
- * Internal use only
- *
- * Obtain unqualified pointer to the struct scc_hashmap_base
- * corresponding to the given map
- */
+//? .. c:macro:: scc_hashmap_impl_base(map)
+//?
+//?     Obtain unqualified pointer to the
+//?     :ref:`struct scc_hashmap_base <scc_hashmap_base>` corresponding
+//?     to the given map.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param map: Hash map handle
+//?     :returns: Unqualified pointer to the base struct of the given map
 #define scc_hashmap_impl_base(map)                                          \
     scc_hashmap_impl_base_qual(map,)
 
@@ -415,6 +563,23 @@ void scc_hashmap_free(void *map);
  * size_t valsize
  *      Size of the value type
  */
+//? .. c:function:: _Bool scc_hashmap_impl_insert(\
+//?        void *mapaddr, size_t keysize, size_t valsize)
+//?
+//?     Attempt to insert the key-value pair in
+//?     :ref:`hm_curr <scc_hashmap_impl_pair_hm_curr>` in the map.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param mapaddr: Address of the handle to the hash map to insert in
+//?     :param keysize: Size of the key type
+//?     :param valsize: Size of the value type
+//?     :returns: A :code:`_Bool` indicating whether the insertion was successful
+//?               or not.
+//?     :retval true: The key-value pair was successfully inserted
+//?     :retval false: Memory allocation failure
 _Bool scc_hashmap_impl_insert(void *mapaddr, size_t keysize, size_t valsize);
 
 //! .. c:function:: _Bool scc_hashmap_insert(void *mapaddr, keytype key, valuetype value)
