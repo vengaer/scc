@@ -66,7 +66,7 @@ void const *scc_rbtree_impl_sentinel(void const *handle);
 #define scc_rbtree_init(type, compare)                              \
     scc_rbtree_impl_init(&(struct scc_rbtree) {                     \
         .rb_baseoff = scc_rbtree_impl_baseoff(type),                \
-        .rb_arena = scc_arena_init(scc_rbnode_impl_layout(type)),   \
+        .rb_arena = scc_arena_new(scc_rbnode_impl_layout(type)),    \
         .rb_compare = compare                                       \
     })
 

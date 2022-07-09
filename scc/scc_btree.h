@@ -330,7 +330,7 @@ void *scc_btree_impl_init(void *base, size_t coff);
             .bt_order = order,                                                      \
             .bt_dataoff = offsetof(scc_btnode_impl_layout(type, order), bt_data),   \
             .bt_linkoff = offsetof(scc_btnode_impl_layout(type, order), bt_links),  \
-            .bt_arena = scc_arena_init(scc_btnode_impl_layout(type, order)),        \
+            .bt_arena = scc_arena_new(scc_btnode_impl_layout(type, order)),         \
             .bt_compare = compare                                                   \
         },                                                                          \
         offsetof(scc_btree_impl_layout(type), bt_curr)                              \

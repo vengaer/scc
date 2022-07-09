@@ -37,7 +37,7 @@ struct scc_chunk {
 #define scc_arena_impl_baseoff(type)                                \
     offsetof(scc_chunk_impl_layout(type), ch_buffer)
 
-#define scc_arena_init(type)                                        \
+#define scc_arena_new(type)                                         \
     (struct scc_arena){                                             \
         .ar_baseoff = scc_arena_impl_baseoff(type),                 \
         .ar_elemsize = sizeof(type),                                \

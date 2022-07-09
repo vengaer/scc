@@ -4,12 +4,12 @@
 #include <unity.h>
 
 void test_scc_arena_release_empty(void) {
-    struct scc_arena arena = scc_arena_init(int);
+    struct scc_arena arena = scc_arena_new(int);
     scc_arena_release(&arena);
 }
 
 void test_scc_arena_alloc_single_chunk(void) {
-    struct scc_arena arena = scc_arena_init(int);
+    struct scc_arena arena = scc_arena_new(int);
     /* No memory should have been allocated yet */
     TEST_ASSERT_EQUAL_PTR(arena.ar_first, arena.ar_current);
     TEST_ASSERT_EQUAL_PTR(0, arena.ar_current);
@@ -37,7 +37,7 @@ void test_scc_arena_alloc_single_chunk(void) {
 }
 
 void test_scc_arena_alloc_multiple_chunks(void) {
-    struct scc_arena arena = scc_arena_init(int);
+    struct scc_arena arena = scc_arena_new(int);
 
     int *prev = scc_arena_alloc(&arena);
     int *curr;
@@ -75,7 +75,7 @@ void test_scc_arena_alloc_multiple_chunks(void) {
 }
 
 void test_scc_arena_free_single_chunk(void) {
-    struct scc_arena arena = scc_arena_init(int);
+    struct scc_arena arena = scc_arena_new(int);
     int *elem;
     for(unsigned i = 0; i < arena.ar_chunksize - 1u; i++) {
         /* Allocate and verify refcount */
@@ -98,7 +98,7 @@ void test_scc_arena_free_single_chunk(void) {
 }
 
 void test_scc_arena_free_multiple_chunks(void) {
-    struct scc_arena arena = scc_arena_init(int);
+    struct scc_arena arena = scc_arena_new(int);
     /* Use up entire first chunk */
     int *first = scc_arena_alloc(&arena);
     for(unsigned i = 0u; i < arena.ar_chunksize - 1u; i++) {
@@ -126,7 +126,7 @@ void test_scc_arena_free_multiple_chunks(void) {
 
 void test_scc_arena_free_middle_chunks(void) {
     enum { NCHUNKS = 5 };
-    struct scc_arena arena = scc_arena_init(int);
+    struct scc_arena arena = scc_arena_new(int);
 
     int *chks[NCHUNKS];
     /* Allocate elements corresponding to 5 chunks */
@@ -183,7 +183,7 @@ void test_scc_arena_free_first_chunk(void) {
         long long lld;
     };
 
-    struct scc_arena arena = scc_arena_init(struct foo);
+    struct scc_arena arena = scc_arena_new(struct foo);
     /* Allocate 4 chunks' worth of elements */
     struct foo *first = scc_arena_alloc(&arena);
     for(unsigned i = 0; i < arena.ar_chunksize * 4u - 1u; i++) {
@@ -206,7 +206,7 @@ void test_scc_arena_free_first_chunk(void) {
 }
 
 void test_scc_arena_free_last_chunk(void) {
-    struct scc_arena arena = scc_arena_init(int);
+    struct scc_arena arena = scc_arena_new(int);
     /* Push 4 chunks to arena */
     for(unsigned i = 0u; i < arena.ar_chunksize * 4u; i++) {
         scc_arena_alloc(&arena);
