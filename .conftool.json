@@ -112,7 +112,7 @@
             "depends": ["CONFIG_DEVEL"],
             "entrytype": "switch",
             "default": "n",
-            "help": "Set to expand assembly macros before passing the files to the assembler. Significantly improves debugging experience"
+            "help": "Set to expand assembly macros before passing the files to the assembler. Improves debugging experience significantly"
         },
         {
             "name": "CONFIG_PERFEVENTS",
