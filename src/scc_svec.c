@@ -14,61 +14,73 @@ bool scc_svec_empty(void const *svec);
 void scc_svec_pop(void *svec);
 void scc_svec_clear(void *vec);
 
-/* scc_svec_is_allocd
- *
- * Read the sv_dynalloc field (or equivalent)
- *
- * void const *svec
- *      The svec instance in question
- */
+//? .. c:function:: _Bool scc_svec_is_allocd(void const *svec)
+//?
+//?     Read the :ref:`sv_dynalloc <unsigned_char_sv_dynalloc>`
+//?     field (or equivalent) of the given svec
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param svec: Handle to the svec for which the field is to be read
+//?     :returns: Value of the :code:`sv_dyanlloc` field in the base struct
 static inline bool scc_svec_is_allocd(void const *svec) {
     return ((unsigned char const*)svec)[-1];
 }
 
-/* scc_svec_bytesize
- *
- * Return the size a vector with the given capacity, element size
- * and number of padding bytes would have in bytes
- *
- * size_t capacity
- *      The would-be capacity of the vector
- *
- * size_t elemsize
- *      The would-be size of each element in the vector
- *
- * size_t npad
- *      The would-be number of paddign bytes between sv_dynalloc and sv_buffer
- */
+//? .. c:function:: size_t scc_svec_bytesize(size_t capacity, size_t elemsize, size_t npad)
+//?
+//?     Compute the size in bytes that an svec with the given capacity, element size
+//?     and number of padding bytes would have.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param capacity: The capacity of the hypothetical svec
+//?     :param elemsize: The size of the elements in the hypothetical svec
+//?     :param npad: The number of padding bytes between
+//?                  :ref:`sv_dynalloc <unsigned_char_sv_dynalloc>` and
+//?                  :ref:`sv_buffer <type_sv_buffer>` in the hypothetical svec
+//?     :returns: The size of the hypothetical svec, in bytes
 static inline size_t scc_svec_bytesize(size_t capacity, size_t elemsize, size_t npad) {
     return capacity * elemsize + sizeof(struct scc_svec_base) + npad;
 }
 
-/* scc_svec_calc_new_capacity
- *
- * Calculate capacity to be allocated for upcoming resize
- *
- * size_t current
- *      Current capacity of the vector
- */
+//? .. size_t scc_svec_calc_new_capacity(size_t current)
+//?
+//?     Calculate capacity after next size increase of an svec
+//?     with the given capacity.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param current: Current capacity of the svec
+//?     :returns: The size the svec would have after the next sizeup
 static inline size_t scc_svec_calc_new_capacity(size_t current) {
     return current + (current < SCC_SVEC_MAX_CAPACITY_INCREASE ?
                                 current : SCC_SVEC_MAX_CAPACITY_INCREASE);
 }
 
-
-/* scc_svec_alloc
- *
- * Allocate and initialize an svec to be filled in later
- *
- * size_t nbytes
- *      Number of bytes to allocate
- *
- * size_t nelemes
- *      Number of elements that are to inserted (done separately)
- *
- * size_t npad
- *      Number of padding bytes between sv_dynalloc and sv_buffer
- */
+//? .. c:function:: struct scc_svec_base *scc_svec_alloc(\
+//?        size_t nbytes, size_t nelems, size_t npad)
+//?
+//?     Allocate and initialize an svec base struct
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param nbytes: Number of bytes to allocate
+//?     :param nelems: Number of elements that are to be inserted
+//?                    by calling function
+//?     :param npad: Number of padding bytes between the
+//?                  :ref:`sv_dynalloc <unsigned_char_sv_dynalloc>`
+//?                  and :ref:`sv_buffer <type_sv_buffer>` fields
+//?                  in the svec.
+//?     :returns: Pointer to a newly allocated svec
 static struct scc_svec_base *scc_svec_alloc(size_t nbytes, size_t nelems, size_t npad) {
     struct scc_svec_base *v = malloc(nbytes);
     if(!v) {
@@ -80,19 +92,17 @@ static struct scc_svec_base *scc_svec_alloc(size_t nbytes, size_t nelems, size_t
     return v;
 }
 
-/* scc_svec_grow
- *
- * Reallocate the vector. Return true on success
- *
- * void *restrict *svec
- *      Pointer to the svec instance to be reallocated
- *
- * size_t capacity
- *      The new capacity of the vector
- *
- * size_t elemsize
- *      Size of each element in the vector
- */
+//? .. c:function:: _Bool scc_svec_grow(void *restrict *svec, size_t capacity, size_t elemsize)
+//?
+//?     Reallocate the svec with increased capacity
+//?
+//?     :param svec: Address of the handle to the svec to be reallocated
+//?     :param cpacity: Desired capacity of the svec
+//?     :param elemsize: Size of the elements in the svec
+//?     :returns: A :code:`_Bool` indicating whether the capacity of the svec was
+//?               successfully increased
+//?     :retval true: The svec was successfully reallocated
+//?     :retval false: Memory allocation failure
 static bool scc_svec_grow(void *restrict *svec, size_t capacity, size_t elemsize) {
     struct scc_svec_base *v;
     size_t const npad = scc_svec_impl_npad(*svec);
@@ -139,26 +149,26 @@ void *scc_svec_impl_from(
     return vec;
 }
 
-bool scc_svec_impl_resize(void *svec, size_t size, size_t elemsize) {
-    size_t const currsize = scc_svec_size(*(void **)svec);
+bool scc_svec_impl_resize(void *svecaddr, size_t size, size_t elemsize) {
+    size_t const currsize = scc_svec_size(*(void **)svecaddr);
 
     if(!size || currsize == size) {
         return true;
     }
     if(currsize > size) {
-        scc_svec_impl_base(*(void **)svec)->sv_size = size;
+        scc_svec_impl_base(*(void **)svecaddr)->sv_size = size;
         return true;
     }
 
-    if(!scc_svec_impl_reserve(svec, size, elemsize)) {
+    if(!scc_svec_impl_reserve(svecaddr, size, elemsize)) {
         return false;
     }
 
-    unsigned char *baseaddr = *(void **)svec;
+    unsigned char *baseaddr = *(void **)svecaddr;
     size_t zsize = (size - currsize) * elemsize;
 
     memset(baseaddr + currsize * elemsize, 0, zsize);
-    scc_svec_impl_base(*(void **)svec)->sv_size = size;
+    scc_svec_impl_base(*(void **)svecaddr)->sv_size = size;
     return true;
 }
 
