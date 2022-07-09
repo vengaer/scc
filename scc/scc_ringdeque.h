@@ -170,7 +170,7 @@ struct scc_ringdeque_base {
 #define scc_ringdeque_impl_base(deque)                                          \
     scc_ringdeque_impl_base_qual(deque,)
 
-//? .. c:function:: void *scc_ringdeque_impl_init(void *deque, size_t offset, size_t capacity)
+//? .. c:function:: void *scc_ringdeque_impl_new(void *deque, size_t offset, size_t capacity)
 //?
 //?     Initialize a raw ringdeque at the given address and return a
 //?     fat pointer to it.
@@ -182,10 +182,10 @@ struct scc_ringdeque_base {
 //?     :param deque: Address of the ringdeque to be initialized
 //?     :param offset: Offset of the :ref:`rd_data <type_rd_data>` member relative :c:texpr:`deque`
 //?     :param capacity: The capacity with which the ringdeque at :c:texpr:`deque` was allocated
-void *scc_ringdeque_impl_init(void *deque, size_t offset, size_t capacity);
+void *scc_ringdeque_impl_new(void *deque, size_t offset, size_t capacity);
 
-//! .. _scc_ringdeque_init:
-//! .. c:function:: void *scc_ringdeque_init(type)
+//! .. _scc_ringdeque_new:
+//! .. c:function:: void *scc_ringdeque_new(type)
 //!
 //!     Instantiate a ringdeque storing instances of the given :c:texpr:`type`. The
 //!     collection is constructed in the frame of the calling function. For more
@@ -195,8 +195,8 @@ void *scc_ringdeque_impl_init(void *deque, size_t offset, size_t capacity);
 //!
 //!     :param type: The type to be stored in the ringdeque
 //!     :returns: A handle used for referring to the instantiated ringdeque
-#define scc_ringdeque_init(type)                                                \
-    scc_ringdeque_impl_init(                                                    \
+#define scc_ringdeque_new(type)                                                 \
+    scc_ringdeque_impl_new(                                                     \
         &(union {                                                               \
             struct scc_ringdeque_base rd_base;                                  \
             unsigned char rd_buffer[sizeof(scc_ringdeque_impl_layout(type))];   \
@@ -209,7 +209,7 @@ void *scc_ringdeque_impl_init(void *deque, size_t offset, size_t capacity);
 //! .. c:function:: void scc_ringdeque_free(void *deque)
 //!
 //!     Reclaim memory allocated for :c:texpr:`deque`. The parameter must
-//!     refer to a valid ringdeque returned by :ref:`scc_ringdeque_init <scc_ringdeque_init>`.
+//!     refer to a valid ringdeque returned by :ref:`scc_ringdeque_new <scc_ringdeque_new>`.
 //!
 //!     :param deque: Handle to the ringdeque to be freed
 void scc_ringdeque_free(void *deque);

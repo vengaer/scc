@@ -2,13 +2,13 @@
 
 #include <unity.h>
 
-void test_scc_ringdeque_init(void) {
-    scc_ringdeque(int) deque = scc_ringdeque_init(int);
+void test_scc_ringdeque_new(void) {
+    scc_ringdeque(int) deque = scc_ringdeque_new(int);
     scc_ringdeque_free(deque);
 }
 
 void test_scc_ringdeque_push_back(void) {
-    scc_ringdeque(unsigned) deque = scc_ringdeque_init(unsigned);
+    scc_ringdeque(unsigned) deque = scc_ringdeque_new(unsigned);
     size_t cap = scc_ringdeque_capacity(deque);
     for(unsigned i = 0u; i < cap + 3u; ++i) {
         TEST_ASSERT_TRUE(scc_ringdeque_push_back(&deque, i));
@@ -22,7 +22,7 @@ void test_scc_ringdeque_push_back(void) {
 }
 
 void test_scc_ringdeque_push_front(void) {
-    scc_ringdeque(unsigned) deque = scc_ringdeque_init(unsigned);
+    scc_ringdeque(unsigned) deque = scc_ringdeque_new(unsigned);
     size_t cap = scc_ringdeque_capacity(deque);
     for(unsigned i = 0u; i < cap + 3u; ++i) {
         TEST_ASSERT_TRUE(scc_ringdeque_push_front(&deque, i));
@@ -38,7 +38,7 @@ void test_scc_ringdeque_push_front(void) {
 }
 
 void test_scc_ringdeque_pop_back(void) {
-    scc_ringdeque(unsigned) deque = scc_ringdeque_init(unsigned);
+    scc_ringdeque(unsigned) deque = scc_ringdeque_new(unsigned);
     size_t const cap = 2 * scc_ringdeque_capacity(deque);
     unsigned i;
     for(i = 0u; i < cap; ++i) {
@@ -53,7 +53,7 @@ void test_scc_ringdeque_pop_back(void) {
 }
 
 void test_scc_ringdeque_pop_front(void) {
-    scc_ringdeque(unsigned) deque = scc_ringdeque_init(unsigned);
+    scc_ringdeque(unsigned) deque = scc_ringdeque_new(unsigned);
     size_t const cap = 2 * scc_ringdeque_capacity(deque);
     unsigned i;
     for(i = 0u; i < cap; ++i) {
@@ -68,7 +68,7 @@ void test_scc_ringdeque_pop_front(void) {
 }
 
 void test_scc_ringdeque_back(void) {
-    scc_ringdeque(unsigned) deque = scc_ringdeque_init(unsigned);
+    scc_ringdeque(unsigned) deque = scc_ringdeque_new(unsigned);
     size_t const cap = 2 * scc_ringdeque_capacity(deque);
 
     for(unsigned  i = 0u; i < cap; ++i) {
@@ -80,7 +80,7 @@ void test_scc_ringdeque_back(void) {
 }
 
 void test_scc_ringdeque_front(void) {
-    scc_ringdeque(unsigned) deque = scc_ringdeque_init(unsigned);
+    scc_ringdeque(unsigned) deque = scc_ringdeque_new(unsigned);
     size_t const cap = 2 * scc_ringdeque_capacity(deque);
 
     for(unsigned i = 0u; i < cap; ++i) {
@@ -92,7 +92,7 @@ void test_scc_ringdeque_front(void) {
 }
 
 void test_scc_ringdeque_clear(void) {
-    scc_ringdeque(unsigned) deque = scc_ringdeque_init(unsigned);
+    scc_ringdeque(unsigned) deque = scc_ringdeque_new(unsigned);
     size_t const cap = 2 * scc_ringdeque_capacity(deque);
 
     for(unsigned i = 0u; i < cap; ++i) {
@@ -125,14 +125,14 @@ void test_scc_ringdeque_clear(void) {
 }
 
 void test_scc_ringdeque_reserve_size_is_power_of_2(void) {
-    scc_ringdeque(unsigned) deque = scc_ringdeque_init(unsigned);
+    scc_ringdeque(unsigned) deque = scc_ringdeque_new(unsigned);
     TEST_ASSERT_TRUE(scc_ringdeque_reserve(&deque, scc_ringdeque_capacity(deque) + 1u));
     TEST_ASSERT_TRUE(scc_bits_is_power_of_2(scc_ringdeque_capacity(deque)));
     scc_ringdeque_free(deque);
 }
 
 void test_scc_ringdeque_reserve_no_reallocation(void) {
-    scc_ringdeque(unsigned) deque = scc_ringdeque_init(unsigned);
+    scc_ringdeque(unsigned) deque = scc_ringdeque_new(unsigned);
 
     size_t const cap = scc_ringdeque_capacity(deque);
     void const *before = deque;
