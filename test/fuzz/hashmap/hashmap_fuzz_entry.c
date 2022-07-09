@@ -39,7 +39,7 @@ int LLVMFuzzerTestOneInput(uint8_t const *data, size_t size) {
         return 0;
     }
     bool success = false;
-    scc_hashmap(uint32_t, uint16_t) map = scc_hashmap_init(uint32_t, uint16_t, eq);
+    scc_hashmap(uint32_t, uint16_t) map = scc_hashmap_new(uint32_t, uint16_t, eq);
     uint16_t *vals = 0;
     uint32_t *keys = malloc(size * sizeof(*keys));
     if(!keys) {

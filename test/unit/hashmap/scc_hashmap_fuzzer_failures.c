@@ -20,7 +20,7 @@ void test_scc_hashmap_fuzzer_failure0(void) {
     static unsigned short const vals[] = {
         0u, 0u
     };
-    scc_hashmap(unsigned, unsigned short) map = scc_hashmap_init(unsigned, unsigned short, eq);
+    scc_hashmap(unsigned, unsigned short) map = scc_hashmap_new(unsigned, unsigned short, eq);
 
     unsigned short *elem;
     TEST_ASSERT_TRUE(scc_hashmap_insert(&map, keys[0], vals[0]));
@@ -55,7 +55,7 @@ void test_scc_hashmap_fuzzer_failure1(void) {
         65280, 65535, 65535, 65535,
         65535, 65535
     };
-    scc_hashmap(unsigned, unsigned short) map = scc_hashmap_init(unsigned, unsigned short, eq);
+    scc_hashmap(unsigned, unsigned short) map = scc_hashmap_new(unsigned, unsigned short, eq);
 
     unsigned short *elem;
     for(unsigned i = 0u; i < scc_arrsize(keys) - 1u; ++i) {
@@ -98,7 +98,7 @@ void test_scc_hashmap_fuzzer_failure2(void) {
     static unsigned short const dvals[] = {
         0, 138
     };
-    scc_hashmap(unsigned, unsigned short) map = scc_hashmap_init(unsigned, unsigned short, eq);
+    scc_hashmap(unsigned, unsigned short) map = scc_hashmap_new(unsigned, unsigned short, eq);
 
     unsigned short *elem;
     for(unsigned i = 0u; i < scc_arrsize(keys); ++i) {
@@ -170,7 +170,7 @@ void test_scc_hashmap_fuzzer_failure3(void) {
         0, 0, 0, 2333,
         61676, 293, 224, 246
     };
-    scc_hashmap(unsigned, unsigned short) map = scc_hashmap_init(unsigned, unsigned short, eq);
+    scc_hashmap(unsigned, unsigned short) map = scc_hashmap_new(unsigned, unsigned short, eq);
 
     unsigned short *elem;
     for(unsigned i = 0u; i < scc_arrsize(keys); ++i) {

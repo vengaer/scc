@@ -12,12 +12,12 @@ static bool eq(void const *left, void const *right) {
     return *(int const *)left == *(int const *)right;
 }
 
-/* test_scc_hashmap_init
+/* test_scc_hashmap_new
  *
  * Initialize a hash map, verify its size and free it
  */
-void test_scc_hashmap_init(void) {
-    scc_hashmap(int, unsigned) map = scc_hashmap_init(int, unsigned, eq);
+void test_scc_hashmap_new(void) {
+    scc_hashmap(int, unsigned) map = scc_hashmap_new(int, unsigned, eq);
     TEST_ASSERT_EQUAL_UINT64(0ull, scc_hashmap_size(map));
     scc_hashmap_free(map);
 }
@@ -29,7 +29,7 @@ void test_scc_hashmap_init(void) {
  */
 void test_scc_hashmap_insert_changes_size(void) {
     enum { TESTSIZE = 128 };
-    scc_hashmap(int, unsigned short) map = scc_hashmap_init(int, unsigned short, eq);
+    scc_hashmap(int, unsigned short) map = scc_hashmap_new(int, unsigned short, eq);
     for(int i = 0u; i < TESTSIZE; ++i) {
         TEST_ASSERT_TRUE(scc_hashmap_insert(&map, i, (unsigned short)i));
         TEST_ASSERT_EQUAL_UINT64(i + 1ull, scc_hashmap_size(map));
@@ -44,7 +44,7 @@ void test_scc_hashmap_insert_changes_size(void) {
  */
 void test_scc_hashmap_find(void) {
     enum { TESTSIZE = 512 };
-    scc_hashmap(int, unsigned short) map = scc_hashmap_init(int, unsigned short, eq);
+    scc_hashmap(int, unsigned short) map = scc_hashmap_new(int, unsigned short, eq);
     unsigned short *val;
     for(int i = 0; i < TESTSIZE; ++i) {
         TEST_ASSERT_TRUE(scc_hashmap_insert(&map, i, (unsigned short)i));
@@ -64,7 +64,7 @@ void test_scc_hashmap_find(void) {
  * inserted ones
  */
 void test_scc_hashmap_duplicate_insert(void) {
-    scc_hashmap(int, unsigned short) map = scc_hashmap_init(int, unsigned short, eq);
+    scc_hashmap(int, unsigned short) map = scc_hashmap_new(int, unsigned short, eq);
     struct scc_hashmap_base *base = scc_hashmap_inspect_base(map);
 
     unsigned long long hash = base->hm_hash(&(int){ 0 }, sizeof(int));
@@ -107,7 +107,7 @@ void test_scc_hashmap_duplicate_insert(void) {
  * verify that it overwrite the original one
  */
 void test_scc_hashmap_insert_overrides_exisiting(void) {
-    scc_hashmap(int, unsigned short) map = scc_hashmap_init(int, unsigned short, eq);
+    scc_hashmap(int, unsigned short) map = scc_hashmap_new(int, unsigned short, eq);
     TEST_ASSERT_TRUE(scc_hashmap_insert(&map, 0, 123));
     unsigned short *val = scc_hashmap_find(map, 0);
     TEST_ASSERT_TRUE(!!val);
@@ -128,7 +128,7 @@ void test_scc_hashmap_insert_overrides_exisiting(void) {
  * the correct value
  */
 void test_scc_hashmap_values_retained_across_rehash(void) {
-    scc_hashmap(int, unsigned short) map = scc_hashmap_init(int, unsigned short, eq);
+    scc_hashmap(int, unsigned short) map = scc_hashmap_new(int, unsigned short, eq);
     size_t orig_cap = scc_hashmap_capacity(map);
 
     int i;
@@ -154,7 +154,7 @@ void test_scc_hashmap_values_retained_across_rehash(void) {
  */
 void test_scc_hashmap_elements_erased_on_remove(void) {
     enum { TESTSIZE = 312 };
-    scc_hashmap(int, unsigned short) map = scc_hashmap_init(int, unsigned short, eq);
+    scc_hashmap(int, unsigned short) map = scc_hashmap_new(int, unsigned short, eq);
     for(int i = 0; i < TESTSIZE; ++i) {
         TEST_ASSERT_TRUE(scc_hashmap_insert(&map, i, i));
     }
@@ -182,7 +182,7 @@ void test_scc_hashmap_elements_erased_on_remove(void) {
  * it does not cause an inifinite loop
  */
 void test_scc_hashmap_insertion_probe_stop(void) {
-    scc_hashmap(int, unsigned short) map = scc_hashmap_init(int, unsigned short, eq);
+    scc_hashmap(int, unsigned short) map = scc_hashmap_new(int, unsigned short, eq);
     scc_hashmap_metatype *md = scc_hashmap_inspect_metadata(map);
 
     /* Insert and remove until all slots have been
@@ -215,7 +215,7 @@ void test_scc_hashmap_insertion_probe_stop(void) {
  * that it does not cause an infinite loop
  */
 void test_scc_hashmap_find_probe_stop(void) {
-    scc_hashmap(int, unsigned short) map = scc_hashmap_init(int, unsigned short, eq);
+    scc_hashmap(int, unsigned short) map = scc_hashmap_new(int, unsigned short, eq);
     scc_hashmap_metatype *md = scc_hashmap_inspect_metadata(map);
 
     /* Insert and remove until all slots have been

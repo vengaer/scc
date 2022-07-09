@@ -21,7 +21,7 @@ void test_scc_hashmap_find_string(void) {
         char buffer[BUFSIZE];
     } strtype;
     scc_hashmap(char const *, strtype) map =
-        scc_hashmap_init_with_hash(char const *, strtype, streq, strhash);
+        scc_hashmap_with_hash(char const *, strtype, streq, strhash);
 
     TEST_ASSERT_TRUE(scc_hashmap_insert(&map, "first key", (strtype){ "first value" }));
     TEST_ASSERT_TRUE(scc_hashmap_insert(&map, "second key", (strtype){ "second value" }));
@@ -44,7 +44,7 @@ void test_scc_hashmap_string_modification(void) {
         char buffer[BUFSIZE];
     } strtype;
     scc_hashmap(char const *, strtype) map =
-        scc_hashmap_init_with_hash(char const *, strtype, streq, strhash);
+        scc_hashmap_with_hash(char const *, strtype, streq, strhash);
 
     TEST_ASSERT_TRUE(scc_hashmap_insert(&map, "key", (strtype){ "value" }));
 

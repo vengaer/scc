@@ -239,7 +239,7 @@ struct scc_hashmap_base {
     }
 
 
-/* scc_hashmap_impl_init
+/* scc_hashmap_impl_new
  *
  * Internal use only
  *
@@ -258,10 +258,10 @@ struct scc_hashmap_base {
  * size_t keysize
  *      Size of the key type
  */
-void *scc_hashmap_impl_init(struct scc_hashmap_base *base, size_t coff, size_t valoff, size_t keysize);
+void *scc_hashmap_impl_new(struct scc_hashmap_base *base, size_t coff, size_t valoff, size_t keysize);
 
-//! .. _scc_hashmap_init_with_hash:
-//! .. c:function:: void *scc_hashmap_init_with_hash(keytype, valuetype, scc_hashmap_eq eq, scc_hashmap_hash hash)
+//! .. _scc_hashmap_with_hash:
+//! .. c:function:: void *scc_hashmap_with_hash(keytype, valuetype, scc_hashmap_eq eq, scc_hashmap_hash hash)
 //!
 //!     Initializes a hash map using the specified hash function. The macro expands
 //!     to a handle to a hash map with automatic storage duration. See
@@ -279,7 +279,7 @@ void *scc_hashmap_impl_init(struct scc_hashmap_base *base, size_t coff, size_t v
 //!     :param hash: Pointer to function to be used for key hashing
 //!     :returns: Handle to a newly created hash map. The map is allocated in the stack
 //!               frame of the current function and its lifetime tied to the scope in
-//!               which :c:texpr:`scc_hashmap_init_with_hash` is invoked.
+//!               which :c:texpr:`scc_hashmap_with_hash` is invoked.
 //!
 //!     .. code-block:: C
 //!         :caption: Example usage
@@ -289,12 +289,12 @@ void *scc_hashmap_impl_init(struct scc_hashmap_base *base, size_t coff, size_t v
 //!
 //!         scc_hashmap(int, _Bool) map;
 //!         {
-//!             map = scc_hashmap_init_with_hash(int, _Bool, eq, hash);
+//!             map = scc_hashmap_with_hash(int, _Bool, eq, hash);
 //!             /* map is valid */
 //!         }
 //!         /* map is no longer valid */
-#define scc_hashmap_init_with_hash(keytype, valuetype, eq, hash)                            \
-    scc_hashmap_impl_init(                                                                  \
+#define scc_hashmap_with_hash(keytype, valuetype, eq, hash)                                 \
+    scc_hashmap_impl_new(                                                                   \
         (void *)&(scc_hashmap_impl_layout(keytype, valuetype)){                             \
             .hm_eq = eq,                                                                    \
             .hm_hash = hash,                                                                \
@@ -310,13 +310,13 @@ void *scc_hashmap_impl_init(struct scc_hashmap_base *base, size_t coff, size_t v
         sizeof(keytype)                                                                     \
     )
 
-//! .. _scc_hashmap_init:
-//! .. c:function:: void *scc_hashmap_init(keytype, valuetype, scc_hashmap_eq eq)
+//! .. _scc_hashmap_new:
+//! .. c:function:: void *scc_hashmap_new(keytype, valuetype, scc_hashmap_eq eq)
 //!
 //!     Initializes a hash map using the default :ref:`Fowler-Noll-Vo <scc_hashmap_fnv1a>`
 //!     hash function. Exactly equivalent to calling
-//!     :code:`scc_hashmap_init_with_hash(keytype, valuetype, eq, scc_hashmap_fnv1a)`. See
-//!     :ref:`its documentation <scc_hashmap_init_with_hash>` for restrictions and common
+//!     :code:`scc_hashmap_with_hash(keytype, valuetype, eq, scc_hashmap_fnv1a)`. See
+//!     :ref:`its documentation <scc_hashmap_with_hash>` for restrictions and common
 //!     pitfalls.
 //!
 //!     The call cannot fail.
@@ -329,11 +329,11 @@ void *scc_hashmap_impl_init(struct scc_hashmap_base *base, size_t coff, size_t v
 //!     :param eq: Pointer to function to be used for equality comparison
 //!     :returns: Handle to a newly created hash map. The map is allocated in the stack
 //!               frame of the current function and its lifetime tied to the scope in
-//!               which :c:texpr:`scc_hashmap_init` is invoked.
+//!               which :c:texpr:`scc_hashmap_new` is invoked.
 //!
-//!     .. seealso:: :ref:`scc_hashmap_init_with_hash <scc_hashmap_init_with_hash>`
-#define scc_hashmap_init(keytype, valuetype, eq)                                            \
-    scc_hashmap_init_with_hash(keytype, valuetype, eq, scc_hashmap_fnv1a)
+//!     .. seealso:: :ref:`scc_hashmap_with_hash <scc_hashmap_with_hash>`
+#define scc_hashmap_new(keytype, valuetype, eq)                                            \
+    scc_hashmap_with_hash(keytype, valuetype, eq, scc_hashmap_fnv1a)
 
 /* scc_hashmap_impl_bkpad
  *
@@ -391,8 +391,8 @@ unsigned long long scc_hashmap_fnv1a(void const *data, size_t size);
 //!
 //!     Reclaim memory used by the given hash map. The :c:texpr:`map`
 //!     parameter must refer to a valid hash map handle returned by either
-//!     :ref:`scc_hashmap_init <scc_hashmap_init>` or
-//!     :ref:`scc_hashmap_init_with_hash <scc_hashmap_init_with_hash>`.
+//!     :ref:`scc_hashmap_new <scc_hashmap_new>` or
+//!     :ref:`scc_hashmap_with_hash <scc_hashmap_with_hash>`.
 //!
 //!     :param map: Handle to the hash map to free
 void scc_hashmap_free(void *map);
@@ -443,7 +443,7 @@ _Bool scc_hashmap_impl_insert(void *mapaddr, size_t keysize, size_t valsize);
 //!
 //!         extern _Bool eq(void const *l, void const *r);
 //!
-//!         scc_hashmap(int, int) map = scc_hashmap_init(int, int, eq);
+//!         scc_hashmap(int, int) map = scc_hashmap_new(int, int, eq);
 //!
 //!         if(!scc_hashmap_insert(&map, 1, 38)) {
 //!             fputs("Insertion failure\n", stderr);
@@ -526,7 +526,7 @@ void *scc_hashmap_impl_find(void *map, size_t keysize, size_t valsize);
 //!
 //!         extern _Bool eq(void const *l, void const *r);
 //!
-//!         scc_hashmap(int, short) map = scc_hashmap_init(int, short, eq);
+//!         scc_hashmap(int, short) map = scc_hashmap_new(int, short, eq);
 //!         assert(scc_hashmap_insert(&map, 12, 2345));
 //!
 //!         short *val = scc_hashmap_find(map, 12);
@@ -575,7 +575,7 @@ _Bool scc_hashmap_impl_remove(void *map, size_t keysize);
 //!
 //!         extern _Bool eq(void const *l, void const *r);
 //!
-//!         scc_hashmap(int, short) map = scc_hashmap_init(int, short, eq);
+//!         scc_hashmap(int, short) map = scc_hashmap_new(int, short, eq);
 //!
 //!         assert(scc_hashmap_insert(&map, 12, 2345));
 //!         assert(scc_hashmap_remove(map, 12));

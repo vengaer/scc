@@ -307,7 +307,7 @@ static bool scc_hashmap_rehash(
     return true;
 }
 
-void *scc_hashmap_impl_init(struct scc_hashmap_base *base, size_t coff, size_t valoff, size_t keysize) {
+void *scc_hashmap_impl_new(struct scc_hashmap_base *base, size_t coff, size_t valoff, size_t keysize) {
     size_t const valpad = valoff - keysize;
     assert(valpad <= UCHAR_MAX);
     base->hm_valpad = valpad;
