@@ -283,7 +283,7 @@ struct scc_hashtab_base {
         scc_hashtab_metatype ht_guard[SCC_HASHTAB_GUARDSZ];                 \
     }
 
-//? .. c:function:: void *scc_hashtab_impl_init(struct scc_hashtab_base *base, size_t coff, size_t mdoff)
+//? .. c:function:: void *scc_hashtab_impl_new(struct scc_hashtab_base *base, size_t coff, size_t mdoff)
 //?
 //?     Initialize the given hash table and return a handle to it.
 //?
@@ -295,10 +295,10 @@ struct scc_hashtab_base {
 //?                  entry in this table.
 //?     :param coff: Offset of :code:`ht_curr` relative the address of :c:expr:`*base`
 //?     :param mdoff: Offset of :code:`ht_meta` relative the address of :c:expr`*base`
-void *scc_hashtab_impl_init(struct scc_hashtab_base *base, size_t coff, size_t mdoff);
+void *scc_hashtab_impl_new(struct scc_hashtab_base *base, size_t coff, size_t mdoff);
 
-//! .. _scc_hashtab_init_with_hash:
-//! .. c:function:: void *scc_hashtab_init_with_hash(type, scc_hashtab_eq eq, scc_hashtab_hash hash)
+//! .. _scc_hashtab_with_hash:
+//! .. c:function:: void *scc_hashtab_with_hash(type, scc_hashtab_eq eq, scc_hashtab_hash hash)
 //!
 //!     Initializes a hash table using the specified hash function. The macro expands
 //!     to a handle to a table with automatic storage duration. See
@@ -315,7 +315,7 @@ void *scc_hashtab_impl_init(struct scc_hashtab_base *base, size_t coff, size_t m
 //!     :param hash: Pointer to function to be used for key hashing
 //!     :returns: Handle to a newly created hash table. The table is allocated in the stack
 //!               frame of the current function and its lifetime tied to the scope in
-//!               which :c:texpr:`scc_hashtab_init_with_hash` is invoked.
+//!               which :c:texpr:`scc_hashtab_with_hash` is invoked.
 //!
 //!     .. code-block:: C
 //!         :caption: Example usage
@@ -325,12 +325,12 @@ void *scc_hashtab_impl_init(struct scc_hashtab_base *base, size_t coff, size_t m
 //!
 //!         scc_hashtab(int) tab;
 //!         {
-//!             tab = scc_hashtab_init_with_hash(int, eq, hash);
+//!             tab = scc_hashtab_with_hash(int, eq, hash);
 //!             /* tab is valid */
 //!         }
 //!         /* tab is no longer valid */
-#define scc_hashtab_init_with_hash(type, eq, hash)                          \
-    scc_hashtab_impl_init(                                                  \
+#define scc_hashtab_with_hash(type, eq, hash)                               \
+    scc_hashtab_impl_new(                                                   \
         (void *)&(scc_hashtab_impl_layout(type)){                           \
             .ht_eq = eq,                                                    \
             .ht_hash = hash,                                                \
@@ -340,13 +340,13 @@ void *scc_hashtab_impl_init(struct scc_hashtab_base *base, size_t coff, size_t m
         offsetof(scc_hashtab_impl_layout(type), ht_meta)                    \
     )
 
-//! .. _scc_hashtab_init:
-//! .. c:function:: void *scc_hashtab_init(type, scc_hashtab_eq eq)
+//! .. _scc_hashtab_new:
+//! .. c:function:: void *scc_hashtab_new(type, scc_hashtab_eq eq)
 //!
 //!     Initializes a hash table using the default :ref:`Fowler-Noll-Vo <scc_hashtab_fnv1a>`
 //!     hash function. Exactly equivalent to calling
-//!     :code:`scc_hashtab_init_with_hash(keytype, valuetype, eq, scc_hashtab_fnv1a)`. See
-//!     :ref:`its documentation <scc_hashtab_init_with_hash>` for restrictions and common
+//!     :code:`scc_hashtab_with_hash(keytype, valuetype, eq, scc_hashtab_fnv1a)`. See
+//!     :ref:`its documentation <scc_hashtab_with_hash>` for restrictions and common
 //!     pitfalls.
 //!
 //!     The call cannot fail.
@@ -358,11 +358,11 @@ void *scc_hashtab_impl_init(struct scc_hashtab_base *base, size_t coff, size_t m
 //!     :param eq: Pointer to function to be used for equality comparison
 //!     :returns: Handle to a newly created hash table. The table is allocated in the stack
 //!               frame of the current function and its lifetime tied to the scope in
-//!               which :c:texpr:`scc_hashtab_init` is invoked.
+//!               which :c:texpr:`scc_hashtab_new` is invoked.
 //!
-//!     .. seealso:: :ref:`scc_hashtab_init_with_hash <scc_hashtab_init_with_hash>`
-#define scc_hashtab_init(type, eq)                                          \
-    scc_hashtab_init_with_hash(type, eq, scc_hashtab_fnv1a)
+//!     .. seealso:: :ref:`scc_hashtab_with_hash <scc_hashtab_with_hash>`
+#define scc_hashtab_new(type, eq)                                           \
+    scc_hashtab_with_hash(type, eq, scc_hashtab_fnv1a)
 
 //? .. c:function:: size_t scc_hashtab_impl_bkpad(void const *tab)
 //?
@@ -439,8 +439,8 @@ unsigned long long scc_hashtab_fnv1a(void const *data, size_t size);
 //!
 //!     Reclaim memory used by the given hash table. The :c:texpr:`tab`
 //!     parameter must refer to a valid hash table handle returned by either
-//!     :ref:`scc_hashtab_init <scc_hashtab_init>` or
-//!     :ref:`scc_hashtab_init_with_hash <scc_hashtab_init_with_hash>`.
+//!     :ref:`scc_hashtab_new <scc_hashtab_new>` or
+//!     :ref:`scc_hashtab_with_hash <scc_hashtab_with_hash>`.
 //!
 //!     :param tab: Handle to the hash table to free
 void scc_hashtab_free(void *tab);
@@ -490,7 +490,7 @@ _Bool scc_hashtab_impl_insert(void *tabaddr, size_t elemsize);
 //!
 //!         extern _Bool eq(void const *l, void const *r);
 //!
-//!         scc_hashtab(int) tab = scc_hash_init(int, eq);
+//!         scc_hashtab(int) tab = scc_hashtab_new(int, eq);
 //!
 //!         if(!scc_hashtab_insert(&tab, 111)) {
 //!             fputs("Insertion failure\n", stderr);
@@ -560,7 +560,7 @@ void const *scc_hashtab_impl_find(void const *tab, size_t elemsize);
 //!         extern _Bool eq(void const *l, void const *r);
 //!         char const *str = "a waste of time";
 //!
-//!         scc_hashtab(char const *) tab = scc_hashtab_init(char const *, eq);
+//!         scc_hashtab(char const *) tab = scc_hashtab_new(char const *, eq);
 //!         assert(scc_hashtab_insert(&tab, str));
 //!
 //!         /* Note: Probing is based on address of string literal
@@ -614,7 +614,7 @@ _Bool scc_hashtab_impl_reserve(void *tabaddr, size_t capacity, size_t elemsize);
 //!
 //!         extern _Bool eq(void const *l, void const *r);
 //!
-//!         scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+//!         scc_hashtab(int) tab = scc_hashtab_new(int, eq);
 //!         assert(scc_hashtab_reserve(&tab, 256));
 //!
 //!         scc_hashtab_free(tab);
@@ -655,7 +655,7 @@ _Bool scc_hashtab_impl_remove(void *tab, size_t elemsize);
 //!
 //!         extern _Bool eq(void const *l, void const *r);
 //!
-//!         scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+//!         scc_hashtab(int) tab = scc_hashtab_new(int, eq);
 //!
 //!         assert(scc_hashtab_insert(&tab, 18));
 //!         assert(scc_hashtab_remove(tab, 18));

@@ -21,7 +21,7 @@ static bool eq(void const *l, void const *r) {
  */
 void test_insertion_probe_detects_duplicate(void) {
     enum { TESTVAL = 13 };
-    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+    scc_hashtab(int) tab = scc_hashtab_new(int, eq);
     struct scc_hashtab_base *base = scc_hashtab_inspect_base(tab);
     unsigned long long hash = scc_hashtab_fnv1a(&(int){ TESTVAL }, sizeof(int));
     scc_hashtab_metatype *md = scc_hashtab_inspect_metadata(tab);
@@ -47,7 +47,7 @@ void test_insertion_probe_detects_duplicate(void) {
  * the table and verify that the probing detects vacant slots
  */
 void test_insertion_probe_functional_up_to_full_capacity(void) {
-    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+    scc_hashtab(int) tab = scc_hashtab_new(int, eq);
     struct scc_hashtab_base *base = scc_hashtab_inspect_base(tab);
     unsigned long long hash;
     size_t index;
@@ -81,7 +81,7 @@ void test_insertion_probe_functional_up_to_full_capacity(void) {
  * probe and verify that the probing finds the vacant slot
  */
 void test_insertion_probe_finds_single_vacant(void) {
-    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+    scc_hashtab(int) tab = scc_hashtab_new(int, eq);
     struct scc_hashtab_base *base = scc_hashtab_inspect_base(tab);
     unsigned long long hash = scc_hashtab_fnv1a(tab, sizeof(int));
     size_t slot = hash & (scc_hashtab_capacity(tab) - 1u);
@@ -116,7 +116,7 @@ void test_insertion_probe_finds_single_vacant(void) {
 void test_insertion_probe_until_stop(void) {
     enum { TESTVAL = 328 };
 
-    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+    scc_hashtab(int) tab = scc_hashtab_new(int, eq);
     struct scc_hashtab_base *base = scc_hashtab_inspect_base(tab);
 
     *tab = TESTVAL;
@@ -166,7 +166,7 @@ void test_insertion_probe_until_stop(void) {
  * index beyond the vector
  */
 void test_insertion_probe_no_end_in_vector(void) {
-    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+    scc_hashtab(int) tab = scc_hashtab_new(int, eq);
 
     /* Reserve enough space to require multiple vector loads */
     size_t const cap = scc_hashtab_capacity(tab) << 2u;
@@ -209,7 +209,7 @@ void test_insertion_probe_no_end_in_vector(void) {
  * Probe empty hash table and verify that the returned index is -1
  */
 void test_find_probe_empty(void) {
-    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+    scc_hashtab(int) tab = scc_hashtab_new(int, eq);
     struct scc_hashtab_base *base = scc_hashtab_inspect_base(tab);
     *tab = 32;
     unsigned long long hash = scc_hashtab_fnv1a(tab, sizeof(*tab));
@@ -224,7 +224,7 @@ void test_find_probe_empty(void) {
  */
 void test_find_probe_no_match(void) {
     enum { SIZE = 10 };
-    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+    scc_hashtab(int) tab = scc_hashtab_new(int, eq);
     struct scc_hashtab_base *base = scc_hashtab_inspect_base(tab);
     scc_hashtab_metatype *md = scc_hashtab_inspect_metadata(tab);
     int *data = scc_hashtab_inspect_data(tab);
@@ -255,7 +255,7 @@ void test_find_probe_no_match(void) {
  */
 void test_find_probe_single_value(void) {
     enum { VAL = 10 };
-    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+    scc_hashtab(int) tab = scc_hashtab_new(int, eq);
     struct scc_hashtab_base *base = scc_hashtab_inspect_base(tab);
     scc_hashtab_metatype *md = scc_hashtab_inspect_metadata(tab);
     int *data = scc_hashtab_inspect_data(tab);

@@ -29,7 +29,7 @@ static bool contains(int *tab, int value) {
  * Verify that the ht_bkoff field has been set correctly
  */
 void test_scc_hashtab_bkoff(void) {
-    scc_hashtab(int) hashtab = scc_hashtab_init(int, eq);
+    scc_hashtab(int) hashtab = scc_hashtab_new(int, eq);
     struct scc_hashtab_base *base = scc_hashtab_inspect_base(hashtab);
     /* Probably UB... */
     TEST_ASSERT_EQUAL_PTR(base->ht_eq, eq);
@@ -43,7 +43,7 @@ void test_scc_hashtab_bkoff(void) {
  */
 void test_scc_hashtab_insert(void) {
     enum { TESTSIZE = 11 };
-    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+    scc_hashtab(int) tab = scc_hashtab_new(int, eq);
 
     for(int i = 0; i < TESTSIZE; ++i) {
         TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, i));
@@ -64,7 +64,7 @@ void test_scc_hashtab_insert(void) {
  * rehashing
  */
 void test_scc_hashtab_values_retained_on_rehash(void) {
-    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+    scc_hashtab(int) tab = scc_hashtab_new(int, eq);
     size_t const cap = scc_hashtab_capacity(tab);
 
     /* Insert until rehash */
@@ -87,7 +87,7 @@ void test_scc_hashtab_values_retained_on_rehash(void) {
  * increased
  */
 void test_scc_hashtab_reserve(void) {
-    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+    scc_hashtab(int) tab = scc_hashtab_new(int, eq);
     size_t const cap = scc_hashtab_capacity(tab);
 
     void const *origaddr = tab;
@@ -106,7 +106,7 @@ void test_scc_hashtab_reserve(void) {
  */
 void test_scc_hashtab_reserve_retains_values(void) {
     enum { TESTSIZE = 256 };
-    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+    scc_hashtab(int) tab = scc_hashtab_new(int, eq);
     for(int i = 0; i < TESTSIZE; ++i) {
         TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, i));
 
@@ -131,7 +131,7 @@ void test_scc_hashtab_reserve_retains_values(void) {
  */
 void test_scc_hashtab_interleaved_insert_find(void) {
     enum { TESTSIZE = 4096 };
-    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+    scc_hashtab(int) tab = scc_hashtab_new(int, eq);
 
     int const *elem;
     for(int i = 0; i < TESTSIZE; ++i) {
@@ -153,7 +153,7 @@ void test_scc_hashtab_interleaved_insert_find(void) {
  */
 void test_scc_hashtab_remove(void) {
     enum { VAL = 234 };
-    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+    scc_hashtab(int) tab = scc_hashtab_new(int, eq);
     TEST_ASSERT_FALSE(scc_hashtab_remove(tab, VAL));
     TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, VAL));
     TEST_ASSERT_TRUE(scc_hashtab_remove(tab, VAL));
@@ -170,7 +170,7 @@ void test_scc_hashtab_remove(void) {
  */
 void test_scc_hashtab_interleaved_remove_find(void) {
     enum { TESTSIZE = 2048 };
-    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+    scc_hashtab(int) tab = scc_hashtab_new(int, eq);
 
     for(int i = 0; i < TESTSIZE; ++i) {
         TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, i));
@@ -202,7 +202,7 @@ void test_scc_hashtab_interleaved_remove_find(void) {
  * it does not cause an inifinite loop
  */
 void test_scc_hashtab_insertion_probe_stop(void) {
-    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+    scc_hashtab(int) tab = scc_hashtab_new(int, eq);
     scc_hashtab_metatype *md = scc_hashtab_inspect_metadata(tab);
 
     /* Insert and remove until all slots have been
@@ -235,7 +235,7 @@ void test_scc_hashtab_insertion_probe_stop(void) {
  * that it does not cause an infinite loop
  */
 void test_scc_hashtab_find_probe_stop(void) {
-    scc_hashtab(int) tab = scc_hashtab_init(int, eq);
+    scc_hashtab(int) tab = scc_hashtab_new(int, eq);
     scc_hashtab_metatype *md = scc_hashtab_inspect_metadata(tab);
 
     /* Insert and remove until all slots have been

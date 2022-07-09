@@ -57,7 +57,7 @@ int LLVMFuzzerTestOneInput(uint8_t const *data, size_t size) {
     dbg_pr_n(it, buf, size, "%u ", *it);
     dbg_pr("\n");
 
-    scc_hashtab(uint32_t) tab = scc_hashtab_init(uint32_t, eq);
+    scc_hashtab(uint32_t) tab = scc_hashtab_new(uint32_t, eq);
 
     hashtab_fuzz_probing(&tab, buf, end);
     hashtab_fuzz_insertion(&tab, buf, end, size);

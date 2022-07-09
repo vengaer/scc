@@ -11,7 +11,7 @@ static bool eq(void const *left, void const *right) {
 }
 
 void automatic_init_free_benchmark(void) {
-    scc_hashtab(bm_type) tab = scc_hashtab_init(bm_type, eq);
+    scc_hashtab(bm_type) tab = scc_hashtab_new(bm_type, eq);
     scc_clobber();
     scc_hashtab_free(tab);
 }

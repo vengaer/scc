@@ -7,7 +7,7 @@ static bool eq(void const *left, void const *right) {
 }
 
 void *hashtab_insertion_init(void) {
-    scc_hashtab(bm_type) tab = scc_hashtab_init(bm_type, eq);
+    scc_hashtab(bm_type) tab = scc_hashtab_new(bm_type, eq);
     if(!scc_hashtab_reserve(&tab, scc_hashtab_capacity(tab) << 1u)) {
         return 0;
     }

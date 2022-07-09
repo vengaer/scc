@@ -304,7 +304,7 @@ void const *scc_hashtab_impl_find(void const *tab, size_t elemsize) {
     return (void const *)((unsigned char const *)tab + (index + 1ull) * elemsize);
 }
 
-void *scc_hashtab_impl_init(struct scc_hashtab_base *base, size_t coff, size_t mdoff) {
+void *scc_hashtab_impl_new(struct scc_hashtab_base *base, size_t coff, size_t mdoff) {
     base->ht_mdoff = mdoff;
     base->ht_fwoff = scc_hashtab_calcpad(coff);
     unsigned char *tab = (unsigned char *)base + coff;
