@@ -14,13 +14,13 @@ int compare_unsigned(void const *left, void const *right) {
     return (leftval < rightval ? -1 : 1) * !(leftval == rightval);
 }
 
-void test_scc_rbtree_init(void) {
-    scc_rbtree(int) tree = scc_rbtree_init(int, compare);
+void test_scc_rbtree_new(void) {
+    scc_rbtree(int) tree = scc_rbtree_new(int, compare);
     scc_rbtree_free(tree);
 }
 
 void test_scc_rbtree_size(void) {
-    scc_rbtree(int) tree = scc_rbtree_init(int, compare);
+    scc_rbtree(int) tree = scc_rbtree_new(int, compare);
     TEST_ASSERT_EQUAL_UINT64(0u, scc_rbtree_size(tree));
     scc_rbtree_free(tree);
 }
@@ -28,7 +28,7 @@ void test_scc_rbtree_size(void) {
 void test_scc_rbtree_insert(void) {
     enum { TEST_SIZE = 3200 };
 
-    scc_rbtree(int) handle = scc_rbtree_init(int, compare);
+    scc_rbtree(int) handle = scc_rbtree_new(int, compare);
     for(int i = 0; i < TEST_SIZE; i++) {
         TEST_ASSERT_TRUE(scc_rbtree_insert(handle, i));
         TEST_ASSERT_EQUAL_UINT64(i + 1ull, scc_rbtree_size(handle));
@@ -41,7 +41,7 @@ void test_scc_rbtree_insert(void) {
 
 void test_scc_rbtree_find(void) {
     enum { TEST_SIZE = 1200 };
-    scc_rbtree(int) handle = scc_rbtree_init(int, compare);
+    scc_rbtree(int) handle = scc_rbtree_new(int, compare);
     for(int i = 0; i < TEST_SIZE; i++) {
         TEST_ASSERT_TRUE(scc_rbtree_insert(handle, i));
         TEST_ASSERT_EQUAL_UINT64(i + 1ull, scc_rbtree_size(handle));
@@ -59,7 +59,7 @@ void test_scc_rbtree_find(void) {
 
 void test_scc_rbtree_remove(void) {
     enum { TEST_SIZE = 500 };
-    scc_rbtree(int) handle = scc_rbtree_init(int, compare);
+    scc_rbtree(int) handle = scc_rbtree_new(int, compare);
     for(int i = 0; i < TEST_SIZE; i++) {
         TEST_ASSERT_TRUE(scc_rbtree_insert(handle, i));
     }
@@ -71,7 +71,7 @@ void test_scc_rbtree_remove(void) {
 
 void test_scc_rbtree_duplicate_removal(void) {
     enum { TEST_SIZE = 500 };
-    scc_rbtree(int) handle = scc_rbtree_init(int, compare);
+    scc_rbtree(int) handle = scc_rbtree_new(int, compare);
     for(int i = 0; i < TEST_SIZE; i++) {
         TEST_ASSERT_TRUE(scc_rbtree_insert(handle, i));
     }
@@ -84,7 +84,7 @@ void test_scc_rbtree_duplicate_removal(void) {
 
 void test_scc_rbtree_foreach(void) {
     enum { TEST_SIZE = 500 };
-    scc_rbtree(int) handle = scc_rbtree_init(int, compare);
+    scc_rbtree(int) handle = scc_rbtree_new(int, compare);
     for(int i = 0; i < TEST_SIZE; i++) {
         TEST_ASSERT_TRUE(scc_rbtree_insert(handle, i));
     }
@@ -98,7 +98,7 @@ void test_scc_rbtree_foreach(void) {
 
 void test_scc_rbtree_foreach_reversed(void) {
     enum { TEST_SIZE = 600 };
-    scc_rbtree(int) handle = scc_rbtree_init(int, compare);
+    scc_rbtree(int) handle = scc_rbtree_new(int, compare);
     for(int i = 0; i < TEST_SIZE; i++) {
         TEST_ASSERT_TRUE(scc_rbtree_insert(handle, i));
     }
@@ -113,7 +113,7 @@ void test_scc_rbtree_foreach_reversed(void) {
 void test_scc_rbtree_properties_insertion(void) {
     enum { TEST_SIZE = 1200 };
     unsigned long long status;
-    scc_rbtree(int) handle = scc_rbtree_init(int, compare);
+    scc_rbtree(int) handle = scc_rbtree_new(int, compare);
     for(int i = 0; i < TEST_SIZE; ++i) {
         TEST_ASSERT_TRUE(scc_rbtree_insert(handle, i));
         status = scc_rbtree_inspect_properties(handle);
@@ -124,7 +124,7 @@ void test_scc_rbtree_properties_insertion(void) {
 
 void test_scc_rbtree_properties_removal(void) {
     enum { TEST_SIZE = 1200 };
-    scc_rbtree(int) handle = scc_rbtree_init(int, compare);
+    scc_rbtree(int) handle = scc_rbtree_new(int, compare);
     for(int i = 0; i < TEST_SIZE; ++i) {
         TEST_ASSERT_TRUE(scc_rbtree_insert(handle, i));
     }
@@ -139,7 +139,7 @@ void test_scc_rbtree_properties_removal(void) {
 
 void test_scc_rbtree_properties_insertion_removal(void) {
     enum { CHUNKSIZE = 1200 };
-    scc_rbtree(int) handle = scc_rbtree_init(int, compare);
+    scc_rbtree(int) handle = scc_rbtree_new(int, compare);
     unsigned long long status;
     int i = 0;
     for(;i < CHUNKSIZE; ++i) {
@@ -162,7 +162,7 @@ void test_scc_rbtree_properties_insertion_removal(void) {
 }
 
 void test_scc_rbtree_removal_fuzz_failure_0(void) {
-    scc_rbtree(unsigned) handle = scc_rbtree_init(unsigned, compare_unsigned);
+    scc_rbtree(unsigned) handle = scc_rbtree_new(unsigned, compare_unsigned);
     TEST_ASSERT_TRUE(scc_rbtree_insert(handle, 160340));
     TEST_ASSERT_TRUE(scc_rbtree_insert(handle, 288));
     TEST_ASSERT_TRUE(scc_rbtree_insert(handle, 0));
@@ -176,7 +176,7 @@ void test_scc_rbtree_removal_fuzz_failure_0(void) {
 
 
 void test_scc_rbtree_removal_fuzz_failure_1(void) {
-    scc_rbtree(unsigned) handle = scc_rbtree_init(unsigned, compare_unsigned);
+    scc_rbtree(unsigned) handle = scc_rbtree_new(unsigned, compare_unsigned);
     unsigned values[] = {
         4294442752, 1644167167, 2013394256, 4294963199, /* NOLINT(readability-magic-numbers) */
         16777275,   0,          4278190080, 591934463   /* NOLINT(readability-magic-numbers) */

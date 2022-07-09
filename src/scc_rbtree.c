@@ -391,7 +391,7 @@ static bool scc_rbtree_insert_nonempty(void **handle, struct scc_rbtree *tree, s
     return true;
 }
 
-void *scc_rbtree_impl_init(struct scc_rbtree *tree) {
+void *scc_rbtree_impl_new(struct scc_rbtree *tree) {
     tree->rb_size = 0u;
     tree->rb_root = scc_rbtree_sentinel(tree);
     tree->rb_sentinel.flags = SCC_RBLEAF;

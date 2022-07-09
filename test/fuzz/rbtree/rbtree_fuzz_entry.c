@@ -54,7 +54,7 @@ int LLVMFuzzerTestOneInput(uint8_t const *data, size_t size) {
     memcpy(buf, data, size * sizeof(*buf));
     unsigned unique_end = partition(buf, size);
 
-    scc_rbtree(uint32_t) handle = scc_rbtree_init(uint32_t, compare);
+    scc_rbtree(uint32_t) handle = scc_rbtree_new(uint32_t, compare);
     if(!handle) {
         goto epilogue;
     }

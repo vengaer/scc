@@ -53,7 +53,7 @@ struct scc_rbtree {
     scc_rbcompare rb_compare;
 };
 
-void *scc_rbtree_impl_init(struct scc_rbtree *restrict tree);
+void *scc_rbtree_impl_new(struct scc_rbtree *restrict tree);
 _Bool scc_rbtree_impl_insert(void *handle);
 void const *scc_rbtree_impl_find(void const *handle);
 _Bool scc_rbtree_impl_remove(void *handle, size_t elemsize);
@@ -63,8 +63,8 @@ void const *scc_rbtree_impl_successor(void const *iter);
 void const *scc_rbtree_impl_predecessor(void const *iter);
 void const *scc_rbtree_impl_sentinel(void const *handle);
 
-#define scc_rbtree_init(type, compare)                              \
-    scc_rbtree_impl_init(&(struct scc_rbtree) {                     \
+#define scc_rbtree_new(type, compare)                               \
+    scc_rbtree_impl_new(&(struct scc_rbtree) {                      \
         .rb_baseoff = scc_rbtree_impl_baseoff(type),                \
         .rb_arena = scc_arena_new(scc_rbnode_impl_layout(type)),    \
         .rb_compare = compare                                       \
