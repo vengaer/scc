@@ -360,7 +360,9 @@ void *scc_hashtab_impl_new(struct scc_hashtab_base *base, size_t coff, size_t md
 //!               frame of the current function and its lifetime tied to the scope in
 //!               which :c:texpr:`scc_hashtab_new` is invoked.
 //!
-//!     .. seealso:: :ref:`scc_hashtab_with_hash <scc_hashtab_with_hash>`
+//!     .. seealso::
+//!
+//!         :ref:`scc_hashtab_with_hash <scc_hashtab_with_hash>`
 #define scc_hashtab_new(type, eq)                                           \
     scc_hashtab_with_hash(type, eq, scc_hashtab_fnv1a)
 

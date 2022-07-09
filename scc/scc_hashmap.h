@@ -331,7 +331,9 @@ void *scc_hashmap_impl_new(struct scc_hashmap_base *base, size_t coff, size_t va
 //!               frame of the current function and its lifetime tied to the scope in
 //!               which :c:texpr:`scc_hashmap_new` is invoked.
 //!
-//!     .. seealso:: :ref:`scc_hashmap_with_hash <scc_hashmap_with_hash>`
+//!     .. seealso::
+//!
+//!         :ref:`scc_hashmap_with_hash <scc_hashmap_with_hash>`
 #define scc_hashmap_new(keytype, valuetype, eq)                                            \
     scc_hashmap_with_hash(keytype, valuetype, eq, scc_hashmap_fnv1a)
 
