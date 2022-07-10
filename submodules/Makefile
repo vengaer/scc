@@ -37,7 +37,7 @@ $(benchmarkmain_alib): $(call reeval,cpu_cores,$(benchmarkmain_alib))
 
 $(benchmarkalib) $(benchmarkmain_alib)&: $(submodules) | $(benchmarkbuilddir)
 	$(CMAKE) -E chdir $(benchmarkbuilddir) $(CMAKE) $(benchmark_buildflags) $(benchmarkdir)
-	$(CMAKE) --build $(benchmarkbuilddir) --parallel $(cpu_cores) --config Releasekk
+	$(CMAKE) --build $(benchmarkbuilddir) --parallel $(cpu_cores) --config Release
 
 .PHONY: __clean_benchmark
 __clean_benchmark:
