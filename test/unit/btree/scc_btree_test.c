@@ -20,3 +20,9 @@ void test_scc_btree_with_order(void) {
     TEST_ASSERT_EQUAL_UINT64(32ull, scc_btree_order(btree));
     scc_btree_free(btree);
 }
+
+void test_scc_btree_size_empty(void) {
+    scc_btree(int) btree = scc_btree_new(int, compare);
+    TEST_ASSERT_EQUAL_UINT64(0ull, scc_btree_size(btree));
+    scc_btree_free(btree);
+}
