@@ -60,24 +60,21 @@ scc_static_assert(SCC_BTREE_DEFAULT_ORDER > 1);
 //? .. _scc_btnode_base:
 //? .. c:struct:: scc_btnode_base
 //?
-//?     Non-variably sized B-tree node used for
-//?     referring to the
-//?     :ref:`root node <struct_scc_btnode_base_bt_root>`
-//?     of the B-tree
+//?     Generic B-tree node structure
 //?
 //?     .. note::
 //?
 //?         Internal use only
 //?
-//?     .. _unsigned_short_bt_nkeys:
-//?     .. c:var:: unsigned short bt_nkeys
-//?
-//?         Number of keys stored in the node
-//?
 //?     .. _unsigned_char_bt_flags:
 //?     .. c:var:: unsigned char bt_flags
 //?
 //?         Link flags. Used bits are as follows
+//?
+//?     .. _unsigned_short_bt_nkeys:
+//?     .. c:var:: unsigned short bt_nkeys
+//?
+//?         Number of keys stored in the node
 //?
 //?         .. list-table:: Flag Bits
 //?             :header-rows: 1
@@ -88,33 +85,15 @@ scc_static_assert(SCC_BTREE_DEFAULT_ORDER > 1);
 //?               - Leftmost link is a thread
 //?             * - 0x02
 //?               - Rightmost link is a thread
-struct scc_btnode_base {
-    unsigned short bt_nkeys;
-    unsigned char bt_flags;
-};
-
-//? .. _scc_btnode:
-//? .. c:struct:: scc_btnode
-//?
-//?     Generic B-tree node structure
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     .. _struct_scc_btnode_base_bt_base:
-//?     .. c:var:: struct scc_btnode_base bt_base
-//?
-//?         Non-variably sized part of the node. See
-//?         :ref:`struct scc_btnode_base <scc_btnode_base>`
 //?
 //?     .. c:var:: unsigned char bt_data[]
 //?
 //?         FAM hiding type-specific details. See
 //?         :ref:`scc_btnode_impl_layout <scc_btnode_impl_layout>`
 //?         for details.
-struct scc_btnode {
-    struct scc_btnode_base *bt_base;
+struct scc_btnode_base {
+    unsigned char bt_flags;
+    unsigned short bt_nkeys;
     unsigned char bt_data[];
 };
 
@@ -189,17 +168,20 @@ struct scc_btree_base {
 //?     Actual layout of the nodes in a B-tree of order
 //?     :code:`order` storing instances of :code:`type`.
 //?
-//?     The :code:`bt_base` node allows for interchangeably referring
-//?     to the generic structure as if it were a
-//?     :ref:`struct scc_btnode <scc_btnode>`
-//?
 //?     .. note::
 //?
 //?         Internal use only
 //?
-//?     .. c:var:: struct scc_btnode_base bt_base
+//?     :param type: The type of the elements to be stored in the node
+//?     :param order: The order to the B-tree
 //?
-//?         See :ref:`bt_base <struct_scc_btnode_base_bt_base>`
+//?     .. c:var:: unsigned char bt_flags
+//?
+//?         See :ref:`bt_flags <unsigned_char_bt_flags>`.
+//?
+//?     .. c:var:: unsigned short bt_nkeys
+//?
+//?         See :ref:`bt_nkeys <unsigned_short_bt_nkeys>`.
 //?
 //?     .. c:var:: type bt_data[order - 1u]
 //?
@@ -207,7 +189,7 @@ struct scc_btree_base {
 //?         given time, the :code:`bt_nkeys` first nodes of the
 //?         array are in use
 //?
-//?     .. c:var:: struct scc_btnode *bt_links[order]
+//?     .. c:var:: struct scc_btnode_base *bt_links[order]
 //?
 //?         Links to other nodes in the B-tree. At most
 //?         the :c:expr:`bt_nkeys + 1u` first nodes are used.
@@ -220,9 +202,10 @@ struct scc_btree_base {
 //?         successor of the node.
 #define scc_btnode_impl_layout(type, order)                                     \
     struct {                                                                    \
-        struct scc_btnode_base bt_base;                                         \
-        type bt_data[order - 1u];                                               \
-        struct scc_btnode *bt_links[(order)];                                   \
+        unsigned char bt_flags;                                                 \
+        unsigned short bt_nkeys;                                                \
+        type bt_data[(order) - 1u];                                             \
+        struct scc_btnode_base *bt_links[order];                                \
     }
 
 //? .. c:macro:: scc_btree_impl_layout(type)
@@ -253,7 +236,7 @@ struct scc_btree_base {
 //?
 //?         See :ref:`bt_size <size_t_bt_size>`
 //?
-//?     .. c:var:: struct scc_btnode_base bt_root
+//?     .. c:var:: struct scc_btnode_base *bt_root
 //?
 //?         See :ref:`bt_root <struct_scc_btnode_base_bt_root>`
 //?
@@ -287,7 +270,7 @@ struct scc_btree_base {
         unsigned short const bt_dataoff;                                            \
         unsigned short const bt_linkoff;                                            \
         size_t bt_size;                                                             \
-        struct scc_btnode_base bt_root;                                             \
+        struct scc_btnode *bt_root;                                                 \
         struct scc_arena bt_arena;                                                  \
         scc_bcompare bt_compare;                                                    \
         unsigned char bt_fwoff;                                                     \
@@ -424,4 +407,14 @@ inline size_t scc_btree_order(void const *btree) {
     return base->bt_order;
 }
 
+//! .. c:function:: size_t scc_btree_size(void const *btree)
+//!
+//!     Query the size of the given B-tree
+//!
+//!     :param btree: B-tree handle
+//!     :returns: Size of the given B-tree
+inline size_t scc_btree_size(void const *btree) {
+    struct scc_btree_base const *base = scc_btree_impl_base_qual(btree, const);
+    return base->bt_size;
+}
 #endif /* SCC_BTREE_H */
