@@ -3,7 +3,8 @@
 
 #include <stddef.h>
 
-//? .. c:function:: scc_algo_lower_bound(void const *key, void const *base, size_t nmemb, size_t size, int(*compare)(void const *, void const *))
+//? .. _scc_algo_lower_bound:
+//? .. c:function:: size_t scc_algo_lower_bound(void const *key, void const *base, size_t nmemb, size_t size, int(*compare)(void const *, void const *))
 //?
 //?     Compute the index of the first element in the sorted, consecutive value sequence
 //?     starting at :code:`base` that is greater than or equal to :code:`key` as determined
