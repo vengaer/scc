@@ -5,14 +5,17 @@
 
 #include <limits.h>
 
+#ifndef SCC_TYPE_INSPECT_MASK
+#define SCC_TYPE_INSPECT_MASK
+typedef unsigned scc_inspect_mask;
+#endif /* SCC_TYPE_INSPECT_MASK */
+
 #define SCC_RBTREE_ERR_RED   0x01
 #define SCC_RBTREE_ERR_BLACK 0x02
 #define SCC_RBTREE_ERR_LEFT  0x04
 #define SCC_RBTREE_ERR_RIGHT 0x08
 #define SCC_RBTREE_ERR_ROOT  0x10
 #define SCC_RBTREE_ERR_LOOP  0x20
-
-typedef unsigned scc_inspect_mask;
 
 #define SCC_RBTREE_ERR_MASK (SCC_RBTREE_ERR_RED   | \
                              SCC_RBTREE_ERR_BLACK | \
