@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <string.h>
 
+void *scc_btree_impl_with_order(void *base, size_t coff, size_t rootoff);
 size_t scc_btree_impl_npad(void const *btree);
 size_t scc_btree_order(void const *btree);
 size_t scc_btree_size(void const *btree);

@@ -204,12 +204,12 @@ struct scc_btree_base {
 //?         zero-indexed bit 1 in :code:`bt_flags` indicates that
 //?         :code:`bt_links[bt_nkeys - 1u]` refers to the in-order
 //?         successor of the node.
-#define scc_btnode_impl_layout(type, order)                                     \
-    struct {                                                                    \
-        unsigned char bt_flags;                                                 \
-        unsigned short bt_nkeys;                                                \
-        type bt_data[(order) - 1u];                                             \
-        struct scc_btnode_base *bt_links[order];                                \
+#define scc_btnode_impl_layout(type, order)                                                     \
+    struct {                                                                                    \
+        unsigned char bt_flags;                                                                 \
+        unsigned short bt_nkeys;                                                                \
+        type bt_data[(order) - 1u];                                                             \
+        struct scc_btnode_base *bt_links[order];                                                \
     }
 
 //? .. c:macro:: scc_btree_impl_layout(type)
@@ -275,22 +275,23 @@ struct scc_btree_base {
 //?         returned by initialization functions such as
 //?         :ref:`scc_btree_new <scc_btree_new>` do not have to be :code:`NULL`
 //?         checked.
-#define scc_btree_impl_layout(type, order)                                          \
-    struct {                                                                        \
-        unsigned short const bt_order;                                              \
-        unsigned short const bt_dataoff;                                            \
-        unsigned short const bt_linkoff;                                            \
-        size_t bt_size;                                                             \
-        struct scc_btnode *bt_root;                                                 \
-        struct scc_arena bt_arena;                                                  \
-        scc_bcompare bt_compare;                                                    \
-        unsigned char bt_fwoff;                                                     \
-        unsigned char bt_bkoff;                                                     \
-        type bt_curr[2];                                                            \
-        scc_btnode_impl_layout(type, order) bt_rootmem;                             \
+#define scc_btree_impl_layout(type, order)                                                          \
+    struct {                                                                                        \
+        unsigned short const bt_order;                                                              \
+        unsigned short const bt_dataoff;                                                            \
+        unsigned short const bt_linkoff;                                                            \
+        size_t bt_size;                                                                             \
+        struct scc_btnode *bt_root;                                                                 \
+        struct scc_arena bt_arena;                                                                  \
+        scc_bcompare bt_compare;                                                                    \
+        unsigned char bt_fwoff;                                                                     \
+        unsigned char bt_bkoff;                                                                     \
+        type bt_curr[2];                                                                            \
+        scc_btnode_impl_layout(type, order) bt_rootmem;                                             \
     }
 
-//? .. c:function:: void *scc_btree_impl_new(void *base, size_t coff)
+//? .. _scc_btree_impl_new:
+//? .. c:function:: void *scc_btree_impl_new(void *base, size_t coff, size_t rootoff)
 //?
 //?     Initialize the given B-tree base struct and return the address of its
 //?     :ref:`bt_curr <type_bt_curr>` member
@@ -307,6 +308,29 @@ struct scc_btree_base {
 //?     :returns: Address of a handle suitable for referring to the given B-tree
 void *scc_btree_impl_new(void *base, size_t coff, size_t rootoff);
 
+//? .. c:function:: void *scc_btree_impl_with_order(void *base, size_t coff, size_t rootoff)
+//?
+//?     Like :ref:`scc_btree_impl_new <scc_btree_impl_new>` but verifies the order
+//?     in the base structure. Should it prove invalid, the function returns NULL
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Base address of the B-tree
+//?     :param coff: Base-relative offset of the :ref:`bt_curr <type_bt_curr>` member
+//?                  in the base struct
+//?     :param rootoff: Base-relative offset of the memory allocated for the root node
+//?     :returns: Address of a handle suitable for referring to the given B-tree,
+//?               or :code:`NULL` if the order field is invalid
+inline void *scc_btree_impl_with_order(void *base, size_t coff, size_t rootoff) {
+    unsigned order = ((struct scc_btree_base *)base)->bt_order;
+    if(order < 3u || !scc_bits_is_even(order)) {
+        return 0;
+    }
+    return scc_btree_impl_new(base, coff, rootoff);
+}
+
 //! .. _scc_btree_with_order:
 //! .. c:function:: void *scc_btree_with_order(type, scc_bcompare compare, unsigned order)
 //!
@@ -316,22 +340,22 @@ void *scc_btree_impl_new(void *base, size_t coff, size_t rootoff);
 //!     The tree is constructed in the frame of the calling function. For more information, see
 //!     :ref:`Scope and Lifetimes <scope_and_lifetimes>`.
 //!
-//!     The call cannot fail.
-//!
 //!     :param type: The type to be stored in the B-tree
 //!     :param compare: Pointer to the comparison function to use
-//!     :param order: The :ref:`order <btree_order>` of the B-tree
-//!     :returns: An opaque pointer to a B-tree allocated in the frame of the calling function
-#define scc_btree_with_order(type, compare, order)                                  \
-    scc_btree_impl_new(&(scc_btree_impl_layout(type, order)) {                      \
-            .bt_order = order,                                                      \
-            .bt_dataoff = offsetof(scc_btnode_impl_layout(type, order), bt_data),   \
-            .bt_linkoff = offsetof(scc_btnode_impl_layout(type, order), bt_links),  \
-            .bt_arena = scc_arena_new(scc_btnode_impl_layout(type, order)),         \
-            .bt_compare = compare                                                   \
-        },                                                                          \
-        offsetof(scc_btree_impl_layout(type, order), bt_curr),                      \
-        offsetof(scc_btree_impl_layout(type, order), bt_rootmem)                    \
+//!     :param order: The :ref:`order <btree_order>` of the B-tree. Must be an even value
+//!                   greater than 2
+//!     :returns: An opaque pointer to a B-tree allocated in the frame of the calling function,
+//!               or NULL if the order is invalid
+#define scc_btree_with_order(type, compare, order)                                                  \
+    scc_btree_impl_with_order(&(scc_btree_impl_layout(type, order)) {                               \
+            .bt_order = order,                                                                      \
+            .bt_dataoff = offsetof(scc_btnode_impl_layout(type, order), bt_data),                   \
+            .bt_linkoff = offsetof(scc_btnode_impl_layout(type, order), bt_links),                  \
+            .bt_arena = scc_arena_new(scc_btnode_impl_layout(type, order)),                         \
+            .bt_compare = compare                                                                   \
+        },                                                                                          \
+        offsetof(scc_btree_impl_layout(type, order), bt_curr),                                      \
+        offsetof(scc_btree_impl_layout(type, order), bt_rootmem)                                    \
     )
 
 //! .. _scc_btree_new:
@@ -350,8 +374,17 @@ void *scc_btree_impl_new(void *base, size_t coff, size_t rootoff);
 //!     :param type: The type to be stored in the B-tree
 //!     :param compare: Pointer to the comparison function to use
 //!     :returns: An opaque pointer to a B-tree allocated in the frame of the calling function
-#define scc_btree_new(type, compare)                                                \
-    scc_btree_with_order(type, compare, SCC_BTREE_DEFAULT_ORDER)
+#define scc_btree_new(type, compare)                                                                \
+    scc_btree_impl_new(&(scc_btree_impl_layout(type, SCC_BTREE_DEFAULT_ORDER)) {                    \
+            .bt_order = SCC_BTREE_DEFAULT_ORDER,                                                    \
+            .bt_dataoff = offsetof(scc_btnode_impl_layout(type, SCC_BTREE_DEFAULT_ORDER), bt_data), \
+            .bt_linkoff = offsetof(scc_btnode_impl_layout(type, SCC_BTREE_DEFAULT_ORDER), bt_links),\
+            .bt_arena = scc_arena_new(scc_btnode_impl_layout(type, SCC_BTREE_DEFAULT_ORDER)),       \
+            .bt_compare = compare                                                                   \
+        },                                                                                          \
+        offsetof(scc_btree_impl_layout(type, SCC_BTREE_DEFAULT_ORDER), bt_curr),                    \
+        offsetof(scc_btree_impl_layout(type, SCC_BTREE_DEFAULT_ORDER), bt_rootmem)                  \
+    )
 
 //? .. c:function:: size_t scc_btree_impl_npad(void const *btree)
 //?
@@ -380,12 +413,12 @@ inline size_t scc_btree_impl_npad(void const *btree) {
 //?     :param btree: B-tree handle
 //?     :param qual: Optioal qualifiers to apply to the returned pointer
 //?     :returns: Suitably qualified pointer to the base address of the given B-tree
-#define scc_btree_impl_base_qual(btree, qual)                                       \
-    scc_container_qual(                                                             \
-        (unsigned char qual *)(btree) - scc_btree_impl_npad(btree),                 \
-        struct scc_btree_base,                                                      \
-        bt_fwoff,                                                                   \
-        qual                                                                        \
+#define scc_btree_impl_base_qual(btree, qual)                                                       \
+    scc_container_qual(                                                                             \
+        (unsigned char qual *)(btree) - scc_btree_impl_npad(btree),                                 \
+        struct scc_btree_base,                                                                      \
+        bt_fwoff,                                                                                   \
+        qual                                                                                        \
     )
 
 //? .. c:macro:: scc_btree_impl_base(btree)
@@ -399,7 +432,7 @@ inline size_t scc_btree_impl_npad(void const *btree) {
 //?
 //?     :param btree: B-tree handle
 //?     :returns: Base address of the given B-tree
-#define scc_btree_impl_base(btree)                                                  \
+#define scc_btree_impl_base(btree)                                                                  \
     scc_btree_impl_base_qual(btree,)
 
 //! .. c:function:: void scc_btree_free(void *btree)
@@ -462,7 +495,7 @@ _Bool scc_btree_impl_insert(void *btreeaddr, size_t elemsize);
 //!     :returns: A :code:`_Bool` indicating whether the insertion took place
 //!     :retval true: The value was inserted
 //!     :retval false: The values was already in the tree, or memory allocation failure
-#define scc_btree_insert(btreeaddr, value)                                              \
+#define scc_btree_insert(btreeaddr, value)                                                              \
     scc_btree_impl_insert((**(btreeaddr) = (value), btreeaddr), sizeof(**(btreeaddr)))
 
 #endif /* SCC_BTREE_H */

@@ -13,8 +13,8 @@ void test_scc_btree_new(void) {
 }
 
 void test_scc_btree_with_order(void) {
-    scc_btree(int) btree = scc_btree_with_order(int, compare, 2);
-    TEST_ASSERT_EQUAL_UINT64(2ull, scc_btree_order(btree));
+    scc_btree(int) btree = scc_btree_with_order(int, compare, 4);
+    TEST_ASSERT_EQUAL_UINT64(4ull, scc_btree_order(btree));
     scc_btree_free(btree);
 
     btree = scc_btree_with_order(int, compare, 32);
