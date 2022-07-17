@@ -28,7 +28,7 @@ void test_scc_btree_size_empty(void) {
     scc_btree_free(btree);
 }
 
-void test_scc_btree_insert(void) {
+void test_scc_btree_insert_default_order(void) {
     enum { TEST_SIZE = 32000 };
     scc_btree(int) btree = scc_btree_new(int, compare);
     for(int i = 0; i < TEST_SIZE; ++i) {
@@ -37,5 +37,16 @@ void test_scc_btree_insert(void) {
         TEST_ASSERT_EQUAL_UINT32(0u, scc_btree_inspect_invariants(btree));
     }
 
+    scc_btree_free(btree);
+}
+
+void test_scc_btree_insert_order_328(void) {
+    enum { TEST_SIZE = 64000 };
+    scc_btree(int) btree = scc_btree_with_order(int, compare, 328);
+    for(int i = TEST_SIZE; i >= 0; --i) {
+        TEST_ASSERT_TRUE(scc_btree_insert(&btree, i));
+        TEST_ASSERT_EQUAL_UINT64((TEST_SIZE - i) + 1ull, scc_btree_size(btree));
+        TEST_ASSERT_EQUAL_UINT32(0u, scc_btree_inspect_invariants(btree));
+    }
     scc_btree_free(btree);
 }
