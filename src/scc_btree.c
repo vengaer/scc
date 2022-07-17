@@ -216,10 +216,32 @@ static inline void scc_btree_new_root(
     scc_btnode_flags_clear(node);
 }
 
+//? .. c:function:: struct scc_btnode_base *scc_btnode_split(\
+//?     struct scc_btree_base *restrict base, \
+//?     struct scc_btnode_base *restrict node, \
+//?     struct scc_btnode_base *p, \
+//?     size_t elemsize)
+//?
+//?     Split the given node in two, moving values and links
+//?     as required. The given node is kept as the left child
+//?     of p to avoid unnecessary writes.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Base address of the B-tree
+//?     :param node: Base address of the node to split
+//?     :param p: Pointer to node's parent. Should node be the
+//?               root, this pointer is NULL and a new root
+//?               is allocated from the arena
+//?     :param elemsize: Size of the elements in the B-tree
+//?     :returns: Address of the new node allocated for the split, or
+//?               :code:`NULL` on allocation failure
 static struct scc_btnode_base *scc_btnode_split(
     struct scc_btree_base *restrict base,
     struct scc_btnode_base *restrict node,
-    struct scc_btnode_base *restrict p,
+    struct scc_btnode_base * p,
     size_t elemsize
 ) {
     struct scc_btnode_base *right = scc_arena_alloc(&base->bt_arena);
