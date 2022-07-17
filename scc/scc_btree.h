@@ -484,10 +484,10 @@ _Bool scc_btree_impl_insert(void *btreeaddr, size_t elemsize);
 
 //! .. c:function:: _Bool scc_btree_insert(void *btreeaddr, type value)
 //!
-//!     Attempt to insert the given value into the B-tree.
+//!     Insert the given value into the B-tree.
 //!
-//!     The :code:`value` parameter must not necessarily be the same type for
-//!     which the B-tree was instantiated. If it is not, it is implicitly converted
+//!     The :code:`value` parameter must not necessarily be the same type as the one
+//!     with which the B-tree was instantiated. If it is not, it is implicitly converted
 //!     to the type stored in the tree.
 //!
 //!     :param btreeaddr: Address of the B-tree handle
@@ -497,5 +497,36 @@ _Bool scc_btree_impl_insert(void *btreeaddr, size_t elemsize);
 //!     :retval false: The values was already in the tree, or memory allocation failure
 #define scc_btree_insert(btreeaddr, value)                                                              \
     scc_btree_impl_insert((**(btreeaddr) = (value), btreeaddr), sizeof(**(btreeaddr)))
+
+//? .. c:function:: void const *scc_btree_impl_find(void *btree, size_t elemsize)
+//?
+//?     Internal search function. Attmpts to find the value stored at
+//?     :code:`btreeaddr` in the tree
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param btree: B-tree handle
+//?     :param elemsize: Size of the elements in the tree
+//?     :returns: A const-qualified pointer to a matching element in the tree, or
+//?               :code:`NULL` if no such element is found
+void const *scc_btree_impl_find(void const *btree, size_t elemsize);
+
+//! .. c:function:: void const *scc_btree_find(void const *btree, type value)
+//!
+//!     Search for, and if found, return a pointer to, an element matching the
+//!     given value.
+//!
+//!     The :code:`value` parameters must not necessarily be the same type as the one
+//!     with which the B-tree was instantiated. If it si not, it is implicitly
+//!     converted to the type stored in the tree.
+//!
+//!     :param btree: Handle to the B-tree
+//!     :param value: The value to search for
+//!     :returns: A const-qualified pointer to the element in the tree if found, otherwise
+//!               :code:`NULL`
+#define scc_btree_find(btree, value)                                                                    \
+    scc_btree_impl_find((*(btree) = (value), btree), sizeof(*(btree)))
 
 #endif /* SCC_BTREE_H */

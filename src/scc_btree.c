@@ -345,3 +345,29 @@ _Bool scc_btree_impl_insert(void *btreeaddr, size_t elemsize) {
     ++base->bt_size;
     return true;
 }
+
+void const *scc_btree_impl_find(void const *btree, size_t elemsize) {
+    struct scc_btree_base const *base = scc_btree_impl_base_qual(btree, const);
+
+    struct scc_btnode_base *curr = base->bt_root;
+
+    size_t bound;
+    void *addr;
+    while(true) {
+        bound = scc_btnode_lower_bound(base, curr, btree, elemsize);
+        if(bound < curr->bt_nkeys) {
+            addr = (unsigned char *)scc_btnode_data(base, curr) + bound * elemsize;
+            if(!base->bt_compare(addr, btree)) {
+                return addr;
+            }
+        }
+
+        if(scc_btnode_is_leaf(curr)) {
+            break;
+        }
+
+        curr = scc_btnode_child(base, curr, bound);
+    }
+
+    return 0;
+}
