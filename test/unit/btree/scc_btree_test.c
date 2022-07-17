@@ -66,3 +66,21 @@ void test_scc_btree_insert_non_monotonic(void) {
     scc_btree_free(btree);
 }
 
+void test_scc_btree_find(void) {
+    enum { TEST_SIZE = 3200 };
+
+    scc_btree(int) btree = scc_btree_with_order(int, compare, 88);
+
+    int const *p;
+    for(int i = 0; i < TEST_SIZE; ++i) {
+        TEST_ASSERT_TRUE(scc_btree_insert(&btree, i));
+        p = scc_btree_find(btree, i);
+        TEST_ASSERT_TRUE(p);
+        TEST_ASSERT_EQUAL_INT32(i, *p);
+
+        for(int j = i + 1; j < TEST_SIZE; ++j) {
+            TEST_ASSERT_FALSE(scc_btree_find(btree, j));
+        }
+    }
+    scc_btree_free(btree);
+}
