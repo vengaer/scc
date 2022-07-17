@@ -1,3 +1,4 @@
+#include <inspect/scc_btree_inspect.h>
 #include <scc/scc_btree.h>
 
 #include <unity.h>
@@ -24,5 +25,17 @@ void test_scc_btree_with_order(void) {
 void test_scc_btree_size_empty(void) {
     scc_btree(int) btree = scc_btree_new(int, compare);
     TEST_ASSERT_EQUAL_UINT64(0ull, scc_btree_size(btree));
+    scc_btree_free(btree);
+}
+
+void test_scc_btree_insert(void) {
+    enum { TEST_SIZE = 32000 };
+    scc_btree(int) btree = scc_btree_new(int, compare);
+    for(int i = 0; i < TEST_SIZE; ++i) {
+        TEST_ASSERT_TRUE(scc_btree_insert(&btree, i));
+        TEST_ASSERT_EQUAL_UINT64(i + 1ull, scc_btree_size(btree));
+        TEST_ASSERT_EQUAL_UINT32(0u, scc_btree_inspect_invariants(btree));
+    }
+
     scc_btree_free(btree);
 }
