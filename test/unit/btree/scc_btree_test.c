@@ -1,5 +1,6 @@
 #include <inspect/scc_btree_inspect.h>
 #include <scc/scc_btree.h>
+#include <scc/scc_mem.h>
 
 #include <unity.h>
 
@@ -50,3 +51,18 @@ void test_scc_btree_insert_order_328(void) {
     }
     scc_btree_free(btree);
 }
+
+void test_scc_btree_insert_non_monotonic(void) {
+    enum { TEST_SIZE = 32000 };
+    int data[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    scc_btree(int) btree = scc_btree_with_order(int, compare, 32);
+
+    for(int i = 0; i < TEST_SIZE; ++i) {
+        TEST_ASSERT_TRUE(scc_btree_insert(&btree, data[i % scc_arrsize(data)]));
+        TEST_ASSERT_EQUAL_UINT64(i + 1ull, scc_btree_size(btree));
+        TEST_ASSERT_EQUAL_UINT32(0u, scc_btree_inspect_invariants(btree));
+    }
+
+    scc_btree_free(btree);
+}
+
