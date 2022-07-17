@@ -47,7 +47,11 @@ scc_inspect_mask scc_btree_impl_inspect_invariants(void const *btree, size_t ele
             void *min = ctx->idx ? data + ctx->idx * elemsize : ctx->min;
             void *max = ctx->idx == ctx->node->bt_nkeys ? ctx->max : data + ctx->idx * elemsize;
 
-            assert(scc_stack_push(&stack, ((struct nodectx) { 0u, max, min, scc_btnode_links(base, ctx->node)[ctx->idx++] })));
+            struct nodectx new = { /* NOLINT(clang-analyzer-deadcode.DeadStores,clang-diagnostic-unused-variable) */
+                0u, max, min, scc_btnode_links(base, ctx->node)[ctx->idx++]
+            };
+
+            assert(scc_stack_push(&stack, new));
             ++depth;
         }
         else {
