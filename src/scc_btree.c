@@ -320,23 +320,9 @@ _Bool scc_btree_impl_insert(void *btreeaddr, size_t elemsize) {
     struct scc_btnode_base *p = 0;
 
     struct scc_btnode_base *right;
-    size_t bound = scc_btnode_lower_bound(base, curr, *(void **)btreeaddr, elemsize);
-
-    if(curr->bt_nkeys == base->bt_order - 1u) {
-        right = scc_btnode_split(base, curr, p, elemsize);
-        if(!right) {
-            return false;
-        }
-
-        if(bound >= curr->bt_nkeys) {
-            curr = right;
-        }
-    }
-
-    while(!scc_btnode_is_leaf(curr)) {
+    size_t bound;
+    while(true) {
         bound = scc_btnode_lower_bound(base, curr, *(void **)btreeaddr, elemsize);
-        curr = scc_btnode_child(base, curr, bound);
-
         if(curr->bt_nkeys == base->bt_order - 1u) {
             right = scc_btnode_split(base, curr, p, elemsize);
             if(!right) {
@@ -347,6 +333,12 @@ _Bool scc_btree_impl_insert(void *btreeaddr, size_t elemsize) {
                 curr = right;
             }
         }
+        if(scc_btnode_is_leaf(curr)) {
+            break;
+        }
+
+        bound = scc_btnode_lower_bound(base, curr, *(void **)btreeaddr, elemsize);
+        curr = scc_btnode_child(base, curr, bound);
     }
 
     scc_btnode_emplace(base, curr, *(void **)btreeaddr, elemsize);
