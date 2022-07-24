@@ -70,6 +70,30 @@ void *scc_arena_alloc(struct scc_arena *arena) {
     return (unsigned char *)chunk + chunk->ch_offset;
 }
 
+_Bool scc_arena_reserve(struct scc_arena *arena, size_t nelems) {
+    if(arena->ar_current && arena->ar_current->ch_end - arena->ar_current->ch_offset >= nelems * arena->ar_elemsize) {
+        /* Enough space in chunk */
+        return true;
+    }
+
+    size_t chunksize = nelems < arena->ar_chunksize ? arena->ar_chunksize : nelems;
+    struct scc_chunk *chunk = scc_chunk_new(chunksize, arena->ar_elemsize, arena->ar_baseoff);
+    if(!chunk) {
+        return false;
+    }
+
+    if(!arena->ar_current) {
+        arena->ar_current = chunk;
+        arena->ar_first = chunk;
+    }
+    else {
+        arena->ar_current->ch_next = chunk;
+        arena->ar_current = chunk;
+    }
+
+    return true;
+}
+
 void scc_arena_free(struct scc_arena *restrict arena, void const *restrict addr) {
     struct scc_chunk *iter;
     struct scc_chunk *tortoise;

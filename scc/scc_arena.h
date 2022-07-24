@@ -60,6 +60,7 @@ void scc_arena_release(struct scc_arena *arena);
         tortoise = iter, iter = iter->ch_next)
 
 void *scc_arena_alloc(struct scc_arena *arena);
+_Bool scc_arena_reserve(struct scc_arena *arena, size_t nelems);
 void scc_arena_free(struct scc_arena *restrict arena, void const *restrict addr);
 
 #endif /* SCC_ARENA_H */
