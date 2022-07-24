@@ -258,3 +258,23 @@ void test_scc_arena_free_last_chunk(void) {
 
     scc_arena_release(&arena);
 }
+
+void test_scc_arena_reserve_enough_space_available(void) {
+    struct scc_arena arena = scc_arena_new(int);
+    TEST_ASSERT_TRUE(scc_arena_reserve(&arena, 10));
+    TEST_ASSERT_EQUAL_PTR(arena.ar_first, arena.ar_current);
+    scc_arena_release(&arena);
+}
+
+void test_scc_arena_reserve_insufficient_space(void) {
+    struct scc_arena arena = scc_arena_new(int);
+
+    TEST_ASSERT_TRUE(scc_arena_alloc(&arena));
+    TEST_ASSERT_TRUE(scc_arena_reserve(&arena, arena.ar_chunksize + 10));
+
+    TEST_ASSERT_EQUAL_PTR(arena.ar_first->ch_next, arena.ar_current);
+
+    TEST_ASSERT_GREATER_THAN_UINT64(arena.ar_chunksize, arena.ar_current->ch_end);
+
+    scc_arena_release(&arena);
+}
