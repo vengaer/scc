@@ -52,14 +52,13 @@ typedef int(*scc_bcompare)(void const *, void const *);
 //!     the header. B-trees of a specific order may be instantiated
 //!     using :ref:`scc_btree_with_order <scc_btree_with_order>`
 //!
-//!     Must be an even number greater than 2. The implementation also
+//!     Must be greater than 2. The implementation also
 //!     requires that it is smaller than :c:texpr:`SIZE_MAX / 2`, but
 //!     chosing values even remotely that size is ill-adviced.
 enum { SCC_BTREE_DEFAULT_ORDER = 6 };
 #endif /* SCC_BTREE_DEFAULT_ORDER */
 
 scc_static_assert(SCC_BTREE_DEFAULT_ORDER > 2);
-scc_static_assert(scc_bits_is_even(SCC_BTREE_DEFAULT_ORDER));
 
 //? .. _scc_btnode_base:
 //? .. c:struct:: scc_btnode_base
@@ -325,7 +324,7 @@ void *scc_btree_impl_new(void *base, size_t coff, size_t rootoff);
 //?               or :code:`NULL` if the order field is invalid
 inline void *scc_btree_impl_with_order(void *base, size_t coff, size_t rootoff) {
     unsigned order = ((struct scc_btree_base *)base)->bt_order;
-    if(order < 3u || !scc_bits_is_even(order)) {
+    if(order < 3u) {
         return 0;
     }
     return scc_btree_impl_new(base, coff, rootoff);

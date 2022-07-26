@@ -122,6 +122,30 @@ static inline void *scc_btnode_data(struct scc_btree_base const *restrict base, 
     return (unsigned char *)node + base->bt_dataoff;
 }
 
+//? .. c:function:: void *scc_btnode_value(\
+//?     struct scc_btree_base const *restrict base, struct scc_btnode_base *restrict node, \
+//?     size_t index, size_t elemsize)
+//?
+//?     Compute and return address of the given node's indexth child
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: B-tree base address
+//?     :param node: Node base address
+//?     :param index: Index of the child whose address is to be computed
+//?     :param elemsize: Size of the elements in the tree
+//?     :returns: Address of the indexth child of the given node
+static inline void *scc_btnode_value(
+    struct scc_btree_base const *restrict base,
+    struct scc_btnode_base *restrict node,
+    size_t index,
+    size_t elemsize
+) {
+    return (unsigned char *)scc_btnode_data(base, node) + index * elemsize;
+}
+
 //? .. _scc_btnode_lower_bound:
 //? .. c:function:: size_t scc_btnode_lower_bound(\
 //?        struct scc_btree_base const *restrict base, \
@@ -153,8 +177,8 @@ static inline size_t scc_btnode_lower_bound(
     return scc_algo_lower_bound(value, scc_btnode_data(base, node), node->bt_nkeys, elemsize, base->bt_compare);
 }
 
-//? .. c:function:: void scc_btnode_emplace(\
-//?        struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, void *value, size_t elemsize)
+//? .. c:function:: size_t scc_btnode_emplace_leaf(\
+//?        struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, void *restrict value, size_t elemsize)
 //?
 //?     Insert the given value in the specified leaf node. The node must
 //?     have at least one vacant slot
@@ -167,10 +191,11 @@ static inline size_t scc_btnode_lower_bound(
 //?     :param node: Node base address
 //?     :param value: Address of the value to insert
 //?     :param elemsize: Size of the elements in the node
-static void scc_btnode_emplace(
+//?     :returns: The lower bound of the newly inserted element
+static size_t scc_btnode_emplace_leaf(
     struct scc_btree_base *restrict base,
     struct scc_btnode_base *restrict node,
-    void *value,
+    void *restrict value,
     size_t elemsize
 ) {
     size_t bound = scc_btnode_lower_bound(base, node, value, elemsize);
@@ -181,6 +206,38 @@ static void scc_btnode_emplace(
     }
     memcpy(data + off, value, elemsize);
     ++node->bt_nkeys;
+    return bound;
+}
+
+//? .. c:function:: void scc_btnode_emplace(\
+//?     struct scc_btree base *restrict base, struct scc_btnode_base *restrict node, \
+//?     struct scc_btnode_base *restrict child, void *restrict value, size_t elemsize)
+//?
+//?     Insert the given value with accompanying child subtree in non-leaf node. The
+//?     given node must have at least one vacant slot
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: B-tree base address
+//?     :param node: The node to insert the value in
+//?     :param child: Root of the subtree to insert
+//?     :param value: The value to insert
+//?     :param elemsize: Size of the elements in the B-tree
+static void scc_btnode_emplace(
+    struct scc_btree_base *restrict base,
+    struct scc_btnode_base *restrict node,
+    struct scc_btnode_base *restrict child,
+    void *restrict value,
+    size_t elemsize
+) {
+    size_t bound = scc_btnode_emplace_leaf(base, node, value, elemsize);
+    struct scc_btnode_base **links = scc_btnode_links(base, node);
+    if(bound < node->bt_nkeys - 1u) {
+        memmove(links + bound + 2u, links + bound + 1u, (node->bt_nkeys - bound - 1u) * sizeof(*links));
+    }
+    links[bound + 1u] = child;
 }
 
 //? .. c:function:: void scc_btree_new_root(\
@@ -212,11 +269,11 @@ static inline void scc_btree_new_root(
     struct scc_btnode_base **links = scc_btnode_links(base, node);
     links[0] = left;
     links[1] = right;
-    node->bt_nkeys = 1u;
+    node->bt_nkeys = 0u;
     scc_btnode_flags_clear(node);
 }
 
-//? .. c:function:: struct scc_btnode_base *scc_btnode_split(\
+//? .. c:function:: struct scc_btnode_base *scc_btnode_split_preemptive(\
 //?     struct scc_btree_base *restrict base, \
 //?     struct scc_btnode_base *restrict node, \
 //?     struct scc_btnode_base *p, \
@@ -238,10 +295,10 @@ static inline void scc_btree_new_root(
 //?     :param elemsize: Size of the elements in the B-tree
 //?     :returns: Address of the new node allocated for the split, or
 //?               :code:`NULL` on allocation failure
-static struct scc_btnode_base *scc_btnode_split(
+static struct scc_btnode_base *scc_btnode_split_preemptive(
     struct scc_btree_base *restrict base,
     struct scc_btnode_base *restrict node,
-    struct scc_btnode_base * p,
+    struct scc_btnode_base *p,
     size_t elemsize
 ) {
     struct scc_btnode_base *right = scc_arena_alloc(&base->bt_arena);
@@ -255,12 +312,13 @@ static struct scc_btnode_base *scc_btnode_split(
             return 0;
         }
         base->bt_root = p;
+        scc_btree_new_root(base, p, node, right);
     }
 
     unsigned char *ldata = scc_btnode_data(base, node);
-    struct scc_btnode_base **llinks = scc_btnode_links(base, node);
-
     unsigned char *rdata = scc_btnode_data(base, right);
+
+    struct scc_btnode_base **llinks = scc_btnode_links(base, node);
     struct scc_btnode_base **rlinks = scc_btnode_links(base, right);
 
     node->bt_nkeys >>= 1u;
@@ -274,26 +332,269 @@ static struct scc_btnode_base *scc_btnode_split(
     }
 
     void const *rootval = ldata + node->bt_nkeys * elemsize;
+    struct scc_btnode_base **plinks = scc_btnode_links(base, p);
 
-    if(p == base->bt_root) {
+    size_t bound = scc_btnode_lower_bound(base, p, rootval, elemsize);
+    assert(bound < base->bt_order);
+    unsigned char *pdata = scc_btnode_data(base, p);
+    if(bound < p->bt_nkeys) {
+        memmove(pdata + (bound + 1u) * elemsize, pdata + bound * elemsize, (p->bt_nkeys - bound) * elemsize);
+        memmove(plinks + bound + 1u, plinks + bound, (p->bt_nkeys - bound + 1u) * sizeof(*plinks));
+    }
+    memcpy(pdata + bound * elemsize, rootval, elemsize);
+    plinks[bound + 1u] = right;
+    ++p->bt_nkeys;
+
+    return right;
+}
+
+//? .. struct scc_btnode_base *scc_btnode_split_non_preemptive(\
+//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict base, \
+//?     struct scc_btnode_base *restrict child, struct scc_btnode_base *p, \
+//?     void *restrict value, size_t elemsize)
+//?
+//?     Split the given node in two, moving values as required. The supplied value is
+//?     treated as if inserted at its appropriate position before the split. The middlemost
+//?     value to be moved to the parent node is written to the first vacant
+//?     slot in the newly allocated right node's data array.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: B-tree base address
+//?     :param node: The node to split
+//?     :param child: Child link to insert
+//?     :param p: Parent of the given node, or NULL if :c:texpr:`node == base->bt_root`
+//?     :param value: The value that were to be written to the node, causing the split
+//?     :param elemsize: Size of the elements in the tree
+//?     :returns: Address of the new node allocated for the split, or
+//?               :code:`NULL` on allocation failure
+static struct scc_btnode_base *scc_btnode_split_non_preemptive(
+    struct scc_btree_base *restrict base,
+    struct scc_btnode_base *restrict node,
+    struct scc_btnode_base *restrict child,
+    struct scc_btnode_base *p,
+    void *restrict value,
+    size_t elemsize
+) {
+    struct scc_btnode_base *right = scc_arena_alloc(&base->bt_arena);
+    if(!right) {
+        return 0;
+    }
+    if(!p) {
+        p = scc_arena_alloc(&base->bt_arena);
+        if(!p) {
+            scc_arena_free(&base->bt_arena, right);
+            return 0;
+        }
+        base->bt_root = p;
         scc_btree_new_root(base, p, node, right);
-        memcpy(scc_btnode_data(base, p), rootval, elemsize);
+    }
+
+    size_t bound = scc_btnode_lower_bound(base, node, value, elemsize);
+    assert(bound <= node->bt_nkeys);
+
+    node->bt_nkeys >>= 1u;
+    right->bt_nkeys = node->bt_nkeys;
+    right->bt_flags = node->bt_flags;
+
+    unsigned char *rdata = scc_btnode_data(base, right);
+    struct scc_btnode_base **rlinks = scc_btnode_links(base, right);
+    struct scc_btnode_base **llinks = scc_btnode_links(base, node);
+
+    void *nval = scc_btnode_value(base, right, right->bt_nkeys, elemsize);
+    if(bound == node->bt_nkeys) {
+        memcpy(nval, value, elemsize);
+        memcpy(rdata, scc_btnode_value(base, node, node->bt_nkeys, elemsize), right->bt_nkeys * elemsize);
+        if(!scc_btnode_is_leaf(node)) {
+            *rlinks = child;
+            memcpy(rlinks + 1u, llinks + node->bt_nkeys + 1u, right->bt_nkeys * sizeof(*rlinks));
+        }
+    }
+    else if(bound < node->bt_nkeys) {
+        memcpy(nval, scc_btnode_value(base, node, node->bt_nkeys - 1u, elemsize), elemsize);
+        size_t nmov = node->bt_nkeys - bound - 1u;
+        unsigned char *from = scc_btnode_value(base, node, bound, elemsize);
+        if(nmov) {
+            memmove(from + elemsize, from, nmov * elemsize);
+        }
+        memcpy(from, value, elemsize);
+        memcpy(rdata, scc_btnode_value(base, node, node->bt_nkeys, elemsize), right->bt_nkeys * elemsize);
+        if(!scc_btnode_is_leaf(node)) {
+            memcpy(rlinks, llinks + node->bt_nkeys, (right->bt_nkeys + 1u) * sizeof(*rlinks));
+            if(nmov) {
+                memmove(llinks + bound + 2u, llinks + bound + 1u, (node->bt_nkeys - bound) * sizeof(*llinks));
+            }
+            llinks[bound + 1u] = child;
+        }
     }
     else {
-        size_t bound = scc_btnode_lower_bound(base, p, rootval, elemsize);
-        assert(bound < base->bt_order);
-        unsigned char *pdata = scc_btnode_data(base, p);
-        struct scc_btnode_base **plinks = scc_btnode_links(base, p);
-        if(bound < p->bt_nkeys) {
-            memmove(pdata + (bound + 1u) * elemsize, pdata + bound * elemsize, (p->bt_nkeys - bound) * elemsize);
-            memmove(plinks + bound + 1u, plinks + bound, (p->bt_nkeys - bound + 1u) * sizeof(*plinks));
+        unsigned char *sdata = scc_btnode_value(base, node, node->bt_nkeys, elemsize);
+        memcpy(nval, sdata, elemsize);
+        sdata += elemsize;
+        size_t nbef = bound - node->bt_nkeys - 1u;
+        if(nbef) {
+            size_t nbytes = nbef * elemsize;
+            memcpy(rdata, sdata, nbytes);
+            sdata += nbytes;
+            rdata += nbytes;
         }
-        memcpy(pdata + bound * elemsize, rootval, elemsize);
-        plinks[bound + 1u] = right;
-        ++p->bt_nkeys;
+        memcpy(rdata, value, elemsize);
+
+        size_t naft = (node->bt_nkeys << 1u) - bound;
+        if(naft) {
+            memcpy(rdata + elemsize, sdata, naft * elemsize);
+        }
+
+        if(!scc_btnode_is_leaf(node)) {
+            ++nbef;
+            memcpy(rlinks, llinks + node->bt_nkeys + 1u, nbef * sizeof(*rlinks));
+            rlinks[bound - node->bt_nkeys] = child;
+            if(naft) {
+                ++nbef;
+                memcpy(rlinks + 1u, llinks + node->bt_nkeys + nbef, naft * sizeof(*rlinks));
+            }
+        }
     }
 
     return right;
+}
+
+//? .. c:function:: _Bool scc_btree_insert_preemptive(struct scc_btree_base *base, void *btreeaddr, size_t elemsize)
+//?
+//?     Insert the element in :c:texpr:`*(void **)btreeaddr` using :ref:`preemptive splitting <preemptive_split>`.
+//?     The order of the given tree must be even lest the B-tree invariants be violated.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Base address of the B-tree
+//?     :param btreeaddr: Address of the B-tree handle
+//?     :param elemsize: Size of the elements in the tree
+//?     :returns: :code:`true` if the value was successfully inserted, otherwise :code:`false`.
+static _Bool scc_btree_insert_preemptive(struct scc_btree_base *base, void *btreeaddr, size_t elemsize) {
+    struct scc_btnode_base *curr = base->bt_root;
+    struct scc_btnode_base *p = 0;
+
+    struct scc_btnode_base *right;
+    size_t bound;
+    while(true) {
+        bound = scc_btnode_lower_bound(base, curr, *(void **)btreeaddr, elemsize);
+        if(curr->bt_nkeys == base->bt_order - 1u) {
+            right = scc_btnode_split_preemptive(base, curr, p, elemsize);
+            if(!right) {
+                return false;
+            }
+
+            if(bound >= curr->bt_nkeys) {
+                curr = right;
+            }
+        }
+        if(scc_btnode_is_leaf(curr)) {
+            break;
+        }
+
+        bound = scc_btnode_lower_bound(base, curr, *(void **)btreeaddr, elemsize);
+        p = curr;
+        curr = scc_btnode_child(base, curr, bound);
+    }
+
+    scc_btnode_emplace_leaf(base, curr, *(void **)btreeaddr, elemsize);
+    ++base->bt_size;
+    return true;
+}
+
+//? .. c:function:: _Bool scc_btree_insert_non_preemptive(struct scc_btree_base *base, void *btreeaddr, size_t elemsize)
+//?
+//?     Insert the element in :c:texpr:`*(void **)btreeaddr` using :ref:`non-preemptive splitting <non_preemptive_split>`.
+//?     Called only for trees whose order is odd
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Base address of the B-tree
+//?     :param btreeaddr: Address of the B-tree handle
+//?     :param elemsize: Size of the elements in the tree
+//?     :returns: :code:`true` if the value was successfully inserted, otherwise :code:`false`.
+static _Bool scc_btree_insert_non_preemptive(struct scc_btree_base *base, void *btreeaddr, size_t elemsize) {
+    size_t origsz = base->bt_size;
+    scc_stack(struct scc_btnode_base *) stack = scc_stack_new(struct scc_btnode_base *);
+
+    /* Root has parent NULL */
+    if(!scc_stack_push(&stack, 0)) {
+        goto epilogue;
+    }
+
+    /* Splitting root requires new root */
+    size_t req_allocs = base->bt_root->bt_nkeys == base->bt_order - 1u;
+
+    size_t bound;
+    struct scc_btnode_base *curr = base->bt_root;
+    while(1) {
+        if(curr->bt_nkeys == base->bt_order - 1u) {
+            ++req_allocs;
+        }
+        else {
+            req_allocs = 0u;
+        }
+
+        if(scc_btnode_is_leaf(curr)) {
+            break;
+        }
+
+        if(!scc_stack_push(&stack, curr)) {
+            goto epilogue;
+        }
+
+        bound = scc_btnode_lower_bound(base, curr, *(void **)btreeaddr, elemsize);
+        curr = scc_btnode_child(base, curr, bound);
+    }
+
+    if(curr->bt_nkeys < base->bt_order - 1u) {
+        scc_btnode_emplace_leaf(base, curr, *(void **)btreeaddr, elemsize);
+        ++base->bt_size;
+        goto epilogue;
+    }
+
+    assert(req_allocs);
+    /* Make sure tree can't end up in invalid state due to
+     * allocation failures */
+    if(!scc_arena_reserve(&base->bt_arena, req_allocs)) {
+        goto epilogue;
+    }
+
+    struct scc_btnode_base *p;
+    struct scc_btnode_base *right = 0;
+    void *value = *(void **)btreeaddr;
+    while(1) {
+        p = scc_stack_top(stack);
+
+        right = scc_btnode_split_non_preemptive(base, curr, right, p, value, elemsize);
+        /* Cannot fail thanks to reserve */
+        assert(right);
+        value = scc_btnode_value(base, right, right->bt_nkeys, elemsize);
+
+        curr = p;
+        if(!curr || curr->bt_nkeys < base->bt_order - 1u) {
+            break;
+        }
+
+        scc_stack_pop(stack);
+    }
+
+    if(!curr) {
+        curr = base->bt_root;
+    }
+
+    scc_btnode_emplace(base, curr, right, value, elemsize);
+    ++base->bt_size;
+
+epilogue:
+    scc_stack_free(stack);
+    return origsz < base->bt_size;
 }
 
 void *scc_btree_impl_new(void *base, size_t coff, size_t rootoff) {
@@ -315,35 +616,11 @@ void scc_btree_free(void *btree) {
 
 _Bool scc_btree_impl_insert(void *btreeaddr, size_t elemsize) {
     struct scc_btree_base *base = scc_btree_impl_base(*(void **)btreeaddr);
-
-    struct scc_btnode_base *curr = base->bt_root;
-    struct scc_btnode_base *p = 0;
-
-    struct scc_btnode_base *right;
-    size_t bound;
-    while(true) {
-        bound = scc_btnode_lower_bound(base, curr, *(void **)btreeaddr, elemsize);
-        if(curr->bt_nkeys == base->bt_order - 1u) {
-            right = scc_btnode_split(base, curr, p, elemsize);
-            if(!right) {
-                return false;
-            }
-
-            if(bound >= curr->bt_nkeys) {
-                curr = right;
-            }
-        }
-        if(scc_btnode_is_leaf(curr)) {
-            break;
-        }
-
-        bound = scc_btnode_lower_bound(base, curr, *(void **)btreeaddr, elemsize);
-        curr = scc_btnode_child(base, curr, bound);
+    if(scc_bits_is_even(base->bt_order)) {
+        return scc_btree_insert_preemptive(base, btreeaddr, elemsize);
     }
 
-    scc_btnode_emplace(base, curr, *(void **)btreeaddr, elemsize);
-    ++base->bt_size;
-    return true;
+    return scc_btree_insert_non_preemptive(base, btreeaddr, elemsize);
 }
 
 void const *scc_btree_impl_find(void const *btree, size_t elemsize) {
