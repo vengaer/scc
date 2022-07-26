@@ -9,12 +9,14 @@ slow-unit-*
 
 submodules/*.stamp
 
+test/fuzz/corpora/btree/*
 test/fuzz/corpora/hashmap/*
 test/fuzz/corpora/hashtab/*
 test/fuzz/corpora/lower_bound/*
 test/fuzz/corpora/rbtree/*
 test/fuzz/corpora/svec/*
 
+!test/fuzz/corpora/btree/corpus_*
 !test/fuzz/corpora/hashmap/corpus_*
 !test/fuzz/corpora/hashtab/corpus_*
 test/fuzz/corpora/lower_bound/corpus_*
