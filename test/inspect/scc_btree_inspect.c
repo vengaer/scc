@@ -39,16 +39,19 @@ scc_inspect_mask scc_btree_impl_inspect_invariants(void const *btree, size_t ele
         if(ctx->max && ctx->idx < ctx->node->bt_nkeys && base->bt_compare(ctx->max, data + ctx->idx * elemsize) < 0) {
             mask |= SCC_BTREE_ERR_LEFT;
         }
-        if(ctx->min && base->bt_compare(ctx->min, data + ctx->idx * elemsize) > 0) {
+        if(ctx->min && ctx->idx < ctx->node->bt_nkeys && base->bt_compare(ctx->min, data + ctx->idx * elemsize) > 0) {
             mask |= SCC_BTREE_ERR_RIGHT;
         }
 
         if(!(ctx->node->bt_flags & SCC_BTREE_FLAG_LEAF) && ctx->idx <= ctx->node->bt_nkeys) {
-            void *min = ctx->idx ? data + ctx->idx * elemsize : ctx->min;
+            void *min = ctx->idx ? data + (ctx->idx - 1u) * elemsize : ctx->min;
             void *max = ctx->idx == ctx->node->bt_nkeys ? ctx->max : data + ctx->idx * elemsize;
 
+            struct scc_btnode_base *link = scc_btnode_links(base, ctx->node)[ctx->idx++];
+            assert(link);
+
             struct nodectx new = { /* NOLINT(clang-analyzer-deadcode.DeadStores,clang-diagnostic-unused-variable) */
-                0u, max, min, scc_btnode_links(base, ctx->node)[ctx->idx++]
+                0u, max, min, link
             };
 
             assert(scc_stack_push(&stack, new));
@@ -56,7 +59,7 @@ scc_inspect_mask scc_btree_impl_inspect_invariants(void const *btree, size_t ele
         }
         else {
             if(!(ctx->node->bt_flags & SCC_BTREE_FLAG_LEAF)) {
-                if((ctx->min || ctx->max) && ctx->node->bt_nkeys < (base->bt_order >> 1u)) {
+                if(ctx->node != base->bt_root && (ctx->min || ctx->max) && ctx->node->bt_nkeys < ((base->bt_order >> 1u) - 1u)) {
                     mask |= SCC_BTREE_ERR_CHILDREN;
                 }
             }
@@ -68,8 +71,11 @@ scc_inspect_mask scc_btree_impl_inspect_invariants(void const *btree, size_t ele
                     mask |= SCC_BTREE_ERR_LEAFDEPTH;
                 }
             }
-            scc_stack_pop(stack);
-            --depth;
+
+            if(++ctx->idx >= ctx->node->bt_nkeys) {
+                scc_stack_pop(stack);
+                --depth;
+            }
         }
     }
 
