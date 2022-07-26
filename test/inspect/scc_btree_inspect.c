@@ -76,6 +76,9 @@ scc_inspect_mask scc_btree_impl_inspect_invariants(void const *btree, size_t ele
                 scc_stack_pop(stack);
                 --depth;
             }
+            else {
+                ctx->min = data + (ctx->idx - 1u) * elemsize;
+            }
         }
     }
 
