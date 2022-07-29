@@ -273,6 +273,37 @@ static inline void scc_btree_new_root(
     scc_btnode_flags_clear(node);
 }
 
+//? .. c:function:: int scc_btnode_find_linkindex(\
+//?     struct scc_btree_base const *restrict base, \
+//?     struct scc_btnode_base const *restrict node, \
+//?     struct scc_btnode_base *restrict p)
+//?
+//?     Find and return the index of the given node in the link
+//?     array of p.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: B-tree base address
+//?     :param node: Base address of the node to be searched for
+//?     :param p: Base address of the parent node whose link array is to be searched
+//?     :returns: Index of :code:`node` in the link array of :code:`p`, or :code:`-1` if
+//?               the node is not found in the array
+static inline int scc_btnode_find_linkindex(
+    struct scc_btree_base const *restrict base,
+    struct scc_btnode_base const *restrict node,
+    struct scc_btnode_base *restrict p
+) {
+    struct scc_btnode_base **plinks = scc_btnode_links(base, p);
+    for(int i = 0; i < (int)p->bt_nkeys + 1; ++i) {
+        if(plinks[i] == node) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 //? .. c:function:: struct scc_btnode_base *scc_btnode_split_preemptive(\
 //?     struct scc_btree_base *restrict base, \
 //?     struct scc_btnode_base *restrict node, \
@@ -331,17 +362,17 @@ static struct scc_btnode_base *scc_btnode_split_preemptive(
         memcpy(rlinks, llinks + node->bt_nkeys + 1u, (node->bt_nkeys + 1u) * sizeof(*rlinks));
     }
 
-    void const *rootval = ldata + node->bt_nkeys * elemsize;
-    struct scc_btnode_base **plinks = scc_btnode_links(base, p);
-
-    size_t bound = scc_btnode_lower_bound(base, p, rootval, elemsize);
+    int bound = scc_btnode_find_linkindex(base, node, p);
+    assert(bound != -1);
     assert(bound < base->bt_order);
+
     unsigned char *pdata = scc_btnode_data(base, p);
+    struct scc_btnode_base **plinks = scc_btnode_links(base, p);
     if(bound < p->bt_nkeys) {
         memmove(pdata + (bound + 1u) * elemsize, pdata + bound * elemsize, (p->bt_nkeys - bound) * elemsize);
         memmove(plinks + bound + 1u, plinks + bound, (p->bt_nkeys - bound + 1u) * sizeof(*plinks));
     }
-    memcpy(pdata + bound * elemsize, rootval, elemsize);
+    memcpy(pdata + bound * elemsize, ldata + node->bt_nkeys * elemsize, elemsize);
     plinks[bound + 1u] = right;
     ++p->bt_nkeys;
 
