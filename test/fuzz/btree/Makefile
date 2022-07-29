@@ -1,6 +1,11 @@
 ifdef __node
 
+$(call push,btree_deps)
+btree_deps += vec
+
 $(call decl-fuzz)
+
+$(call pop,btree_deps)
 
 else
 # Recurse to top level

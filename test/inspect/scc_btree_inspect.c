@@ -2,8 +2,11 @@
 
 #include <scc/scc_btree.h>
 #include <scc/scc_stack.h>
+#include <scc/scc_svec.h>
+#include <scc/scc_vec.h>
 
 #include <assert.h>
+#include <string.h>
 
 enum { SCC_BTREE_FLAG_LEAF = 0x01 };
 
@@ -84,4 +87,81 @@ scc_inspect_mask scc_btree_impl_inspect_invariants(void const *btree, size_t ele
 
     scc_stack_free(stack);
     return mask;
+}
+
+void scc_btree_impl_inspect_dump(void const *restrict btree, size_t elemsize, FILE *fp) {
+    struct scc_btree_base const *base = scc_btree_impl_base_qual(btree, const);
+    scc_stack(struct nodectx) stack = scc_stack_new(struct nodectx);
+    assert(scc_stack_push(&stack, ((struct nodectx) { .idx = 0u, .node = base->bt_root })));
+
+    struct lvlent {
+        unsigned lvl;
+        scc_vec(unsigned char) bytes;
+    };
+
+    scc_svec(struct lvlent) lvls = scc_svec_new(struct lvlent);
+    assert(scc_svec_reserve(&lvls, scc_btree_size(btree)));
+
+    unsigned lvl = 0u;
+    unsigned max_lvl = 0u;
+
+    struct nodectx *ctx;
+
+    while(!scc_stack_empty(stack)) {
+        ctx = &scc_stack_top(stack);
+        if(!(ctx->node->bt_flags & SCC_BTREE_FLAG_LEAF) && ctx->idx <= ctx->node->bt_nkeys) {
+            struct scc_btnode_base *link = scc_btnode_links(base, ctx->node)[ctx->idx++];
+            assert(link);
+
+            struct nodectx new = { /* NOLINT(clang-analyzer-deadcode.DeadStores,clang-diagnostic-unused-variable) */
+                .idx = 0u, .node = link
+            };
+
+            assert(scc_stack_push(&stack, new));
+            ++lvl;
+            if(lvl > max_lvl) {
+                max_lvl = lvl;
+            }
+        }
+        else if(++ctx->idx >= ctx->node->bt_nkeys) {
+                struct lvlent ent = {
+                    .lvl = lvl--,
+                    .bytes = scc_vec_new(unsigned char)
+                };
+
+                scc_vec_resize(ent.bytes, ctx->node->bt_nkeys * elemsize);
+                memcpy(&ent.bytes[0], (unsigned char *)ctx->node + base->bt_dataoff, scc_vec_size(ent.bytes));
+                scc_svec_push(&lvls, ent);
+
+                scc_stack_pop(stack);
+        }
+    }
+
+    fputs("-- begin --\n", fp);
+    struct lvlent *iter;
+    for(unsigned i = 0u; i <= max_lvl; ++i) {
+        fprintf(fp, "%u: ", i);
+        scc_svec_foreach(iter, lvls) {
+            if(iter->lvl == i) {
+                for(unsigned j = 0u; j < scc_vec_size(iter->bytes); ++j) {
+                    if(!(j % elemsize)) {
+                        fputs(" 0x", fp);
+                    }
+                    fprintf(fp, "%02x", iter->bytes[j]);
+                }
+                fputs(" | ", fp);
+            }
+        }
+
+        fputs("\n\n", fp);
+    }
+
+    fputs("--  end  --\n", fp);
+
+    scc_svec_foreach(iter, lvls) {
+        scc_vec_free(iter->bytes);
+    }
+
+    scc_stack_free(stack);
+    scc_svec_free(lvls);
 }
