@@ -137,26 +137,26 @@ void scc_btree_impl_inspect_dump(void const *restrict btree, size_t elemsize, FI
         }
     }
 
-    fputs("-- begin --\n", fp);
+    (void)fputs("-- begin --\n", fp);
     struct lvlent *iter;
     for(unsigned i = 0u; i <= max_lvl; ++i) {
-        fprintf(fp, "%u: ", i);
+        (void)fprintf(fp, "%u: ", i);
         scc_svec_foreach(iter, lvls) {
             if(iter->lvl == i) {
                 for(unsigned j = 0u; j < scc_vec_size(iter->bytes); ++j) {
                     if(!(j % elemsize)) {
-                        fputs(" 0x", fp);
+                        (void)fputs(" 0x", fp);
                     }
-                    fprintf(fp, "%02x", iter->bytes[j]);
+                    (void)fprintf(fp, "%02x", iter->bytes[j]);
                 }
-                fputs(" | ", fp);
+                (void)fputs(" | ", fp);
             }
         }
 
-        fputs("\n\n", fp);
+        (void)fputs("\n\n", fp);
     }
 
-    fputs("--  end  --\n", fp);
+    (void)fputs("--  end  --\n", fp);
 
     scc_svec_foreach(iter, lvls) {
         scc_vec_free(iter->bytes);
