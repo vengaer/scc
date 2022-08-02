@@ -40,3 +40,14 @@ void test_scc_algo_lower_bound_1(void) {
         TEST_ASSERT_EQUAL_UINT64(stupid, bins);
     }
 }
+
+void test_scc_algo_lower_bound_duplicate(void) {
+    {
+        int data[] = { 0, 1, 2, 3, 3, 3, 3, 66 };
+        TEST_ASSERT_EQUAL_UINT64(3ull, scc_algo_lower_bound(&(int){ 3 }, data, scc_arrsize(data), sizeof(int), compare));
+    }
+    {
+        int data[] = { 0, 1, 2, 2, 3, 3, 3, 66 };
+        TEST_ASSERT_EQUAL_UINT64(4ull, scc_algo_lower_bound(&(int){ 3 }, data, scc_arrsize(data), sizeof(int), compare));
+    }
+}
