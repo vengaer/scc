@@ -481,10 +481,9 @@ static struct scc_btnode_base *scc_btnode_split_non_preemptive(
         if(!scc_btnode_is_leaf(node)) {
             ++nbef;
             memcpy(rlinks, llinks + node->bt_nkeys + 1u, nbef * sizeof(*rlinks));
-            rlinks[bound - node->bt_nkeys] = child;
+            rlinks[nbef++] = child;
             if(naft) {
-                ++nbef;
-                memcpy(rlinks + 1u, llinks + node->bt_nkeys + nbef, naft * sizeof(*rlinks));
+                memcpy(rlinks + nbef, llinks + node->bt_nkeys + nbef, naft * sizeof(*rlinks));
             }
         }
     }
