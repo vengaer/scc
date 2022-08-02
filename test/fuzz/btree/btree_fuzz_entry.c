@@ -17,7 +17,7 @@ int compare(void const *left, void const *right) {
     return (leftval < rightval ? -1 : 1) * !(leftval == rightval);
 }
 
-int LLVMFuzzerTestOneInput(uint8_t const *data, size_t size) {
+int LLVMFuzzerTestOneInput(uint8_t const *data, size_t size) { /* NOLINT(readability-function-size) */
     if(size-- < 2u) {
         return 0;
     }
