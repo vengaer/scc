@@ -57,6 +57,7 @@ int LLVMFuzzerTestOneInput(uint8_t const *data, size_t size) {
 #undef CASE
 
     uint8_t const *it;
+    dbg_pr("Order: %" PRIu8 "\n", data[-1]);
     dbg_pr("Data:\n");
     dbg_pr_n(it, data, size, "%" PRIu8 " ", *it);
     dbg_pr("\n");
