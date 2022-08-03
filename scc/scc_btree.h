@@ -285,7 +285,7 @@ struct scc_btree_base {
         scc_bcompare bt_compare;                                                                    \
         unsigned char bt_fwoff;                                                                     \
         unsigned char bt_bkoff;                                                                     \
-        type bt_curr[2];                                                                            \
+        type bt_curr;                                                                               \
         scc_btnode_impl_layout(type, order) bt_rootmem;                                             \
     }
 
