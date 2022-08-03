@@ -52,6 +52,12 @@ fuzz_svec:
     - conftool set CONFIG_FUZZ_TARGET svec
     - make -j$(nproc) fuzz
 
+fuzz_btree:
+  stage: fuzz
+  script:
+    - conftool set CONFIG_FUZZ_TARGET btree
+    - make -j$(nproc) fuzz
+
 lint:
   stage: lint
   script:
