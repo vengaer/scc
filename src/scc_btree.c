@@ -210,7 +210,7 @@ static size_t scc_btnode_emplace_leaf(
 }
 
 //? .. c:function:: void scc_btnode_emplace(\
-//?     struct scc_btree base *restrict base, struct scc_btnode_base *restrict node, \
+//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, \
 //?     struct scc_btnode_base *restrict child, void *restrict value, size_t elemsize)
 //?
 //?     Insert the given value with accompanying child subtree in non-leaf node. The
