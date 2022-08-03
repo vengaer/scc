@@ -518,7 +518,7 @@ static _Bool scc_btree_insert_preemptive(struct scc_btree_base *base, void *btre
                 return false;
             }
 
-            if(bound >= curr->bt_nkeys) {
+            if(bound > curr->bt_nkeys) {
                 curr = right;
             }
         }
