@@ -792,7 +792,7 @@ static inline void scc_btnode_merge_left(
     size_t nmov = scc_btnode_merge(base, node, sibling, p, bound, elemsize);
     if(p->bt_nkeys) {
         struct scc_btnode_base **plinks = scc_btnode_links(base, p);
-        memmove(plinks + bound, plinks + bound + 1u, nmov + 1u);
+        memmove(plinks + bound, plinks + bound + 1u, (nmov + 1u) * sizeof(*plinks));
     }
     else {
         scc_arena_free(&base->bt_arena, p);
@@ -828,7 +828,7 @@ static inline void scc_btnode_merge_right(
     size_t nmov = scc_btnode_merge(base, sibling, node, p, bound, elemsize);
     if(p->bt_nkeys) {
         struct scc_btnode_base **plinks = scc_btnode_links(base, p);
-        memmove(plinks + bound + 1u, plinks + bound + 2u, nmov + 1u);
+        memmove(plinks + bound + 1u, plinks + bound + 2u, (nmov + 1u) * sizeof(*plinks));
     }
     else {
         scc_arena_free(&base->bt_arena, p);
