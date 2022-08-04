@@ -79,6 +79,14 @@ int LLVMFuzzerTestOneInput(uint8_t const *data, size_t size) { /* NOLINT(readabi
         }
     }
 
+    for(size_t i = 0u; i < size; ++i) {
+        fuzz_assert(scc_btree_remove(btree, data[i]), "Could not remove %" PRIu8 " from tree with order %" PRIu8, data[i], data[-1]);
+        fuzz_assert(scc_btree_size(btree) == size - i - 1u, "Incorrect size after removal of %" PRIu8, data[i]);
+        mask = scc_btree_inspect_invariants(btree);
+        fuzz_assert(!mask, "Invariants violated with %#x after removal of %" PRIu8 " in tree with order %" PRIu8,
+                    mask, data[i], data[-1]);
+    }
+
     scc_btree_free(btree);
     return 0;
 }
