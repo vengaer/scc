@@ -711,6 +711,60 @@ static void scc_btnode_rotate_left(
     memmove(slinks, slinks + 1u, (sibling->bt_nkeys + 1u) * sizeof(*slinks));
 }
 
+//? .. c:function:: void scc_btnode_merge(\
+//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, \
+//?     struct scc_btnode_base *restrict sibling, struct scc_btnode_base *restrict p, \
+//?     size_t bound, size_t elemsize)
+//?
+//?     Generic merging of the given node with its left sibling, leaving parent links untouched
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: B-tree base address
+//?     :param node: Base address of node to be rotated into
+//?     :param sibling: Base address of the left sibling of :code:`node`
+//?     :param p: Base address of the parent node of :code:`node` and :code:`sibling`
+//?     :param bound: The index of :code:`node` in :code:`p`'s link array
+//?     :param elemsize: Size of the elements in the B-tree
+static size_t scc_btnode_merge(
+    struct scc_btree_base *restrict base,
+    struct scc_btnode_base *restrict node,
+    struct scc_btnode_base *restrict sibling,
+    struct scc_btnode_base *restrict p,
+    size_t bound,
+    size_t elemsize
+) {
+    unsigned char *nslot = scc_btnode_data(base, node);
+    unsigned char *sslot = scc_btnode_value(base, sibling, sibling->bt_nkeys, elemsize);
+    unsigned char *pslot = scc_btnode_value(base, p, bound, elemsize);
+    memcpy(sslot, pslot, elemsize);
+    memcpy(sslot + elemsize, nslot, node->bt_nkeys * elemsize);
+
+    struct scc_btnode_base **nlinks = scc_btnode_links(base, node);
+    struct scc_btnode_base **slinks = scc_btnode_links(base, sibling);
+
+    if(!scc_btnode_is_leaf(node)) {
+        assert(!scc_btnode_is_leaf(sibling));
+        memcpy(slinks + sibling->bt_nkeys + 1u, nlinks, (node->bt_nkeys + 1u) * sizeof(*slinks));
+    }
+
+    sibling->bt_nkeys += node->bt_nkeys + 1u;
+    assert(sibling->bt_nkeys < base->bt_order);
+
+    size_t nmov = p->bt_nkeys - bound - 1u;
+    if(nmov) {
+        memmove(pslot, pslot + elemsize, nmov * elemsize);
+    }
+    if(!--p->bt_nkeys) {
+        assert(p == base->bt_root);
+        base->bt_root = sibling;
+        scc_arena_free(&base->bt_arena, p);
+    }
+    return nmov;
+}
+
 //? .. c:function:: void scc_btnode_merge_left(\
 //?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, \
 //?     struct scc_btnode_base *restrict sibling, struct scc_btnode_base *restrict p, \
@@ -728,7 +782,7 @@ static void scc_btnode_rotate_left(
 //?     :param p: Base address of the parent node of :code:`node` and :code:`sibling`
 //?     :param bound: The index of :code:`node` in :code:`p`'s link array
 //?     :param elemsize: Size of the elements in the B-tree
-static void scc_btnode_merge_left(
+static inline void scc_btnode_merge_left(
     struct scc_btree_base *restrict base,
     struct scc_btnode_base *restrict node,
     struct scc_btnode_base *restrict sibling,
@@ -736,28 +790,9 @@ static void scc_btnode_merge_left(
     size_t bound,
     size_t elemsize
 ) {
-    unsigned char *nslot = scc_btnode_data(base, node);
-    unsigned char *sslot = scc_btnode_value(base, sibling, sibling->bt_nkeys, elemsize);
-    unsigned char *pslot = scc_btnode_value(base, p, bound, elemsize);
-    memcpy(sslot, pslot, elemsize);
-    memcpy(sslot + elemsize, nslot, node->bt_nkeys * elemsize);
-
-    struct scc_btnode_base **nlinks = scc_btnode_links(base, node);
-    struct scc_btnode_base **slinks = scc_btnode_links(base, sibling);
+    size_t nmov = scc_btnode_merge(base, node, sibling, p, bound, elemsize);
     struct scc_btnode_base **plinks = scc_btnode_links(base, p);
-
-    assert(!scc_btnode_is_leaf(node) && !scc_btnode_is_leaf(sibling));
-    memcpy(slinks + sibling->bt_nkeys + 1u, nlinks, (node->bt_nkeys + 1u) * sizeof(*slinks));
-
-    sibling->bt_nkeys += node->bt_nkeys + 1u;
-    assert(sibling->bt_nkeys < base->bt_order);
-
-    size_t nmov = p->bt_nkeys - bound;
-    if(nmov) {
-        memmove(pslot, pslot + elemsize, nmov * elemsize);
-    }
     memmove(plinks + bound, plinks + bound + 1u, nmov + 1u);
-
     scc_arena_free(&base->bt_arena, node);
 }
 
@@ -786,7 +821,10 @@ static inline void scc_btnode_merge_right(
     size_t bound,
     size_t elemsize
 ) {
-    scc_btnode_merge_left(base, sibling, node, p, bound, elemsize);
+    size_t nmov = scc_btnode_merge(base, sibling, node, p, bound, elemsize);
+    struct scc_btnode_base **plinks = scc_btnode_links(base, p);
+    memmove(plinks + bound + 1u, plinks + bound + 2u, nmov + 1u);
+    scc_arena_free(&base->bt_arena, sibling);
 }
 
 //? .. c:function:: void scc_btnode_balance(\
@@ -811,7 +849,7 @@ void scc_btnode_balance(
     size_t bound,
     size_t elemsize
 ) {
-    size_t const borrow_lim = (base->bt_order >> 1u) + 1u;
+    size_t const borrow_lim = base->bt_order >> 1u;
 
     struct scc_btnode_base *sibling = 0;
     if(bound) {
@@ -920,9 +958,8 @@ void const *scc_btree_impl_find(void const *btree, size_t elemsize) {
     return 0;
 }
 
-_Bool scc_btree_impl_remove(void *btree, size_t elemsize) {
-    struct scc_btree_base *base = scc_btree_impl_base(btree);
-    size_t const borrow_lim = (base->bt_order >> 1u) + 1u;
+_Bool scc_btree_remove_preemptive(struct scc_btree_base *base, void *btree, size_t elemsize) {
+    size_t const borrow_lim = base->bt_order >> 1u;
     _Bool swap_pred = true;
 
     size_t fbound;
@@ -955,6 +992,8 @@ _Bool scc_btree_impl_remove(void *btree, size_t elemsize) {
                     }
                     else {
                         scc_btnode_merge_right(base, left, next, curr, bound, elemsize);
+                        found = left;
+                        fbound = scc_btnode_lower_bound(base, found, btree, elemsize);
                     }
                 }
             }
@@ -988,4 +1027,13 @@ _Bool scc_btree_impl_remove(void *btree, size_t elemsize) {
 
     --base->bt_size;
     return true;
+}
+
+_Bool scc_btree_impl_remove(void *btree, size_t elemsize) {
+    struct scc_btree_base *base = scc_btree_impl_base(btree);
+    if(scc_bits_is_even(base->bt_order)) {
+        return scc_btree_remove_preemptive(base, btree, elemsize);
+    }
+
+    return false;
 }
