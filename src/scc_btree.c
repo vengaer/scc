@@ -753,9 +753,9 @@ static size_t scc_btnode_merge(
     sibling->bt_nkeys += node->bt_nkeys + 1u;
     assert(sibling->bt_nkeys < base->bt_order);
 
-    size_t nmov = p->bt_nkeys - bound - 1u;
+    size_t nmov = p->bt_nkeys - bound;
     if(nmov) {
-        memmove(pslot, pslot + elemsize, nmov * elemsize);
+        memmove(pslot, pslot + elemsize, (nmov - 1u) * elemsize);
     }
     if(!--p->bt_nkeys) {
         assert(p == base->bt_root);
@@ -792,7 +792,7 @@ static inline void scc_btnode_merge_left(
     size_t nmov = scc_btnode_merge(base, node, sibling, p, bound, elemsize);
     if(p->bt_nkeys) {
         struct scc_btnode_base **plinks = scc_btnode_links(base, p);
-        memmove(plinks + bound, plinks + bound + 1u, (nmov + 1u) * sizeof(*plinks));
+        memmove(plinks + bound, plinks + bound + 1u, nmov * sizeof(*plinks));
     }
     else {
         scc_arena_free(&base->bt_arena, p);
@@ -828,7 +828,7 @@ static inline void scc_btnode_merge_right(
     size_t nmov = scc_btnode_merge(base, sibling, node, p, bound, elemsize);
     if(p->bt_nkeys) {
         struct scc_btnode_base **plinks = scc_btnode_links(base, p);
-        memmove(plinks + bound + 1u, plinks + bound + 2u, (nmov + 1u) * sizeof(*plinks));
+        memmove(plinks + bound + 1u, plinks + bound + 2u, nmov * sizeof(*plinks));
     }
     else {
         scc_arena_free(&base->bt_arena, p);
