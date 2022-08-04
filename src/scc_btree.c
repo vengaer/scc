@@ -907,59 +907,22 @@ static inline void scc_btnode_remove_leaf(
     memmove(data, data + elemsize, nmov * elemsize);
 }
 
-void *scc_btree_impl_new(void *base, size_t coff, size_t rootoff) {
-#define base ((struct scc_btree_base *)base)
-    size_t fwoff = coff - offsetof(struct scc_btree_base, bt_fwoff) - sizeof(base->bt_fwoff);
-    assert(fwoff <= UCHAR_MAX);
-    base->bt_fwoff = (unsigned char)fwoff;
-    scc_btree_root_init(base, (unsigned char *)base + rootoff);
-    unsigned char *btree = (unsigned char *)base + coff;
-    scc_btree_set_bkoff(btree, fwoff);
-    return btree;
-#undef base
-}
-
-void scc_btree_free(void *btree) {
-    struct scc_btree_base *base = scc_btree_impl_base(btree);
-    scc_arena_release(&base->bt_arena);
-}
-
-_Bool scc_btree_impl_insert(void *btreeaddr, size_t elemsize) {
-    struct scc_btree_base *base = scc_btree_impl_base(*(void **)btreeaddr);
-    if(scc_bits_is_even(base->bt_order)) {
-        return scc_btree_insert_preemptive(base, btreeaddr, elemsize);
-    }
-
-    return scc_btree_insert_non_preemptive(base, btreeaddr, elemsize);
-}
-
-void const *scc_btree_impl_find(void const *btree, size_t elemsize) {
-    struct scc_btree_base const *base = scc_btree_impl_base_qual(btree, const);
-
-    struct scc_btnode_base *curr = base->bt_root;
-
-    size_t bound;
-    void *addr;
-    while(true) {
-        bound = scc_btnode_lower_bound(base, curr, btree, elemsize);
-        if(bound < curr->bt_nkeys) {
-            addr = (unsigned char *)scc_btnode_data(base, curr) + bound * elemsize;
-            if(!base->bt_compare(addr, btree)) {
-                return addr;
-            }
-        }
-
-        if(scc_btnode_is_leaf(curr)) {
-            break;
-        }
-
-        curr = scc_btnode_child(base, curr, bound);
-    }
-
-    return 0;
-}
-
-_Bool scc_btree_remove_preemptive(struct scc_btree_base *base, void *btree, size_t elemsize) {
+//? .. c:function:: _Bool scc_btree_remove_preemptive(\
+//?     struct scc_btree_base *restrict base, void *restrict btree, size_t elemsize)
+//?
+//?     Find and remove the value stored in the :code:`bt_curr` field using preemptive
+//?     merging
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: B-tree base address
+//?     :param btree: B-tree handle
+//?     :param elemsize: Size of the elements in the tree
+//?     :returns: :code:`true` if the value was removed, :code:`false` if the value
+//?               wasn't found
+_Bool scc_btree_remove_preemptive(struct scc_btree_base *restrict base, void *restrict btree, size_t elemsize) {
     size_t const borrow_lim = base->bt_order >> 1u;
     _Bool swap_pred = true;
 
@@ -1028,6 +991,58 @@ _Bool scc_btree_remove_preemptive(struct scc_btree_base *base, void *btree, size
 
     --base->bt_size;
     return true;
+}
+
+void *scc_btree_impl_new(void *base, size_t coff, size_t rootoff) {
+#define base ((struct scc_btree_base *)base)
+    size_t fwoff = coff - offsetof(struct scc_btree_base, bt_fwoff) - sizeof(base->bt_fwoff);
+    assert(fwoff <= UCHAR_MAX);
+    base->bt_fwoff = (unsigned char)fwoff;
+    scc_btree_root_init(base, (unsigned char *)base + rootoff);
+    unsigned char *btree = (unsigned char *)base + coff;
+    scc_btree_set_bkoff(btree, fwoff);
+    return btree;
+#undef base
+}
+
+void scc_btree_free(void *btree) {
+    struct scc_btree_base *base = scc_btree_impl_base(btree);
+    scc_arena_release(&base->bt_arena);
+}
+
+_Bool scc_btree_impl_insert(void *btreeaddr, size_t elemsize) {
+    struct scc_btree_base *base = scc_btree_impl_base(*(void **)btreeaddr);
+    if(scc_bits_is_even(base->bt_order)) {
+        return scc_btree_insert_preemptive(base, btreeaddr, elemsize);
+    }
+
+    return scc_btree_insert_non_preemptive(base, btreeaddr, elemsize);
+}
+
+void const *scc_btree_impl_find(void const *btree, size_t elemsize) {
+    struct scc_btree_base const *base = scc_btree_impl_base_qual(btree, const);
+
+    struct scc_btnode_base *curr = base->bt_root;
+
+    size_t bound;
+    void *addr;
+    while(true) {
+        bound = scc_btnode_lower_bound(base, curr, btree, elemsize);
+        if(bound < curr->bt_nkeys) {
+            addr = (unsigned char *)scc_btnode_data(base, curr) + bound * elemsize;
+            if(!base->bt_compare(addr, btree)) {
+                return addr;
+            }
+        }
+
+        if(scc_btnode_is_leaf(curr)) {
+            break;
+        }
+
+        curr = scc_btnode_child(base, curr, bound);
+    }
+
+    return 0;
 }
 
 _Bool scc_btree_impl_remove(void *btree, size_t elemsize) {
