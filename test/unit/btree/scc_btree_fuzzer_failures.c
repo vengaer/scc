@@ -149,3 +149,19 @@ void test_scc_btree_fuzzer_failure2(void) {
     }
     scc_btree_free(btree);
 }
+
+void test_scc_btree_fuzzer_failure3(void) {
+    static unsigned char const data[] = { 0x01, 0x00, 0x00, 0x62, 0xb0, 0x00, 0x52, 0xa5, 0x74, 0x00, 0xe9 };
+    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, compare, 0x04);
+
+    for(size_t i = 0u; i < scc_arrsize(data); ++i) {
+        TEST_ASSERT_TRUE(scc_btree_insert(&btree, data[i]));
+        TEST_ASSERT_EQUAL_UINT32(0u, scc_btree_inspect_invariants(btree));
+    }
+    for(size_t i = 0u; i < scc_arrsize(data); ++i) {
+        TEST_ASSERT_TRUE(scc_btree_remove(btree, data[i]));
+        TEST_ASSERT_EQUAL_UINT32(0u, scc_btree_inspect_invariants(btree));
+    }
+    scc_btree_free(btree);
+}
+
