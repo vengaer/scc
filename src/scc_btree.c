@@ -867,6 +867,7 @@ void scc_btnode_balance(
             return;
         }
         scc_btnode_merge_right(base, next, sibling, curr, bound, elemsize);
+        return;
     }
 
     assert(sibling);
