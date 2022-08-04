@@ -165,7 +165,6 @@ void test_scc_btree_insert_non_monotonic_odd_order(void) {
 }
 
 void test_scc_btree_remove_leaf(void) {
-
     int leafvals[] = { 0, 1, 3, 4, 5, 6 };
 
     for(int i = 0; i < (int)scc_arrsize(leafvals); ++i) {
@@ -191,4 +190,29 @@ void test_scc_btree_remove_leaf(void) {
 
         scc_btree_free(btree);
     }
+}
+
+void test_scc_btree_remove_root(void) {
+    scc_btree(int) btree = scc_btree_new(int, compare);
+
+    for(int i = 0; i < 7; ++i) {
+        TEST_ASSERT_TRUE(scc_btree_insert(&btree, i));
+    }
+
+    TEST_ASSERT_TRUE(scc_btree_remove(btree, 2));
+    TEST_ASSERT_EQUAL_UINT32(0u, scc_btree_inspect_invariants(btree));
+
+    int const *p;
+    for(int i = 0; i < 7; ++i) {
+        p = scc_btree_find(btree, i);
+        if(i == 2) {
+            TEST_ASSERT_FALSE(p);
+        }
+        else {
+            TEST_ASSERT_TRUE(p);
+            TEST_ASSERT_EQUAL_INT32(i, *p);
+        }
+    }
+
+    scc_btree_free(btree);
 }
