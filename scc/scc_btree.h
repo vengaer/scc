@@ -499,8 +499,8 @@ _Bool scc_btree_impl_insert(void *btreeaddr, size_t elemsize);
 
 //? .. c:function:: void const *scc_btree_impl_find(void *btree, size_t elemsize)
 //?
-//?     Internal search function. Attmpts to find the value stored at
-//?     :code:`btreeaddr` in the tree
+//?     Internal search function. Attempts to find the value stored at
+//?     :code:`btree` in the tree
 //?
 //?     .. note::
 //?
@@ -517,8 +517,8 @@ void const *scc_btree_impl_find(void const *btree, size_t elemsize);
 //!     Search for, and if found, return a pointer to, an element matching the
 //!     given value.
 //!
-//!     The :code:`value` parameters must not necessarily be the same type as the one
-//!     with which the B-tree was instantiated. If it si not, it is implicitly
+//!     The :code:`value` parameter must not necessarily be the same type as the one
+//!     with which the B-tree was instantiated. If it is not, it is implicitly
 //!     converted to the type stored in the tree.
 //!
 //!     :param btree: Handle to the B-tree
@@ -527,5 +527,38 @@ void const *scc_btree_impl_find(void const *btree, size_t elemsize);
 //!               :code:`NULL`
 #define scc_btree_find(btree, value)                                                                    \
     scc_btree_impl_find((*(btree) = (value), btree), sizeof(*(btree)))
+
+//? .. c:function:: _Bool scc_btree_impl_remove(void *btree, size_t elemsize)
+//?
+//?     Internal removal function. Attempts to find and remove the value stored
+//?     in the :code:`bt_curr` field.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param btree: B-tree handle
+//?     :param elemsize: Size of the the elements in the B-tree
+//?     :returns: :code:`true` if the value in :code:`bt_curr` field was found
+//?               and successfully removed. :code:`false` if no such value was
+//?               found in the tree
+_Bool scc_btree_impl_remove(void *btree, size_t elemsize);
+
+
+//! .. c:function:: _Bool scc_btree_remove(void *btree, type value)
+//!
+//!     Find and remove the specified value in the given B-tree. Should the B-tree
+//!     contain several copies of the value in question, only one copy is removed
+//!
+//!     The :code:`value` parameter must not necessarily be the same type as the
+//!     one with which the B-tree was instantiated. If it is not, the value is
+//!     implicitly converted to the type stored in the tree.
+//!
+//!     :param btree: Handle to the B-tree
+//!     :param value: Value to remove
+//!     :returns: :code:`true` if the value was removed, :code:`false` if no
+//!               copies of the specified value were found
+#define scc_btree_remove(btree, value)                                                                  \
+    scc_btree_impl_remove((*(btree) = (value), btree), sizeof(*(btree)))
 
 #endif /* SCC_BTREE_H */
