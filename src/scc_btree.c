@@ -856,7 +856,7 @@ static inline void scc_btnode_remove_leaf(
     size_t index,
     size_t elemsize
 ) {
-    assert(node->bt_nkeys > 1u);
+    assert(node->bt_nkeys > 1u || node == base->bt_root);
 
     size_t nmov = node->bt_nkeys - index - 1u;
     --node->bt_nkeys;
