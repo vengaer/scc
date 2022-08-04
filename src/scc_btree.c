@@ -957,15 +957,15 @@ _Bool scc_btree_remove_preemptive(struct scc_btree_base *restrict base, void *re
             }
 
             if(next->bt_nkeys < borrow_lim) {
-                struct scc_btnode_base *left = next;
                 if(bound < curr->bt_nkeys) {
-                    next = scc_btnode_child(base, curr, bound + 1u);
-                    if(next->bt_nkeys >= borrow_lim) {
+                    struct scc_btnode_base *right = scc_btnode_child(base, curr, bound + 1u);
+                    if(right->bt_nkeys >= borrow_lim) {
+                        next = right;
                         swap_pred = false;
                     }
                     else {
-                        scc_btnode_merge_right(base, left, next, curr, bound, elemsize);
-                        found = left;
+                        scc_btnode_merge_right(base, next, right, curr, bound, elemsize);
+                        found = next;
                         fbound = scc_btnode_lower_bound(base, found, btree, elemsize);
                     }
                 }
