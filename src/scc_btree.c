@@ -923,6 +923,7 @@ void const *scc_btree_impl_find(void const *btree, size_t elemsize) {
 _Bool scc_btree_impl_remove(void *btree, size_t elemsize) {
     struct scc_btree_base *base = scc_btree_impl_base(btree);
     size_t const borrow_lim = (base->bt_order >> 1u) + 1u;
+    _Bool swap_pred = true;
 
     size_t fbound;
     struct scc_btnode_base *found = 0;
@@ -930,7 +931,7 @@ _Bool scc_btree_impl_remove(void *btree, size_t elemsize) {
     struct scc_btnode_base *curr = base->bt_root;
 
     size_t bound;
-    void const *value;
+    unsigned char *value;
     struct scc_btnode_base *next;
 
     while(1) {
@@ -946,10 +947,14 @@ _Bool scc_btree_impl_remove(void *btree, size_t elemsize) {
             }
 
             if(next->bt_nkeys < borrow_lim) {
+                struct scc_btnode_base *left = next;
                 if(bound < curr->bt_nkeys) {
                     next = scc_btnode_child(base, curr, bound + 1u);
-                    if(next->bt_nkeys < borrow_lim) {
-                        /* merge */
+                    if(next->bt_nkeys >= borrow_lim) {
+                        swap_pred = false;
+                    }
+                    else {
+                        scc_btnode_merge_right(base, left, next, curr, bound, elemsize);
                     }
                 }
             }
@@ -972,8 +977,15 @@ _Bool scc_btree_impl_remove(void *btree, size_t elemsize) {
         scc_btnode_remove_leaf(base, found, fbound, elemsize);
     }
     else {
-        /* TODO: swap with pre/successor */
+        size_t idx = swap_pred ? curr->bt_nkeys - 1u : 0u;
+        value = scc_btnode_value(base, curr, idx, elemsize);
+        memcpy(scc_btnode_value(base, found, fbound, elemsize), value, elemsize);
+        --curr->bt_nkeys;
+        if(!swap_pred) {
+            memmove(value, value + elemsize, curr->bt_nkeys * elemsize);
+        }
     }
 
+    --base->bt_size;
     return true;
 }
