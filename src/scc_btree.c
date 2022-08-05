@@ -791,9 +791,9 @@ static inline void scc_btnode_merge_left(
         memmove(plinks + bound, plinks + bound + 1u, nmov * sizeof(*plinks));
     }
     else {
-        scc_arena_free(&base->bt_arena, p);
+        scc_arena_try_free(&base->bt_arena, p);
     }
-    scc_arena_free(&base->bt_arena, node);
+    scc_arena_try_free(&base->bt_arena, node);
 }
 
 //? .. c:function:: void scc_btnode_merge_right(\
@@ -827,9 +827,9 @@ static inline void scc_btnode_merge_right(
         memmove(plinks + bound + 1u, plinks + bound + 2u, nmov * sizeof(*plinks));
     }
     else {
-        scc_arena_free(&base->bt_arena, p);
+        scc_arena_try_free(&base->bt_arena, p);
     }
-    scc_arena_free(&base->bt_arena, sibling);
+    scc_arena_try_free(&base->bt_arena, sibling);
 }
 
 //? .. c:function:: void scc_btnode_balance(\
