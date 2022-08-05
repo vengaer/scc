@@ -24,5 +24,7 @@ void scc_btree_impl_inspect_dump(void const *restrict btree, size_t elemsize, FI
 #define scc_btree_inspect_dump(btree, fp)   \
     scc_btree_impl_inspect_dump(btree, sizeof(*(btree)), fp)
 
+size_t scc_btree_inspect_size(void const *btree);
+
 
 #endif /* SCC_BTREE_INSPECT_H */

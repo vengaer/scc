@@ -168,3 +168,33 @@ void scc_btree_impl_inspect_dump(void const *restrict btree, size_t elemsize, FI
     scc_stack_free(stack);
     scc_svec_free(lvls);
 }
+
+size_t scc_btree_inspect_size(void const *btree) {
+    struct scc_btree_base const *base = scc_btree_impl_base_qual(btree, const);
+    scc_stack(struct nodectx) stack = scc_stack_new(struct nodectx);
+    assert(scc_stack_push(&stack, ((struct nodectx) { .idx = 0u, .node = base->bt_root })));
+
+    size_t total = 0u;
+
+    struct nodectx *ctx;
+    while(!scc_stack_empty(stack)) {
+        ctx = &scc_stack_top(stack);
+        if(!(ctx->node->bt_flags & SCC_BTREE_FLAG_LEAF) && ctx->idx <= ctx->node->bt_nkeys) {
+            struct scc_btnode_base *link = scc_btnode_links(base, ctx->node)[ctx->idx++];
+            assert(link);
+
+            struct nodectx new = { /* NOLINT(clang-analyzer-deadcode.DeadStores,clang-diagnostic-unused-variable) */
+                .idx = 0u, .node = link
+            };
+
+            assert(scc_stack_push(&stack, new));
+        }
+        else if(++ctx->idx >= ctx->node->bt_nkeys) {
+                total += ctx->node->bt_nkeys;
+                scc_stack_pop(stack);
+        }
+    }
+
+    scc_stack_free(stack);
+    return total;
+}
