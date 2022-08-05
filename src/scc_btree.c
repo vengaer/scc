@@ -913,6 +913,42 @@ static inline void scc_btnode_remove_leaf(
     memmove(data, data + elemsize, nmov * elemsize);
 }
 
+//? .. c:function:: void scc_btnode_overwrite(\
+//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict curr, \
+//?     struct scc_btnode_base *restrict found, size_t fbound, size_t elemsize, _Bool swap_pred)
+//?
+//?     Swap the in-order predecessor or successor with the element at index fbound in
+//?     the found node
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: B-tree base address
+//?     :param leaf: Leaf node to copy the predecessor or successor from
+//?     :param found: Internal node whose value should be overwritten
+//?     :param fbound: Lower bound of the value to be overwritten in the internal node
+//?     :param elemsize: Size of the elements in the tree
+//?     :param predecessor: :code:`true` if the value is to be overwritten with the
+//?                         in-order predecessor. If :code:`false`, the value is
+//?                         overwritten with the in-order successor
+static inline void scc_btnode_overwrite(
+    struct scc_btree_base *restrict base,
+    struct scc_btnode_base *restrict leaf,
+    struct scc_btnode_base *restrict found,
+    size_t fbound,
+    size_t elemsize,
+    _Bool predecessor
+) {
+    size_t const idx = predecessor ? leaf->bt_nkeys - 1u : 0u;
+    unsigned char *value = scc_btnode_value(base, leaf, idx, elemsize);
+    memcpy(scc_btnode_value(base, found, fbound, elemsize), value, elemsize);
+    --leaf->bt_nkeys;
+    if(!predecessor) {
+        memmove(value, value + elemsize, leaf->bt_nkeys * elemsize);
+    }
+}
+
 //? .. c:function:: _Bool scc_btree_remove_preemptive(\
 //?     struct scc_btree_base *restrict base, void *restrict btree, size_t elemsize)
 //?
@@ -992,13 +1028,7 @@ static _Bool scc_btree_remove_preemptive(struct scc_btree_base *restrict base, v
         scc_btnode_remove_leaf(base, found, fbound, elemsize);
     }
     else {
-        size_t idx = swap_pred ? curr->bt_nkeys - 1u : 0u;
-        value = scc_btnode_value(base, curr, idx, elemsize);
-        memcpy(scc_btnode_value(base, found, fbound, elemsize), value, elemsize);
-        --curr->bt_nkeys;
-        if(!swap_pred) {
-            memmove(value, value + elemsize, curr->bt_nkeys * elemsize);
-        }
+        scc_btnode_overwrite(base, curr, found, fbound, elemsize, swap_pred);
     }
 
     --base->bt_size;
