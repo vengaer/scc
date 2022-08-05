@@ -753,9 +753,9 @@ static size_t scc_btnode_merge(
     sibling->bt_nkeys += node->bt_nkeys + 1u;
     assert(sibling->bt_nkeys < base->bt_order);
 
-    size_t nmov = p->bt_nkeys - bound;
+    size_t nmov = p->bt_nkeys - bound - 1u;
     if(nmov) {
-        memmove(pslot, pslot + elemsize, (nmov - 1u) * elemsize);
+        memmove(pslot, pslot + elemsize, nmov * elemsize);
     }
     if(!--p->bt_nkeys) {
         assert(p == base->bt_root);
@@ -789,8 +789,8 @@ static inline void scc_btnode_merge_left(
     size_t bound,
     size_t elemsize
 ) {
-    size_t nmov = scc_btnode_merge(base, node, sibling, p, bound, elemsize);
-    if(p->bt_nkeys) {
+    size_t nmov = scc_btnode_merge(base, node, sibling, p, bound - 1u, elemsize) + 1u;
+    if(p->bt_nkeys && bound <= p->bt_nkeys) {
         struct scc_btnode_base **plinks = scc_btnode_links(base, p);
         memmove(plinks + bound, plinks + bound + 1u, nmov * sizeof(*plinks));
     }
@@ -825,7 +825,7 @@ static inline void scc_btnode_merge_right(
     size_t bound,
     size_t elemsize
 ) {
-    size_t nmov = scc_btnode_merge(base, sibling, node, p, bound, elemsize);
+    size_t nmov = scc_btnode_merge(base, sibling, node, p, bound, elemsize) + 1u;
     if(p->bt_nkeys) {
         struct scc_btnode_base **plinks = scc_btnode_links(base, p);
         memmove(plinks + bound + 1u, plinks + bound + 2u, nmov * sizeof(*plinks));
@@ -851,7 +851,7 @@ static inline void scc_btnode_merge_right(
 //?     :param curr: The current node being traversed. Parent of next
 //?     :param bound: Index of :code:`next` in the link array of :code:`curr`
 //?     :param elemsize: Size of the elements in the B-tree
-void scc_btnode_balance(
+static struct scc_btnode_base *scc_btnode_balance(
     struct scc_btree_base *restrict base,
     struct scc_btnode_base *restrict next,
     struct scc_btnode_base *restrict curr,
@@ -865,7 +865,7 @@ void scc_btnode_balance(
         sibling = scc_btnode_child(base, curr, bound - 1u);
         if(sibling->bt_nkeys >= borrow_lim) {
             scc_btnode_rotate_right(base, next, sibling, curr, bound, elemsize);
-            return;
+            return next;
         }
     }
 
@@ -873,14 +873,15 @@ void scc_btnode_balance(
         sibling = scc_btnode_child(base, curr, bound + 1u);
         if(sibling->bt_nkeys >= borrow_lim) {
             scc_btnode_rotate_left(base, next, sibling, curr, bound, elemsize);
-            return;
+            return next;
         }
         scc_btnode_merge_right(base, next, sibling, curr, bound, elemsize);
-        return;
+        return next;
     }
 
     assert(sibling);
     scc_btnode_merge_left(base, next, sibling, curr, bound, elemsize);
+    return sibling;
 }
 
 //? .. c:function:: void scc_btnode_remove_leaf(\
@@ -931,7 +932,7 @@ static inline void scc_btnode_remove_leaf(
 //?     :param elemsize: Size of the elements in the tree
 //?     :returns: :code:`true` if the value was removed, :code:`false` if the value
 //?               wasn't found
-_Bool scc_btree_remove_preemptive(struct scc_btree_base *restrict base, void *restrict btree, size_t elemsize) {
+static _Bool scc_btree_remove_preemptive(struct scc_btree_base *restrict base, void *restrict btree, size_t elemsize) {
     size_t const borrow_lim = base->bt_order >> 1u;
     _Bool swap_pred = true;
 
@@ -975,7 +976,7 @@ _Bool scc_btree_remove_preemptive(struct scc_btree_base *restrict base, void *re
             break;
         }
         else if(next->bt_nkeys < borrow_lim) {
-            scc_btnode_balance(base, next, curr, bound, elemsize);
+            next = scc_btnode_balance(base, next, curr, bound, elemsize);
         }
 
         curr = next;
