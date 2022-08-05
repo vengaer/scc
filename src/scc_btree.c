@@ -653,20 +653,18 @@ static void scc_btnode_rotate_right(
     size_t elemsize
 ) {
     unsigned char *nslot = scc_btnode_data(base, node);
-    struct scc_btnode_base **links = scc_btnode_links(base, node);
-    memmove(nslot + elemsize, nslot, node->bt_nkeys * elemsize);
-    memmove(links + 1u, links, (node->bt_nkeys + 1u) * sizeof(*links));
-
     unsigned char *pslot = scc_btnode_value(base, p, bound - 1u, elemsize);
-    memcpy(nslot, pslot, elemsize);
-
     unsigned char *sslot = scc_btnode_value(base, sibling, sibling->bt_nkeys - 1u, elemsize);
-    struct scc_btnode_base *subtree = scc_btnode_child(base, sibling, sibling->bt_nkeys);
-    memcpy(pslot, sslot, elemsize);
-    links[0] = subtree;
 
-    ++node->bt_nkeys;
-    --sibling->bt_nkeys;
+    memmove(nslot + elemsize, nslot, node->bt_nkeys * elemsize);
+    memcpy(nslot, pslot, elemsize);
+    memcpy(pslot, sslot, elemsize);
+
+    struct scc_btnode_base **nlinks = scc_btnode_links(base, node);
+    struct scc_btnode_base *subtree = scc_btnode_child(base, sibling, sibling->bt_nkeys--);
+
+    memmove(nlinks + 1u, nlinks, ++node->bt_nkeys * sizeof(*nlinks));
+    nlinks[0] = subtree;
 }
 
 //? .. c:function:: void scc_btnode_rotate_left(\
