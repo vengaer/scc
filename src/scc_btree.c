@@ -786,12 +786,12 @@ static inline void scc_btnode_merge_left(
     size_t elemsize
 ) {
     size_t nmov = scc_btnode_merge(base, node, sibling, p, bound - 1u, elemsize) + 1u;
-    if(p->bt_nkeys && bound <= p->bt_nkeys) {
+    if(!p->bt_nkeys) {
+        scc_arena_try_free(&base->bt_arena, p);
+    }
+    else if (bound <= p->bt_nkeys) {
         struct scc_btnode_base **plinks = scc_btnode_links(base, p);
         memmove(plinks + bound, plinks + bound + 1u, nmov * sizeof(*plinks));
-    }
-    else {
-        scc_arena_try_free(&base->bt_arena, p);
     }
     scc_arena_try_free(&base->bt_arena, node);
 }
