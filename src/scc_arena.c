@@ -1,4 +1,5 @@
 #include <scc/scc_arena.h>
+#include <scc/scc_dbg.h>
 
 #include <assert.h>
 #include <stdbool.h>
@@ -94,7 +95,7 @@ _Bool scc_arena_reserve(struct scc_arena *arena, size_t nelems) {
     return true;
 }
 
-void scc_arena_free(struct scc_arena *restrict arena, void const *restrict addr) {
+_Bool scc_arena_try_free(struct scc_arena *restrict arena, void const *restrict addr) {
     struct scc_chunk *iter;
     struct scc_chunk *tortoise;
     scc_arena_foreach_chunk_lagging(iter, tortoise, arena) {
@@ -102,7 +103,9 @@ void scc_arena_free(struct scc_arena *restrict arena, void const *restrict addr)
             break;
         }
     }
-    assert(iter);
+    if(!iter) {
+        return false;
+    }
     --iter->ch_refcount;
     if(iter->ch_offset == iter->ch_end && !iter->ch_refcount) {
         if(!tortoise) {
@@ -117,5 +120,9 @@ void scc_arena_free(struct scc_arena *restrict arena, void const *restrict addr)
         }
         free(iter);
     }
+    return true;
 }
 
+void scc_arena_free(struct scc_arena *restrict arena, void const *restrict addr) {
+    scc_bug_on(!scc_arena_try_free(arena, addr));
+}

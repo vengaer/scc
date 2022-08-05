@@ -61,6 +61,21 @@ void scc_arena_release(struct scc_arena *arena);
 
 void *scc_arena_alloc(struct scc_arena *arena);
 _Bool scc_arena_reserve(struct scc_arena *arena, size_t nelems);
+
+//? .. c:function:: void scc_arena_try_free(struct scc_arena *restrict arena, void const *restrict addr)
+//?
+//?     Free the given address provided it is managed by the arena, if not, do nothing
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param arena: The arena potentially managing the node
+//?     :param addr: The address that is to be deallocated
+//?     :returns: :code:`true` if the element at the specified address was deallocated,
+//?               otherwise :code:`false`
+_Bool scc_arena_try_free(struct scc_arena *restrict arena, void const *restrict addr);
+
 void scc_arena_free(struct scc_arena *restrict arena, void const *restrict addr);
 
 #endif /* SCC_ARENA_H */
