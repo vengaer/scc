@@ -16,15 +16,19 @@ typedef unsigned scc_inspect_mask;
 
 scc_inspect_mask scc_btree_impl_inspect_invariants(void const *btree, size_t elemsize);
 
-#define scc_btree_inspect_invariants(btree) \
+#define scc_btree_inspect_invariants(btree)         \
     scc_btree_impl_inspect_invariants((btree), sizeof(*(btree)))
 
 void scc_btree_impl_inspect_dump(void const *restrict btree, size_t elemsize, FILE *fp);
 
-#define scc_btree_inspect_dump(btree, fp)   \
+#define scc_btree_inspect_dump(btree, fp)           \
     scc_btree_impl_inspect_dump(btree, sizeof(*(btree)), fp)
 
 size_t scc_btree_inspect_size(void const *btree);
 
+size_t scc_btree_impl_inspect_cardinality(void const *restrict btree, size_t elemsize);
+
+#define scc_btree_inspect_cardinality(btree, elem)  \
+    scc_btree_impl_inspect_cardinality((*(btree) = (elem), btree), sizeof(*(btree)))
 
 #endif /* SCC_BTREE_INSPECT_H */

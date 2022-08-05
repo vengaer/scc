@@ -190,11 +190,45 @@ size_t scc_btree_inspect_size(void const *btree) {
             assert(scc_stack_push(&stack, new));
         }
         else if(++ctx->idx >= ctx->node->bt_nkeys) {
-                total += ctx->node->bt_nkeys;
-                scc_stack_pop(stack);
+            total += ctx->node->bt_nkeys;
+            scc_stack_pop(stack);
         }
     }
 
     scc_stack_free(stack);
     return total;
+}
+
+
+size_t scc_btree_impl_inspect_cardinality(void const *restrict btree, size_t elemsize) {
+    struct scc_btree_base const *base = scc_btree_impl_base_qual(btree, const);
+    scc_stack(struct nodectx) stack = scc_stack_new(struct nodectx);
+    assert(scc_stack_push(&stack, ((struct nodectx) { .idx = 0u, .node = base->bt_root })));
+
+    size_t n = 0u;
+
+    struct nodectx *ctx;
+    while(!scc_stack_empty(stack)) {
+        ctx = &scc_stack_top(stack);
+        if(!(ctx->node->bt_flags & SCC_BTREE_FLAG_LEAF) && ctx->idx <= ctx->node->bt_nkeys) {
+            struct scc_btnode_base *link = scc_btnode_links(base, ctx->node)[ctx->idx++];
+            assert(link);
+
+            struct nodectx new = { /* NOLINT(clang-analyzer-deadcode.DeadStores,clang-diagnostic-unused-variable) */
+                .idx = 0u, .node = link
+            };
+
+            assert(scc_stack_push(&stack, new));
+        }
+        else if(++ctx->idx >= ctx->node->bt_nkeys) {
+            unsigned char *data = (unsigned char *)ctx->node + base->bt_dataoff;
+            for(unsigned i = 0u; i < ctx->node->bt_nkeys; ++i) {
+                n += !base->bt_compare(btree, data + i * elemsize);
+            }
+            scc_stack_pop(stack);
+        }
+    }
+
+    scc_stack_free(stack);
+    return n;
 }
