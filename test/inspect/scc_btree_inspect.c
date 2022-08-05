@@ -104,6 +104,7 @@ void scc_btree_impl_inspect_dump(void const *restrict btree, size_t elemsize, FI
 
     unsigned lvl = 0u;
     unsigned max_lvl = 0u;
+    unsigned total = 0u;
 
     struct nodectx *ctx;
 
@@ -148,6 +149,7 @@ void scc_btree_impl_inspect_dump(void const *restrict btree, size_t elemsize, FI
                         (void)fputs(" 0x", fp);
                     }
                     (void)fprintf(fp, "%02x", iter->bytes[j]);
+                    ++total;
                 }
                 (void)fputs(" | ", fp);
             }
@@ -156,6 +158,7 @@ void scc_btree_impl_inspect_dump(void const *restrict btree, size_t elemsize, FI
         (void)fputs("\n\n", fp);
     }
 
+    fprintf(fp, "Total nodes: %u\n", total);
     (void)fputs("--  end  --\n", fp);
 
     scc_svec_foreach(iter, lvls) {
