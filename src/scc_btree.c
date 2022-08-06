@@ -733,7 +733,7 @@ static size_t scc_btnode_merge(
     size_t elemsize
 ) {
     unsigned char *nslot = scc_btnode_data(base, node);
-    unsigned char *sslot = scc_btnode_value(base, sibling, sibling->bt_nkeys, elemsize);
+    unsigned char *sslot = scc_btnode_value(base, sibling, sibling->bt_nkeys, elemsize); /* NOLINT(clang-analyzer-core.NullDereference) */
     unsigned char *pslot = scc_btnode_value(base, p, bound, elemsize);
     memcpy(sslot, pslot, elemsize);
     memcpy(sslot + elemsize, nslot, node->bt_nkeys * elemsize);
