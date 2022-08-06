@@ -833,7 +833,7 @@ static inline void scc_btnode_merge_right(
 }
 
 //? .. c:function:: void scc_btnode_balance(\
-//?     struct scc_btree_base *restrict base, strut scc_btnode_base *restrict next, \
+//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict next, \
 //?     struct scc_btnode_base *restrict curr, size_t bound, size_t elemsize)
 //?
 //?     Balance B-tree for preemptive removal
