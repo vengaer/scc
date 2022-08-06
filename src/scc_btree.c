@@ -1018,6 +1018,12 @@ static _Bool scc_btree_remove_preemptive(struct scc_btree_base *restrict base, v
         }
         else if(next->bt_nkeys < borrow_lim) {
             next = scc_btnode_balance(base, next, curr, bound, elemsize);
+            /* Found value may be rotated into next node when balancing. If it is,
+             * the value is always in the next node */
+            if(curr == found && base->bt_compare(scc_btnode_value(base, found, fbound, elemsize), btree)) {
+                found = next;
+                fbound = scc_btnode_lower_bound(base, found, btree, elemsize);
+            }
         }
 
         curr = next;
