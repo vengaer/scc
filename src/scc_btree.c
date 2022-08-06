@@ -978,11 +978,14 @@ static _Bool scc_btree_remove_preemptive(struct scc_btree_base *restrict base, v
     struct scc_btnode_base *next;
 
     while(1) {
-        if(!found || found == curr) {
+        if(!found) {
             bound = scc_btnode_lower_bound(base, curr, btree, elemsize);
         }
+        else if(found == curr) {
+            bound = fbound;
+        }
         else {
-            bound = swap_pred ? curr->bt_nkeys : 0u;
+            bound = swap_pred * curr->bt_nkeys;
         }
 
         next = scc_btnode_child(base, curr, bound);
