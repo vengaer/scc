@@ -158,7 +158,7 @@ void scc_btree_impl_inspect_dump(void const *restrict btree, size_t elemsize, FI
         (void)fputs("\n\n", fp);
     }
 
-    fprintf(fp, "Total elements: %u\n", total);
+    (void)fprintf(fp, "Total elements: %u\n", total);
     (void)fputs("--  end  --\n", fp);
 
     scc_svec_foreach(iter, lvls) {
