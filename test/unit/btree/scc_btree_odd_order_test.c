@@ -82,3 +82,26 @@ void test_scc_btree_insert_non_monotonic_odd_order(void) {
 
     scc_btree_free(btree);
 }
+
+void test_scc_btree_remove_odd_order(void) {
+    enum { TEST_SIZE = 320 };
+    scc_btree(int) btree = scc_btree_with_order(int, compare, 5);
+
+    for(int i = 0;  i < TEST_SIZE; ++i) {
+        TEST_ASSERT_TRUE(scc_btree_insert(&btree, i));
+    }
+
+    int const *p;
+    for(int i = 0; i < TEST_SIZE; ++i) {
+        TEST_ASSERT_TRUE(scc_btree_remove(btree, i));
+        TEST_ASSERT_EQUAL_UINT32(0u, scc_btree_inspect_invariants(btree));
+
+        for(int j = i + 1; j < TEST_SIZE; ++j) {
+            p = scc_btree_find(btree, j);
+            TEST_ASSERT_TRUE(p);
+            TEST_ASSERT_EQUAL_INT32(j, *p);
+        }
+    }
+
+    scc_btree_free(btree);
+}
