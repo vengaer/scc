@@ -998,18 +998,16 @@ static _Bool scc_btree_remove_preemptive(struct scc_btree_base *restrict base, v
                 break;
             }
 
-            if(next->bt_nkeys < borrow_lim) {
-                if(bound < curr->bt_nkeys) {
-                    struct scc_btnode_base *right = scc_btnode_child(base, curr, bound + 1u);
-                    if(right->bt_nkeys >= borrow_lim) {
-                        next = right;
-                        swap_pred = false;
-                    }
-                    else {
-                        scc_btnode_merge_right(base, next, right, curr, bound, elemsize);
-                        found = next;
-                        fbound = scc_btnode_lower_bound(base, found, btree, elemsize);
-                    }
+            if(next->bt_nkeys < borrow_lim && bound < curr->bt_nkeys) {
+                struct scc_btnode_base *right = scc_btnode_child(base, curr, bound + 1u);
+                if(right->bt_nkeys >= borrow_lim) {
+                    next = right;
+                    swap_pred = false;
+                }
+                else {
+                    scc_btnode_merge_right(base, next, right, curr, bound, elemsize);
+                    found = next;
+                    fbound = scc_btnode_lower_bound(base, found, btree, elemsize);
                 }
             }
         }
