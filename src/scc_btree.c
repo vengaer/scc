@@ -1068,7 +1068,7 @@ static void scc_btree_balance_non_preemptive(
 ) {
     assert(scc_stack_size(nodes) == scc_stack_size(bounds));
 
-    size_t const borrow_lim = base->bt_order >> 1u;
+    size_t const borrow_lim = (base->bt_order >> 1u) + 1u;
     struct scc_btnode_base *sibling = 0;
     struct scc_btnode_base *next;
     size_t bound;
@@ -1078,7 +1078,7 @@ static void scc_btree_balance_non_preemptive(
         curr = scc_stack_top(nodes);
         bound = scc_stack_top(bounds);
 
-        if(!curr || next->bt_nkeys >= borrow_lim) {
+        if(!curr || next->bt_nkeys >= borrow_lim - 1u) {
             break;
         }
 
@@ -1087,7 +1087,7 @@ static void scc_btree_balance_non_preemptive(
 
         if(bound) {
             sibling = scc_btnode_child(base, curr, bound - 1u);
-            if(sibling->bt_nkeys >= borrow_lim && next->bt_nkeys) {
+            if(sibling->bt_nkeys >= borrow_lim) {
                 scc_btnode_rotate_right(base, next, sibling, curr, bound, elemsize);
                 continue;
             }
@@ -1095,7 +1095,7 @@ static void scc_btree_balance_non_preemptive(
 
         if(bound < curr->bt_nkeys) {
             sibling = scc_btnode_child(base, curr, bound + 1u);
-            if(sibling->bt_nkeys >= borrow_lim && next->bt_nkeys) {
+            if(sibling->bt_nkeys >= borrow_lim) {
                 scc_btnode_rotate_left(base, next, sibling, curr, bound, elemsize);
                 continue;
             }
@@ -1124,7 +1124,7 @@ static void scc_btree_balance_non_preemptive(
 //?     :returns: :code:`true` if the value was removed, :code:`false` if the value
 //?               wasn't found
 static _Bool scc_btree_remove_non_preemptive(struct scc_btree_base *restrict base, void *restrict btree, size_t elemsize) {
-    size_t const borrow_lim = base->bt_order >> 1u;
+    size_t const borrow_lim = (base->bt_order >> 1u) + 1u;
     size_t const origsz = base->bt_size;
     _Bool swap_pred = true;
     scc_stack(struct scc_btnode_base *) nodes = scc_stack_new(struct scc_btnode_base *);
