@@ -147,9 +147,9 @@ void scc_btree_impl_inspect_dump(void const *restrict btree, size_t elemsize, FI
                 for(unsigned j = 0u; j < scc_vec_size(iter->bytes); ++j) {
                     if(!(j % elemsize)) {
                         (void)fputs(" 0x", fp);
+                        ++total;
                     }
                     (void)fprintf(fp, "%02x", iter->bytes[j]);
-                    ++total;
                 }
                 (void)fputs(" | ", fp);
             }
