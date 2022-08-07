@@ -11,8 +11,7 @@
 //! .. c:macro:: scc_btree(type)
 //!
 //!     Expands to an opaque pointer suitable for storing
-//!     a handle to a B-tree containing the specified type
-//!
+//!     a handle to a B-tree containing the specified type !
 //!     :param type: The type to store in the B-tree
 #define scc_btree(type) type *
 
@@ -494,6 +493,23 @@ _Bool scc_btree_impl_insert(void *btreeaddr, size_t elemsize);
 //!     :returns: A :code:`_Bool` indicating whether the insertion took place
 //!     :retval true: The value was inserted
 //!     :retval false: The values was already in the tree, or memory allocation failure
+//!
+//!     .. code-block:: C
+//!         :caption: Insert 0, 1, 2, 3 and 4 in a btree
+//!
+//!         extern int compare(void const *l, void const *r);
+//!
+//!         scc_btree(int) btree = scc_btree_new(int, compare);
+//!
+//!         for(int i = 0; i < 5; ++i) {
+//!             if(!scc_btree_insert(&btree, i)) {
+//!                 fprintf(stderr, "Could not insert %d\n", i);
+//!             }
+//!         }
+//!
+//!         /* Use B-tree */
+//!
+//!         scc_btree_free(btree);
 #define scc_btree_insert(btreeaddr, value)                                                              \
     scc_btree_impl_insert((**(btreeaddr) = (value), btreeaddr), sizeof(**(btreeaddr)))
 
