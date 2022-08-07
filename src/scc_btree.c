@@ -754,7 +754,7 @@ static size_t scc_btnode_merge(
         memmove(pslot, pslot + elemsize, nmov * elemsize);
     }
     if(!--p->bt_nkeys) {
-        assert(p == base->bt_root);
+        assert(!scc_bits_is_even(base->bt_order) || p == base->bt_root);
         base->bt_root = sibling;
     }
     return nmov;
@@ -901,7 +901,7 @@ static inline void scc_btnode_remove_leaf(
     size_t index,
     size_t elemsize
 ) {
-    assert(node->bt_nkeys > 1u || node == base->bt_root);
+    assert(!scc_bits_is_even(base->bt_order) || node->bt_nkeys > 1u || node == base->bt_root);
 
     size_t nmov = node->bt_nkeys - index - 1u;
     --node->bt_nkeys;
