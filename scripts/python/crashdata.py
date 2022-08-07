@@ -13,14 +13,14 @@ def read_and_dump(file, outfile, skip):
         data = handle.read()[skip:]
 
     with FileWrHandle(outfile) if outfile is not None else StdoutWrHandle() as handle:
-        handle.write('unsigned char data[] = {\n\t')
+        handle.write(f'unsigned char data[] = {{\n{4 * " "}')
         for i, byte in enumerate(data):
             handle.write(f'0x{byte:02x}')
             if i < len(data) - 1:
                 handle.write(',')
             handle.write(' ')
             if not (i + 1) % _LINE_LIM:
-                handle.write('\n\t')
+                handle.write(f'\n{4 * " "}')
 
         handle.writeln('\n}')
 
