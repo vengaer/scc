@@ -832,7 +832,7 @@ static inline void scc_btnode_merge_right(
     scc_arena_try_free(&base->bt_arena, sibling);
 }
 
-//? .. c:function:: void scc_btnode_balance(\
+//? .. c:function:: void scc_btree_balance_preemptive(\
 //?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict next, \
 //?     struct scc_btnode_base *restrict curr, size_t bound, size_t elemsize)
 //?
@@ -847,7 +847,7 @@ static inline void scc_btnode_merge_right(
 //?     :param curr: The current node being traversed. Parent of next
 //?     :param bound: Index of :code:`next` in the link array of :code:`curr`
 //?     :param elemsize: Size of the elements in the B-tree
-static struct scc_btnode_base *scc_btnode_balance(
+static struct scc_btnode_base *scc_btree_balance_preemptive(
     struct scc_btree_base *restrict base,
     struct scc_btnode_base *restrict next,
     struct scc_btnode_base *restrict curr,
@@ -1015,7 +1015,7 @@ static _Bool scc_btree_remove_preemptive(struct scc_btree_base *restrict base, v
             break;
         }
         else if(next->bt_nkeys < borrow_lim) {
-            next = scc_btnode_balance(base, next, curr, bound, elemsize);
+            next = scc_btree_balance_preemptive(base, next, curr, bound, elemsize);
             /* Found value may be rotated into next node when balancing. If it is,
              * the value is always in the next node */
             if(curr == found && base->bt_compare(scc_btnode_value(base, found, fbound, elemsize), btree)) {
@@ -1069,18 +1069,42 @@ static void scc_btree_balance_non_preemptive(
     assert(scc_stack_size(nodes) == scc_stack_size(bounds));
 
     size_t const borrow_lim = base->bt_order >> 1u;
-    struct scc_btnode_base *p = scc_stack_top(nodes);
-    size_t bound = scc_stack_top(bounds);
+    struct scc_btnode_base *sibling = 0;
+    struct scc_btnode_base *next;
+    size_t bound;
 
-    while(p && curr->bt_nkeys < borrow_lim) {
+    while(1) {
+        next = curr;
+        curr = scc_stack_top(nodes);
+        bound = scc_stack_top(bounds);
+
+        if(!curr || next->bt_nkeys >= borrow_lim) {
+            break;
+        }
+
         scc_stack_pop(nodes);
         scc_stack_pop(bounds);
 
-        scc_btnode_balance(base, curr, p, bound, elemsize);
+        if(bound) {
+            sibling = scc_btnode_child(base, curr, bound - 1u);
+            if(sibling->bt_nkeys >= borrow_lim && next->bt_nkeys) {
+                scc_btnode_rotate_right(base, next, sibling, curr, bound, elemsize);
+                continue;
+            }
+        }
 
-        curr = p;
-        p = scc_stack_top(nodes);
-        bound = scc_stack_top(bounds);
+        if(bound < curr->bt_nkeys) {
+            sibling = scc_btnode_child(base, curr, bound + 1u);
+            if(sibling->bt_nkeys >= borrow_lim && next->bt_nkeys) {
+                scc_btnode_rotate_left(base, next, sibling, curr, bound, elemsize);
+                continue;
+            }
+            scc_btnode_merge_right(base, next, sibling, curr, bound, elemsize);
+            continue;
+        }
+
+        assert(sibling);
+        scc_btnode_merge_left(base, next, sibling, curr, bound, elemsize);
     }
 }
 
