@@ -627,6 +627,9 @@ void test_scc_btree_fuzzer_failure14(void) {
     }
     unsigned char const *p;
     for(size_t i = 0u; i < scc_arrsize(data); ++i) {
+        /* TODO: preemptive free of parent while balancing */
+        fprintf(stderr, "%zu: remove %#x\n", i, (unsigned)data[i]);
+        scc_btree_inspect_dump(btree, stderr);
         TEST_ASSERT_TRUE(scc_btree_remove(btree, data[i]));
         TEST_ASSERT_EQUAL_UINT32(0u, scc_btree_inspect_invariants(btree));
         TEST_ASSERT_EQUAL_UINT64(scc_btree_size(btree), scc_btree_inspect_size(btree));
