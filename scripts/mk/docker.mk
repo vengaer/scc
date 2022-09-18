@@ -15,6 +15,6 @@ docker-image: $(__image_stamp)
 
 docker: $(__image_stamp)
 	$(call echo-exec,$(IMAGE))
-	docker run --rm -ti --net=host -u$$(id -u) -w=$(root) -v$(root):$(root) $(IMAGE)
+	docker run --rm -ti --net=host -w=$(root) -v$(root):$(root) $(IMAGE)
 
 endif
