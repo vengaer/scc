@@ -44,6 +44,7 @@ __clean_benchmark:
 .PHONY: distclean
 distclean: $(if $(wildcard $(submodules)),__clean_unity)
 distclean: $(if $(wildcard $(submodules)),__clean_benchmark)
+	rm -f $(submodules)
 
 else
 # Recurse to top level
