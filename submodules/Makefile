@@ -13,8 +13,6 @@ benchmarkalib        := $(benchmarkbuilddir)/src/libbenchmark.a
 benchmarkmain_alib   := $(patsubst %.a,%_main.a,$(benchmarkalib))
 benchmark_buildflags := -DCMAKE_BUILD_TYPE=Release -DBENCHMARK_DOWNLOAD_DEPENDENCIES=on
 
-submodules := $(__node_path)/.init.stamp
-
 $(submodules):
 	git submodule update --init
 	$(TOUCH) $@
