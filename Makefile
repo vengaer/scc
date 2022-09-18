@@ -1,7 +1,5 @@
 .SECONDEXPANSION:
 
--include .config
-
 CC           := clang
 CXX          := clang++
 AS           := $(CC)

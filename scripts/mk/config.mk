@@ -7,6 +7,7 @@ include $(mkscripts)/refl.mk
 
 CONFTOOL          := conftool
 CONFIG            := $(root)/.config
+-include $(CONFIG)
 __conftool_spec   := $(root)/.conftool.$(jsonext)
 
 __validate_config := $(builddir)/.config.valid.stamp
