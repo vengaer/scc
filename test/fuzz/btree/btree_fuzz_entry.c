@@ -21,6 +21,9 @@ int LLVMFuzzerTestOneInput(uint8_t const *data, size_t size) { /* NOLINT(readabi
     if(size-- < 2u) {
         return 0;
     }
+    if(*data & 0x01) {
+        return 0;
+    }
 
     scc_btree(uint8_t) btree;
 #define CASE(i) case i: btree = scc_btree_with_order(uint8_t, compare, i); break;

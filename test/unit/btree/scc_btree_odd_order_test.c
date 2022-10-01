@@ -84,6 +84,8 @@ void test_scc_btree_insert_non_monotonic_odd_order(void) {
 }
 
 void test_scc_btree_remove_odd_order(void) {
+    TEST_IGNORE_MESSAGE("Odd-order removal not implemented");
+    TEST_IGNORE();
     enum { TEST_SIZE = 320 };
     scc_btree(int) btree = scc_btree_with_order(int, compare, 5);
 
