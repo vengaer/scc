@@ -1,6 +1,7 @@
 #ifndef SCC_ARENA_H
 #define SCC_ARENA_H
 
+#include "scc_assert.h"
 #include "scc_mem.h"
 
 #include <stddef.h>
@@ -8,6 +9,8 @@
 #ifndef SCC_ARENA_CHUNKSIZE
 enum { SCC_ARENA_CHUNKSIZE = 256 };
 #endif
+
+scc_static_assert(SCC_ARENA_CHUNKSIZE > 2);
 
 struct scc_arena {
     struct scc_chunk *ar_first;     /* First chunk */
