@@ -30,16 +30,21 @@ def write(data, outfile):
         'simd_isa': 'SCC_SIMD_ISA_{}',
         'hostos': 'SCC_HOST_OS_{}',
         'vecsize': 'SCC_VECSIZE {}',
-        'abi': 'SCC_ABI_{}'
+        'abi': 'SCC_ABI_{}',
+        'CONFIG_ARENA_CHUNKSIZE': 'SCC_ARENA_CHUNKSIZE {}'
     }
     with FileWrHandle(outfile) if outfile is not None else StdoutWrHandle() as handle:
         handle.writeln('#ifndef SCC_CONFIG_H')
         handle.writeln('#define SCC_CONFIG_H\n')
         for var, fmt in formats.items():
-            name = fmt.format(data[var]).split(' ', maxsplit=1)[0]
-            handle.writeln(f'#ifndef {name}')
-            handle.writeln(f'#define {fmt.format(data[var])}')
-            handle.writeln('#endif\n')
+            try:
+                name = fmt.format(data[var]).split(' ', maxsplit=1)[0]
+                handle.writeln(f'#ifndef {name}')
+                handle.writeln(f'#define {fmt.format(data[var])}')
+                handle.writeln('#endif\n')
+            except KeyError as err:
+                if not str(err).replace("'","").startswith('CONFIG_'):
+                    raise
         handle.writeln('#endif /* SCC_CONFIG_H */')
 
 def main(configs, outfile):

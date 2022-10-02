@@ -120,6 +120,14 @@
             "entrytype": "switch",
             "default": "n",
             "help": "Set to track performance-related events"
+        },
+        {
+            "name": "CONFIG_ARENA_CHUNKSIZE",
+            "depends": [],
+            "entrytype": "integer",
+            "default": 256,
+            "help": "Default arena allocator chunk size. Must be greater than 2"
         }
+
     ]
 }

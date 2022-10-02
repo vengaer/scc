@@ -5,7 +5,7 @@ __config_header  := $(__node_path)/scc_config.h
 __scc_incdir     := $(__node_path)
 __public_headers := $(addsuffix .h,$(addprefix $(__node_path)/scc_,btree hashmap hashtab rbtree ringdeque stack svec vec))
 
-$(__config_header): $(pyscripts)/confgen.$(pyext) $(archinfo) $(simdinfo) $(vecinfo)
+$(__config_header): $(pyscripts)/confgen.$(pyext) $(archinfo) $(simdinfo) $(vecinfo) $(CONFIG)
 	$(call echo-gen,$(notdir $@))
 	$(PYTHON) $< $(filter-out $<,$^) -o $@
 	touch $@
