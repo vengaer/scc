@@ -1045,6 +1045,169 @@ static _Bool scc_btree_remove_preemptive(struct scc_btree_base *restrict base, v
     return true;
 }
 
+//? .. c:function:: void scc_btree_balance_non_preemptive(\
+//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict curr, \
+//?     struct scc_btnode_base **restrict nodes, size_t *bounds, size_t elemsize)
+//?
+//?     Traverse the tree back towards the root, balancing as needed
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: B-tree base address
+//?     :param curr: Leaf node in which to start the traversal
+//?     :param nodes: Stack of nodes traversed while finding the leaf
+//?     :param bounds: Stack of bounds computed whilefinding the leaf. The
+//?                    nth bound in the stack is the index of the link in the
+//?                    nth node to obtain the n+1th node
+//?     :param elemsize: Size of the elements in the B-tree
+static void scc_btree_balance_non_preemptive(
+    struct scc_btree_base *restrict base,
+    struct scc_btnode_base *restrict curr,
+    scc_stack(struct scc_btnode_base *) nodes,
+    scc_stack(size_t) bounds,
+    size_t elemsize
+) {
+    assert(scc_stack_size(nodes) == scc_stack_size(bounds));
+
+    size_t const borrow_lim = (base->bt_order >> 1u) + 1u;
+    struct scc_btnode_base *sibling = 0;
+    struct scc_btnode_base *child;
+    size_t bound;
+
+    while(1) {
+        child = curr;
+        curr = scc_stack_top(nodes);
+        bound = scc_stack_top(bounds);
+
+        if(!curr || child->bt_nkeys >= borrow_lim - 1u) {
+            break;
+        }
+
+        scc_stack_pop(nodes);
+        scc_stack_pop(bounds);
+
+        if(bound) {
+            sibling = scc_btnode_child(base, curr, bound - 1u);
+            if(sibling->bt_nkeys >= borrow_lim) {
+                scc_btnode_rotate_right(base, child, sibling, curr, bound, elemsize);
+                continue;
+            }
+        }
+
+        if(bound < curr->bt_nkeys) {
+            sibling = scc_btnode_child(base, curr, bound + 1u);
+            if(sibling->bt_nkeys >= borrow_lim) {
+                scc_btnode_rotate_left(base, child, sibling, curr, bound, elemsize);
+                continue;
+            }
+            scc_btnode_merge_right(base, child, sibling, curr, bound, elemsize);
+            continue;
+        }
+
+        assert(sibling);
+        scc_btnode_merge_left(base, child, sibling, curr, bound, elemsize);
+    }
+}
+
+//? .. c:function:: _Bool scc_btree_remove_non_preemptive(\
+//?     struct scc_btree_base *restrict base, void *restrict btree, size_t elemsize)
+//?
+//?     Find and remove the value stored in the :code:`bt_curr` field using non-preemptive
+//?     merging
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: B-tree base address
+//?     :param btree: B-tree handle
+//?     :param elemsize: Size of the elements in the tree
+//?     :returns: :code:`true` if the value was removed, :code:`false` if the value
+//?               wasn't found
+static _Bool scc_btree_remove_non_preemptive(struct scc_btree_base *restrict base, void *restrict btree, size_t elemsize) {
+    size_t const borrow_lim = (base->bt_order >> 1u) + 1u;
+    size_t const origsz = base->bt_size;
+
+    _Bool swap_pred = true;
+
+    scc_stack(struct scc_btnode_base *) nodes = scc_stack_new(struct scc_btnode_base *);
+    scc_stack(size_t) bounds = scc_stack_new(size_t);
+
+    struct scc_btnode_base *found = 0;
+    size_t fbound;
+
+    size_t bound;
+
+    struct scc_btnode_base *curr = base->bt_root;
+    struct scc_btnode_base *next;
+
+    unsigned char const *value = 0;
+
+    /* Root has parent NULL */
+    if(!scc_stack_push(&nodes, 0) || !scc_stack_push(&bounds, 0u)) {
+        goto epilogue;
+    }
+
+    while(1) {
+        if(!found) {
+            bound = scc_btnode_lower_bound(base, curr, btree, elemsize);
+        }
+        else {
+            bound = swap_pred * curr->bt_nkeys;
+        }
+
+        next = scc_btnode_child(base, curr, bound);
+        value = scc_btnode_value(base, curr, bound, elemsize);
+        if(!found && bound < curr->bt_nkeys && !base->bt_compare(value, btree)) {
+            found = curr;
+            fbound = bound;
+
+            if(scc_btnode_is_leaf(curr)) {
+                break;
+            }
+
+            if(next->bt_nkeys < borrow_lim && bound < curr->bt_nkeys) {
+                struct scc_btnode_base *right = scc_btnode_child(base, curr, bound + 1u);
+                if(right->bt_nkeys >= borrow_lim) {
+                    ++bound;
+                    next = right;
+                    swap_pred = false;
+                }
+            }
+        }
+
+        if(scc_btnode_is_leaf(curr)) {
+            break;
+        }
+
+        if(!scc_stack_push(&nodes, curr) || !scc_stack_push(&bounds, bound)) {
+            goto epilogue;
+        }
+        curr = next;
+    }
+
+    if(!found) {
+        goto epilogue;
+    }
+
+    if(scc_btnode_is_leaf(found)) {
+        scc_btnode_remove_leaf(base, found, fbound, elemsize);
+    }
+    else {
+        scc_btnode_overwrite(base, curr, found, fbound, elemsize, swap_pred);
+    }
+    scc_btree_balance_non_preemptive(base, curr, nodes, bounds, elemsize);
+
+    --base->bt_size;
+epilogue:
+    scc_stack_free(nodes);
+    scc_stack_free(bounds);
+
+    return base->bt_size < origsz;
+}
+
 void *scc_btree_impl_new(void *base, size_t coff, size_t rootoff) {
 #define base ((struct scc_btree_base *)base)
     size_t fwoff = coff - offsetof(struct scc_btree_base, bt_fwoff) - sizeof(base->bt_fwoff);
@@ -1102,5 +1265,5 @@ _Bool scc_btree_impl_remove(void *btree, size_t elemsize) {
     if(scc_bits_is_even(base->bt_order)) {
         return scc_btree_remove_preemptive(base, btree, elemsize);
     }
-    return false;
+    return scc_btree_remove_non_preemptive(base, btree, elemsize);
 }

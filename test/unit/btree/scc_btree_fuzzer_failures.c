@@ -535,7 +535,6 @@ void test_scc_btree_fuzzer_failure10(void) {
 }
 
 void test_scc_btree_fuzzer_failure11(void) {
-    TEST_IGNORE_MESSAGE("Odd-order removal not implemented");
     unsigned char data[] = {
         0x32, 0x00, 0xe1
     };
@@ -562,7 +561,6 @@ void test_scc_btree_fuzzer_failure11(void) {
 }
 
 void test_scc_btree_fuzzer_failure12(void) {
-    TEST_IGNORE_MESSAGE("Odd-order removal not implemented");
     unsigned char data[] = {
         0x29, 0x9a, 0x00, 0xe1
     };
@@ -589,7 +587,6 @@ void test_scc_btree_fuzzer_failure12(void) {
 }
 
 void test_scc_btree_fuzzer_failure13(void) {
-    TEST_IGNORE_MESSAGE("Odd-order removal not implemented");
     unsigned char data[] = {
         0x14, 0x00, 0x00, 0x00, 0xbb, 0x00, 0xe1
     };
