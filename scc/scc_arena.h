@@ -8,7 +8,7 @@
 #include <stddef.h>
 
 #ifndef SCC_ARENA_CHUNKSIZE
-enum { SCC_ARENA_CHUNKSIZE = 256 };
+#define SCC_ARENA_CHUNKSIZE 256u
 #endif
 
 scc_static_assert(SCC_ARENA_CHUNKSIZE > 0);
