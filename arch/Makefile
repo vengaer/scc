@@ -1,16 +1,16 @@
 ifdef __node
 
-archscript := $(pyscripts)/arch.$(pyext)
-vecscript  := $(pyscripts)/isavec.$(pyext)
+archscript  := $(pyscripts)/arch.$(pyext)
+vecscript   := $(pyscripts)/isavec.$(pyext)
 
 # General platform information
-archinfo   := $(__node_builddir)/archinfo.$(mkext)
+archinfo    := $(__node_builddir)/archinfo.$(mkext)
 # SIMD ISA information
-simdinfo   := $(__node_builddir)/isa.$(mkext)
+simdinfo    := $(__node_builddir)/isa.$(mkext)
 # Vector information
-vecinfo    := $(__node_builddir)/vecinfo.$(mkext)
+vecinfo     := $(__node_builddir)/vecinfo.$(mkext)
 
-isa_query  := $(__node_builddir)/isa_query
+isa_query   := $(__node_builddir)/isa_query
 
 $(archinfo): $(archscript) | $(__node_builddir)
 	$(call echo-gen,$(notdir $@))
@@ -20,14 +20,14 @@ $(if $(call not,$(__skip_arch)),                \
     $(call __include-barrier-rel,$(archinfo))   \
     $(call __include-barrier-rel,$(vecinfo)))
 
-query_srcdir := $(__node_path)/$(arch_lower)/$(abi_lower)
-__node_obj   := $(call wildcard-obj,$(query_srcdir),$(asext))
+query_srcdir  := $(__node_path)/$(arch_lower)/$(abi_lower)
+__query_obj   := $(call wildcard-obj,$(query_srcdir),$(asext))
 
 $(simdinfo): $(isa_query)
 	$(call echo-gen,$(notdir $@))
 	$< $@
 
-$(call __include-barrier-acq,$(archinfo),$(isa_query)): $(__node_obj) | $(archinfo) $(__node_builddir)
+$(call __include-barrier-acq,$(archinfo),$(isa_query)): $(__query_obj) | $(archinfo) $(__node_builddir)
 	$(call echo-ld,$(notdir $@))
 	$(LD) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 

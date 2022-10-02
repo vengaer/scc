@@ -6,6 +6,7 @@ libscc.*
 .config
 crash-*
 slow-unit-*
+scc_config.h
 
 submodules/*.stamp
 
