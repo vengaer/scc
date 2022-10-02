@@ -755,12 +755,14 @@ static size_t scc_btnode_merge(
     }
     if(!--p->bt_nkeys) {
         assert(!scc_bits_is_even(base->bt_order) || p == base->bt_root);
-        base->bt_root = sibling;
+        if(scc_bits_is_even(base->bt_order)) {
+            base->bt_root = sibling;
+        }
     }
     return nmov;
 }
 
-//? .. c:function:: void scc_btnode_merge_left(\
+//? .. c:function:: void scc_btnode_merge_left_non_preemptive(\
 //?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, \
 //?     struct scc_btnode_base *restrict sibling, struct scc_btnode_base *restrict p, \
 //?     size_t bound, size_t elemsize)
@@ -777,7 +779,7 @@ static size_t scc_btnode_merge(
 //?     :param p: Base address of the parent node of :code:`node` and :code:`sibling`
 //?     :param bound: The index of :code:`node` in :code:`p`'s link array
 //?     :param elemsize: Size of the elements in the B-tree
-static inline void scc_btnode_merge_left(
+static inline void scc_btnode_merge_left_non_preemptive(
     struct scc_btree_base *restrict base,
     struct scc_btnode_base *restrict node,
     struct scc_btnode_base *restrict sibling,
@@ -786,17 +788,47 @@ static inline void scc_btnode_merge_left(
     size_t elemsize
 ) {
     size_t nmov = scc_btnode_merge(base, node, sibling, p, bound - 1u, elemsize) + 1u;
-    if(!p->bt_nkeys) {
-        scc_arena_try_free(&base->bt_arena, p);
-    }
-    else if(bound <= p->bt_nkeys) {
+    if(bound <= p->bt_nkeys) {
         struct scc_btnode_base **plinks = scc_btnode_links(base, p);
         memmove(plinks + bound, plinks + bound + 1u, nmov * sizeof(*plinks));
     }
     scc_arena_try_free(&base->bt_arena, node);
 }
 
-//? .. c:function:: void scc_btnode_merge_right(\
+//? .. c:function:: void scc_btnode_merge_left_preemptive(\
+//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, \
+//?     struct scc_btnode_base *restrict sibling, struct scc_btnode_base *restrict p, \
+//?     size_t bound, size_t elemsize)
+//?
+//?     Merge the given node with its left sibling, freeing the parent node
+//?     if required
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: B-tree base address
+//?     :param node: Base address of node to be rotated into
+//?     :param sibling: Base address of the left sibling of :code:`node`
+//?     :param p: Base address of the parent node of :code:`node` and :code:`sibling`
+//?     :param bound: The index of :code:`node` in :code:`p`'s link array
+//?     :param elemsize: Size of the elements in the B-tree
+static inline void scc_btnode_merge_left_preemptive(
+    struct scc_btree_base *restrict base,
+    struct scc_btnode_base *restrict node,
+    struct scc_btnode_base *restrict sibling,
+    struct scc_btnode_base *restrict p,
+    size_t bound,
+    size_t elemsize
+) {
+    scc_btnode_merge_left_non_preemptive(base, node, sibling, p, bound, elemsize);
+    if(!p->bt_nkeys) {
+        scc_arena_try_free(&base->bt_arena, p);
+    }
+}
+
+
+//? .. c:function:: void scc_btnode_merge_right_non_preemptive(\
 //?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, \
 //?     struct scc_btnode_base *restrict sibling, struct scc_btnode_base *restrict p, \
 //?     size_t bound, size_t elemsize)
@@ -813,7 +845,7 @@ static inline void scc_btnode_merge_left(
 //?     :param p: Base address of the parent node of :code:`node` and :code:`sibling`
 //?     :param bound: The index of :code:`node` in :code:`p`'s link array
 //?     :param elemsize: Size of the elements in the B-tree
-static inline void scc_btnode_merge_right(
+static inline void scc_btnode_merge_right_non_preemptive(
     struct scc_btree_base *restrict base,
     struct scc_btnode_base *restrict node,
     struct scc_btnode_base *restrict sibling,
@@ -826,10 +858,39 @@ static inline void scc_btnode_merge_right(
         struct scc_btnode_base **plinks = scc_btnode_links(base, p);
         memmove(plinks + bound + 1u, plinks + bound + 2u, nmov * sizeof(*plinks));
     }
-    else {
+    scc_arena_try_free(&base->bt_arena, sibling);
+}
+
+//? .. c:function:: void scc_btnode_merge_right_preemptive(\
+//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, \
+//?     struct scc_btnode_base *restrict sibling, struct scc_btnode_base *restrict p, \
+//?     size_t bound, size_t elemsize)
+//?
+//?     Merge the given node with its right sibling, freeing the parent node
+//?     as required
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: B-tree base address
+//?     :param node: Base address of node to be rotated into
+//?     :param sibling: Base address of the right sibling of :code:`node`
+//?     :param p: Base address of the parent node of :code:`node` and :code:`sibling`
+//?     :param bound: The index of :code:`node` in :code:`p`'s link array
+//?     :param elemsize: Size of the elements in the B-tree
+static inline void scc_btnode_merge_right_preemptive(
+    struct scc_btree_base *restrict base,
+    struct scc_btnode_base *restrict node,
+    struct scc_btnode_base *restrict sibling,
+    struct scc_btnode_base *restrict p,
+    size_t bound,
+    size_t elemsize
+) {
+    scc_btnode_merge_right_non_preemptive(base, node, sibling, p, bound, elemsize);
+    if(!p->bt_nkeys) {
         scc_arena_try_free(&base->bt_arena, p);
     }
-    scc_arena_try_free(&base->bt_arena, sibling);
 }
 
 //? .. c:function:: void scc_btree_balance_preemptive(\
@@ -871,12 +932,12 @@ static struct scc_btnode_base *scc_btree_balance_preemptive(
             scc_btnode_rotate_left(base, next, sibling, curr, bound, elemsize);
             return next;
         }
-        scc_btnode_merge_right(base, next, sibling, curr, bound, elemsize);
+        scc_btnode_merge_right_preemptive(base, next, sibling, curr, bound, elemsize);
         return next;
     }
 
     assert(sibling);
-    scc_btnode_merge_left(base, next, sibling, curr, bound, elemsize);
+    scc_btnode_merge_left_preemptive(base, next, sibling, curr, bound, elemsize);
     return sibling;
 }
 
@@ -1005,7 +1066,7 @@ static _Bool scc_btree_remove_preemptive(struct scc_btree_base *restrict base, v
                     swap_pred = false;
                 }
                 else {
-                    scc_btnode_merge_right(base, next, right, curr, bound, elemsize);
+                    scc_btnode_merge_right_preemptive(base, next, right, curr, bound, elemsize);
                     found = next;
                     fbound = scc_btnode_lower_bound(base, found, btree, elemsize);
                 }
@@ -1102,12 +1163,18 @@ static void scc_btree_balance_non_preemptive(
                 scc_btnode_rotate_left(base, child, sibling, curr, bound, elemsize);
                 continue;
             }
-            scc_btnode_merge_right(base, child, sibling, curr, bound, elemsize);
+            scc_btnode_merge_right_non_preemptive(base, child, sibling, curr, bound, elemsize);
             continue;
         }
 
         assert(sibling);
-        scc_btnode_merge_left(base, child, sibling, curr, bound, elemsize);
+        scc_btnode_merge_left_non_preemptive(base, child, sibling, curr, bound, elemsize);
+    }
+
+    if(!base->bt_root->bt_nkeys) {
+        child = *scc_btnode_links(base, base->bt_root);
+        scc_arena_try_free(&base->bt_arena, base->bt_root);
+        base->bt_root = child;
     }
 }
 
@@ -1198,9 +1265,12 @@ static _Bool scc_btree_remove_non_preemptive(struct scc_btree_base *restrict bas
     else {
         scc_btnode_overwrite(base, curr, found, fbound, elemsize, swap_pred);
     }
-    scc_btree_balance_non_preemptive(base, curr, nodes, bounds, elemsize);
-
     --base->bt_size;
+
+    if(base->bt_size) {
+        scc_btree_balance_non_preemptive(base, curr, nodes, bounds, elemsize);
+    }
+
 epilogue:
     scc_stack_free(nodes);
     scc_stack_free(bounds);

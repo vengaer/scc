@@ -16,6 +16,7 @@ RUN useradd -m builder                                                  &&  \
                                      cmake                                  \
                                      rust                               &&  \
     cargo install --path /scc/submodules/conftool --root /usr/local     &&  \
+    pacman -Rns --noconfirm rust                                        &&  \
     pip install --no-cache setuptools sphinx-rtd-theme pylint pytest    &&  \
     chown -R builder:builder /scc
 
