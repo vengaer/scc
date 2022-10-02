@@ -11,7 +11,7 @@
 enum { SCC_ARENA_CHUNKSIZE = 256 };
 #endif
 
-scc_static_assert(SCC_ARENA_CHUNKSIZE > 2);
+scc_static_assert(SCC_ARENA_CHUNKSIZE > 0);
 
 struct scc_arena {
     struct scc_chunk *ar_first;     /* First chunk */

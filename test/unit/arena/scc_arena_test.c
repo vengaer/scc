@@ -18,20 +18,26 @@ void test_scc_arena_alloc_single_chunk(void) {
     TEST_ASSERT_EQUAL_UINT32(1u, arena.ar_current->ch_refcount);
     /* Single chunk expected in arena */
     TEST_ASSERT_EQUAL_PTR(arena.ar_first, arena.ar_current);
+    (void)elem0;
 
+#if SCC_ARENA_CHUNKSIZE > 1
     int *elem1 = scc_arena_alloc(&arena);
     /* Elements should be contiguous */
     TEST_ASSERT_EQUAL_PTR(elem1, (unsigned char *)elem0 + sizeof(*elem0));
     TEST_ASSERT_EQUAL_UINT32(2u, arena.ar_current->ch_refcount);
     /* Only a single chunk in arena */
     TEST_ASSERT_EQUAL_PTR(arena.ar_first, arena.ar_current);
+    (void)elem1;
+#endif
 
+#if SCC_ARENA_CHUNKSIZE > 2
     int *elem2 = scc_arena_alloc(&arena);
     /* Contiguous elements */
     TEST_ASSERT_EQUAL_PTR(elem2, (unsigned char *)elem1 + sizeof(*elem1));
     TEST_ASSERT_EQUAL_UINT32(3u, arena.ar_current->ch_refcount);
     /* Single chunk in arena */
     TEST_ASSERT_EQUAL_PTR(arena.ar_first, arena.ar_current);
+#endif
 
     scc_arena_release(&arena);
 }
@@ -226,6 +232,7 @@ void test_scc_arena_free_last_chunk(void) {
 
     /* Current last chunk */
     chunk = (struct scc_chunk *)((unsigned char *)p - arena.ar_baseoff);
+#if SCC_ARENA_CHUNKSIZE > 1
     /* Reduce refcount to 0, chunk should not be freed as there is
      * still plenty of memory available in it */
     scc_arena_free(&arena, p);
@@ -255,6 +262,7 @@ void test_scc_arena_free_last_chunk(void) {
     scc_arena_free(&arena, p);
     /* Chunk should now have been released */
     TEST_ASSERT_EQUAL_PTR(arena.ar_first->ch_next->ch_next->ch_next, arena.ar_current);
+#endif
 
     scc_arena_release(&arena);
 }
