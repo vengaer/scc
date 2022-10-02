@@ -789,7 +789,7 @@ static inline void scc_btnode_merge_left(
     if(!p->bt_nkeys) {
         scc_arena_try_free(&base->bt_arena, p);
     }
-    else if (bound <= p->bt_nkeys) {
+    else if(bound <= p->bt_nkeys) {
         struct scc_btnode_base **plinks = scc_btnode_links(base, p);
         memmove(plinks + bound, plinks + bound + 1u, nmov * sizeof(*plinks));
     }

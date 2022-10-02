@@ -111,7 +111,7 @@ void *scc_vec_impl_from(size_t offset, void const *data, size_t size, size_t ele
     size_t const npad = offset - sizeof(struct scc_vec_base);
     size_t const nbytes = scc_vec_bytesize(size, elemsize, npad);
     struct scc_vec_base *v = scc_vec_alloc(nbytes, size, npad);
-    if (!v) {
+    if(!v) {
         return 0;
     }
     v->sv_capacity = size;
