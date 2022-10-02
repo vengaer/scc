@@ -821,7 +821,7 @@ static inline void scc_btnode_merge_right(
     size_t bound,
     size_t elemsize
 ) {
-    size_t nmov = scc_btnode_merge(base, sibling, node, p, bound, elemsize) + 1u; /* NOLINT(readability-suspicious-call-argument) */
+    size_t nmov = scc_btnode_merge(base, sibling, node, p, bound, elemsize); /* NOLINT(readability-suspicious-call-argument) */
     if(p->bt_nkeys) {
         struct scc_btnode_base **plinks = scc_btnode_links(base, p);
         memmove(plinks + bound + 1u, plinks + bound + 2u, nmov * sizeof(*plinks));
