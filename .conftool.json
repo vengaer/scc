@@ -126,7 +126,7 @@
             "depends": [],
             "entrytype": "integer",
             "default": 256,
-            "help": "Default arena allocator chunk size. Must be greater than 2"
+            "help": "Default arena allocator chunk size"
         }
 
     ]
