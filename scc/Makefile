@@ -10,6 +10,12 @@ $(__config_header): $(pyscripts)/confgen.$(pyext) $(archinfo) $(simdinfo) $(veci
 	$(PYTHON) $< $(filter-out $<,$^) -o $@
 	touch $@
 
+.PHONY: __clean_config_header
+__clean_config_header:
+	$(RM) $(RMFLAGS) $(__config_header)
+
+clean: __clean_config_header
+
 else
 # Recurse to top level
 __recurse := $(if $(MAKECMDGOALS),$(MAKECMDGOALS),__recurse)
