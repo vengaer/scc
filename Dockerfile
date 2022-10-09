@@ -3,7 +3,6 @@ LABEL maintainer="vilhelm.engstrom@tuta.io"
 
 COPY . /scc
 WORKDIR /scc
-ENV CC=clang
 
 RUN useradd -m builder                                                  &&  \
     pacman -Syu --noconfirm --needed make                                   \
