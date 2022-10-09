@@ -25,7 +25,7 @@ $(eval
         $(foreach __s,$(wildcard $(__node_path)/*.$(__ext)),
             $(eval __lint_$(__s) := $(__node_builddir)/.lint.$(notdir $(__s)).stamp)
 
-            $(__lint_$(__s)): $(__s) $(__all_mkfiles) | $(__node_builddir) $(submodules)
+            $(__lint_$(__s)): $(__s) $(__config_header) $(__all_mkfiles) | $(__node_builddir) $(submodules)
 	            $$(call echo-lint,$$(notdir $$<))
 	            $(TIDY) $(TIDYFLAGS) $$< -- $(CPPFLAGS) $(CFLAGS)
 	            $(TOUCH) $$@
