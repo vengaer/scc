@@ -6,85 +6,54 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#define rn_left     rn_bare.un_link.node.left
-#define rn_right    rn_bare.un_link.node.right
-#define rn_tree     rn_bare.un_link.tree
-#define rn_color    rn_bare.color
-#define rn_flags    rn_bare.flags
-
-#define rb_root     rb_sentinel.un_link.root
-
 enum { SCC_RBTREE_INSPECT_LEFT = 0 };
 enum { SCC_RBTREE_INSPECT_RIGHT = 1 };
 enum { SCC_RBTREE_INSPECT_LTHRD = 0x1 };
 enum { SCC_RBTREE_INSPECT_RTHRD = 0x2 };
 enum { SCC_RBTREE_INSPECT_LEAF = 0x3 };
 
+#define rb_root rb_sentinel.rs_left
+
 #define scc_rbnode_value_qual(tree, node, qual)     \
-    ((unsigned char qual *)(node) + (tree)->rb_baseoff)
+    ((unsigned char qual *)(node) + (tree)->rb_dataoff)
 
 #define scc_rbnode_value(tree, node)                \
     scc_rbnode_value_qual(tree, node,)
 
-static bool scc_rbtree_inspect_thread(struct scc_rbnode const *node, unsigned dir);
-static bool scc_rbtree_inspect_red(struct scc_rbnode const *node);
-static bool scc_rbtree_inspect_black(struct scc_rbnode const *node);
-static bool scc_rbtree_inspect_red_safe(struct scc_rbnode const *node, unsigned dir);
-static bool scc_rbtree_inspect_has_red_child(struct scc_rbnode const *node);
-static bool scc_rbtree_inspect_red_violation(struct scc_rbnode const *node);
-static bool scc_rbtree_inspect_has_child(struct scc_rbnode const *node, unsigned dir);
-static int scc_rbtree_inspect_compare(
-    struct scc_rbtree const *restrict tree,
-    struct scc_rbnode const *restrict left,
-    struct scc_rbnode const *restrict right
-);
-static bool scc_rbtree_inspect_left_violation(
-    struct scc_rbtree const *tree,
-    struct scc_rbnode const *node
-);
-static inline bool scc_rbtree_inspect_right_violation(
-    struct scc_rbtree const *tree,
-    struct scc_rbnode const *node
-);
-scc_inspect_mask scc_rbtree_inspect_node(
-    struct scc_rbtree const *restrict tree,
-    struct scc_rbnode const *restrict node
-);
-
-static inline bool scc_rbtree_inspect_thread(struct scc_rbnode const *node, unsigned dir) {
+static inline bool scc_rbtree_inspect_thread(struct scc_rbnode_base const *node, unsigned dir) {
     return node->rn_flags & (1 << dir);
 }
 
-static inline bool scc_rbtree_inspect_red(struct scc_rbnode const *node) {
+static inline bool scc_rbtree_inspect_red(struct scc_rbnode_base const *node) {
     return node->rn_color == scc_rbcolor_red;
 }
 
-static inline bool scc_rbtree_inspect_black(struct scc_rbnode const *node) {
+static inline bool scc_rbtree_inspect_black(struct scc_rbnode_base const *node) {
     return !scc_rbtree_inspect_red(node);
 }
 
-static inline bool scc_rbtree_inspect_red_safe(struct scc_rbnode const *node, unsigned dir) {
+static inline bool scc_rbtree_inspect_red_safe(struct scc_rbnode_base const *node, unsigned dir) {
     return !scc_rbtree_inspect_thread(node, dir) &&
             scc_rbtree_inspect_red(dir ? node->rn_left : node->rn_right);
 }
 
-static inline bool scc_rbtree_inspect_has_red_child(struct scc_rbnode const *node) {
+static inline bool scc_rbtree_inspect_has_red_child(struct scc_rbnode_base const *node) {
     return scc_rbtree_inspect_red_safe(node, SCC_RBTREE_INSPECT_LEFT) ||
            scc_rbtree_inspect_red_safe(node, SCC_RBTREE_INSPECT_RIGHT);
 }
 
-static inline bool scc_rbtree_inspect_red_violation(struct scc_rbnode const *node) {
+static inline bool scc_rbtree_inspect_red_violation(struct scc_rbnode_base const *node) {
     return  scc_rbtree_inspect_red(node) && scc_rbtree_inspect_has_red_child(node);
 }
 
-static inline bool scc_rbtree_inspect_has_child(struct scc_rbnode const *node, unsigned dir) {
+static inline bool scc_rbtree_inspect_has_child(struct scc_rbnode_base const *node, unsigned dir) {
     return !(node->rn_flags & (1 << dir));
 }
 
 static inline int scc_rbtree_inspect_compare(
-    struct scc_rbtree const *restrict tree,
-    struct scc_rbnode const *restrict left,
-    struct scc_rbnode const *restrict right
+    struct scc_rbtree_base const *restrict tree,
+    struct scc_rbnode_base const *restrict left,
+    struct scc_rbnode_base const *restrict right
 ) {
     void const *laddr = scc_rbnode_value_qual(tree, left, const);
     void const *raddr = scc_rbnode_value_qual(tree, right, const);
@@ -92,24 +61,24 @@ static inline int scc_rbtree_inspect_compare(
 }
 
 static inline bool scc_rbtree_inspect_left_violation(
-    struct scc_rbtree const *tree,
-    struct scc_rbnode const *node
+    struct scc_rbtree_base const *tree,
+    struct scc_rbnode_base const *node
 ) {
     return scc_rbtree_inspect_has_child(node, SCC_RBTREE_INSPECT_LEFT) &&
            scc_rbtree_inspect_compare(tree, node->rn_left, node) >= 0;
 }
 
 static inline bool scc_rbtree_inspect_right_violation(
-    struct scc_rbtree const *tree,
-    struct scc_rbnode const *node
+    struct scc_rbtree_base const *tree,
+    struct scc_rbnode_base const *node
 ) {
     return scc_rbtree_inspect_has_child(node, SCC_RBTREE_INSPECT_RIGHT) &&
            scc_rbtree_inspect_compare(tree, node, node->rn_right) >= 0;
 }
 
 scc_inspect_mask scc_rbtree_inspect_node(
-    struct scc_rbtree const *restrict tree,
-    struct scc_rbnode const *restrict node
+    struct scc_rbtree_base const *restrict tree,
+    struct scc_rbnode_base const *restrict node
 ) {
     if(node->rn_left == node) {
         /* Left link causes loop */
@@ -138,13 +107,7 @@ scc_inspect_mask scc_rbtree_inspect_node(
 
 scc_inspect_mask scc_rbtree_inspect_properties(void const *handle) {
     enum { NOT_TRAVERSED = -1 };
-    struct scc_rbtree const *tree =
-        scc_container_qual(
-            (unsigned char const *)handle - ((unsigned char const *)handle)[-1],
-            struct scc_rbnode,
-            rn_buffer,
-            const
-        )->rn_tree;
+    struct scc_rbtree_base const *tree = scc_rbtree_impl_base_qual(handle, const);
 
     if(!tree->rb_size) {
         return 0;
@@ -156,14 +119,13 @@ scc_inspect_mask scc_rbtree_inspect_properties(void const *handle) {
     }
 
     struct nodectx {
-        struct scc_rbnode const *ct_node;
+        struct scc_rbnode_base const *ct_node;
         long long *ct_pval;
         long long ct_left;
         long long ct_right;
     };
 
-    scc_stack(struct nodectx) stack
-        = scc_stack_new(struct nodectx);
+    scc_stack(struct nodectx) stack = scc_stack_new(struct nodectx);
 
     scc_stack_push(&stack, ((struct nodectx) {
         .ct_node = tree->rb_root,
@@ -213,7 +175,6 @@ scc_inspect_mask scc_rbtree_inspect_properties(void const *handle) {
             }
             scc_stack_pop(stack);
         }
-
     }
 
 epilogue:

@@ -16,7 +16,7 @@ static bool rbtree_fuzz_verify_insert(scc_rbtree(uint32_t) *handle, uint32_t *da
             return false;
         }
 
-        if(scc_rbtree_insert(*handle, data[i]) != should_succeed) {
+        if(scc_rbtree_insert(handle, data[i]) != should_succeed) {
             fprintf(stderr, "Insertion error, expected %s, got %s\n", should_succeed ? "success" : "failure",
                                                                       should_succeed ? "failure" : "success");
             return false;

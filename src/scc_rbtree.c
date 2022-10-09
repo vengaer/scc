@@ -6,230 +6,463 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define rn_left     rn_bare.un_link.node.left
-#define rn_right    rn_bare.un_link.node.right
-#define rn_tree     rn_bare.un_link.tree
-#define rn_color    rn_bare.color
-#define rn_flags    rn_bare.flags
+#define rb_root rb_sentinel.rs_left
 
-#define rb_root     rb_sentinel.un_link.root
+size_t scc_rbtree_impl_npad(void const *rbtree);
+size_t scc_rbtree_size(void const *rbtree);
+_Bool scc_rbtree_empty(void const *rbtree);
+void const *scc_rbtree_impl_iterstop(void const *rbtree);
 
-#define scc_rbtree_sentinel_qual(tree, qual)                \
-    (struct scc_rbnode qual *)&(tree)->rb_sentinel
-
-#define scc_rbtree_sentinel(tree)                           \
-    scc_rbtree_sentinel_qual(tree,)
-
-#define scc_rbnode_link_qual(node, idx, qual)               \
-    (*(struct scc_rbnode * qual*)                           \
-        ((unsigned char qual*)&(node)->rn_left  +           \
-            scc_rbnode_link_offset(node) * idx))
-
-#define scc_rbnode_link(node, idx)                          \
-    scc_rbnode_link_qual(node, idx,)
-
-#define scc_rbnode_baseaddr_qual(node, qual)                \
-    scc_container_qual(                                     \
-        (unsigned char qual *)node - scc_rbnode_npad(node), \
-        struct scc_rbnode,                                  \
-        rn_buffer,                                          \
-        qual                                                \
-    )
-
-#define scc_rbnode_baseaddr(node)                           \
-    scc_rbnode_baseaddr_qual(node,)
-
-#define scc_rbtree_from_handle_qual(handle, qual)           \
-    scc_rbnode_baseaddr_qual(handle, qual)->rn_tree
-
-#define scc_rbtree_from_handle(handle)                      \
-    scc_rbtree_from_handle_qual(handle,)
-
-#define scc_rbnode_value_qual(tree, node, qual)             \
-    ((unsigned char qual *)(node) + (tree)->rb_baseoff)
-
-#define scc_rbnode_value(tree, node)                        \
-    scc_rbnode_value_qual(tree, node,)
-
+//? .. c:enum:: @flags
+//?
+//?     Flags used for internal thread tracking
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     .. c:enumerator:: SCC_RBLTHRD
+//?
+//?         Indicates that the left link of a node is a thread
+//?
+//?     .. c:enumerator:: scc_rbcolor_red
+//?
+//?         Indicates that the right link of a node is a thread
+//?
+//?     .. c:enumerator:: SCC_RBLEAF
+//?
+//?         Indicates that both the left and right links of a node are threads
 enum {
     SCC_RBLTHRD = 0x01,
     SCC_RBRTHRD = 0x02,
-    SCC_RBLEAF  = SCC_RBLTHRD | SCC_RBRTHRD
+    SCC_RBLEAF = SCC_RBLTHRD | SCC_RBRTHRD
 };
 
+//? .. c:enum:: scc_rbdir
+//?
+//?     Denotes the direction of link traversal
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     .. c:enumerator:: scc_rbdir_left
+//?
+//?         Traverse left link
+//?
+//?     .. c:enumerator:: scc_rbdir_right
+//?
+//?         Traverse right link
 enum scc_rbdir {
     scc_rbdir_left,
     scc_rbdir_right
 };
 
-bool scc_rbtree_empty(void const *handle);
+//? .. c:macro:: scc_rbnode_link_qual(node, idx, qual)
+//?
+//?     Obtain suitably qualified pointer to the idxth
+//?     link of the given node
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param node: The node whose link address is to be
+//?                  computed
+//?     :param idx:  The index of the link
+//?     :param qual: Qualifiers to apply to the pointer
+//?     :returns:    Address of the idxth link of the given node
+#define scc_rbnode_link_qual(node, idx, qual)                       \
+    (*(struct scc_rbnode_base *qual *)                              \
+        ((unsigned char qual *)&(node)->rn_left +                   \
+            (scc_rbnode_link_offset(node)) * (idx)))
 
-static void scc_rbnode_set_npad(
-    struct scc_rbnode *restrict node,
-    struct scc_rbtree const *restrict tree
-);
-static unsigned scc_rbnode_npad(void const *rbnode);
-static void *scc_rbtree_new_handle(struct scc_rbtree *tree);
-static unsigned scc_rbnode_link_offset(struct scc_rbnode const *node);
+//? .. c:macro:: scc_rbnode_link(node, idx)
+//?
+//?     Obtain unqualified pointer to the idxth
+//?     link of the given node
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param node: The node whose link address is to be
+//?                  computed
+//?     :param idx:  The index of the link
+//?     :returns:    Address of the idxth link of the given node
+#define scc_rbnode_link(node, idx)                                  \
+    scc_rbnode_link_qual(node, idx,)
 
-static void scc_rbnode_mkred(struct scc_rbnode *node);
-static void scc_rbnode_mkblack(struct scc_rbnode *node);
-static void scc_rbnode_mkleaf(struct scc_rbnode *node);
-static void scc_rbnode_set(struct scc_rbnode *node, enum scc_rbdir dir);
-static void scc_rbnode_unset(struct scc_rbnode *node, enum scc_rbdir dir);
-static bool scc_rbnode_thread(struct scc_rbnode const *node, enum scc_rbdir dir);
-static void scc_rbnode_thread_from(
-    struct scc_rbnode *restrict dst,
-    struct scc_rbnode const *restrict src,
-    enum scc_rbdir dir
-);
-static bool scc_rbnode_red(struct scc_rbnode const *node);
-static bool scc_rbnode_red_safe(struct scc_rbnode const *node, enum scc_rbdir dir);
-static bool scc_rbnode_children_red_safe(struct scc_rbnode const *node);
-static bool scc_rbnode_has_red_child(struct scc_rbnode const *node);
-static bool scc_rbnode_has_thread_link(struct scc_rbnode const *node);
-static int scc_rbtree_compare(
-    struct scc_rbtree const *restrict tree,
-    struct scc_rbnode const *restrict node,
-    void const *restrict needle
-);
-static void const *scc_rbnode_leftmost(struct scc_rbnode const *node);
-static void const *scc_rbnode_rightmost(struct scc_rbnode const *node);
-static struct scc_rbnode *scc_rbtree_rotate_single(struct scc_rbnode *root, enum scc_rbdir dir);
-static struct scc_rbnode *scc_rbtree_rotate_double(struct scc_rbnode *root, enum scc_rbdir dir);
-static void scc_rbtree_balance_insertion(
-    struct scc_rbnode *n,
-    struct scc_rbnode *p,
-    struct scc_rbnode *gp,
-    struct scc_rbnode *ggp
-);
-static struct scc_rbnode *scc_rbtree_balance_removal(
-    struct scc_rbnode *n,
-    struct scc_rbnode *p,
-    struct scc_rbnode *gp,
-    enum scc_rbdir dir
-);
+//? .. c:macro:: scc_rbnode_value_qual(base, node, qual)
+//?
+//?     Compute and return suitably qualified pointer to the
+//?     :ref:`rn_value <type_rn_value>` field in the given
+//?     node
+//?
+//?     :param base: Base address of the rbtree
+//?     :param node: Base address of the node
+//?     :param qual: Qualifiers to apply to the computed pointer
+//?     :returns: Address of the :ref:`rn_value <type_rn_value>` field in :code:`node`.
+#define scc_rbnode_value_qual(base, node, qual)                     \
+    ((void qual *)(((unsigned char qual *)node) +                   \
+        ((base)->rb_dataoff)))
 
-static bool scc_rbtree_replace_handle(void **handle, struct scc_rbtree *tree);
-static bool scc_rbtree_insert_empty(void **handle, struct scc_rbtree *tree, struct scc_rbnode *n);
-static bool scc_rbtree_insert_nonempty(void **handle, struct scc_rbtree *tree, struct scc_rbnode *node);
+//? .. c:macro:: scc_rbnode_value(base, node)
+//?
+//?     Compute and return unqualified pointer to the
+//?     :ref:`rn_value <type_rn_value>` field in the given
+//?     node
+//?
+//?     :param base: Base address of the rbtree
+//?     :param node: Base address of the node
+//?     :returns: Address of the :ref:`rn_value <type_rn_value>` field in :code:`node`.
+#define scc_rbnode_value(base, node)                                \
+    scc_rbnode_value_qual(base, node,)
 
-static inline void scc_rbnode_set_npad(
-    struct scc_rbnode *restrict node,
-    struct scc_rbtree const *restrict tree
+//? .. c:macro:: scc_rbnode_impl_base_qual(valaddr, qual)
+//?
+//?     Obtain suitably qualified pointer to the base
+//?     address of the node containing the given value address
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param valaddr: Address of the :ref:`rn_value <type_rn_value>` field
+//?                     in the node
+//?     :param qual:    Qualifiers to apply to the pointer
+//?     :returns:       Base address of the :ref:`struct scc_rbnode_base <scc_rbnode_base>`
+//?                     corresponding to the given value address
+#define scc_rbnode_impl_base_qual(valaddr, qual)                    \
+    scc_container_qual(                                             \
+        (unsigned char qual *)valaddr -                             \
+            scc_rbnode_bkoff(valaddr),                              \
+        struct scc_rbnode_base,                                     \
+        rn_data,                                                    \
+        qual                                                        \
+    )
+
+//? .. c:macro:: scc_rbnode_impl_base(valaddr)
+//?
+//?     Obtain unqualified pointer to the base address of the node
+//?     containing the given value address
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param valaddr: Address of the :ref:`rn_value <type_rn_value>` field
+//?                     in the node
+//?     :returns:       Base address of the :ref:`struct scc_rbnode_base <scc_rbnode_base>`
+//?                     corresponding to the given value address
+#define scc_rbnode_impl_base(valaddr)                               \
+    scc_rbnode_impl_base_qual(valaddr,)
+
+
+//? .. c:function:: size_t scc_rbnode_link_offset(struct scc_rbnode_base const *node)
+//?
+//?     Compute offset between the :ref:`rn_left <struct_scc_rbnode_base_rn_left>`
+//?     and :ref:`rn_right <struct_scc_rbnode_base_rn_right>` pointers in an
+//?     rbnode
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param node: The node to use for the computation
+//?     :returns:    The offset between the two links of an rbnode
+static inline size_t scc_rbnode_link_offset(struct scc_rbnode_base const *node) {
+    return ((unsigned char const*)&node->rn_right) - ((unsigned char const *)&node->rn_left);
+}
+
+
+//? .. c:function:: void scc_rbtree_set_bkoff(unsigned char *rbtree, unsigned char bkoff)
+//?
+//?     Set the :ref:`rb_bkoff <unsigned_char_rb_bkoff>` field to the given value
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param rbtree: Handle to the rbtree
+//?     :param bkoff:  The value to set the bkoff field to
+static inline void scc_rbtree_set_bkoff(unsigned char *rbtree, unsigned char bkoff) {
+    rbtree[-1] = bkoff;
+}
+
+//? .. c:function:: void scc_rbnode_set_bkoff(\
+//?     struct scc_rbtree_base const *restrict base, struct scc_rbnode_base *restrict node)
+//?
+//?     Set the :ref:`rn_bkoff <unsigned_char_rn_bkoff>` field of the given node
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Base address of the rbtree
+//?     :param node: The node whose :ref:`rn_bkoff <unsigned_char_rn_bkoff>` field is to be
+//?                  set
+static inline void scc_rbnode_set_bkoff(
+    struct scc_rbtree_base const *restrict base,
+    struct scc_rbnode_base *restrict node
 ) {
-
-    unsigned const npad = tree->rb_baseoff - sizeof(struct scc_rbnode_bare);
-    assert(npad <= UCHAR_MAX);
-    ((unsigned char *)node)[tree->rb_baseoff - 1] = npad;
+    unsigned const bkoff = base->rb_dataoff - offsetof(struct scc_rbnode_base, rn_data);
+    assert(bkoff <= UCHAR_MAX);
+    ((unsigned char *)node)[base->rb_dataoff - 1u] = bkoff;
 }
 
-static inline unsigned scc_rbnode_npad(void const *node) {
-    return ((unsigned char const *)node)[-1];
+//? .. c:function:: size_t scc_rbnode_bkoff(void const *iter)
+//?
+//?     Read the :ref:`rn_bkoff <unsigned_char_rn_bkoff>` field of the rbnode
+//?     correponding to the given value address
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param iter: Address of the :ref:`rn_value <type_rn_value>` field in the
+//?                  currently traversed rbnode
+//?     :returns:    Value of the :ref:`rn_bkoff <unsigned_char_rn_bkoff>` in the
+//?                  node containing to the given value
+static inline size_t scc_rbnode_bkoff(void const *iter) {
+    return ((unsigned char const *)iter)[-1];
 }
 
-static void *scc_rbtree_new_handle(struct scc_rbtree *tree) {
-    struct scc_rbnode *node = scc_arena_alloc(&tree->rb_arena);
-    if(!node) {
-        return 0;
-    }
-    node->rn_tree = tree;
-    scc_rbnode_set_npad(node, tree);
-    return (unsigned char *)node + tree->rb_baseoff;
-}
-
-static inline unsigned scc_rbnode_link_offset(struct scc_rbnode const *node) {
-    return (unsigned char const *)&node->rn_right - (unsigned char const *)&node->rn_left;
-}
-
-static inline void scc_rbnode_mkred(struct scc_rbnode *node) {
-    node->rn_color = scc_rbcolor_red;
-}
-
-static inline void scc_rbnode_mkblack(struct scc_rbnode *node) {
-    node->rn_color = scc_rbcolor_black;
-}
-
-static void scc_rbnode_mkleaf(struct scc_rbnode *node) {
-    node->rn_flags = SCC_RBLEAF;
-}
-
-static inline void scc_rbnode_set(struct scc_rbnode *node, enum scc_rbdir dir) {
+//? .. c:function:: void scc_rbnode_set(struct scc_rbnode_base *node, enum scc_rbdir dir)
+//?
+//?     Set node's thread flag in the given direction
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param node: The node whose flag is to be set
+//?     :param dir:  The direction of the link whose corresponding flag is to be set
+static inline void scc_rbnode_set(struct scc_rbnode_base *node, enum scc_rbdir dir) {
     node->rn_flags |= (1 << dir);
 }
 
-static inline void scc_rbnode_unset(struct scc_rbnode *node, enum scc_rbdir dir) {
+//? .. c:function:: void scc_rbnode_unset(struct scc_rbnode_base *node, enum scc_rbdir dir)
+//?
+//?     Unset node's thread flag in the given direction
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param node: The node whose flag is to be unset
+//?     :param dir:  The direction of the link whose corresponding flag is to be unset
+static inline void scc_rbnode_unset(struct scc_rbnode_base *node, enum scc_rbdir dir) {
     node->rn_flags &= ~(1 << dir);
 }
 
-static inline bool scc_rbnode_thread(struct scc_rbnode const *node, enum scc_rbdir dir) {
-    return node->rn_flags & (1 << dir);
-}
-
-static void scc_rbnode_thread_from(
-    struct scc_rbnode *restrict dst,
-    struct scc_rbnode const *restrict src,
+//? .. c:function:: void scc_rbnode_thread_from(struct scc_rbnode_base *restrict dst, \
+//?     struct scc_rbnode_base const *restrict src, enum scc_rbdir dir)
+//?
+//?     Copy thread flag for the given direction from :code:`src` to :code:`dst`.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param dst: Node to copy the flag bit to
+//?     :param src: Node to copy the flag bit from
+//?     :param dir: The direction corresponding to the flag bit
+static inline void scc_rbnode_thread_from(
+    struct scc_rbnode_base *restrict dst,
+    struct scc_rbnode_base const *restrict src,
     enum scc_rbdir dir
 ) {
     dst->rn_flags = (dst->rn_flags & ~(1 << dir)) | (src->rn_flags & (1 << dir));
 }
 
-static inline bool scc_rbnode_red(struct scc_rbnode const *node) {
-    return node->rn_color == scc_rbcolor_red;
+//? .. c:function:: _Bool scc_rbnode_thread(struct scc_rbnode_base const *node, enum scc_rbdir dir)
+//?
+//?     Determine if the given node's link in the specified direction is a thread
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param node: The node whose link is to be checked
+//?     :param dir:  The direction of the link to be checked
+//?     :returns: :code:`true` if the link in the given direction is a thread, otherwise :code:`false`.
+static inline _Bool scc_rbnode_thread(struct scc_rbnode_base const *node, enum scc_rbdir dir) {
+    return node->rn_flags & (1u << dir);
 }
 
-static inline bool scc_rbnode_red_safe(struct scc_rbnode const *node, enum scc_rbdir dir) {
-    return !scc_rbnode_thread(node, dir) &&
-            scc_rbnode_red(scc_rbnode_link_qual(node, dir, const));
-}
-
-static inline bool scc_rbnode_children_red_safe(struct scc_rbnode const *node) {
-    return scc_rbnode_red_safe(node, scc_rbdir_left) &&
-           scc_rbnode_red_safe(node, scc_rbdir_right);
-}
-
-static inline bool scc_rbnode_has_red_child(struct scc_rbnode const *node) {
-    return scc_rbnode_red_safe(node, scc_rbdir_left) ||
-           scc_rbnode_red_safe(node, scc_rbdir_right);
-}
-
-static inline bool scc_rbnode_has_thread_link(struct scc_rbnode const *node) {
+//? .. c:function:: _Bool scc_rbnode_has_thread_link(struct scc_rbnode_base const *node)
+//?
+//?     Determine whether the given node has at least one thread link
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param node: The node whose links are to be checked
+//?     :returns:    :code:`true` if the given node has at least one thread link,
+//?                  otherwise :code:`false`
+static inline _Bool scc_rbnode_has_thread_link(struct scc_rbnode_base const *node) {
     return scc_rbnode_thread(node, scc_rbdir_left) ||
            scc_rbnode_thread(node, scc_rbdir_right);
 }
 
+//? .. c:function:: _Bool scc_rbnode_red(struct scc_rbnode_base const *node)
+//?
+//?     Determine whether the given node is red
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param node: The node to check
+//?     :returns: :code:`true` if the given node is red, otherwise :code:`false`.
+static inline _Bool scc_rbnode_red(struct scc_rbnode_base const *node) {
+    return node->rn_color == scc_rbcolor_red;
+}
+
+//? .. c:function:: _Bool scc_rbnode_red_safe(struct scc_rbnode_base const *node, enum scc_rbdir dir)
+//?
+//?     Check if the given node has a red child in the given direction
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param node:   The node whose child is to be checked
+//?     :param dir:    The direction of the child to check
+//?     :returns:      A :code:`_Bool` signalling whether the child in the given directory
+//?                    is red
+//?     :retval true:  The given node has a child in the given direction and the child in
+//?                    question is red
+//?     :retval false: The given node has no child in the given direction
+//?     :retval false: The given node has a black child in the given direction
+static inline _Bool scc_rbnode_red_safe(struct scc_rbnode_base const *node, enum scc_rbdir dir) {
+    return !scc_rbnode_thread(node, dir) &&
+            scc_rbnode_red(scc_rbnode_link_qual(node, dir, const));
+}
+
+//? .. c:function:: void *scc_rbnode_children_red_safe(struct scc_rbnode_base const *node)
+//?
+//?     Check if the given node has two red children
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param node: The node whose children is to be checked
+//?     :returns: A :code:`_Bool` indicating whether both the node's children are red
+//?     :retval true: The node has two children and both are red
+//?     :retval false: The node does not have two children
+//?     :retval false: The node has two children but at least one of them is black
+static inline _Bool scc_rbnode_children_red_safe(struct scc_rbnode_base const *node) {
+    return scc_rbnode_red_safe(node, scc_rbdir_left) &&
+           scc_rbnode_red_safe(node, scc_rbdir_right);
+}
+
+//? .. c:function:: _Bool scc_rbnode_has_red_child(struct scc_rbnode_base const *node)
+//?
+//?     Check if the given node has at least one red child
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param node:   The node whose children are to be examined
+//?     :returns:      A :code:`_Bool` indicating whether the node has any red children
+//?     :retval true:  The node has at least one red child
+//?     :retval false: The node has no children
+//?     :retval false: The node has at least one child but none of them are red
+static inline _Bool scc_rbnode_has_red_child(struct scc_rbnode_base const *node) {
+    return scc_rbnode_red_safe(node, scc_rbdir_left) ||
+           scc_rbnode_red_safe(node, scc_rbdir_right);
+}
+
+//? .. c:function:: void scc_rbnode_mkblack(struct scc_rbnode_base *node)
+//?
+//?     Color the given node black
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param node: The node to color
+static inline void scc_rbnode_mkblack(struct scc_rbnode_base *node) {
+    node->rn_color = scc_rbcolor_black;
+}
+
+//? .. c:function:: void scc_rbnode_mkred(struct scc_rbnode_base *node)
+//?
+//?     Color the given node red
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param node: The node to color
+static inline void scc_rbnode_mkred(struct scc_rbnode_base *node) {
+    node->rn_color = scc_rbcolor_red;
+}
+
+//? .. c:function:: void scc_rbnode_mkleaf(struct scc_rbnode_base *node)
+//?
+//?     Mark the given node as a leaf
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param node: The node to mark
+static inline void scc_rbnode_mkleaf(struct scc_rbnode_base *node) {
+    node->rn_flags = SCC_RBLEAF;
+}
+
+//? .. c:function:: int scc_rbtree_compare(\
+//?     struct scc_rbtree_base const *restrict base, \
+//?     struct scc_rbnode_base const *restrict node, \
+//?     void const *restrict value)
+//?
+//?     Convenience wrapper for invoking :c:expr:`base->rb_compare` on the
+//?     value in the given node and the value parameter
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base:  Base address of the rbtree
+//?     :param node:  The node whose value is to be used in the comparison
+//?     :param value: The value to compare to the value in the given node
+//?     :returns:     An integer ordering the two values. See :ref:`scc_rbcompare <scc_rbcompare>`
+//?                   for details.
 static inline int scc_rbtree_compare(
-    struct scc_rbtree const *restrict tree,
-    struct scc_rbnode const *restrict node,
-    void const *restrict needle
+    struct scc_rbtree_base const *restrict base,
+    struct scc_rbnode_base const *restrict node,
+    void const *restrict value
 ) {
-    void const *value = scc_rbnode_value_qual(tree, node, const);
-    return tree->rb_compare(value, needle);
+    return base->rb_compare(scc_rbnode_value_qual(base, node, const), value);
 }
 
-static void const *scc_rbnode_leftmost(struct scc_rbnode const *node) {
-    while(!scc_rbnode_thread(node, scc_rbdir_left)) {
-        node = node->rn_left;
-    }
-    return node;
-}
-
-static void const *scc_rbnode_rightmost(struct scc_rbnode const *node) {
-    while(!scc_rbnode_thread(node, scc_rbdir_right)) {
-        node = node->rn_right;
-    }
-    return node;
-}
-
-static struct scc_rbnode *scc_rbtree_rotate_single(struct scc_rbnode *root, enum scc_rbdir dir) {
-    struct scc_rbnode *n = scc_rbnode_link(root, !dir);
+//? .. c:function:: struct scc_rbnode_base *scc_rbtree_rotate_single(struct scc_rbnode_base *root, enum scc_rbdir dir)
+//?
+//?     Perform single rotation of subtree anchored at the given root
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param root: The root around which the rotation is to be performed
+//?     :param dir:  The direction to rotate in
+//?     :returns:    The new root of the subtree
+static struct scc_rbnode_base *scc_rbtree_rotate_single(struct scc_rbnode_base *root, enum scc_rbdir dir) {
+    struct scc_rbnode_base *n = scc_rbnode_link(root, !dir);
 
     if(scc_rbnode_thread(n, dir)) {
-        /* Links already correct, modify thread flags */
+        /* Links already coprrect, modify thread flags */
         scc_rbnode_set(root, !dir);
         scc_rbnode_unset(n, dir);
     }
     else {
+        /* Must rotate */
         scc_rbnode_link(root, !dir) = scc_rbnode_link(n, dir);
         scc_rbnode_link(n, dir) = root;
     }
@@ -240,16 +473,41 @@ static struct scc_rbnode *scc_rbtree_rotate_single(struct scc_rbnode *root, enum
     return n;
 }
 
-static struct scc_rbnode *scc_rbtree_rotate_double(struct scc_rbnode *root, enum scc_rbdir dir) {
+//? .. c:function:: struct scc_rbnode_base *scc_rbtree_rotate_double(struct scc_rbnode_base *root, enum scc_rbdir dir)
+//?
+//?     Perform double rotation of subtree anchored at the given root
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param root: The root around which the rotation is to be performed
+//?     :param dir:  The direction to rotate in
+//?     :returns:    The new root of the subtree
+static inline struct scc_rbnode_base *scc_rbtree_rotate_double(struct scc_rbnode_base *root, enum scc_rbdir dir) {
     scc_rbnode_link(root, !dir) = scc_rbtree_rotate_single(scc_rbnode_link(root, !dir), !dir);
     return scc_rbtree_rotate_single(root, dir);
 }
 
+//? .. c:function:: void scc_rbtree_balance_insertion(\
+//?     struct scc_rbnode_base *n, struct scc_rbnode_base *p, \
+//?     struct scc_rbnode_base *gp, struct scc_rbnode_base *ggp)
+//?
+//?     Preemptively balance the section around n, p and gp for insertion.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param n:   The bottommost node of the secion
+//?     :param p:   Parent node of n
+//?     :param gp:  Parent node of p
+//?     :param ggp: Parent node of gp
 static void scc_rbtree_balance_insertion(
-    struct scc_rbnode *n,
-    struct scc_rbnode *p,
-    struct scc_rbnode *gp,
-    struct scc_rbnode *ggp
+    struct scc_rbnode_base *n,
+    struct scc_rbnode_base *p,
+    struct scc_rbnode_base *gp,
+    struct scc_rbnode_base *ggp
 ) {
     scc_rbnode_mkred(n);
     if(!scc_rbnode_has_thread_link(n)) {
@@ -277,10 +535,25 @@ static void scc_rbtree_balance_insertion(
     }
 }
 
-static struct scc_rbnode *scc_rbtree_balance_removal(
-    struct scc_rbnode *n,
-    struct scc_rbnode *p,
-    struct scc_rbnode *gp,
+//? .. c:function:: struct scc_rbnode_base *scc_rbtree_balance_removal(\
+//?     struct scc_rbnode_base *n, struct scc_rbnode_base *p, \
+//?     struct scc_rbnode_base *gp, enum scc_rbdir dir)
+//?
+//?     Preemptively balance the section around n, p and gp for removal.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param n:   The bottommost node of the section
+//?     :param p:   Parent node of n
+//?     :param gp:  Parent node of p
+//?     :param dir: Direction of the link to be traversed next
+//?     :returns:   The new root of the subtree after balancing
+static struct scc_rbnode_base *scc_rbtree_balance_removal(
+    struct scc_rbnode_base *n,
+    struct scc_rbnode_base *p,
+    struct scc_rbnode_base *gp,
     enum scc_rbdir dir
 ) {
     enum scc_rbdir pdir = p->rn_right == n;
@@ -292,7 +565,7 @@ static struct scc_rbnode *scc_rbtree_balance_removal(
     }
 
     if(!scc_rbnode_thread(p, !pdir)) {
-        struct scc_rbnode *sibling = scc_rbnode_link(p, !pdir);
+        struct scc_rbnode_base *sibling = scc_rbnode_link(p, !pdir);
         if(scc_rbnode_has_red_child(sibling)) {
             if(scc_rbnode_red_safe(sibling, pdir)) {
                 scc_rbnode_link(gp, gpdir) = scc_rbtree_rotate_double(p, pdir);
@@ -315,48 +588,131 @@ static struct scc_rbnode *scc_rbtree_balance_removal(
     return p;
 }
 
-static bool scc_rbtree_replace_handle(void **handle, struct scc_rbtree *tree) {
-    void *new_handle = scc_rbtree_new_handle(tree);
-    if(!new_handle) {
-        return false;
+//? .. c:function:: struct scc_rbnode_base *scc_rbnode_new(\
+//?     struct scc_rbtree_base *restrict base,\
+//?     void const *restrict value,\
+//?     size_t elemsize)
+//?
+//?     Allocate and initialize a new rbnode
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base:     Base address of the rbtree
+//?     :param value:    Value to be assigned to the node
+//?     :param elemsize: Size of the elements in the tree
+//?     :returns:        Address of a newly allocated node in the arena, or :code:`NULL` on allocation failure
+static inline struct scc_rbnode_base *scc_rbnode_new(
+    struct scc_rbtree_base *restrict base,
+    void const *restrict value,
+    size_t elemsize
+) {
+    struct scc_rbnode_base *node = scc_arena_alloc(&base->rb_arena);
+    if(!node) {
+        return 0;
     }
-    *handle = new_handle;
-    return true;
+    memcpy(scc_rbnode_value(base, node), value, elemsize);
+    scc_rbnode_set_bkoff(base, node);
+    return node;
 }
 
-static bool scc_rbtree_insert_empty(void **handle, struct scc_rbtree *tree, struct scc_rbnode *node) {
-    if(!scc_rbtree_replace_handle(handle, tree)) {
+//? .. c:function:: struct scc_rbnode_base const *scc_rbtree_leftmost(\
+//?     struct scc_rbnode_base const *root)
+//?
+//?     Find the leftmost node in the subtree spanning from the given root
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param root: The root of the subtree
+//?     :returns:    Address of the leftmost node in the subtree
+static inline struct scc_rbnode_base const *scc_rbtree_leftmost(struct scc_rbnode_base const *root) {
+    while(!scc_rbnode_thread(root, scc_rbdir_left)) {
+        root = root->rn_left;
+    }
+    return root;
+}
+
+//? .. c:function:: struct scc_rbnode_base const *scc_rbtree_rightmost(\
+//?     struct scc_rbnode_base const *root)
+//?
+//?     Find the rightmost node in the subtree spanning from the given root
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param root: The root of the subtree
+//?     :returns:    Address of the rightmost node in the subtree
+static inline struct scc_rbnode_base const *scc_rbtree_rightmost(struct scc_rbnode_base const *root) {
+    while(!scc_rbnode_thread(root, scc_rbdir_right)) {
+        root = root->rn_right;
+    }
+    return root;
+}
+
+//? .. c:function:: _Bool scc_rbtree_insert_empty(struct scc_rbtree_base *restrict base, void *restrict handle, size_t elemsize)
+//?
+//?     Insert the value at :c:expr:`*handle` into the empty rbtree
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Base address of the rbtree
+//?     :param handle: rbtree handle
+//?     :param elemsize: Size of the elements in the tree
+//?     :returns: :code:`true` if the value was inserted, :code:`false` on allocation failure
+static inline _Bool scc_rbtree_insert_empty(struct scc_rbtree_base *restrict base, void *restrict handle, size_t elemsize) {
+    struct scc_rbnode_base *node = scc_rbnode_new(base, handle, elemsize);
+    if(!node) {
         return false;
     }
-    node->rn_left = scc_rbtree_sentinel(tree);
-    node->rn_right = scc_rbtree_sentinel(tree);
+    node->rn_left = (void *)&base->rb_sentinel;
+    node->rn_right = (void *)&base->rb_sentinel;
     scc_rbnode_mkblack(node);
     scc_rbnode_mkleaf(node);
-
-    tree->rb_root = node;
-    scc_rbnode_unset(scc_rbtree_sentinel(tree), scc_rbdir_left);
-    tree->rb_size = 1u;
+    base->rb_root = node;
+    base->rb_size = 1u;
+    scc_rbnode_unset((void *)&base->rb_sentinel, scc_rbdir_left);
     return true;
 }
 
-static bool scc_rbtree_insert_nonempty(void **handle, struct scc_rbtree *tree, struct scc_rbnode *node) {
-    struct scc_rbnode *gp =  &(struct scc_rbnode) { .rn_left = scc_rbtree_sentinel(tree) };
-    struct scc_rbnode *ggp = &(struct scc_rbnode) { .rn_left = gp };
-    struct scc_rbnode *p = scc_rbtree_sentinel(tree);
-    struct scc_rbnode *n = tree->rb_root;
+//? .. c:function:: _Bool scc_rbtree_insert_nonempty(struct scc_rbtree_base *restrict base, void const *restrict handle, size_t elemsize)
+//?
+//?     Insert the value at :c:expr:`*handle` inte the non-empty rbtree
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Base address of the rbtree
+//?     :param handle: rbtree handle
+//?     :param elemsize: Size of the elements in the tree
+//?     :returns: :code:`true` if the vlaue was inserted, otherwise :code:`false`.
+//?     :retval true: The value was inserted
+//?     :retval false: The value was already present in the tree
+//?     :retval false: Allocation failure
+static _Bool scc_rbtree_insert_nonempty(struct scc_rbtree_base *restrict base, void const *restrict handle, size_t elemsize) {
+    struct scc_rbnode_base *n = base->rb_root;
+    struct scc_rbnode_base *p = (void *)&base->rb_sentinel;
+    struct scc_rbnode_base *gp = &(struct scc_rbnode_base) { .rn_left = p };
+    struct scc_rbnode_base *ggp = &(struct scc_rbnode_base) { .rn_left = gp };
 
     enum scc_rbdir dir;
     int rel;
 
     while(1) {
         if(scc_rbnode_children_red_safe(n)) {
-            /* Push red coloring up */
+            /* Push red coloring towards root */
             scc_rbtree_balance_insertion(n, p, gp, ggp);
         }
-        rel = scc_rbtree_compare(tree, n, *handle);
+        rel = scc_rbtree_compare(base, n, handle);
         if(!rel) {
             /* Already in tree */
-            scc_rbnode_mkblack(tree->rb_root);
+            scc_rbnode_mkblack(base->rb_root);
             return false;
         }
         dir = rel <= 0;
@@ -370,65 +726,74 @@ static bool scc_rbtree_insert_nonempty(void **handle, struct scc_rbtree *tree, s
         n = scc_rbnode_link(n, dir);
     }
 
-    if(!scc_rbtree_replace_handle(handle, tree)) {
+    /* Allocate */
+    struct scc_rbnode_base *new = scc_rbnode_new(base, handle, elemsize);
+    if(!new) {
+        scc_rbnode_mkblack(base->rb_root);
         return false;
     }
 
     /* Prepare node for insertion */
-    scc_rbnode_mkleaf(node);
-    scc_rbnode_link(node, dir) = scc_rbnode_link(n, dir);
-    scc_rbnode_link(node, !dir) = n;
+    scc_rbnode_mkleaf(new);
+    scc_rbnode_link(new, dir) = scc_rbnode_link(n, dir);
+    scc_rbnode_link(new, !dir) = n;
 
     /* Set node as child of n */
-    scc_rbnode_link(n, dir) = node;
+    scc_rbnode_link(n, dir) = new;
     scc_rbnode_unset(n, dir);
 
     /* Uphold properties */
-    scc_rbtree_balance_insertion(node, n, p, gp);
-    scc_rbnode_mkblack(tree->rb_root);
+    scc_rbtree_balance_insertion(new, n, p, gp);
+    scc_rbnode_mkblack(base->rb_root);
 
-    ++tree->rb_size;
+    ++base->rb_size;
     return true;
 }
 
-void *scc_rbtree_impl_new(struct scc_rbtree *tree) {
-    tree->rb_size = 0u;
-    tree->rb_root = scc_rbtree_sentinel(tree);
-    tree->rb_sentinel.flags = SCC_RBLEAF;
+void *scc_rbtree_impl_new(void *base, size_t coff) {
+#define base ((struct scc_rbtree_base *)base)
+    base->rb_size = 0u;
+    base->rb_root = (void *)&base->rb_sentinel;
 
-    return scc_rbtree_new_handle(tree);
+    /* Size field used to determine whether sentinel has a left child
+     * or not. Unset left thread here to save a few ops */
+    base->rb_sentinel.rs_flags = SCC_RBRTHRD;
+
+    size_t fwoff = coff - offsetof(struct scc_rbtree_base, rb_fwoff) - sizeof(base->rb_fwoff);
+    assert(fwoff <= UCHAR_MAX);
+    base->rb_fwoff = (unsigned char)fwoff;
+    unsigned char *rbtree = (unsigned char *)base + coff;
+    scc_rbtree_set_bkoff(rbtree, fwoff);
+    return rbtree;
+#undef base
 }
 
-void scc_rbtree_free(void *handle) {
-    scc_arena_release(&scc_rbtree_from_handle(handle)->rb_arena);
+void scc_rbtree_free(void *rbtree) {
+    struct scc_rbtree_base *base = scc_rbtree_impl_base(rbtree);
+    scc_arena_release(&base->rb_arena);
 }
 
-size_t scc_rbtree_size(void const *handle) {
-    return scc_rbtree_from_handle_qual(handle, const)->rb_size;
-}
-
-bool scc_rbtree_impl_insert(void *handle) {
-    struct scc_rbtree *tree = scc_rbtree_from_handle(*(void **)handle);
-    struct scc_rbnode *node = scc_rbnode_baseaddr(*(void **)handle);
-
-    if(scc_rbtree_empty(*(void **)handle)) {
-        return scc_rbtree_insert_empty(handle, tree, node);
+_Bool scc_rbtree_impl_insert(void *rbtreeaddr, size_t elemsize) {
+    struct scc_rbtree_base *base = scc_rbtree_impl_base(*(void **)rbtreeaddr);
+    if(!base->rb_size) {
+        return scc_rbtree_insert_empty(base, *(void **)rbtreeaddr, elemsize);
     }
 
-    return scc_rbtree_insert_nonempty(handle, tree, node);
+    return scc_rbtree_insert_nonempty(base, *(void **)rbtreeaddr, elemsize);
 }
 
-void const *scc_rbtree_impl_find(void const *handle) {
-    struct scc_rbtree const *tree = scc_rbtree_from_handle_qual(handle, const);
-    struct scc_rbnode const *p = scc_rbtree_sentinel_qual(tree, const);
-    struct scc_rbnode const *n = tree->rb_root;
+void const *scc_rbtree_impl_find(void const *rbtree) {
+    struct scc_rbtree_base const *base = scc_rbtree_impl_base_qual(rbtree, const);
+    struct scc_rbnode_base *p = &(struct scc_rbnode_base) { .rn_left = base->rb_root };
+    struct scc_rbnode_base *n = base->rb_root;
+
     enum scc_rbdir dir = scc_rbdir_left;
     int rel;
 
     while(!scc_rbnode_thread(p, dir)) {
-        rel = scc_rbtree_compare(tree, n, handle);
+        rel = scc_rbtree_compare(base, n, rbtree);
         if(!rel) {
-            return scc_rbnode_value_qual(tree, n, const);
+            return scc_rbnode_value_qual(base, n, const);
         }
 
         dir = rel <= 0;
@@ -439,21 +804,20 @@ void const *scc_rbtree_impl_find(void const *handle) {
     return 0;
 }
 
-bool scc_rbtree_impl_remove(void *handle, size_t elemsize) {
-    struct scc_rbtree *tree = scc_rbtree_from_handle(handle);
-    struct scc_rbnode *gp = &(struct scc_rbnode) {
-        .rn_left = scc_rbtree_sentinel(tree)
-    };
-    struct scc_rbnode *p = scc_rbtree_sentinel(tree);
-    struct scc_rbnode *n = tree->rb_root;
+_Bool scc_rbtree_impl_remove(void *rbtree, size_t elemsize) {
+    struct scc_rbtree_base *base = scc_rbtree_impl_base(rbtree);
 
-    struct scc_rbnode *found = 0;
+    struct scc_rbnode_base *n = base->rb_root;
+    struct scc_rbnode_base *p = (void *)&base->rb_sentinel;
+    struct scc_rbnode_base *gp = &(struct scc_rbnode_base) { .rn_left = p, };
+
+    struct scc_rbnode_base *found = 0;
 
     enum scc_rbdir dir = scc_rbdir_left;
     int rel;
 
     while(!scc_rbnode_thread(p, dir)) {
-        rel = scc_rbtree_compare(tree, n, handle);
+        rel = scc_rbtree_compare(base, n, rbtree);
         if(!rel) {
             found = n;
         }
@@ -475,54 +839,51 @@ bool scc_rbtree_impl_remove(void *handle, size_t elemsize) {
         /* Replace value of found with value of p */
         scc_rbnode_thread_from(gp, p, gpdir);
         scc_rbnode_link(gp, gpdir) = scc_rbnode_link(p, gpdir);
-        memcpy(scc_rbnode_value(tree, found), scc_rbnode_value(tree, p), elemsize);
+        memcpy(scc_rbnode_value(base, found), scc_rbnode_value(base, p), elemsize);
 
-        scc_arena_free(&tree->rb_arena, p);
-        --tree->rb_size;
+        scc_arena_free(&base->rb_arena, p);
+        --base->rb_size;
     }
-    scc_rbnode_mkblack(tree->rb_root);
+
+    scc_rbnode_mkblack(base->rb_root);
 
     return found;
 }
 
-void const *scc_rbtree_impl_leftmost(void const *handle) {
-    struct scc_rbtree const *tree = scc_rbtree_from_handle_qual(handle, const);
-    struct scc_rbnode const *leftmost = scc_rbnode_leftmost(tree->rb_root);
-    return scc_rbnode_value_qual(tree, leftmost, const);
+void const *scc_rbtree_impl_leftmost_value(void const *rbtree) {
+    struct scc_rbtree_base const *base = scc_rbtree_impl_base_qual(rbtree, const);
+    struct scc_rbnode_base const *leftmost = scc_rbtree_leftmost(base->rb_root);
+    return scc_rbnode_value_qual(base, leftmost, const);
 }
 
-void const *scc_rbtree_impl_rightmost(void const *handle) {
-    struct scc_rbtree const *tree = scc_rbtree_from_handle_qual(handle, const);
-    struct scc_rbnode const *rightmost = scc_rbnode_rightmost(tree->rb_root);
-    return scc_rbnode_value_qual(tree, rightmost, const);
+void const *scc_rbtree_impl_rightmost_value(void const *rbtree) {
+    struct scc_rbtree_base const *base = scc_rbtree_impl_base_qual(rbtree, const);
+    struct scc_rbnode_base const *rightmost = scc_rbtree_rightmost(base->rb_root);
+    return scc_rbnode_value_qual(base, rightmost, const);
 }
 
 void const *scc_rbtree_impl_successor(void const *iter) {
-    struct scc_rbnode const *node = scc_rbnode_baseaddr_qual(iter, const);
+    struct scc_rbnode_base const *node = scc_rbnode_impl_base_qual(iter, const);
     size_t const offset = (unsigned char const *)iter - (unsigned char const *)node;
     if(scc_rbnode_thread(node, scc_rbdir_right)) {
         node = node->rn_right;
     }
     else {
-        node = scc_rbnode_leftmost(node->rn_right);
+        node = scc_rbtree_leftmost(node->rn_right);
     }
+
     return (unsigned char const *)node + offset;
 }
 
 void const *scc_rbtree_impl_predecessor(void const *iter) {
-    struct scc_rbnode const *node = scc_rbnode_baseaddr_qual(iter, const);
+    struct scc_rbnode_base const *node = scc_rbnode_impl_base_qual(iter, const);
     size_t const offset = (unsigned char const *)iter - (unsigned char const *)node;
     if(scc_rbnode_thread(node, scc_rbdir_left)) {
         node = node->rn_left;
     }
     else {
-        node = scc_rbnode_rightmost(node->rn_left);
+        node = scc_rbtree_rightmost(node->rn_left);
     }
-    return (unsigned char const *)node + offset;
-}
 
-void const *scc_rbtree_impl_sentinel(void const *handle) {
-    struct scc_rbtree const *tree = scc_rbtree_from_handle_qual(handle, const);
-    struct scc_rbnode const *sentinel = scc_rbtree_sentinel_qual(tree, const);
-    return scc_rbnode_value_qual(tree, sentinel, const);
+    return (unsigned char const *)node + offset;
 }

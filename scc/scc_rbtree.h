@@ -2,102 +2,639 @@
 #define SCC_RBTREE_H
 
 #include "scc_arena.h"
+#include "scc_mem.h"
 #include "scc_pp_token.h"
 
 #include <stddef.h>
 
+//! .. c:macro:: scc_rbtree(type)
+//!
+//!     Expands to an opaque pointer suitable for storing
+//!     a handle to a red-black tree containing the specified type
+//!
+//!     :param type: The type to store in the red-black tree
 #define scc_rbtree(type) type *
 
+//! .. _scc_rbcompare:
+//! .. c:type:: int(*scc_rbcompare)(void const *left, void const *right)
+//!
+//!     Signature of the function used for comparison. The return
+//!     value should be as follows
+//!
+//!     .. list-table:: Comparison return values
+//!         :header-rows: 1
+//!
+//!         * - Value
+//!           - Meaning
+//!         * - :code:`< 0`
+//!           - :code:`left < right`
+//!         * - :code:`== 0`
+//!           - :code:`left == right`
+//!         * - :code:`> 0`
+//!           - :code:`left > right`
+//!
+//!     .. code-block:: C
+//!         :caption: Simple implementation comparing two ints
+//!
+//!         int compare_ints(void const *left, void const *right) {
+//!             return *(int const *)left - *(int const *)right;
+//!         }
 typedef int(*scc_rbcompare)(void const *, void const *);
 
+//? .. c:enum:: scc_rbcolor
+//?
+//?     Denotes the color of a node
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     .. c:enumerator:: scc_rbcolor_black
+//?
+//?         Used for black nodes
+//?
+//?     .. c:enumerator:: scc_rbcolor_red
+//?
+//?         Used for red nodes
 enum scc_rbcolor {
     scc_rbcolor_black,
     scc_rbcolor_red
 };
 
-struct scc_rbnode;
-
-struct scc_rbnode_bare {
-    union {
-        struct {
-            struct scc_rbnode *left;        /* Left link */
-            struct scc_rbnode *right;       /* Right link */
-        } node;
-        struct scc_rbnode *root;            /* Root node */
-        struct scc_rbtree *tree;            /* Address of tree */
-    } un_link;
-    enum scc_rbcolor color;
-    unsigned char flags;                    /* Thread flags */
-    unsigned char pad;                      /* Explicit padding */
+//? .. _scc_rbnode_base:
+//? .. c:struct:: scc_rbnode_base
+//?
+//?     Generic rbtree node base structure
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     .. _struct_scc_rbnode_base_rn_left:
+//?     .. c:var:: struct scc_rbnode_base *rn_left
+//?
+//?         Link to left child
+//?
+//?     .. _struct_scc_rbnode_base_rn_right:
+//?     .. c:var:: struct scc_rbnode_base *rn_right
+//?
+//?         Link to right child
+//?
+//?     .. _enum_scc_rbcolor_rn_color:
+//?     .. c:var:: enum scc_rbcolor rn_color
+//?
+//?         Color for the node
+//?
+//?     .. _unsigned_char_rn_flags:
+//?     .. c:var:: unsigned char rn_flags
+//?
+//?         Internal bitflags
+//?
+//?     .. c:var:: unsigned char rn_data[]
+//?
+//?         FAM hiding type-specific details. See :ref:`rn_value <type_rn_value>`
+//?         for more information
+struct scc_rbnode_base {
+    struct scc_rbnode_base *rn_left;
+    struct scc_rbnode_base *rn_right;
+    enum scc_rbcolor rn_color;
+    unsigned char rn_flags;
+    unsigned char rn_data[];
 };
 
-struct scc_rbnode {
-    struct scc_rbnode_bare rn_bare;
-    unsigned char rn_buffer[];
+//? .. c:struct scc_rbsentinel
+//?
+//?     Structure of the :ref:`sentinel node <struct_scc_rbsentinel_rb_sentinel>`
+//?     node in the :ref:`tree base <scc_rbtree_base>`.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     .. c:var:: struct scc_rbnode_base *rs_left
+//?
+//?         Link to left child
+//?
+//?     .. c:var:: struct scc_rbnode_base *rs_right
+//?
+//?         Link to right child. Used only for layout compatibility with
+//?         :ref:`scc_rbnode_base <scc_rbnode_base>`.
+//?
+//?     .. c:var:: enum scc_rbcolor rs_color
+//?
+//?         Dummy color field to enforce layout compatibility with
+//?         :ref:`scc_rbnode_base <scc_rbnode_base>`.
+//?
+//?     .. c:var:: unsigned char rs_flags
+//?
+//?         Internal bitflags
+struct scc_rbsentinel {
+    struct scc_rbnode_base *rs_left;
+    struct scc_rbnode_base *rs_right;
+    enum scc_rbcolor rs_color;
+    unsigned char rs_flags;
 };
 
-#define scc_rbnode_impl_layout(type)                                \
-    struct {                                                        \
-        struct scc_rbnode_bare rn_bare;                             \
-        type rn_value;                                              \
+//? .. _scc_rbtree_base:
+//? .. c:struct:: scc_rbtree_base
+//?
+//?     Base structure of the rbtree
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     .. _unsigned_short_const_rb_dataoff:
+//?     .. c:var:: unsigned short const rb_dataoff
+//?
+//?         Offset of each node's data relative its base address
+//?
+//?     .. _size_t_rb_size:
+//?     .. c:var:: size_t rb_size
+//?
+//?         Size of the rbtree
+//?
+//?     .. _scc_rbcompare_rb_compare:
+//?     .. c:var:: scc_rbcompare rb_compare
+//?
+//?         Address of comparison function
+//?
+//?     .. _struct_scc_arena_rb_arena:
+//?     .. c:var:: struct scc_arena rb_arena
+//?
+//?         Node allocator
+//?
+//?     .. _struct_scc_rbsentinel_rb_sentinel:
+//?     .. c:var:: struct scc_rbsentinel rb_sentinel
+//?
+//?         Sentinel node. rb_sentinel.rs_left holds the
+//?         address refers to the tree root
+//?
+//?     .. _unsigned_char_rb_fwoff:
+//?     .. c:var:: unsigned char rb_fwoff
+//?
+//?         Number of padding bytes between the field itself and
+//?         :ref:`rb_curr <type_rb_curr>`
+//?
+//?     .. c:var:: unsigned char rb_data[]
+//?
+//?         FAM hiding type-specific details. See :ref:`scc_rbtree_impl_layout <scc_rbtree_impl_layout>`
+//?         for more information.
+struct scc_rbtree_base {
+    unsigned short const rb_dataoff;
+    size_t rb_size;
+    scc_rbcompare rb_compare;
+    struct scc_arena rb_arena;
+    struct scc_rbsentinel rb_sentinel;
+    unsigned char rb_fwoff;
+    unsigned char rb_data[];
+};
+
+//? .. c:macro:: scc_rbnode_impl_layout(type)
+//?
+//?     Actual layout of the nodes in an rbtree
+//?     storing instances of :code:`type`.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param type: The type of the elements to be stored in the node
+//?
+//?     .. c:var:: struct scc_rbnode_base *rn_left
+//?
+//?         See :ref:`rn_left <struct_scc_rbnode_base_rn_left>`.
+//?
+//?     .. c:var:: struct scc_rbnode_base *rn_right
+//?
+//?         See :ref:`rn_right <struct_scc_rbnode_base_rn_right>`.
+//?
+//?     .. c:var:: enum scc_rbcolor rn_color
+//?
+//?         See :ref:`rn_color <enum_scc_rbcolor_rn_color>`.
+//?
+//?     .. c:var:: unsigned char rn_flags
+//?
+//?         See :ref:`rn_flags <unsigned_char_rn_flags>`.
+//?
+//?     .. _unsigned_char_rn_bkoff:
+//?     .. c:var:: unsigned char rn_bkoff
+//?
+//?         Field storing the number of padding bytes between
+//?         :ref:`rn_flags <unsigned_char_rn_flags>` and
+//?         :ref:`rn_value <type_rn_value>`.
+//?
+//?     .. _type_rn_value:
+//?     .. c:var:: type rn_value
+//?
+//?         The value stored in the node
+#define scc_rbnode_impl_layout(type)                                                        \
+    struct {                                                                                \
+        struct scc_rbnode_base *rn_left;                                                    \
+        struct scc_rbnode_base *rn_right;                                                   \
+        enum scc_rbcolor rn_color;                                                          \
+        unsigned char rn_flags;                                                             \
+        unsigned char rn_bkoff;                                                             \
+        type rn_value;                                                                      \
     }
 
-#define scc_rbtree_impl_baseoff(type)                               \
-    offsetof(scc_rbnode_impl_layout(type), rn_value)
 
-struct scc_rbtree {
-    unsigned short rb_baseoff;
-    size_t rb_size;
-    struct scc_rbnode_bare rb_sentinel;
-    struct scc_arena rb_arena;
-    scc_rbcompare rb_compare;
-};
+//? .. _scc_rbtree_impl_layout:
+//? .. c:macro:: scc_rbtree_impl_layout(type)
+//?
+//?     Actual layout of the nodes in an rbtree
+//?     storing instances of :code:`type`.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param type: The type of the elements to be stored in the node
+//?
+//?     .. c:var:: unsigned short const rb_dataoff
+//?
+//?         See :ref:`rb_dataoff <unsigned_short_const_rb_dataoff>`.
+//?
+//?     .. c:var:: size_t rb_size
+//?
+//?         See :ref:`rb_size <size_t_rb_size>`.
+//?
+//?     .. c:var:: scc_rbcompare rb_compare
+//?
+//?         See :ref:`rb_compare <scc_rbcompare_rb_compare>`.
+//?
+//?     .. c:var:: struct scc_arena arena
+//?
+//?         See :ref:`rb_arena <struct_scc_arena_rb_arena>`.
+//?
+//?     .. c:var:: struct scc_rbsentinel rb_sentinel
+//?
+//?         See :ref:`rb_sentinel <struct_scc_rbsentinel_rb_sentinel>`.
+//?
+//?     .. c:var:: unsigned char rb_fwoff
+//?
+//?         See :ref:`rb_fwoff <unsigned_char_rb_fwoff>`.
+//?
+//?     .. _unsigned_char_rb_bkoff:
+//?     .. c:var:: unsigned char rb_bkoff
+//?
+//?         Number of padding bytes between :ref:`rb_fwoff <unsigned_char_rb_fwoff>`
+//?         and :ref:`rb_curr <type_rb_curr>`
+//?
+//?     .. _type_rb_curr:
+//?     .. c:var:: type rb_curr
+//?
+//?         Used for temporary storage for allowing operations on rvalues. Any
+//?         elements to be inserted, removed or searched for are temporarily
+//?         stored here
+#define scc_rbtree_impl_layout(type)                                                        \
+    struct {                                                                                \
+        unsigned short const rb_dataoff;                                                    \
+        size_t rb_size;                                                                     \
+        scc_rbcompare rb_compare;                                                           \
+        struct scc_arena rb_arena;                                                          \
+        struct scc_rbsentinel sentinel;                                                     \
+        unsigned char rb_fwoff;                                                             \
+        unsigned char rb_bkoff;                                                             \
+        type rb_curr;                                                                       \
+    }
 
-void *scc_rbtree_impl_new(struct scc_rbtree *restrict tree);
-_Bool scc_rbtree_impl_insert(void *handle);
-void const *scc_rbtree_impl_find(void const *handle);
-_Bool scc_rbtree_impl_remove(void *handle, size_t elemsize);
-void const *scc_rbtree_impl_leftmost(void const *handle);
-void const *scc_rbtree_impl_rightmost(void const *handle);
-void const *scc_rbtree_impl_successor(void const *iter);
-void const *scc_rbtree_impl_predecessor(void const *iter);
-void const *scc_rbtree_impl_sentinel(void const *handle);
+//? .. c:function:: void *scc_rbtree_impl_new(struct scc_rbtree_base *base, size_t coff)
+//?
+//?     Initialize the given rbtree base struct and return the address of the
+//?     :ref:`rb_curr <type_rb_curr>` field in the tree
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base:    Address of the :ref:`struct scc_rbtree_base <scc_rbtree_base>`
+//?                     structure of the tree.
+//?     :param coff:    Base-relative offset of the :ref:`rb_curr <type_rb_curr>` field in
+//?                     the base structure
+//?     :returns:       Address of a handle suitable for referring to the given rbtree
+void *scc_rbtree_impl_new(void *base, size_t coff);
 
-#define scc_rbtree_new(type, compare)                               \
-    scc_rbtree_impl_new(&(struct scc_rbtree) {                      \
-        .rb_baseoff = scc_rbtree_impl_baseoff(type),                \
-        .rb_arena = scc_arena_new(scc_rbnode_impl_layout(type)),    \
-        .rb_compare = compare                                       \
-    })
+//! .. _scc_rbtree_new:
+//! .. c:function:: void *scc_rbtree_new(type, scc_rbcompare compare)
+//!
+//!     Instantiate an rbtree storing instances of the given :code:`type`
+//!     and using :code:`compare` for comparison.
+//!
+//!     The call cannot fail.
+//!
+//!     :param type: The type to be stored in the rbtree
+//!     :param compare: Pointer to the comparison function to use
+//!     :returns: An opaque pointer to a rbtree allocated in the frame of the calling function
+#define scc_rbtree_new(type, compare)                                                       \
+    scc_rbtree_impl_new(&(scc_rbtree_impl_layout(type)) {                                   \
+            .rb_dataoff = offsetof(scc_rbnode_impl_layout(type), rn_value),                 \
+            .rb_compare = compare,                                                          \
+            .rb_arena = scc_arena_new(scc_rbnode_impl_layout(type)),                        \
+        },                                                                                  \
+        offsetof(scc_rbtree_impl_layout(type), rb_curr)                                     \
+   )
 
-void scc_rbtree_free(void *handle);
-size_t scc_rbtree_size(void const *handle);
-
-inline _Bool scc_rbtree_empty(void const *handle) {
-    return !scc_rbtree_size(handle);
+//? .. c:function:: size_t scc_rbtree_impl_npad(void const *rbtree)
+//?
+//?     Compute the number of padding bytes between :ref:`rb_curr <type_rb_curr>`
+//?     and :ref:`rb_fwoff <unsigned_char_rb_fwoff>`.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param rbtree: Handle to the rbtree
+//?     :returns: The number of padding bytes between :code:`rb_fwoff` and :code:`rb_curr`
+inline size_t scc_rbtree_impl_npad(void const *rbtree) {
+    return ((unsigned char const *)rbtree)[-1] + sizeof(unsigned char);
 }
 
-#define scc_rbtree_insert(handle, value)                            \
-    scc_rbtree_impl_insert((*handle = value, &handle))
+//? .. c:macro:: scc_rbtree_impl_base_qual(rbtree, qual)
+//?
+//?     Obtain qualified pointer to the :ref:`struct scc_rbtree_base <scc_rbtree_base>`
+//?     corresponding to the given rbtree handle
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param rbtree: rtree handle
+//?     :param qual: Optioal qualifiers to apply to the returned pointer
+//?     :returns: Suitably qualified pointer to the base address of the given rbtree
+#define scc_rbtree_impl_base_qual(rbtree, qual)                                             \
+    scc_container_qual(                                                                     \
+        (unsigned char qual *)(rbtree) - scc_rbtree_impl_npad(rbtree),                      \
+        struct scc_rbtree_base,                                                             \
+        rb_fwoff,                                                                           \
+        qual                                                                                \
+    )
 
-#define scc_rbtree_find(handle, value)                              \
-    scc_rbtree_impl_find((*handle = value, handle))
+//? .. c:macro:: scc_rbtree_impl_base(rbtree)
+//?
+//?     Obtain unqualified pointer to the base address of the given
+//?     :code:`rbtree`.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param rbtree: rbtree handle
+//?     :returns: Base address of the given rbtree
+#define scc_rbtree_impl_base(rbtree)                                                        \
+    scc_rbtree_impl_base_qual(rbtree,)
 
-#define scc_rbtree_remove(handle, value)                            \
-    scc_rbtree_impl_remove((*handle = value, handle), sizeof(*handle))
+//! .. c:function:: size_t scc_rbtree_size(void const *rbtree)
+//!
+//!     Query the size of the given rbtree
+//!
+//!     :param btree: rbtree handle
+//!     :returns: Size of the given rbtree
+inline size_t scc_rbtree_size(void const *rbtree) {
+    struct scc_rbtree_base const *base = scc_rbtree_impl_base_qual(rbtree, const);
+    return base->rb_size;
+}
 
-#define scc_rbtree_foreach(iter, handle)                            \
-    for(void const *scc_pp_cat_expand(scc_rbtree_end,__LINE__) =    \
-            (iter = scc_rbtree_impl_leftmost(handle),               \
-                scc_rbtree_impl_sentinel(handle));                  \
-        iter != scc_pp_cat_expand(scc_rbtree_end,__LINE__);         \
+//! .. c:function:: _Bool scc_rbtree_empty(void const *rbtree)
+//!
+//!     Determine whether the given rbtree is empty
+//!
+//!     :param rbtree: rbtree handle
+//!     :returns: :code:`true` if the tree is empty, otherwise :code:`false`.
+inline _Bool scc_rbtree_empty(void const *rbtree) {
+    return !scc_rbtree_size(rbtree);
+}
+
+//! .. c:function:: void scc_rbtree_free(void *rbtree)
+//!
+//!     Reclaim memory allocated for :c:expr:`rbtree`. The parameter must
+//!     refer to a valid rbtree returned by :ref:`scc_rbtree_new <scc_rbtree_new>`
+//!
+//!     :param btree: rbtree handle
+void scc_rbtree_free(void *rbtree);
+
+//? .. c:function:: _Bool scc_rbtree_impl_insert(void *rbtreeaddr, size_t elemsize)
+//?
+//?     Internal insertion function. Attempt to insert the value stored at
+//?     :c:texpr:`*(void **)rbtreeaddr` in the tree.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param btreeaddr: Address of the rbtree handle
+//?     :param elemsize: Size of the elements stored in the rbtree
+//?     :returns: A :code:`_Bool` indicating whether insertion took place
+//?     :retval true: Insertion successful
+//?     :retval false: The value was already in the tree, or allocation failure
+_Bool scc_rbtree_impl_insert(void *rbtreeaddr, size_t elemsize);
+
+//! .. c:function:: _Bool scc_rbtree_insert(void *rbtreeaddr, type value)
+//!
+//!     Insert the given value into the rbtree.
+//!
+//!     The :code:`value` parameter must not necessarily be the same type as the one
+//!     with which the rbtree was instantiated. If it is not, it is implicitly converted
+//!     to the type stored in the tree.
+//!
+//!     :param rbtreeaddr: Address of the rbtree handle
+//!     :param value: The value to insert in the tree
+//!     :returns: A :code:`_Bool` indicating whether the insertion took place
+//!     :retval true: The value was inserted
+//!     :retval false: The values was already in the tree, or memory allocation failure
+//!
+//!     .. code-block:: C
+//!         :caption: Insert 0, 1, 2, 3 and 4 in an rbtree
+//!
+//!         extern int compare(void const *l, void const *r);
+//!
+//!         scc_rbtree(int) rbtree = scc_rbtree_new(int, compare);
+//!
+//!         for(int i = 0; i < 5; ++i) {
+//!             if(!scc_rbtree_insert(&rbtree, i)) {
+//!                 fprintf(stderr, "Could not insert %d\n", i);
+//!             }
+//!         }
+//!
+//!         /* Use rbtree */
+//!
+//!         scc_rbtree_free(rbtree);
+#define scc_rbtree_insert(rbtreeaddr, value)                                                \
+    scc_rbtree_impl_insert((**(rbtreeaddr) = (value), rbtreeaddr), sizeof(**(rbtreeaddr)))
+
+//? .. c:function:: void const *scc_rbtree_impl_find(void *rbtree, size_t elemsize)
+//?
+//?     Internal search function. Attempts to find the value stored at
+//?     :code:`rbtree` in the tree
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param rbtree: rbtree handle
+//?     :param elemsize: Size of the elements in the tree
+//?     :returns: A const-qualified pointer to a matching element in the tree, or
+//?               :code:`NULL` if no such element is found
+void const *scc_rbtree_impl_find(void const *rbtree);
+
+//! .. c:function:: void const *scc_rbtree_find(void const *rbtree, type value)
+//!
+//!     Search for, and if found, return a pointer to, an element matching the
+//!     given value.
+//!
+//!     The :code:`value` parameter must not necessarily be the same type as the one
+//!     with which the rbtree was instantiated. If it is not, it is implicitly
+//!     converted to the type stored in the tree.
+//!
+//!     :param rbtree: Handle to the rbtree
+//!     :param value: The value to search for
+//!     :returns: A const-qualified pointer to the element in the tree if found, otherwise
+//!               :code:`NULL`
+#define scc_rbtree_find(rbtree, value)                                                      \
+    scc_rbtree_impl_find((*(rbtree) = (value), (rbtree)))
+
+//? .. c:function:: _Bool scc_rbtree_impl_remove(void *rbtree, size_t elemsize)
+//?
+//?     Internal removal function. Attempts to find and remove the value stored
+//?     in the :code:`rb_curr` field.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param rbtree: rbtree handle
+//?     :param elemsize: Size of the the elements in the rbtree
+//?     :returns: :code:`true` if the value in :code:`rb_curr` field was found
+//?               and successfully removed. :code:`false` if no such value was
+//?               found in the tree
+_Bool scc_rbtree_impl_remove(void *rbtree, size_t elemsize);
+
+//! .. c:function:: _Bool scc_rbtree_remove(void *rbtree, type value)
+//!
+//!     Find and remove the specified value in the given rbtree.
+//!
+//!     The :code:`value` parameter must not necessarily be the same type as the
+//!     one with which the rbtree was instantiated. If it is not, the value is
+//!     implicitly converted to the type stored in the tree.
+//!
+//!     :param rbtree: Handle to the rbtree
+//!     :param value: Value to remove
+//!     :returns: :code:`true` if the value was removed, :code:`false` if no
+//!               copies of the specified value were found
+#define scc_rbtree_remove(rbtree, value)                                                    \
+    scc_rbtree_impl_remove((*(rbtree) = (value), (rbtree)), sizeof(*(rbtree)))
+
+//? .. c:function:: void const *scc_rbtree_impl_leftmost_value(void const *rbtree)
+//?
+//?     Find and return the address of the value in the leftmost node in the given tree
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param rbtree: rbtree handle
+//?     :returns:      Address of the value in the leftmost node in the tree
+void const *scc_rbtree_impl_leftmost_value(void const *rbtree);
+
+//? .. c:function:: void const *scc_rbtree_impl_rightmost_value(void const *rbtree)
+//?
+//?     Find and return the address of the value in the rightmost node in the given tree
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param rbtree: rbtree handle
+//?     :returns:      Address of the value in the rightmost node in the tree
+void const *scc_rbtree_impl_rightmost_value(void const *rbtree);
+
+//? .. c:function:: void const *scc_rbtree_impl_successor(void const *iter)
+//?
+//?     Find and return the address of the in-order successor of the given address
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param iter: Address of the :ref:`rn_value <type_rn_value>` field in
+//?                  the currently traversed node
+//?     :returns:    Address of the in-order successor of the given node
+void const *scc_rbtree_impl_successor(void const *iter);
+
+//? .. c:function:: void const *scc_rbtree_impl_predecessor(void const *iter)
+//?
+//?     Find and return the address of the in-order predecessor of the given address
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param iter: Address of the :ref:`rn_value <type_rn_value>` field in
+//?                  the currently traversed node
+//?     :returns:    Address of the in-order predecessor of the given node
+void const *scc_rbtree_impl_predecessor(void const *iter);
+
+//? .. c:function:: void const *scc_rbtree_impl_iterstop(void const *rbtree)
+//?
+//?     Compute address to be used as stop marker in :ref:`scc_rbtree_foreach <scc_rbtree_foreach>`
+//?     and :ref:`scc_rbtree_foreach_reversed <scc_rbtree_foreach_reversed>`.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param rbtree: Tree handle
+//?     :returns:      An address within the rbtree struct to be used
+//?                    as stop address for the iteration
+inline void const *scc_rbtree_impl_iterstop(void const *rbtree) {
+    struct scc_rbtree_base const *base = scc_rbtree_impl_base_qual(rbtree, const);
+    return (unsigned char const *)&base->rb_sentinel + base->rb_dataoff;
+}
+
+//! .. _scc_rbtree_foreach:
+//! .. c:macro:: scc_rbtree_foreach(iter, rbtree)
+//!
+//!     In-order iteration of the nodes in the rbtree. The macro results in a scope
+//!     executed once for each node in the tree with :code:`iter` referring to each such
+//!     node, in order.
+//!
+//!     :param iter:   Const-qualified pointer to the type of element stored in the tree
+//!     :param rbtree: rbtree handle
+//!
+//!     .. code-block:: C
+//!         :caption: Iterate over and print each element in a tree
+//!
+//!         extern scc_rbtree(int) rbtree;
+//!
+//!         // Iterator
+//!         int const *iter;
+//!
+//!         scc_rbtree_foreach(iter, rbtree) {
+//!             printf("%d\n", *iter);
+//!         }
+#define scc_rbtree_foreach(iter, rbtree)                                                    \
+    for(void const *scc_pp_cat_expand(scc_rbtree_end_,__LINE__) =                           \
+            (iter = scc_rbtree_impl_leftmost_value(rbtree),                                 \
+                scc_rbtree_impl_iterstop(rbtree));                                          \
+        iter != scc_pp_cat_expand(scc_rbtree_end_,__LINE__);                                \
         iter = scc_rbtree_impl_successor(iter))
 
-#define scc_rbtree_foreach_reversed(iter, handle)                   \
-    for(void const *scc_pp_cat_expand(scc_rbtree_end,__LINE__) =    \
-            (iter = scc_rbtree_impl_rightmost(handle),              \
-                scc_rbtree_impl_sentinel(handle));                  \
-        iter != scc_pp_cat_expand(scc_rbtree_end,__LINE__);         \
+//! .. _scc_rbtreer_foreach_reversed:
+//! .. c:macro:: scc_rbtree_foreach_reversed(iter, rbtree)
+//!
+//!     Reversed in-order iteration of the nodes in the rbtree.
+//!
+//!     .. seealso::
+//!
+//!         :ref:`scc_rbtree_foreach <scc_rbtree_foreach>`
+//!
+//!     :param iter:   Const-qualified pointer to the type of element stored in the tree
+//!     :param rbtree: rbtree handle
+#define scc_rbtree_foreach_reversed(iter, rbtree)                                           \
+    for(void const *scc_pp_cat_expand(scc_rbtree_end_,__LINE__) =                           \
+            (iter = scc_rbtree_impl_rightmost_value(rbtree),                                \
+                scc_rbtree_impl_iterstop(rbtree));                                          \
+        iter != scc_pp_cat_expand(scc_rbtree_end_,__LINE__);                                \
         iter = scc_rbtree_impl_predecessor(iter))
 
 #endif /* SCC_RBTREE_H */
