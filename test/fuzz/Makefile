@@ -58,7 +58,10 @@ $(eval
 	    $$(call echo-as,$(__node)/$$(notdir $$@))
 	    $$(AS) -o $$@ $$< $(ASFLAGS) $(CPPFLAGS)
 
-    $(fuzztarget): $(call __fuzz-obj)
+    $(eval __fuzzobj := $(call __fuzz-obj))
+    $(eval __all_obj += $(__fuzzobj))
+
+    $(fuzztarget): $(__fuzzobj)
 	    $$(call echo-ld,$(__node)/$$(notdir $$@))
 	    $$(CC) -o $$@ $$^ $(LDFLAGS) $(LDLIBS)
 
