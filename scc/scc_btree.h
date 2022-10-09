@@ -11,7 +11,8 @@
 //! .. c:macro:: scc_btree(type)
 //!
 //!     Expands to an opaque pointer suitable for storing
-//!     a handle to a B-tree containing the specified type !
+//!     a handle to a B-tree containing the specified type
+//!
 //!     :param type: The type to store in the B-tree
 #define scc_btree(type) type *
 
@@ -20,7 +21,7 @@
 //!     Signature of the function used for comparison. The return
 //!     value should be as follows
 //!
-//!     .. list-table:: Flag Bits
+//!     .. list-table:: Comparison return values
 //!         :header-rows: 1
 //!
 //!         * - Value
@@ -261,7 +262,7 @@ struct scc_btree_base {
 //?         and :ref:`bt_curr <type_bt_curr>`
 //?
 //?     .. _type_bt_curr:
-//?     .. c:var:: type bt_curr[2]
+//?     .. c:var:: type bt_curr
 //?
 //?         Used for temporary storage for allowing operations on rvalues. Any
 //?         elements to be inserted, removed or searched for are first written
@@ -422,13 +423,14 @@ inline size_t scc_btree_impl_npad(void const *btree) {
 //? .. c:macro:: scc_btree_impl_base(btree)
 //?
 //?     Obtain unqualified pointer to the base address of the given
-//?     :code:`handle`.
+//?     :code:`btree`.
 //?
 //?     .. note::
 //?
 //?         Internal use only
 //?
 //?     :param btree: B-tree handle
+
 //?     :returns: Base address of the given B-tree
 #define scc_btree_impl_base(btree)                                                                  \
     scc_btree_impl_base_qual(btree,)
@@ -575,6 +577,6 @@ _Bool scc_btree_impl_remove(void *btree, size_t elemsize);
 //!     :returns: :code:`true` if the value was removed, :code:`false` if no
 //!               copies of the specified value were found
 #define scc_btree_remove(btree, value)                                                                  \
-    scc_btree_impl_remove((*(btree) = (value), btree), sizeof(*(btree)))
+    scc_btree_impl_remove(((*(btree) = (value)), (btree)), sizeof(*(btree)))
 
 #endif /* SCC_BTREE_H */

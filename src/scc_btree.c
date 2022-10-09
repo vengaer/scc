@@ -126,7 +126,7 @@ static inline void *scc_btnode_data(struct scc_btree_base const *restrict base, 
 //?     struct scc_btree_base const *restrict base, struct scc_btnode_base *restrict node, \
 //?     size_t index, size_t elemsize)
 //?
-//?     Compute and return address of the given node's indexth child
+//?     Compute and return address of the indexth value in the given node
 //?
 //?     .. note::
 //?
