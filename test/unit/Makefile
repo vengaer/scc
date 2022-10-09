@@ -15,7 +15,7 @@ LDLIBS          += -lunity -lm
 define __unit-obj
 $(strip
     $(patsubst $(srcdir)/%.$(cext),$(builddir)/scc/%.$(oext),
-        $(wildcard $(patsubst %,$(srcdir)/*%*.$(cext),$(__node) $($(__node)_deps))))
+        $(wildcard $(patsubst %,$(srcdir)/*_%*.$(cext),$(__node) $($(__node)_deps))))
     $(patsubst $(inspectdir)/%.$(cext),$(inspectbuilddir)/%.$(oext),
         $(wildcard $(inspectdir)/scc_$(__node)*.$(cext)))
     $(patsubst $(asdir)/%.$(asext),$(asbuilddir)/%.$(oext),
@@ -24,7 +24,6 @@ endef
 
 define decl-unit
 $(eval
-    $(eval __prefix    := $(__node_name))
     $(eval __unitsrc   := $(wildcard $(__node_path)/*.$(cext)))
     $(eval __chk       := $(patsubst $(__node_path)/%.$(cext),$(__node_builddir)/.chk.%.stamp,$(__unitsrc)))
     $(eval __runners   := $(patsubst $(__node_path)/%.$(cext),$(__node_builddir)/%$(runnersuffix),$(__unitsrc)))
