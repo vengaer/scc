@@ -784,7 +784,7 @@ _Bool scc_rbtree_impl_insert(void *rbtreeaddr, size_t elemsize) {
 
 void const *scc_rbtree_impl_find(void const *rbtree) {
     struct scc_rbtree_base const *base = scc_rbtree_impl_base_qual(rbtree, const);
-    struct scc_rbnode_base *p = &(struct scc_rbnode_base) { .rn_left = base->rb_root };
+    struct scc_rbnode_base const *p = (void const *)&base->rb_sentinel;
     struct scc_rbnode_base *n = base->rb_root;
 
     enum scc_rbdir dir = scc_rbdir_left;
