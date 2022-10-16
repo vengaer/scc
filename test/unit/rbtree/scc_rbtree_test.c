@@ -220,7 +220,7 @@ void test_scc_rbtree_removal_fuzz_failure1(void) {
     scc_rbtree_free(handle);
 }
 
-void test_scc_rbtree_removal_fuzz_failure2(void) {
+void test_scc_rbtree_fuzz_failure2(void) {
     scc_rbtree(unsigned) handle = scc_rbtree_new(unsigned, compare_unsigned);
     TEST_ASSERT_TRUE(scc_rbtree_insert(&handle, 117u));
 
@@ -228,5 +228,38 @@ void test_scc_rbtree_removal_fuzz_failure2(void) {
     scc_rbtree_foreach_reversed(iter, handle) {
         TEST_ASSERT_EQUAL_UINT32(117u, *iter);
     }
+    scc_rbtree_free(handle);
+}
+
+void test_scc_rbtree_fuzz_failure3(void) {
+    scc_rbtree(unsigned) handle = scc_rbtree_new(unsigned, compare_unsigned);
+    unsigned data[] = {
+         442130442,  4279435263, 2412773375, 3486502863,
+         3489600255, 3472883712, 64815107,   4294954959,
+         2865745871
+
+    };
+
+    for(unsigned i = 0; i < scc_arrsize(data); ++i) {
+        TEST_ASSERT_TRUE(scc_rbtree_insert(&handle, data[i]));
+    }
+
+    unsigned long long flags;
+    for(unsigned i = 0u; i < scc_arrsize(data); i++) {
+        TEST_ASSERT_EQUAL_UINT64(scc_arrsize(data) - i, scc_rbtree_size(handle));
+        TEST_ASSERT_TRUE(scc_rbtree_remove(handle, data[i]));
+        for(unsigned j = i + 1u; j < scc_arrsize(data); j++) {
+            TEST_ASSERT_TRUE(scc_rbtree_find(handle, data[j]));
+        }
+
+        flags = scc_rbtree_inspect_properties(handle);
+        TEST_ASSERT_EQUAL_UINT64(0ull, flags & SCC_RBTREE_ERR_MASK);
+    }
+
+    for(unsigned i = 0u; i < scc_arrsize(data); ++i) {
+        TEST_ASSERT_FALSE(scc_rbtree_find(handle, data[i]));
+    }
+    TEST_ASSERT_EQUAL_UINT64(0ull, scc_rbtree_size(handle));
+
     scc_rbtree_free(handle);
 }
