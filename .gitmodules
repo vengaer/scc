@@ -10,3 +10,6 @@
 	path = submodules/conftool
 	url = https://gitlab.com/vengaer/conftool.git
 	ignore = dirty
+[submodule "submodules/pycparser"]
+	path = submodules/pycparser
+	url = https://github.com/eliben/pycparser.git
