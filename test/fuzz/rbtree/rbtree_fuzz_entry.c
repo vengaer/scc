@@ -40,7 +40,6 @@ int compare(void const *left, void const *right) {
 }
 
 int LLVMFuzzerTestOneInput(uint8_t const *data, size_t size) {
-    bool success = false;
     uint32_t *buf = 0;
     size = size / sizeof(*buf);
     if(size < 1) {
@@ -62,27 +61,12 @@ int LLVMFuzzerTestOneInput(uint8_t const *data, size_t size) {
 
     scc_rbtree(uint32_t) handle = scc_rbtree_new(uint32_t, compare);
 
-    if(!rbtree_fuzz_insert(&handle, buf, unique_end, size)) {
-        goto epilogue;
-    }
+    rbtree_fuzz_insert(&handle, buf, unique_end, size);
+    rbtree_fuzz_traversal(handle, buf, unique_end);
+    rbtree_fuzz_removal(handle, buf, unique_end);
 
-    if(!rbtree_fuzz_traversal(&handle, buf, unique_end)) {
-        goto epilogue;
-    }
-
-    if(!rbtree_fuzz_removal(&handle, buf, unique_end)) {
-        goto epilogue;
-    }
-
-    success = true;
-epilogue:
     free(buf);
-    if(handle) {
-        scc_rbtree_free(handle);
-    }
-    if(!success) {
-        abort();
-    }
+    scc_rbtree_free(handle);
 
     return 0;
 }
