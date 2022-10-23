@@ -90,5 +90,16 @@
         "check": [
             ["scc_svec_base", "scc_svec_int"]
         ]
+    },
+    "scc_vec.h": {
+        "types": {
+            "scc_vec_int": {
+                "from": "scc_vec_impl_layout",
+                "params": ["int"]
+            }
+        },
+        "check": [
+            ["scc_vec_base", "scc_vec_int"]
+        ]
     }
 }
