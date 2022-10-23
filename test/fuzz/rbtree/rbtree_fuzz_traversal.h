@@ -6,6 +6,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-void rbtree_fuzz_traversal(scc_rbtree(uint32_t) const handle, uint32_t const *data, size_t size);
+void rbtree_fuzz_traversal(scc_rbtree(uint32_t) const handle, uint32_t const *data, size_t size);  /* NOLINT(readability-avoid-const-params-in-decls) */
 
 #endif /* RBTREE_FUZZ_TRAVERSAL_H */
