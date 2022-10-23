@@ -211,7 +211,7 @@ struct scc_btree_base {
         struct scc_btnode_base *bt_links[order];                                                \
     }
 
-//? .. c:macro:: scc_btree_impl_layout(type)
+//? .. c:macro:: scc_btree_impl_layout(type, order)
 //?
 //?     Actual layout of a B-tree storing instances of the given
 //?     :code:`type`.
@@ -222,6 +222,9 @@ struct scc_btree_base {
 //?     .. note::
 //?
 //?         Internal use only
+//?
+//?     :param type: The type of the elements to be stored in the node
+//?     :param order: The order to the B-tree
 //?
 //?     .. c:var:: unsigned short const bt_order
 //?
@@ -280,7 +283,7 @@ struct scc_btree_base {
         unsigned short const bt_dataoff;                                                            \
         unsigned short const bt_linkoff;                                                            \
         size_t bt_size;                                                                             \
-        struct scc_btnode *bt_root;                                                                 \
+        struct scc_btnode_base *bt_root;                                                            \
         struct scc_arena bt_arena;                                                                  \
         scc_bcompare bt_compare;                                                                    \
         unsigned char bt_fwoff;                                                                     \
