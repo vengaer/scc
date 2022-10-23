@@ -1,4 +1,38 @@
 {
+    "scc_btree.h": {
+        "types": {
+            "scc_btnode_base": {
+                "generate": false
+            },
+            "scc_btnode_int_order4": {
+                "generate": true,
+                "from": "scc_btnode_impl_layout",
+                "params": ["int", "4"]
+            },
+            "scc_btnode_int_order5": {
+                "generate": true,
+                "from": "scc_btnode_impl_layout",
+                "params": ["int", "5"]
+            },
+            "scc_btree_base": {
+                "generate": false
+            },
+            "scc_btree_int_order4": {
+                "generate": true,
+                "from": "scc_btree_impl_layout",
+                "params": ["int", "4"]
+            },
+            "scc_btree_int_order5": {
+                "generate": true,
+                "from": "scc_btree_impl_layout",
+                "params": ["int", "5"]
+            }
+        },
+        "check": [
+            ["scc_btnode_base", "scc_btnode_int_order4", "scc_btnode_int_order5"],
+            ["scc_btree_base", "scc_btree_int_order4", "scc_btree_int_order5"]
+        ]
+    },
     "scc_rbtree.h": {
         "types": {
             "scc_rbnode_base": {
