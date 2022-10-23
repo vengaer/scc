@@ -22,18 +22,6 @@ builddir     := $(root)/build
 dirs         += $(builddir)
 srcdir       := $(root)/src
 
-ASFLAGS      := -c -g -x assembler -MD -MP
-CFLAGS       := -std=c99 -c -MD -MP -g -Wall -Wextra -Wpedantic -Waggregate-return   \
-                -Wbad-function-cast -Wcast-qual -Wfloat-equal -Wmissing-include-dirs \
-                -Wnested-externs -Wpointer-arith -Wshadow -Wunknown-pragmas -Wswitch \
-                -Wundef -Wunused -Wwrite-strings
-CXXFLAGS     := -std=c++17 -c -MD -MP -g -Wall -Wextra -Wpedantic
-CPPFLAGS     += -I$(root) -DNDEBUG
-
-LDFLAGS      :=
-LDLIBS       :=
-ARFLAGS      := -rcs
-
 TIDYFLAGS     = --warnings-as-errors=* --checks=$(tidychecks)
 
 MKDIRFLAGS   := -p
@@ -55,6 +43,18 @@ pyscripts    := $(scripts)/python
 all:
 
 include $(wildcard $(mkscripts)/*.mk)
+
+ASFLAGS      := -c -x assembler -MD -MP $(__debug_info)
+CFLAGS       := -std=c99 -c -MD -MP -Wall -Wextra -Wpedantic -Waggregate-return      \
+                -Wbad-function-cast -Wcast-qual -Wfloat-equal -Wmissing-include-dirs \
+                -Wnested-externs -Wpointer-arith -Wshadow -Wunknown-pragmas -Wswitch \
+                -Wundef -Wunused -Wwrite-strings $(__debug_info)
+CXXFLAGS     := -std=c++17 -c -MD -MP -Wall -Wextra -Wpedantic $(__debug_info)
+CPPFLAGS     += -I$(root) -DNDEBUG
+
+LDFLAGS      :=
+LDLIBS       :=
+ARFLAGS      := -rcs
 
 sover        := 0
 socompat     := 0

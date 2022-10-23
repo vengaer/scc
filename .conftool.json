@@ -127,7 +127,13 @@
             "entrytype": "integer",
             "default": 256,
             "help": "Default arena allocator chunk size"
+        },
+        {
+            "name": "CONFIG_DEBUG_INFO",
+            "depends": ["CONFIG_DEVEL"],
+            "entrytype": "switch",
+            "default": "y",
+            "help": "Set to enable debug information (i.e. pass -g to the compiler)"
         }
-
     ]
 }

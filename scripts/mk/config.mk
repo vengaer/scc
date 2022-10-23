@@ -46,4 +46,6 @@ SCC_BM_TYPE      := $(CONFIG_BENCHMARK_TYPE)
 # Build options
 VERBOSE          ?= $(call is-set,$(CONFIG_VERBOSE))
 
+__debug_info     := $(if $(call is-set,$(CONFIG_DEBUG_INFO)),-g)
+
 endif
