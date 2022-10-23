@@ -1,0 +1,44 @@
+{
+    "scc_rbtree.h": {
+        "types": {
+            "scc_rbnode_base": {
+                "generate": false
+            },
+            "scc_rbnode_int": {
+                "generate": true,
+                "from": "scc_rbnode_impl_layout",
+                "params": ["int"]
+            },
+            "scc_rbsentinel": {
+                "generate": false
+            },
+            "scc_rbtree_base": {
+                "generate": false
+            },
+            "scc_rbtree_int": {
+                "generate": true,
+                "from": "scc_rbtree_impl_layout",
+                "params": ["int"]
+            }
+        },
+        "check": [
+            ["scc_rbnode_base", "scc_rbnode_int", "scc_rbsentinel"],
+            ["scc_rbtree_base", "scc_rbtree_int"]
+        ]
+    },
+    "scc_svec.h": {
+        "types": {
+            "scc_svec_base": {
+                "generate": false
+            },
+            "scc_svec_int": {
+                "generate": true,
+                "from": "scc_svec_impl_layout",
+                "params": ["int"]
+            }
+        },
+        "check": [
+            ["scc_svec_base", "scc_svec_int"]
+        ]
+    }
+}
