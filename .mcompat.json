@@ -35,7 +35,8 @@
             }
         },
         "check": [
-            ["scc_hashmap_base", "scc_hashmap_int_int", "scc_hashmap_int_char"]
+            ["scc_hashmap_base", "scc_hashmap_int_int"],
+            ["scc_hashmap_base", "scc_hashmap_int_char"]
         ]
     },
     "scc_hashtab.h": {
@@ -50,7 +51,8 @@
             }
         },
         "check": [
-            ["scc_hashtab_base", "scc_hashtab_int", "scc_hashtab_char"]
+            ["scc_hashtab_base", "scc_hashtab_int"],
+            ["scc_hashtab_base", "scc_hashtab_char"]
         ]
     },
     "scc_rbtree.h": {
