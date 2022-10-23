@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+import contextlib
 import json
 import os
 import sys
@@ -47,8 +48,11 @@ def parse_ast(filename, include_dirs):
 
 
 def declname(field):
-    return field.declname if not isinstance(field, ArrayDecl) else field.type.declname
-
+    with contextlib.suppress(AttributeError):
+        return field.declname
+    with contextlib.suppress(AttributeError):
+        return field.type.declname
+    return field.type.type.declname
 
 def chk_field(left, right, field):
     left = left.type
