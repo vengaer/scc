@@ -39,7 +39,7 @@ $(eval
     $(foreach __s,$(wildcard $(__node_path)/*.$(hext)),
         $(eval __compatchk_$(__s) := $(__node_builddir)/.mcompatchk.$(notdir $(__s)).stamp)
 
-        $(__compatchk_$(__s)): $(__s) $(__config_header) $(__mcompatcfg) $(__all_mkfiles) | $(__node_builddir) $(submodules)
+        $(__compatchk_$(__s)): $(__s) $(__mcompat) $(__config_header) $(__mcompatcfg) $(__all_mkfiles) | $(__node_builddir) $(submodules)
 	        $$(call echo-mcompat,$$(notdir $$<))
 	        $(PYTHON) $(__mcompat) -c $(__mcompatcfg) -I$(root)/submodules/pycparser/utils/fake_libc_include $$<
 	        $(TOUCH) $$@
