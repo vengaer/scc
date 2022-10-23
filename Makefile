@@ -31,7 +31,7 @@ TOUCHFLAGS   :=
 PYTESTFLAGS  := -v
 PYLINTFLAGS  := --fail-under=10.0
 
-submodules := submodules/.init.stamp
+submodules   := submodules/.init.stamp
 
 scc          := scc
 
