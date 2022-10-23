@@ -69,6 +69,17 @@
             ["scc_rbtree_base", "scc_rbtree_int"]
         ]
     },
+    "scc_ringdeque.h": {
+        "types": {
+            "scc_ringdeque_int": {
+                "from": "scc_ringdeque_impl_layout",
+                "params": ["int"]
+            }
+        },
+        "check": [
+            ["scc_ringdeque_base", "scc_ringdeque_int"]
+        ]
+    },
     "scc_svec.h": {
         "types": {
             "scc_svec_int": {
