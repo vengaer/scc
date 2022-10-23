@@ -23,7 +23,7 @@ _verbose = False  # pylint: disable=invalid-name
 
 
 def generate_typedefs(filename, tmppath, ent):
-    to_generate = [t for t in ent["types"] if ent["types"][t]["generate"]]
+    to_generate = [t for t in ent["types"] if ent["types"][t]]
 
     with open(tmppath, "w", encoding="ascii") as outfile:
         with open(filename, "r", encoding="ascii") as infile:

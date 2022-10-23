@@ -1,29 +1,19 @@
 {
     "scc_btree.h": {
         "types": {
-            "scc_btnode_base": {
-                "generate": false
-            },
             "scc_btnode_int_order4": {
-                "generate": true,
                 "from": "scc_btnode_impl_layout",
                 "params": ["int", "4"]
             },
             "scc_btnode_int_order5": {
-                "generate": true,
                 "from": "scc_btnode_impl_layout",
                 "params": ["int", "5"]
             },
-            "scc_btree_base": {
-                "generate": false
-            },
             "scc_btree_int_order4": {
-                "generate": true,
                 "from": "scc_btree_impl_layout",
                 "params": ["int", "4"]
             },
             "scc_btree_int_order5": {
-                "generate": true,
                 "from": "scc_btree_impl_layout",
                 "params": ["int", "5"]
             }
@@ -36,12 +26,10 @@
     "scc_hashmap.h": {
         "types": {
             "scc_hashamp_int_int": {
-                "generate": true,
                 "from": "scc_hashmap_impl_layout",
                 "params": ["int", "int"]
             },
             "scc_hashmap_int_char": {
-                "generate": true,
                 "from": "scc_hashmap_impl_layout",
                 "params": ["int", "char"]
             }
@@ -52,22 +40,11 @@
     },
     "scc_rbtree.h": {
         "types": {
-            "scc_rbnode_base": {
-                "generate": false
-            },
             "scc_rbnode_int": {
-                "generate": true,
                 "from": "scc_rbnode_impl_layout",
                 "params": ["int"]
             },
-            "scc_rbsentinel": {
-                "generate": false
-            },
-            "scc_rbtree_base": {
-                "generate": false
-            },
             "scc_rbtree_int": {
-                "generate": true,
                 "from": "scc_rbtree_impl_layout",
                 "params": ["int"]
             }
@@ -79,11 +56,7 @@
     },
     "scc_svec.h": {
         "types": {
-            "scc_svec_base": {
-                "generate": false
-            },
             "scc_svec_int": {
-                "generate": true,
                 "from": "scc_svec_impl_layout",
                 "params": ["int"]
             }
