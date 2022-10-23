@@ -90,6 +90,7 @@ def parse_typedefs(names, ast):
         if type(child[1].type.type) not in (Struct, Union):
             continue
         typedefs.append(child[1].type.type)
+
     return typedefs
 
 
@@ -106,13 +107,16 @@ def parse_structs(names, ast):
     return structs
 
 
-def check_compatibility(names, ast):
+def check_compatibility(names, ast, expect_typedefs):
     if _verbose:
         print(f"Checking {names}")
-    candidates = parse_typedefs(names, ast) + parse_structs(names, ast)
+    typedefs = parse_typedefs(names, ast)
+    if expect_typedefs:
+        assert typedefs, 'Found no typedefs'
+    candidates = typedefs + parse_structs(names, ast)
 
-    for i, type0 in enumerate(candidates[:-1]):
-        for type1 in candidates[i + 1 :]:
+    for i, type0 in enumerate(candidates):
+        for type1 in candidates[i + 1:]:
             for left, right in zip(type0.decls, type1.decls):
                 if tuple(
                     (
@@ -142,6 +146,7 @@ def main(filename, include_dir, verbose, config):
         ent = cfg[os.path.basename(filename)]
     except KeyError:
         sys.exit(0)
+
     fdesc, tmppath = tempfile.mkstemp()
     try:
         os.close(fdesc)
@@ -154,7 +159,7 @@ def main(filename, include_dir, verbose, config):
             else []),
         )
         for chkset in ent["check"]:
-            check_compatibility(chkset, ast)
+            check_compatibility(chkset, ast, ent['types'])
     finally:
         os.remove(tmppath)
 
