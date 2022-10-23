@@ -33,6 +33,23 @@
             ["scc_btree_base", "scc_btree_int_order4", "scc_btree_int_order5"]
         ]
     },
+    "scc_hashmap.h": {
+        "types": {
+            "scc_hashamp_int_int": {
+                "generate": true,
+                "from": "scc_hashmap_impl_layout",
+                "params": ["int", "int"]
+            },
+            "scc_hashmap_int_char": {
+                "generate": true,
+                "from": "scc_hashmap_impl_layout",
+                "params": ["int", "char"]
+            }
+        },
+        "check": [
+            ["scc_hashmap_base", "scc_hashmap_int_int", "scc_hashmap_int_char"]
+        ]
+    },
     "scc_rbtree.h": {
         "types": {
             "scc_rbnode_base": {
