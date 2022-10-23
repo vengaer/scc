@@ -25,7 +25,7 @@
     },
     "scc_hashmap.h": {
         "types": {
-            "scc_hashamp_int_int": {
+            "scc_hashmap_int_int": {
                 "from": "scc_hashmap_impl_layout",
                 "params": ["int", "int"]
             },
@@ -36,6 +36,21 @@
         },
         "check": [
             ["scc_hashmap_base", "scc_hashmap_int_int", "scc_hashmap_int_char"]
+        ]
+    },
+    "scc_hashtab.h": {
+        "types": {
+            "scc_hashtab_int": {
+                "from": "scc_hashtab_impl_layout",
+                "params": ["int"]
+            },
+            "scc_hashtab_char": {
+                "from": "scc_hashtab_impl_layout",
+                "params": ["char"]
+            }
+        },
+        "check": [
+            ["scc_hashtab_base", "scc_hashtab_int", "scc_hashtab_char"]
         ]
     },
     "scc_rbtree.h": {
