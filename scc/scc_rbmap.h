@@ -5,6 +5,7 @@
 
 #include <stddef.h>
 
+//? .. _scc_rbmap_impl_pair:
 //? .. c:macro:: scc_rbmap_impl_pair(keytype, valuetype)
 //?
 //?     Expands to a struct appropriate for storing pairs of
@@ -29,6 +30,16 @@
 //!     :param valuetype: The value type to storre in the map
 #define scc_rbmap(keytype, valuetype)                                                       \
     scc_rbmap_impl_pair(keytype, valuetype) *
+
+//! .. c:macro:: scc_rbmap_iter(keytype, valuetype)
+//!
+//!     Expands to an opaque pointer suitable for passing as the
+//!     iter parameter to :ref:`scc_rbmap_foreach <scc_rbmap_foreach>`
+//!
+//!     :param keytype: The key type stored in the map that is to be iterated over
+//!     :param valuetype: The value type stored in the map that is to be iterated over
+#define scc_rbmap_iter(keytype, valuetype)                                                  \
+    struct { keytype const key; valuetype value; } *
 
 //? .. c:macro:: scc_rbmnode_impl_layout(keytype, valuetype)
 //?
@@ -64,10 +75,10 @@
 //?
 //?         Field storing the number of padding bytes between
 //?         :ref:`rn_flags <unsigned_char_rn_flags>` and
-//?         :ref:`rn_pair <type_rn_pair>`.
+//?         :ref:`rn_pair <rbm_kvpair_rn_pair>`.
 //?
-//?     .. _type_rn_pair:
-//?     .. c:var:: type rn_pair
+//?     .. _rbm_kvpair_rn_pair:
+//?     .. c:var:: rbm_kvpair rn_pair
 //?
 //?         The key-value pair stored in the node
 #define scc_rbmnode_impl_layout(keytype, valuetype) \
@@ -285,5 +296,103 @@ void *scc_rbmap_impl_find(void *map, size_t valoff);
         ((map)->rm_key = (key), (map)),                                                     \
         sizeof(*(map))                                                                      \
     )
+
+//? .. c:function:: void *scc_rbmap_impl_leftmost_pair(void *map)
+//?
+//?     Find and return the address of the pair stored in the leftmost node
+//?     in the given map
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param map: rbmap handle
+//?     :returns:   Address of the pair in the leftmost node in the map
+void *scc_rbmap_impl_leftmost_pair(void *map);
+
+//? .. c:function:: void *scc_rbmap_impl_rightmost_pair(void *map)
+//?
+//?     Find and return the address of the pair stored in the rightmost
+//?     node in the given map
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param map: rbmap handle
+//?     :returns:   Address of the pair in the rightmost node in the map
+void *scc_rbmap_impl_rightmost_pair(void *map);
+
+//? .. c:function:: void *scc_rbmap_impl_successor(void *iter)
+//?
+//?     Find and return the address of the in-order successor of the given address
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param iter: Address of the :ref:`rn_pair <rbm_kvpair_rn_pair>` field in
+//?                  the currently traversed node
+//?     :returns:    Address of the in-order successor of the given node
+void *scc_rbmap_impl_successor(void *iter);
+
+//? .. c:function:: void *scc_rbmap_impl_predecessor(void *iter)
+//?
+//?     Find and return the address of the in-order predecessor of the given address
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param iter: Address of the :ref:`rn_pair <rbm_kvpair_rn_pair>` field in
+//?                  the currently traversed node
+//?     :returns:    Address of the in-order predecessor of the given node
+void *scc_rbmap_impl_predecessor(void *iter);
+
+//? .. c:function:: void const *scc_rbmap_impl_iterstop(void const *map)
+//?
+//?     Compute address to be used as stop marker in :ref:`scc_rbmap_foreach <scc_rbmap_foreach>`
+//?     and :ref:`scc_rbmap_foreach_reversed <scc_rbmap_foreach_reversed>`.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param map: Map handle
+//?     :returns:   An address within the rbmap struct to be used
+//?                 as stop address for the iteration
+inline void const *scc_rbmap_impl_iterstop(void const *map) {
+    return scc_rbtree_impl_iterstop(map);
+}
+
+//! .. _scc_rbmap_foreach:
+//! .. c:macro:: scc_rbmap_foreach(iter, map)
+//!
+//!     In-order iteration of the nodes in the rbmap. The macro results in a scope
+//!     executed once for each key-value pair in the tree with :code:`iter` exposing
+//!     the key and value as :c:texpr:`iter->key` and :c:texpr:`iter->value`, respectively.
+//!
+//!     :param iter:  An instance obtained by invoking :ref:`scc_rbmap_iter` with the
+//!                   appropriate key and value types
+//!     :param rbmap: rbmap handle
+//!
+//!     .. code-block:: C
+//!         :caption: Iterate over and duplicate each value in an rbmap mapping
+//!                   ints to ints
+//!
+//!         extern scc_rbmap(int, int) rbmap;
+//!
+//!         // Iterator
+//!         scc_rbmap_iter(int, int) iter;
+//!
+//!         scc_rbmap_foreach(iter, rbmap) {
+//!             iter->value *= 2;
+//!         }
+#define scc_rbmap_foreach(iter, rbmap)                                                      \
+    for(void const *scc_pp_cat_expand(scc_rbmap_end_,__LINE__) =                            \
+            (iter = scc_rbmap_impl_leftmost_pair(rbmap),                                    \
+                scc_rbmap_impl_iterstop(rbmap));                                            \
+        iter != scc_pp_cat_expand(scc_rbmap_end_,__LINE__);                                 \
+        iter = scc_rbmap_impl_successor(iter))
 
 #endif /* SCC_RBMAP_H */

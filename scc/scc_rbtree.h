@@ -457,9 +457,66 @@ inline size_t scc_rbnode_link_offset(struct scc_rbnode_base const *node) {
 //?     :param node: The node whose link is to be checked
 //?     :param dir:  The direction of the link to be checked
 //?     :returns: :code:`true` if the link in the given direction is a thread, otherwise :code:`false`.
-static inline _Bool scc_rbnode_thread(struct scc_rbnode_base const *node, enum scc_rbdir dir) {
+inline _Bool scc_rbnode_thread(struct scc_rbnode_base const *node, enum scc_rbdir dir) {
     return node->rn_flags & (1u << dir);
 }
+
+//? .. c:function:: size_t scc_rbnode_bkoff(void const *iter)
+//?
+//?     Read the :ref:`rn_bkoff <unsigned_char_rn_bkoff>` field of the rbnode
+//?     correponding to the given value address
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param iter: Address of the :ref:`rn_value <type_rn_value>` field in the
+//?                  currently traversed rbnode
+//?     :returns:    Value of the :ref:`rn_bkoff <unsigned_char_rn_bkoff>` in the
+//?                  node containing to the given value
+inline size_t scc_rbnode_bkoff(void const *iter) {
+    return ((unsigned char const *)iter)[-1];
+}
+
+//? .. c:macro:: scc_rbnode_impl_base_qual(valaddr, qual)
+//?
+//?     Obtain suitably qualified pointer to the base
+//?     address of the node containing the given value address
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param valaddr: Address of the :ref:`rn_value <type_rn_value>` field
+//?                     in the node
+//?     :param qual:    Qualifiers to apply to the pointer
+//?     :returns:       Base address of the :ref:`struct scc_rbnode_base <scc_rbnode_base>`
+//?                     corresponding to the given value address
+#define scc_rbnode_impl_base_qual(valaddr, qual)                    \
+    scc_container_qual(                                             \
+        (unsigned char qual *)valaddr -                             \
+            scc_rbnode_bkoff(valaddr),                              \
+        struct scc_rbnode_base,                                     \
+        rn_data,                                                    \
+        qual                                                        \
+    )
+
+//? .. c:macro:: scc_rbnode_impl_base(valaddr)
+//?
+//?     Obtain unqualified pointer to the base address of the node
+//?     containing the given value address
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param valaddr: Address of the :ref:`rn_value <type_rn_value>` field
+//?                     in the node
+//?     :returns:       Base address of the :ref:`struct scc_rbnode_base <scc_rbnode_base>`
+//?                     corresponding to the given value address
+#define scc_rbnode_impl_base(valaddr)                               \
+    scc_rbnode_impl_base_qual(valaddr,)
+
 
 //? .. c:macro:: scc_rbtree_impl_base_qual(rbtree, qual)
 //?

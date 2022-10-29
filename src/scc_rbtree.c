@@ -14,6 +14,7 @@ _Bool scc_rbtree_empty(void const *rbtree);
 void const *scc_rbtree_impl_iterstop(void const *rbtree);
 size_t scc_rbnode_link_offset(struct scc_rbnode_base const *node);
 _Bool scc_rbnode_thread(struct scc_rbnode_base const *node, enum scc_rbdir dir);
+size_t scc_rbnode_bkoff(void const *iter);
 
 //? .. c:enum:: @flags
 //?
@@ -39,45 +40,6 @@ enum {
     SCC_RBRTHRD = 0x02,
     SCC_RBLEAF = SCC_RBLTHRD | SCC_RBRTHRD
 };
-
-//? .. c:macro:: scc_rbnode_impl_base_qual(valaddr, qual)
-//?
-//?     Obtain suitably qualified pointer to the base
-//?     address of the node containing the given value address
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param valaddr: Address of the :ref:`rn_value <type_rn_value>` field
-//?                     in the node
-//?     :param qual:    Qualifiers to apply to the pointer
-//?     :returns:       Base address of the :ref:`struct scc_rbnode_base <scc_rbnode_base>`
-//?                     corresponding to the given value address
-#define scc_rbnode_impl_base_qual(valaddr, qual)                    \
-    scc_container_qual(                                             \
-        (unsigned char qual *)valaddr -                             \
-            scc_rbnode_bkoff(valaddr),                              \
-        struct scc_rbnode_base,                                     \
-        rn_data,                                                    \
-        qual                                                        \
-    )
-
-//? .. c:macro:: scc_rbnode_impl_base(valaddr)
-//?
-//?     Obtain unqualified pointer to the base address of the node
-//?     containing the given value address
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param valaddr: Address of the :ref:`rn_value <type_rn_value>` field
-//?                     in the node
-//?     :returns:       Base address of the :ref:`struct scc_rbnode_base <scc_rbnode_base>`
-//?                     corresponding to the given value address
-#define scc_rbnode_impl_base(valaddr)                               \
-    scc_rbnode_impl_base_qual(valaddr,)
 
 //? .. c:function:: void scc_rbtree_set_bkoff(unsigned char *rbtree, unsigned char bkoff)
 //?
@@ -112,23 +74,6 @@ static inline void scc_rbnode_set_bkoff(
     unsigned const bkoff = base->rb_dataoff - offsetof(struct scc_rbnode_base, rn_data);
     assert(bkoff <= UCHAR_MAX);
     ((unsigned char *)node)[base->rb_dataoff - 1u] = bkoff;
-}
-
-//? .. c:function:: size_t scc_rbnode_bkoff(void const *iter)
-//?
-//?     Read the :ref:`rn_bkoff <unsigned_char_rn_bkoff>` field of the rbnode
-//?     correponding to the given value address
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param iter: Address of the :ref:`rn_value <type_rn_value>` field in the
-//?                  currently traversed rbnode
-//?     :returns:    Value of the :ref:`rn_bkoff <unsigned_char_rn_bkoff>` in the
-//?                  node containing to the given value
-static inline size_t scc_rbnode_bkoff(void const *iter) {
-    return ((unsigned char const *)iter)[-1];
 }
 
 //? .. c:function:: void scc_rbnode_set(struct scc_rbnode_base *node, enum scc_rbdir dir)
