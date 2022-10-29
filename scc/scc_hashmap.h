@@ -623,8 +623,8 @@ _Bool scc_hashmap_impl_insert(void *mapaddr, size_t keysize, size_t valsize);
 //!         scc_hashmap_free(map);
 #define scc_hashmap_insert(mapaddr, key, value)                             \
     scc_hashmap_impl_insert((                                               \
-            (*(mapaddr))->hp_key = key,                                     \
-            (*(mapaddr))->hp_val = value,                                   \
+            (*(mapaddr))->hp_key = (key),                                   \
+            (*(mapaddr))->hp_val = (value),                                 \
             (mapaddr)                                                       \
         ),                                                                  \
         sizeof((*(mapaddr))->hp_key),                                       \
