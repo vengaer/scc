@@ -2,4 +2,5 @@
 
 disable=
     missing-docstring,
-    duplicate-code
+    duplicate-code,
+    import-error
