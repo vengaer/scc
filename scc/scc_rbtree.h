@@ -786,7 +786,7 @@ inline void const *scc_rbtree_impl_iterstop(void const *rbtree) {
         iter != scc_pp_cat_expand(scc_rbtree_end_,__LINE__);                                \
         iter = scc_rbtree_impl_successor(iter))
 
-//! .. _scc_rbtreer_foreach_reversed:
+//! .. _scc_rbtree_foreach_reversed:
 //! .. c:macro:: scc_rbtree_foreach_reversed(iter, rbtree)
 //!
 //!     Reversed in-order iteration of the nodes in the rbtree.
