@@ -31,6 +31,7 @@
 #define scc_rbmap(keytype, valuetype)                                                       \
     scc_rbmap_impl_pair(keytype, valuetype) *
 
+//! .. _scc_rbmap_iter:
 //! .. c:macro:: scc_rbmap_iter(keytype, valuetype)
 //!
 //!     Expands to an opaque pointer suitable for passing as the
@@ -373,7 +374,7 @@ inline void const *scc_rbmap_impl_iterstop(void const *map) {
 //!     executed once for each key-value pair in the tree with :code:`iter` exposing
 //!     the key and value as :c:texpr:`iter->key` and :c:texpr:`iter->value`, respectively.
 //!
-//!     :param iter:  An instance obtained by invoking :ref:`scc_rbmap_iter` with the
+//!     :param iter:  An instance obtained by invoking :ref:`scc_rbmap_iter <scc_rbmap_iter>` with the
 //!                   appropriate key and value types
 //!     :param rbmap: rbmap handle
 //!
@@ -405,7 +406,7 @@ inline void const *scc_rbmap_impl_iterstop(void const *map) {
 //!
 //!         :ref:`scc_rbmap_foreach <scc_rbmap_foreach>`
 //!
-//!     :param iter:  An instance obtained by invoking :ref:`scc_rbmap_iter` with the
+//!     :param iter:  An instance obtained by invoking :ref:`scc_rbmap_iter <scc_rbmap_iter>` with the
 //!                   appropriate key and value types
 //!     :param rbmap: rbmap handle
 #define scc_rbmap_foreach_reversed(iter, rbmap)                                             \
