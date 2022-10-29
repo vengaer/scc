@@ -388,6 +388,7 @@ inline void const *scc_rbmap_impl_iterstop(void const *map) {
 //!         scc_rbmap_iter(int, int) iter;
 //!
 //!         scc_rbmap_foreach(iter, rbmap) {
+//!             printf("Value of %d %d -> %d\n", iter->key, iter->value, iter->value * 2);
 //!             iter->value *= 2;
 //!         }
 #define scc_rbmap_foreach(iter, rbmap)                                                      \
