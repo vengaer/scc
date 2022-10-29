@@ -64,3 +64,29 @@ void test_scc_rbmap_remove(void) {
     }
     scc_rbmap_free(rbmap);
 }
+
+void test_scc_rbmap_foreach(void) {
+    enum { TEST_SIZE = 500 };
+    scc_rbmap(int, int) rbmap = scc_rbmap_new(int, int, compare);
+
+    for(int i = 0; i < TEST_SIZE; ++i) {
+        TEST_ASSERT_TRUE(scc_rbmap_insert(&rbmap, i, i));
+    }
+
+    scc_rbmap_iter(int, int) iter;
+    int i = 0;
+    scc_rbmap_foreach(iter, rbmap) {
+        TEST_ASSERT_EQUAL_INT32(iter->key, i);
+        TEST_ASSERT_EQUAL_INT32(iter->value, i);
+        iter->value += iter->value;
+        ++i;
+    }
+
+    i = 0;
+    scc_rbmap_foreach(iter, rbmap) {
+        TEST_ASSERT_EQUAL_INT32(iter->key, i);
+        TEST_ASSERT_EQUAL_INT32(iter->value, i + i);
+        ++i;
+    }
+    scc_rbmap_free(rbmap);
+}
