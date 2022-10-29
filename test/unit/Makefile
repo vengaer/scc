@@ -19,7 +19,10 @@ $(strip
     $(patsubst $(inspectdir)/%.$(cext),$(inspectbuilddir)/%.$(oext),
         $(wildcard $(inspectdir)/scc_$(__node)*.$(cext)))
     $(patsubst $(asdir)/%.$(asext),$(asbuilddir)/%.$(oext),
-        $(wildcard $(patsubst %,$(asdir)/*%*.$(asext),$(__node) $($(__node)_deps)))))
+        $(wildcard $(patsubst %,$(asdir)/*%*.$(asext),$(__node) $($(__node)_deps))))
+    $(if $($(__node)_deps),
+        $(patsubst $(inspectdir)/%.$(cext),$(inspectbuilddir)/%.$(oext),
+            $(wildcard $(addprefix $(inspectdir)/scc_,$(addsuffix *.$(cext),$($(__node)_deps)))))))
 endef
 
 define decl-unit
