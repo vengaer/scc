@@ -47,3 +47,20 @@ void test_scc_rbmap_find(void) {
     }
     scc_rbmap_free(rbmap);
 }
+
+void test_scc_rbmap_remove(void) {
+    enum { TEST_SIZE = 5000 };
+    scc_rbmap(int, int) rbmap = scc_rbmap_new(int, int, compare);
+    for(int i = 0; i < TEST_SIZE; i++) {
+        TEST_ASSERT_TRUE(scc_rbmap_insert(&rbmap, i, 0));
+    }
+
+    scc_inspect_mask mask;
+    for(int i = 0; i < TEST_SIZE; i++) {
+        TEST_ASSERT_TRUE(scc_rbmap_remove(rbmap, i));
+        TEST_ASSERT_FALSE(scc_rbmap_remove(rbmap, i));
+        mask = scc_rbtree_inspect_properties(rbmap);
+        TEST_ASSERT_EQUAL_UINT64(mask & SCC_RBTREE_ERR_MASK, 0ull);
+    }
+    scc_rbmap_free(rbmap);
+}
