@@ -28,6 +28,7 @@ Trees
 .. toctree::
 
     btree/index
+    rbmap/index
     rbtree/index
 
 .. _adapter_types:
