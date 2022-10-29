@@ -20,6 +20,6 @@ test/fuzz/corpora/svec/*
 !test/fuzz/corpora/btree/corpus_*
 !test/fuzz/corpora/hashmap/corpus_*
 !test/fuzz/corpora/hashtab/corpus_*
-test/fuzz/corpora/lower_bound/corpus_*
+!test/fuzz/corpora/lower_bound/corpus_*
 !test/fuzz/corpora/rbtree/corpus_*
 !test/fuzz/corpora/svec/corpus_*
