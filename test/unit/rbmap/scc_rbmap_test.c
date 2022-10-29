@@ -29,6 +29,7 @@ void test_scc_rbmap_find(void) {
     enum { TEST_SIZE = 1200 };
     scc_rbmap(int, int) rbmap = scc_rbmap_new(int, int, compare);
 
+    scc_inspect_mask mask;
     int *val;
     for(int i = 0; i < TEST_SIZE; ++i) {
         TEST_ASSERT_TRUE(scc_rbmap_insert(&rbmap, i, i));
@@ -41,7 +42,8 @@ void test_scc_rbmap_find(void) {
             val = scc_rbmap_find(rbmap, j);
             TEST_ASSERT_EQUAL_INT32(2 * j, *val);
         }
+        mask = scc_rbtree_inspect_properties(rbmap);
+        TEST_ASSERT_EQUAL_UINT64(mask & SCC_RBTREE_ERR_MASK, 0ull);
     }
     scc_rbmap_free(rbmap);
 }
-
