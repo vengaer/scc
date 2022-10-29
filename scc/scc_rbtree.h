@@ -293,7 +293,7 @@ struct scc_rbtree_base {
         size_t rb_size;                                                                     \
         scc_rbcompare rb_compare;                                                           \
         struct scc_arena rb_arena;                                                          \
-        struct scc_rbsentinel sentinel;                                                     \
+        struct scc_rbsentinel rb_sentinel;                                                  \
         unsigned char rb_fwoff;                                                             \
         unsigned char rb_bkoff;                                                             \
         type rb_curr;                                                                       \
