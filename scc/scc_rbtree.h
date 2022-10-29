@@ -388,7 +388,7 @@ inline size_t scc_rbtree_impl_npad(void const *rbtree) {
 //!
 //!     Query the size of the given rbtree
 //!
-//!     :param btree: rbtree handle
+//!     :param rbtree: rbtree handle
 //!     :returns: Size of the given rbtree
 inline size_t scc_rbtree_size(void const *rbtree) {
     struct scc_rbtree_base const *base = scc_rbtree_impl_base_qual(rbtree, const);
@@ -410,7 +410,7 @@ inline _Bool scc_rbtree_empty(void const *rbtree) {
 //!     Reclaim memory allocated for :c:expr:`rbtree`. The parameter must
 //!     refer to a valid rbtree returned by :ref:`scc_rbtree_new <scc_rbtree_new>`
 //!
-//!     :param btree: rbtree handle
+//!     :param rbtree: rbtree handle
 void scc_rbtree_free(void *rbtree);
 
 //? .. c:function:: _Bool scc_rbtree_impl_insert(void *rbtreeaddr, size_t elemsize)
@@ -422,7 +422,7 @@ void scc_rbtree_free(void *rbtree);
 //?
 //?         Internal use only
 //?
-//?     :param btreeaddr: Address of the rbtree handle
+//?     :param rbtreeaddr: Address of the rbtree handle
 //?     :param elemsize: Size of the elements stored in the rbtree
 //?     :returns: A :code:`_Bool` indicating whether insertion took place
 //?     :retval true: Insertion successful
