@@ -7,7 +7,7 @@ Welcome to scc's documentation!
     :includehidden:
     :maxdepth: 5
 
-    intro
     collections
     lifetime
     configuration/index
+    tldr
