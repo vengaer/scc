@@ -14,12 +14,6 @@ enum { SCC_RBTREE_INSPECT_LEAF = 0x3 };
 
 #define rb_root rb_sentinel.rs_left
 
-#define scc_rbnode_value_qual(tree, node, qual)     \
-    ((unsigned char qual *)(node) + (tree)->rb_dataoff)
-
-#define scc_rbnode_value(tree, node)                \
-    scc_rbnode_value_qual(tree, node,)
-
 static inline bool scc_rbtree_inspect_thread(struct scc_rbnode_base const *node, unsigned dir) {
     return node->rn_flags & (1 << dir);
 }

@@ -61,6 +61,87 @@ enum scc_rbcolor {
     scc_rbcolor_red
 };
 
+//? .. c:enum:: scc_rbdir
+//?
+//?     Denotes the direction of link traversal
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     .. c:enumerator:: scc_rbdir_left
+//?
+//?         Traverse left link
+//?
+//?     .. c:enumerator:: scc_rbdir_right
+//?
+//?         Traverse right link
+enum scc_rbdir {
+    scc_rbdir_left,
+    scc_rbdir_right
+};
+
+//? .. c:macro:: scc_rbnode_link_qual(node, idx, qual)
+//?
+//?     Obtain suitably qualified pointer to the idxth
+//?     link of the given node
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param node: The node whose link address is to be
+//?                  computed
+//?     :param idx:  The index of the link
+//?     :param qual: Qualifiers to apply to the pointer
+//?     :returns:    Address of the idxth link of the given node
+#define scc_rbnode_link_qual(node, idx, qual)                       \
+    (*(struct scc_rbnode_base *qual *)                              \
+        ((unsigned char qual *)&(node)->rn_left +                   \
+            (scc_rbnode_link_offset(node)) * (idx)))
+
+//? .. c:macro:: scc_rbnode_link(node, idx)
+//?
+//?     Obtain unqualified pointer to the idxth
+//?     link of the given node
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param node: The node whose link address is to be
+//?                  computed
+//?     :param idx:  The index of the link
+//?     :returns:    Address of the idxth link of the given node
+#define scc_rbnode_link(node, idx)                                  \
+    scc_rbnode_link_qual(node, idx,)
+
+//? .. c:macro:: scc_rbnode_value_qual(base, node, qual)
+//?
+//?     Compute and return suitably qualified pointer to the
+//?     :ref:`rn_value <type_rn_value>` field in the given
+//?     node
+//?
+//?     :param base: Base address of the rbtree
+//?     :param node: Base address of the node
+//?     :param qual: Qualifiers to apply to the computed pointer
+//?     :returns: Address of the :ref:`rn_value <type_rn_value>` field in :code:`node`.
+#define scc_rbnode_value_qual(base, node, qual)                     \
+    ((void qual *)(((unsigned char qual *)node) +                   \
+        ((base)->rb_dataoff)))
+
+//? .. c:macro:: scc_rbnode_value(base, node)
+//?
+//?     Compute and return unqualified pointer to the
+//?     :ref:`rn_value <type_rn_value>` field in the given
+//?     node
+//?
+//?     :param base: Base address of the rbtree
+//?     :param node: Base address of the node
+//?     :returns: Address of the :ref:`rn_value <type_rn_value>` field in :code:`node`.
+#define scc_rbnode_value(base, node)                                \
+    scc_rbnode_value_qual(base, node,)
+
 //? .. _scc_rbnode_base:
 //? .. c:struct:: scc_rbnode_base
 //?
@@ -347,6 +428,37 @@ void *scc_rbtree_impl_new(void *base, size_t coff);
 //?     :returns: The number of padding bytes between :code:`rb_fwoff` and :code:`rb_curr`
 inline size_t scc_rbtree_impl_npad(void const *rbtree) {
     return ((unsigned char const *)rbtree)[-1] + sizeof(unsigned char);
+}
+
+//? .. c:function:: size_t scc_rbnode_link_offset(struct scc_rbnode_base const *node)
+//?
+//?     Compute offset between the :ref:`rn_left <struct_scc_rbnode_base_rn_left>`
+//?     and :ref:`rn_right <struct_scc_rbnode_base_rn_right>` pointers in an
+//?     rbnode
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param node: The node to use for the computation
+//?     :returns:    The offset between the two links of an rbnode
+inline size_t scc_rbnode_link_offset(struct scc_rbnode_base const *node) {
+    return ((unsigned char const*)&node->rn_right) - ((unsigned char const *)&node->rn_left);
+}
+
+//? .. c:function:: _Bool scc_rbnode_thread(struct scc_rbnode_base const *node, enum scc_rbdir dir)
+//?
+//?     Determine if the given node's link in the specified direction is a thread
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param node: The node whose link is to be checked
+//?     :param dir:  The direction of the link to be checked
+//?     :returns: :code:`true` if the link in the given direction is a thread, otherwise :code:`false`.
+static inline _Bool scc_rbnode_thread(struct scc_rbnode_base const *node, enum scc_rbdir dir) {
+    return node->rn_flags & (1u << dir);
 }
 
 //? .. c:macro:: scc_rbtree_impl_base_qual(rbtree, qual)
