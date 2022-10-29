@@ -263,7 +263,7 @@ struct scc_rbtree_base {
 //?
 //?         See :ref:`rb_compare <scc_rbcompare_rb_compare>`.
 //?
-//?     .. c:var:: struct scc_arena arena
+//?     .. c:var:: struct scc_arena rb_arena
 //?
 //?         See :ref:`rb_arena <struct_scc_arena_rb_arena>`.
 //?
