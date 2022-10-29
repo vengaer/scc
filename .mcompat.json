@@ -55,6 +55,22 @@
             ["scc_hashtab_base", "scc_hashtab_char"]
         ]
     },
+    "scc_rbmap.h": {
+        "types": {
+            "scc_rbmnode_int_int": {
+                "from": "scc_rbmnode_impl_layout",
+                "params": ["int", "int"]
+            },
+            "scc_rbmap_int_int": {
+                "from": "scc_rbmap_impl_layout",
+                "params": ["int", "int"]
+            }
+        },
+        "check": [
+            ["scc_rbnode_base", "scc_rbmnode_int_int", "scc_rbsentinel"],
+            ["scc_rbtree_base", "scc_rbmap_int_int"]
+        ]
+    },
     "scc_rbtree.h": {
         "types": {
             "scc_rbnode_int": {
