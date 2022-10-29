@@ -518,7 +518,7 @@ _Bool scc_rbtree_impl_remove(void *rbtree, size_t elemsize);
 //!     :param rbtree: Handle to the rbtree
 //!     :param value: Value to remove
 //!     :returns: :code:`true` if the value was removed, :code:`false` if no
-//!               copies of the specified value were found
+//!               such value was found
 #define scc_rbtree_remove(rbtree, value)                                                    \
     scc_rbtree_impl_remove((*(rbtree) = (value), (rbtree)), sizeof(*(rbtree)))
 
