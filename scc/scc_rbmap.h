@@ -34,7 +34,8 @@
 //! .. c:macro:: scc_rbmap_iter(keytype, valuetype)
 //!
 //!     Expands to an opaque pointer suitable for passing as the
-//!     iter parameter to :ref:`scc_rbmap_foreach <scc_rbmap_foreach>`
+//!     iter parameter to :ref:`scc_rbmap_foreach <scc_rbmap_foreach>` and
+//!     :ref:`scc_rbmap_foreach_reversed <scc_rbmap_foreach_reversed>`.
 //!
 //!     :param keytype: The key type stored in the map that is to be iterated over
 //!     :param valuetype: The value type stored in the map that is to be iterated over
@@ -394,5 +395,24 @@ inline void const *scc_rbmap_impl_iterstop(void const *map) {
                 scc_rbmap_impl_iterstop(rbmap));                                            \
         iter != scc_pp_cat_expand(scc_rbmap_end_,__LINE__);                                 \
         iter = scc_rbmap_impl_successor(iter))
+
+//! .. _scc_rbmap_foreach_reversed:
+//! .. c:macro:: scc_rbmap_foreach_reversed(iter, rbmap)
+//!
+//!     Reversed in-order iteration of the nodes in the rbmap.
+//!
+//!     .. seealso::
+//!
+//!         :ref:`scc_rbmap_foreach <scc_rbmap_foreach>`
+//!
+//!     :param iter:  An instance obtained by invoking :ref:`scc_rbmap_iter` with the
+//!                   appropriate key and value types
+//!     :param rbmap: rbmap handle
+#define scc_rbmap_foreach_reversed(iter, rbmap)                                             \
+    for(void const *scc_pp_cat_expand(scc_rbmap_end_,__LINE__) =                            \
+            (iter = scc_rbmap_impl_rightmost_pair(rbmap),                                   \
+                scc_rbmap_impl_iterstop(rbmap));                                            \
+        iter != scc_pp_cat_expand(scc_rbmap_end_,__LINE__);                                 \
+        iter = scc_rbmap_impl_predecessor(iter))
 
 #endif /* SCC_RBMAP_H */
