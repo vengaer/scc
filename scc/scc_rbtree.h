@@ -238,7 +238,6 @@ struct scc_rbtree_base {
         type rn_value;                                                                      \
     }
 
-
 //? .. _scc_rbtree_impl_layout:
 //? .. c:macro:: scc_rbtree_impl_layout(type)
 //?
@@ -462,7 +461,7 @@ _Bool scc_rbtree_impl_insert(void *rbtreeaddr, size_t elemsize);
 #define scc_rbtree_insert(rbtreeaddr, value)                                                \
     scc_rbtree_impl_insert((**(rbtreeaddr) = (value), rbtreeaddr), sizeof(**(rbtreeaddr)))
 
-//? .. c:function:: void const *scc_rbtree_impl_find(void *rbtree, size_t elemsize)
+//? .. c:function:: void const *scc_rbtree_impl_find(void *rbtree)
 //?
 //?     Internal search function. Attempts to find the value stored at
 //?     :code:`rbtree` in the tree
@@ -472,7 +471,6 @@ _Bool scc_rbtree_impl_insert(void *rbtreeaddr, size_t elemsize);
 //?         Internal use only
 //?
 //?     :param rbtree: rbtree handle
-//?     :param elemsize: Size of the elements in the tree
 //?     :returns: A const-qualified pointer to a matching element in the tree, or
 //?               :code:`NULL` if no such element is found
 void const *scc_rbtree_impl_find(void const *rbtree);
