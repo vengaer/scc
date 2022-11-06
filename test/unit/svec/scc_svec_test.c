@@ -417,5 +417,22 @@ void test_scc_svec_from_via_malloc(void) {
         TEST_ASSERT_EQUAL_INT32((int)i, svec[i]);
     }
 
+    /* Should be dynamically allocated */
+    TEST_ASSERT_TRUE(scc_svec_is_allocd(svec));
+
+    scc_svec_free(svec);
+}
+
+void test_scc_svec_stack_allocation(void) {
+    scc_svec(int) svec = scc_svec_from(int,
+        0,  1,  2,  3,  4,  5,  6,  7,
+        8,  9,  10, 11, 12, 13, 14, 15,
+        16, 17, 18, 19, 20, 21, 22, 23,
+        24, 25, 26, 27, 28, 29, 30, 31
+    );
+
+    /* Should not be dynamically allocated */
+    TEST_ASSERT_FALSE(scc_svec_is_allocd(svec));
+
     scc_svec_free(svec);
 }
