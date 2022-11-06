@@ -4,6 +4,7 @@ $(call push,rbtree_deps)
 rbtree_deps += svec
 
 $(call decl-unit)
+$(call decl-mutate)
 
 $(call pop,rbtree_deps)
 
