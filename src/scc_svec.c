@@ -1,6 +1,7 @@
 #include <scc/scc_panic.h>
 #include <scc/scc_svec.h>
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -175,6 +176,7 @@ void scc_svec_impl_erase_range(void *svec, size_t first, size_t end, size_t elem
     }
 
     size_t const nelems = end - first;
+    assert(nelems);
 
     scc_svec_impl_base(svec)->sv_size -= nelems;
 
