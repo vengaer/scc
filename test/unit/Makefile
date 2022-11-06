@@ -14,15 +14,17 @@ LDLIBS          += -lunity -lm
 
 define __unit-obj
 $(strip
-    $(patsubst $(srcdir)/%.$(cext),$(builddir)/scc$(if $(1),/$(1))/%.$(oext),
+    $(if $(1),$(eval __uo_subdir := /$(1)))
+    $(patsubst $(srcdir)/%.$(cext),$(builddir)/scc$(__uo_subdir)/%.$(oext),
         $(wildcard $(patsubst %,$(srcdir)/*_%*.$(cext),$(__node) $($(__node)_deps))))
-    $(patsubst $(inspectdir)/%.$(cext),$(inspectbuilddir)/%.$(oext),
+    $(patsubst $(inspectdir)/%.$(cext),$(inspectbuilddir)$(__uo_subdir)/%.$(oext),
         $(wildcard $(inspectdir)/scc_$(__node)*.$(cext)))
     $(patsubst $(asdir)/%.$(asext),$(asbuilddir)/%.$(oext),
         $(wildcard $(patsubst %,$(asdir)/*%*.$(asext),$(__node) $($(__node)_deps))))
     $(if $($(__node)_deps),
-        $(patsubst $(inspectdir)/%.$(cext),$(inspectbuilddir)/%.$(oext),
-            $(wildcard $(addprefix $(inspectdir)/scc_,$(addsuffix *.$(cext),$($(__node)_deps)))))))
+        $(patsubst $(inspectdir)/%.$(cext),$(inspectbuilddir)$(__uo_subdir)/%.$(oext),
+            $(wildcard $(addprefix $(inspectdir)/scc_,$(addsuffix *.$(cext),$($(__node)_deps))))))
+    $(eval __uo_subdir :=))
 endef
 
 __mutate-obj = $(call __unit-obj,mutate)
@@ -81,6 +83,9 @@ $(eval
     $(eval __mutrunners := $(patsubst $(__node_path)/%.$(cext),$(__mut_builddir)/%_mut$(runnersuffix),$(__mutsrc)))
     $(eval __mutobj     := $(call __mutate-obj))
 
+    $(foreach __o,$(__mutobj),
+        $(if $(findstring mutate,$(__o)),$(eval __all_obj += $(__o))))
+
     .SECONDARY: $(addsuffix .$(cext),$(__mutrunners))
 
     # Running mutation tests
@@ -98,9 +103,12 @@ $(eval
 	    $(RB) $(unitygenerator) $$< $$@
 
     $(foreach __r,$(__mutrunners),
+        $(eval __all_obj += $(__r).$(oext))
         $(__r): $(__r).$(oext) $(patsubst %_mut$(runnersuffix),%.$(oext),$(__r)) $(__mutobj) $(unityalib)
 	        $$(call echo-ld,$$(notdir $$@))
-	        $(LD) -o $$@ $$^ $(LDLIBS) $$(LDFLAGS))
+	        $(LD) -o $$@ $$^ $(LDLIBS) $$(LDFLAGS)
+
+        $(eval __all_obj += $(__r).$(oext)))
 
     $(__mut_builddir)/%.$(oext): $(__mut_builddir)/%.$(cext) $(mull_ir_frontend)
 	    $$(call echo-cc,$(notdir $(__mut_builddir))/$$(notdir $$@))
@@ -120,10 +128,16 @@ $(eval
     $(call pop,CFLAGS))
 endef
 
-sccbuilddir_mutate := $(sccbuilddir)/mutate
-dirs               += $(sccbuilddir_mutate)
+sccbuilddir_mutate     := $(sccbuilddir)/mutate
+dirs                   += $(sccbuilddir_mutate)
+inspectbuilddir_mutate := $(inspectbuilddir)/mutate
+dirs                   += $(inspectbuilddir_mutate)
 
-$(sccbuilddir_mutate)/%.$(oext): $(srcdir)/%.$(cext) $(__config_header) $(mull_ir_frontend) | $(sccbuilddir_mutate)
+$(sccbuilddir_mutate)/%.$(oext): $(srcdir)/%.$(cext) $(mull_ir_frontend) | $(sccbuilddir_mutate)
+	$(call echo-cc,mutate/$(notdir $@))
+	$(CC) -o $@ $< $(CFLAGS) $(__mull_cflags) $(CPPFLAGS)
+
+$(inspectbuilddir_mutate)/%.$(oext): $(inspectdir)/%.$(cext) $(mull_ir_frontend) | $(inspectbuilddir_mutate)
 	$(call echo-cc,mutate/$(notdir $@))
 	$(CC) -o $@ $< $(CFLAGS) $(__mull_cflags) $(CPPFLAGS)
 
