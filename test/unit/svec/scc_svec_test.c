@@ -452,3 +452,10 @@ void test_scc_svec_erase_range_value_retention(void) {
 
     scc_svec_free(svec);
 }
+
+void test_scc_svec_alloc_on_reverse_only_if_required(void) {
+    scc_svec(int) svec = scc_svec_new(int);
+    TEST_ASSERT_TRUE(scc_svec_reserve(&svec, SCC_SVEC_STATIC_CAPACITY));
+    TEST_ASSERT_FALSE(scc_svec_is_allocd(svec));
+    scc_svec_free(svec);
+}
