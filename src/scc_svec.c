@@ -13,21 +13,7 @@ size_t scc_svec_capacity(void const *svec);
 bool scc_svec_empty(void const *svec);
 void scc_svec_pop(void *svec);
 void scc_svec_clear(void *vec);
-
-//? .. c:function:: _Bool scc_svec_is_allocd(void const *svec)
-//?
-//?     Read the :ref:`sv_dynalloc <unsigned_char_sv_dynalloc>`
-//?     field (or equivalent) of the given svec
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param svec: Handle to the svec for which the field is to be read
-//?     :returns: Value of the :code:`sv_dyanlloc` field in the base struct
-static inline bool scc_svec_is_allocd(void const *svec) {
-    return ((unsigned char const*)svec)[-1];
-}
+bool scc_svec_is_allocd(void const *svec);
 
 //? .. c:function:: size_t scc_svec_bytesize(size_t capacity, size_t elemsize, size_t npad)
 //?

@@ -618,6 +618,21 @@ inline void scc_svec_clear(void *svec) {
     scc_svec_impl_base(svec)->sv_size = 0u;
 }
 
+//? .. c:function:: _Bool scc_svec_is_allocd(void const *svec)
+//?
+//?     Read the :ref:`sv_dynalloc <unsigned_char_sv_dynalloc>`
+//?     field (or equivalent) of the given svec
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param svec: Handle to the svec for which the field is to be read
+//?     :returns: Value of the :code:`sv_dyanlloc` field in the base struct
+inline _Bool scc_svec_is_allocd(void const *svec) {
+    return ((unsigned char const*)svec)[-1];
+}
+
 //! .. _scc_svec_foreach:
 //! .. c:macro:: scc_svec_foreach(iter, svec)
 //!
