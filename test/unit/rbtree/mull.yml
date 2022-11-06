@@ -1,0 +1,5 @@
+excludePaths:
+  - submodules/*
+  - test/*
+  - src/scc_svec.c
+  - src/scc_arena.c

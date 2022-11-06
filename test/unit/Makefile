@@ -89,7 +89,7 @@ $(eval
         $(__s): $(call reeval,LDFLAGS,$(__s))
         $(__s): $(call reeval,CPPFLAGS,$(__s))
         $(__s): $(patsubst $(__mut_builddir)/.mut.%.stamp,$(__mut_builddir)/%_mut$(runnersuffix),$(__s)) $(mull_runner)
-	        $(mull_runner) $$<
+	        MULL_CONFIG=$(__node_path)/mull.yml $(mull_runner) $$<
 	        $(TOUCH) $$@)
 
     # Generate runner source
