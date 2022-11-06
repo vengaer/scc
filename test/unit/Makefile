@@ -14,8 +14,7 @@ LDLIBS          += -lunity -lm
 
 define __unit-obj
 $(strip
-    $(if $(1),$(eval __subdir := /$(1)))
-    $(patsubst $(srcdir)/%.$(cext),$(builddir)/scc$(__subdir)/%.$(oext),
+    $(patsubst $(srcdir)/%.$(cext),$(builddir)/scc$(if $(1),/$(1))/%.$(oext),
         $(wildcard $(patsubst %,$(srcdir)/*_%*.$(cext),$(__node) $($(__node)_deps))))
     $(patsubst $(inspectdir)/%.$(cext),$(inspectbuilddir)/%.$(oext),
         $(wildcard $(inspectdir)/scc_$(__node)*.$(cext)))
@@ -56,11 +55,11 @@ $(eval
 	        $(LD) -o $$@ $$^ $(LDFLAGS))
 
     $(__node_builddir)/%.$(oext): $(__node_path)/%.$(cext) | $(__node_builddir)
-	    $$(call echo-cc,mutate/$$(notdir $$@))
+	    $$(call echo-cc,$$(notdir $$@))
 	    $(CC) -o $$@ $$< $(CFLAGS) $(CPPFLAGS)
 
     $(__node_builddir)/%.$(oext): $(srcdir)/%.$(cext) | $(__node_builddir)
-	    $$(call echo-cc,mutate/$$(notdir $$@))
+	    $$(call echo-cc,$$(notdir $$@))
 	    $(CC) -o $$@ $$< $(CFLAGS) $(CPPFLAGS)
 
     check: $(__chk)
@@ -77,12 +76,12 @@ $(eval
     $(eval __mut_builddir := $(__node_builddir)/mutation)
     $(eval dirs += $(__mut_builddir))
 
-    $(eval __mutsrc  := $(wildcard $(__node_path)/*.$(cext)))
-    $(eval __mut     := $(patsubst $(__node_path)/%.$(cext),$(__mut_builddir)/.mut.%.stamp,$(__mutsrc)))
-    $(eval __runners := $(patsubst $(__node_path)/%.$(cext),$(__mut_builddir)/%_mut$(runnersuffix),$(__mutsrc)))
-    $(eval __mutobj  := $(call __mutate-obj))
+    $(eval __mutsrc     := $(wildcard $(__node_path)/*.$(cext)))
+    $(eval __mut        := $(patsubst $(__node_path)/%.$(cext),$(__mut_builddir)/.mut.%.stamp,$(__mutsrc)))
+    $(eval __mutrunners := $(patsubst $(__node_path)/%.$(cext),$(__mut_builddir)/%_mut$(runnersuffix),$(__mutsrc)))
+    $(eval __mutobj     := $(call __mutate-obj))
 
-    .SECONDARY: $(addsuffix .$(cext),$(__runners))
+    .SECONDARY: $(addsuffix .$(cext),$(__mutrunners))
 
     # Running mutation tests
     $(foreach __s,$(__mut),
@@ -98,21 +97,21 @@ $(eval
 	    $$(call echo-gen,$$(notdir $$@))
 	    $(RB) $(unitygenerator) $$< $$@
 
-    $(foreach __r,$(__runners),
+    $(foreach __r,$(__mutrunners),
         $(__r): $(__r).$(oext) $(patsubst %_mut$(runnersuffix),%.$(oext),$(__r)) $(__mutobj) $(unityalib)
 	        $$(call echo-ld,$$(notdir $$@))
 	        $(LD) -o $$@ $$^ $(LDLIBS) $$(LDFLAGS))
 
     $(__mut_builddir)/%.$(oext): $(__mut_builddir)/%.$(cext) $(mull_ir_frontend)
-	    $$(call echo-cc,$$(notdir $$@))
+	    $$(call echo-cc,$(notdir $(__mut_builddir))/$$(notdir $$@))
 	    $(CC) -o $$@ $$< $$(CFLAGS) $$(CPPFLAGS)
 
     $(__mut_builddir)/%.$(oext): $(__node_path)/%.$(cext) $(mull_ir_frontend) | $(__mut_builddir)
-	    $$(call echo-cc,$$(notdir $$@))
+	    $$(call echo-cc,$(notdir $(__mut_builddir))/$$(notdir $$@))
 	    $(CC) -o $$@ $$< $$(CFLAGS) $$(CPPFLAGS)
 
     $(__mut_builddir)/%.$(oext): $(srcdir)/%.$(cext) $(mull_ir_frontend) | $(__mut_builddir)
-	    $$(call echo-cc,$(__node)/$$(notdir  $$@))
+	    $$(call echo-cc,$(notdir $(__mut_builddir))/$$(notdir  $$@))
 	    $(CC) -o $$@ $$< $$(CFLAGS) $$(CPPFLAGS)
 
     mutate: $(__mut)
