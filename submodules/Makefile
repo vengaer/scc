@@ -63,6 +63,7 @@ $(mull_build_stamp): $(mullbuilddir)/$(__cmake_cache)
 
 $(mull_runner) $(mull_ir_frontend): $(mull_build_stamp)
 	$(LN) $(LNFLAGS) $@-* $@
+	$(TOUCH) $@
 
 .PHONY: __clean_mull
 __clean_mull:

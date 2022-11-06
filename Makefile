@@ -86,6 +86,9 @@ check: CPPFLAGS := $(filter-out -DNDEBUG,$(CPPFLAGS))
 .PHONY: fuzz
 fuzz:  CPPFLAGS := $(filter-out -DNDEBUG,$(CPPFLAGS))
 
+.PHONY: mutate
+mutate: CPPFLAGS := $(filter-out -DNDEBUG,$(CPPFLAGS))
+
 .PHONY: lint
 lint:
 
