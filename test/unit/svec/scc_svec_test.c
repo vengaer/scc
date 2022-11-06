@@ -401,3 +401,21 @@ void test_scc_svec_foreach_reversed_by(void) {
     TEST_ASSERT_LESS_OR_EQUAL(0, i);
     scc_svec_free(svec);
 }
+
+void test_scc_svec_from_via_malloc(void) {
+    scc_svec(int) svec = scc_svec_from(int,
+        0,  1,  2,  3,  4,  5,  6,  7,
+        8,  9,  10, 11, 12, 13, 14, 15,
+        16, 17, 18, 19, 20, 21, 22, 23,
+        24, 25, 26, 27, 28, 29, 30, 31,
+        32
+    );
+
+    TEST_ASSERT_EQUAL_UINT64(33ull, scc_svec_size(svec));
+
+    for(unsigned i = 0u; i < scc_svec_size(svec); ++i) {
+        TEST_ASSERT_EQUAL_INT32((int)i, svec[i]);
+    }
+
+    scc_svec_free(svec);
+}
