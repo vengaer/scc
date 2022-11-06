@@ -325,7 +325,7 @@ void *scc_svec_impl_from(
 //?     :retval false: Memory allocation failure
 _Bool scc_svec_impl_resize(void *svecaddr, size_t size, size_t elemsize);
 
-//! .. c:function:: _Bool scc_svec_resize(void *svec, size_t size)
+//! .. c:function:: _Bool scc_svec_resize(void **svecaddr, size_t size)
 //!
 //!     Resize the given svec to the specified size. Truncating or
 //!     allocating memory as required. Newly allocated elements
@@ -336,15 +336,15 @@ _Bool scc_svec_impl_resize(void *svecaddr, size_t size, size_t elemsize);
 //!
 //!         May relocated the svec in memory
 //!
-//!     :param svec: Handle to the svec to be resized
+//!     :param svecaddr: Address of the handle to the svec to be resized
 //!     :param size: Desired size of the svec
 //!     :returns: A :code:`_Bool` indicating the outcome
 //!     :retval true: Resize successful
 //!     :retval false: Memory allocation failure. The svec is left
 //!                    unchanged and must still be passed to
 //!                    :ref:`scc_svec_free <scc_svec_free>`.
-#define scc_svec_resize(svec, size)                                     \
-    scc_svec_impl_resize(&(svec), size, sizeof(*(svec)))
+#define scc_svec_resize(svecaddr, size)                                     \
+    scc_svec_impl_resize(svecaddr, size, sizeof(**(svecaddr)))
 
 //? .. c:function:: void scc_svec_impl_erase(void *svec, size_t index, size_t elemsize)
 //?
