@@ -123,7 +123,7 @@ endef
 sccbuilddir_mutate := $(sccbuilddir)/mutate
 dirs               += $(sccbuilddir_mutate)
 
-$(sccbuilddir_mutate)/%.$(oext): $(srcdir)/%.$(cext) | $(sccbuilddir_mutate)
+$(sccbuilddir_mutate)/%.$(oext): $(srcdir)/%.$(cext) $(__config_header) | $(sccbuilddir_mutate)
 	$(call echo-cc,mutate/$(notdir $@))
 	$(CC) -o $@ $< $(CFLAGS) $(__mull_cflags) $(CPPFLAGS)
 
