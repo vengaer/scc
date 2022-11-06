@@ -436,3 +436,19 @@ void test_scc_svec_stack_allocation(void) {
 
     scc_svec_free(svec);
 }
+
+void test_scc_svec_erase_range_value_retention(void) {
+    scc_svec(int) svec = scc_svec_from(int, 0, 1, 2, 3, 4, 5, 6);
+    scc_svec_erase_range(svec, 1, 2);
+    TEST_ASSERT_EQUAL_INT32(0, svec[0]);
+    TEST_ASSERT_EQUAL_INT32(2, svec[1]);
+    TEST_ASSERT_EQUAL_INT32(3, svec[2]);
+    TEST_ASSERT_EQUAL_INT32(4, svec[3]);
+    TEST_ASSERT_EQUAL_INT32(5, svec[4]);
+    TEST_ASSERT_EQUAL_INT32(6, svec[5]);
+
+    /* Should not have moved anything beyond the end of the vector */
+    TEST_ASSERT_EQUAL_INT32(6, svec[6]);
+
+    scc_svec_free(svec);
+}
