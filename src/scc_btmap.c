@@ -723,7 +723,7 @@ static _Bool scc_btmap_insert_preemptive(struct scc_btmap_base *base, void *btma
 //? .. c:fuinction:: _Bool scc_btmap_insert_non_preemptive(\
 //?     struct scc_btmap_base *base, void *btmapaddr, size_t keysize, size_t valsize)
 //?
-//?     Insert the key-value pair in :c:texpr:`´(void **)btmapaddr` using :ref:`non-preemptive splitting <non_preemptive_split>`.
+//?     Insert the key-value pair in :c:texpr:`(void **)btmapaddr` using :ref:`non-preemptive splitting <non_preemptive_split>`.
 //?     Calle donly for trees whose order is odd
 //?
 //?     .. note::

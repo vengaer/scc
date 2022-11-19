@@ -576,7 +576,7 @@ _Bool scc_btmap_impl_insert(void *btmapaddr, size_t keysize, size_t valsize);
 //?               is not found in the map
 void *scc_btmap_impl_find(void *btmap, size_t keysize, size_t valsize);
 
-//! ..c:function:: void *scc_btmap_find(void *btmap, keytype key)
+//! .. c:function:: void *scc_btmap_find(void *btmap, keytype key)
 //!
 //!     Search for and, if found, return a pointer to the value corresponding to
 //!     the given key.
