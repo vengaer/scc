@@ -22,3 +22,17 @@ void test_scc_btmap_with_order(void) {
     TEST_ASSERT_EQUAL_UINT64(32ull, scc_btmap_order(btmap));
     scc_btmap_free(btmap);
 }
+
+void test_scc_btmap_insert_replace(void) {
+    scc_btmap(int, int) btmap = scc_btmap_new(int, int, compare);
+    TEST_ASSERT_TRUE(scc_btmap_insert(&btmap, 1, 1));
+    TEST_ASSERT_EQUAL_UINT64(1ull, scc_btmap_size(btmap));
+
+    TEST_ASSERT_TRUE(scc_btmap_insert(&btmap, 2, 3));
+    TEST_ASSERT_EQUAL_UINT64(2ull, scc_btmap_size(btmap));
+
+    TEST_ASSERT_TRUE(scc_btmap_insert(&btmap, 1, 3));
+    TEST_ASSERT_EQUAL_UINT64(2ull, scc_btmap_size(btmap));
+
+    scc_btmap_free(btmap);
+}
