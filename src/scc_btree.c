@@ -148,8 +148,8 @@ static inline void *scc_btnode_value(
 
 //? .. _scc_btnode_lower_bound:
 //? .. c:function:: size_t scc_btnode_lower_bound(\
-//?        struct scc_btree_base const *restrict base, \
-//?        struct scc_btnode_base const *restrict node, \
+//?        struct scc_btree_base const *base, \
+//?        struct scc_btnode_base *node, \
 //?        void const *restrict value, \
 //?        size_t elemsize)
 //?
