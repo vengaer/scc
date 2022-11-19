@@ -51,3 +51,19 @@ void test_scc_algo_lower_bound_duplicate(void) {
         TEST_ASSERT_EQUAL_UINT64(4ull, scc_algo_lower_bound(&(int){ 3 }, data, scc_arrsize(data), sizeof(int), compare));
     }
 }
+
+void test_scc_algo_lower_bound_eq(void) {
+    size_t const mask = (~(size_t)0u) >> 1u;
+    {
+        int data[] = { 0, 1, 2, 3, 3, 3, 3, 66 };
+        size_t ret = scc_algo_lower_bound_eq(&(int){ 3 }, data, scc_arrsize(data), sizeof(int), compare);
+        TEST_ASSERT_TRUE(ret & ~mask);
+        TEST_ASSERT_EQUAL_UINT64(3ull, ret & mask);
+    }
+    {
+        int data[] = { 0, 1, 2, 2, 3, 3, 3, 66 };
+        size_t ret = scc_algo_lower_bound_eq(&(int){ 4 }, data, scc_arrsize(data), sizeof(int), compare);
+        TEST_ASSERT_FALSE(ret & ~mask);
+        TEST_ASSERT_EQUAL_UINT64(7ull, ret & mask);
+    }
+}
