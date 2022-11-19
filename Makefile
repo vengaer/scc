@@ -1,5 +1,9 @@
 .SECONDEXPANSION:
 
+VER_MAJOR    := 0
+VER_MINOR    := 0
+VER_PATCH    := 1
+
 CC           := clang
 CXX          := clang++
 AS           := $(CC)
@@ -56,10 +60,11 @@ LDFLAGS      :=
 LDLIBS       :=
 ARFLAGS      := -rcs
 
-sover        := 0
-socompat     := 0
+sover        := $(VER_MAJOR).$(VER_MINOR).$(VER_PATCH)
+socompat     := $(VER_MAJOR)
 
 solink       := $(builddir)/lib$(scc).$(soext)
+solinkcompat := $(solink).$(VER_MAJOR)
 solib        := $(solink).$(sover)
 alib         := $(builddir)/lib$(scc).$(aext)
 

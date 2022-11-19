@@ -12,7 +12,11 @@ sccbuilddir  := $(__node_builddir)
 
 $(call include-node,asm)
 
-$(solink): $(solib) | $(builddir)
+$(solink): $(solinkcompat) | $(builddir)
+	$(call echo-ln,$(notdir $@))
+	$(LN) $(LNFLAGS) $< $@
+
+$(solinkcompat): $(solib) | $(builddir)
 	$(call echo-ln,$(notdir $@))
 	$(LN) $(LNFLAGS) $< $@
 
