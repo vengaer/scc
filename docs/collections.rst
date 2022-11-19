@@ -25,6 +25,7 @@ Trees
 
 .. toctree::
 
+    btmap/index
     btree/index
     rbmap/index
     rbtree/index

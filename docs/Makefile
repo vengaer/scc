@@ -15,6 +15,7 @@ __all_rstsrc += $(__node_builddir)/conftool_spec.$(rstext)
 
 .SECONDARY: $(__docgen)
 
+$(call include-node,btmap)
 $(call include-node,btree)
 $(call include-node,configuration)
 $(call include-node,hashmap)
