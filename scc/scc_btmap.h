@@ -335,4 +335,14 @@ inline void scc_btmap_free(void *btmap) {
     scc_btree_free(btmap);
 }
 
+//! .. c:function:: size_t scc_btmap_order(void const *btmap)
+//!
+//!     Return the order of the given B-treemap
+//!
+//!     :param btmap: B-treemap handle
+//!     :returns: The order of the given B-treemap
+inline size_t scc_btmap_order(void const *btmap) {
+    return scc_btree_order(btmap);
+}
+
 #endif /* SCC_BTMAP_H */
