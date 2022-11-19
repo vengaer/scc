@@ -384,7 +384,7 @@ static struct scc_btnode_base *scc_btnode_split_preemptive(
     return right;
 }
 
-//? .. struct scc_btnode_base *scc_btnode_split_non_preemptive(\
+//? .. c:function:: struct scc_btnode_base *scc_btnode_split_non_preemptive(\
 //?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict base, \
 //?     struct scc_btnode_base *restrict child, struct scc_btnode_base *p, \
 //?     void *restrict value, size_t elemsize)
