@@ -275,8 +275,9 @@ static inline void scc_btree_new_root(
 
 //? .. c:function:: int scc_btnode_find_linkindex(\
 //?     struct scc_btree_base const *restrict base, \
-//?     struct scc_btnode_base const *restrict node, \
-//?     struct scc_btnode_base *restrict p)
+//?     struct scc_btnode_base *restrict node, \
+//?     struct scc_btnode_base *restrict p, \
+//?     size_t elemsize)
 //?
 //?     Find and return the index of the given node in the link
 //?     array of p.
@@ -288,20 +289,25 @@ static inline void scc_btree_new_root(
 //?     :param base: B-tree base address
 //?     :param node: Base address of the node to be searched for
 //?     :param p: Base address of the parent node whose link array is to be searched
-//?     :returns: Index of :code:`node` in the link array of :code:`p`, or :code:`-1` if
+//?     :param elemsize: Size of the elements in the node
+//?     :returns: Index of :code:`node` in the link array of :code:`p`, or :code:`base->bt_order` if
 //?               the node is not found in the array
-static inline int scc_btnode_find_linkindex(
+static inline size_t scc_btnode_find_linkindex(
     struct scc_btree_base const *restrict base,
-    struct scc_btnode_base const *restrict node,
-    struct scc_btnode_base *restrict p
+    struct scc_btnode_base *restrict node,
+    struct scc_btnode_base *restrict p,
+    size_t elemsize
 ) {
+    void *val = scc_btnode_data(base, node);
+    size_t bound = scc_btnode_lower_bound(base, p, val, elemsize);
     struct scc_btnode_base **plinks = scc_btnode_links(base, p);
-    for(int i = 0; i < (int)p->bt_nkeys + 1; ++i) {
+    for(unsigned i = bound; i < p->bt_nkeys + 1u; ++i) {
         if(plinks[i] == node) {
             return i;
         }
     }
-    return -1;
+
+    return base->bt_order;
 }
 
 //? .. c:function:: struct scc_btnode_base *scc_btnode_split_preemptive(\
@@ -362,8 +368,7 @@ static struct scc_btnode_base *scc_btnode_split_preemptive(
         memcpy(rlinks, llinks + node->bt_nkeys + 1u, (node->bt_nkeys + 1u) * sizeof(*rlinks));
     }
 
-    int bound = scc_btnode_find_linkindex(base, node, p);
-    assert(bound != -1);
+    int bound = scc_btnode_find_linkindex(base, node, p, elemsize);
     assert(bound < base->bt_order);
 
     unsigned char *pdata = scc_btnode_data(base, p);
