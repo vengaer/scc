@@ -56,7 +56,7 @@ static inline void scc_btree_root_init(struct scc_btree_base *base, void *root) 
 //?
 //?     :param node: Pointer to the node to check
 //?     :returns: :code:`true` is the node is a leaf, otherwise :code:`false`.
-static inline _Bool scc_btnode_is_leaf(struct scc_btnode_base *node) {
+static inline _Bool scc_btnode_is_leaf(struct scc_btnode_base const *node) {
     return node->bt_flags & SCC_BTREE_FLAG_LEAF;
 }
 
