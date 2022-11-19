@@ -7,23 +7,6 @@
 
 #include <stddef.h>
 
-#ifndef SCC_BTMAP_DEFAULT_ORDER
-//! .. _scc_btmap_default_order:
-//! .. c:macro:: SCC_BTMAP_DEFAULT_ORDER
-//!
-//!     Default :ref:`order <btree_order>` of B-treemaps
-//!     instantiated using :ref:`scc_btmap_new <scc_btmap_new>`.
-//!
-//!     The value may be overridden by defining it before including
-//!     the header. B-treemaps of a specific order may be instantiated
-//!     using :ref:`scc_btmap_with_order <scc_btmap_with_order>`
-//!
-//!     Must be greater than 2. The implementation also
-//!     requires that it is smaller than :c:texpr:`SIZE_MAX / 2`, but
-//!     chosing values even remotely that size is ill-adviced.
-#define SCC_BTMAP_DEFAULT_ORDER SCC_BTREE_DEFAULT_ORDER
-#endif /* SCC_BTMAP_DEFAULT_ORDER */
-
 //? .. _scc_btmap_impl_pair:
 //? .. c:macro:: scc_btmap_impl_pair(keytype, valuetype)
 //?
@@ -49,6 +32,23 @@
 //!     :param valuetype: The value type to storre in the map
 #define scc_btmap(keytype, valuetype)                                                                           \
     scc_btmap_impl_pair(keytype, valuetype) *
+
+#ifndef SCC_BTMAP_DEFAULT_ORDER
+//! .. _scc_btmap_default_order:
+//! .. c:macro:: SCC_BTMAP_DEFAULT_ORDER
+//!
+//!     Default :ref:`order <btree_order>` of B-treemaps
+//!     instantiated using :ref:`scc_btmap_new <scc_btmap_new>`.
+//!
+//!     The value may be overridden by defining it before including
+//!     the header. B-treemaps of a specific order may be instantiated
+//!     using :ref:`scc_btmap_with_order <scc_btmap_with_order>`
+//!
+//!     Must be greater than 2. The implementation also
+//!     requires that it is smaller than :c:texpr:`SIZE_MAX / 2`, but
+//!     chosing values even remotely that size is ill-adviced.
+#define SCC_BTMAP_DEFAULT_ORDER SCC_BTREE_DEFAULT_ORDER
+#endif /* SCC_BTMAP_DEFAULT_ORDER */
 
 //? .. _scc_btmnode_base:
 //? .. c:struct:: scc_btmnode_base
@@ -137,6 +137,12 @@ struct scc_btmnode_base {
 //?
 //?         Node allocator
 //?
+//?     .. _unsigned_short_btm_kvoff
+//?     .. c:var:: struct unsigned short const btm_kvoff
+//?
+//?         Offset of the value in the
+//?         :ref:`key-value pair <scc_btmap_impl_pair>`
+//?
 //?     .. _unsigned_char_btm_fwoff:
 //?     .. c:var:: unsigned char btm_fwoff
 //?
@@ -155,6 +161,7 @@ struct scc_btmap_base {
     struct scc_btmnode_base *btm_root;
     scc_bcompare btm_compare;
     struct scc_arena btm_arena;
+    unsigned short const btm_kvoff;
     unsigned char btm_fwoff;
     unsigned char btm_data[];
 };
@@ -257,6 +264,10 @@ struct scc_btmap_base {
 //?
 //?         See :ref:`btm_arena <struct_scc_arena_btm_arena>`
 //?
+//?     .. c:var:: unsigned short const btm_kvoff
+//?
+//?         See :ref:`btm_kvoff <unsigned_short_btm_kvoff>`
+//?
 //?     .. c:var:: unsigned char btm_fwoff
 //?
 //?         See :ref:`btm_fwoff <unsigned_char_btm_fwoff>`
@@ -290,6 +301,7 @@ struct scc_btmap_base {
         struct scc_btmnode_base *btm_root;                                                                              \
         scc_bcompare btm_compare;                                                                                       \
         struct scc_arena btm_arena;                                                                                     \
+        unsigned short const btm_kvoff;                                                                                 \
         unsigned char btm_fwoff;                                                                                        \
         unsigned char btm_bkoff;                                                                                        \
         scc_btmap_impl_pair(keytype, valuetype) btm_curr;                                                               \
@@ -319,7 +331,8 @@ struct scc_btmap_base {
             .btm_valoff = offsetof(scc_btmnode_impl_layout(keytype, valuetype, order), btm_vals),                       \
             .btm_linkoff = offsetof(scc_btmnode_impl_layout(keytype, valuetype, order), btm_links),                     \
             .btm_arena = scc_arena_new(scc_btmnode_impl_layout(keytype, valuetype, order)),                             \
-            .btm_compare = compare                                                                                      \
+            .btm_compare = compare,                                                                                     \
+            .btm_kvoff = offsetof(scc_btmap_impl_pair(keytype, valuetype), btm_value)                                   \
         },                                                                                                              \
         offsetof(scc_btmap_impl_layout(keytype, valuetype, order), btm_curr),                                           \
         offsetof(scc_btmap_impl_layout(keytype, valuetype, order), btm_rootmem)                                         \
@@ -349,7 +362,8 @@ struct scc_btmap_base {
             .btm_valoff = offsetof(scc_btmnode_impl_layout(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER), btm_vals),     \
             .btm_linkoff = offsetof(scc_btmnode_impl_layout(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER), btm_links),   \
             .btm_arena = scc_arena_new(scc_btmnode_impl_layout(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER)),           \
-            .btm_compare = compare                                                                                      \
+            .btm_compare = compare,                                                                                     \
+            .btm_kvoff = offsetof(scc_btmap_impl_pair(keytype, valuetype), btm_value)                                   \
         },                                                                                                              \
         offsetof(scc_btmap_impl_layout(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER), btm_curr),                         \
         offsetof(scc_btmap_impl_layout(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER), btm_rootmem)                       \
@@ -475,5 +489,74 @@ inline size_t scc_btmap_size(void const *btmap) {
     struct scc_btmap_base const *base = scc_btmap_impl_base_qual(btmap, const);
     return base->btm_size;
 }
+
+//? .. c:function:: _Bool scc_btmap_impl_insert(void *btmapaddr, size_t elemsize)
+//?
+//?     Internal insertion function. Attempt to insert the value stored at
+//?     :c:texpr:`*(void **)btmapaddr` in the map.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param btmapaddr: Address of the B-treemap handle
+//?     :param keysize: Size of the elements stored in the map
+//?     :param valsize: Size of the values stored in the map
+//?     :returns: A :code:`_Bool` indicating whether insertion took place
+//?     :retval true: Insertion successful
+//?     :retval false: The value was already in the map, or allocation failure
+_Bool scc_btmap_impl_insert(void *btmapaddr, size_t keysize, size_t valsize);
+
+//! .. c:function:: _Bool scc_btmap_insert(void *btmapaddr, keytype key, valuetype value)
+//!
+//!     Insert the given value into the B-treemap. If the key already exists in the
+//!     map, its associated value is overwritten.
+//!
+//!     The :code:`value` parameter must not necessarily be the same type as the one
+//!     with which the B-treemap was instantiated. If it is not, it is implicitly converted
+//!     to the type stored in the map.
+//!
+//!     :param btmapaddr: Address of the B-treemap handle
+//!     :param key: The key to associate the value to be inserted with
+//!     :param value: The value to insert in the map
+//!     :returns: A :code:`_Bool` indicating whether the insertion took place
+//!     :retval true: The key-value pair was inserted
+//!     :retval false: Memory allocation failure
+//!
+//!     .. code-block:: C
+//!         :caption: Insert pairs (1, 2), (2, 3), (1, 8) in a B-treemap
+//!
+//!         extern int compare(void const *l, void const *r);
+//!
+//!         scc_btmap(int, int) btmap = scc_btmap_new(int, int, compare);
+//!
+//!         /* Insert first pair */
+//!         if(!scc_btmap_insert(&btmap, 1, 2)) {
+//!             /* Error */
+//!         }
+//!         /* Map contains (1, 2) */
+//!
+//!         /* Insert with new key not in map */
+//!         if(!scc_btmap_insert(&btmap, 2, 3)) {
+//!             /* Error */
+//!         }
+//!         /* Map now contains (1, 2), (2, 3) */
+//!
+//!         /* Insert with key already in map*/
+//!         if(!scc_btmap_insert(&btmap, 1, 8)) {
+//!             /* Error */
+//!         }
+//!         /* Map now contains (1, 8), (2, 3) */
+//!
+//!         scc_btmap_free(btmap);
+#define scc_btmap_insert(btmapaddr, key, value)                                                         \
+    scc_btmap_impl_insert((                                                                             \
+            (*(btmapaddr))->btm_key = (key),                                                            \
+            (*(btmapaddr))->btm_value = (value),                                                        \
+            (btmapaddr)                                                                                 \
+        ),                                                                                              \
+        sizeof((*(btmapaddr))->btm_key),                                                                \
+        sizeof((*(btmapaddr))->btm_value)                                                               \
+    )
 
 #endif /* SCC_BTMAP_H */
