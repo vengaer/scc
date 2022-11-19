@@ -5,7 +5,7 @@ Welcome to scc's documentation!
 
 .. toctree::
     :includehidden:
-    :maxdepth: 5
+    :maxdepth: 2
 
     collections
     lifetime
