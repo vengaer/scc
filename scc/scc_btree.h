@@ -475,7 +475,7 @@ inline size_t scc_btree_size(void const *btree) {
 //?     :param elemsize: Size of the elements stored in the B-tree
 //?     :returns: A :code:`_Bool` indicating whether insertion took place
 //?     :retval true: Insertion successful
-//?     :retval false: The value was already in the tree, or allocation failure
+//?     :retval false: Allocation failure
 _Bool scc_btree_impl_insert(void *btreeaddr, size_t elemsize);
 
 //! .. c:function:: _Bool scc_btree_insert(void *btreeaddr, type value)
@@ -490,7 +490,7 @@ _Bool scc_btree_impl_insert(void *btreeaddr, size_t elemsize);
 //!     :param value: The value to insert in the tree
 //!     :returns: A :code:`_Bool` indicating whether the insertion took place
 //!     :retval true: The value was inserted
-//!     :retval false: The values was already in the tree, or memory allocation failure
+//!     :retval false: Memory allocation failure
 //!
 //!     .. code-block:: C
 //!         :caption: Insert 0, 1, 2, 3 and 4 in a btree
