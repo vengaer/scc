@@ -132,15 +132,15 @@ struct scc_btnode_base {
 //?
 //?         Address of the root node
 //?
-//?     .. _struct_scc_arena_bt_arena:
-//?     .. c:var:: struct scc_arena bt_arena
-//?
-//?         Node allocator
-//?
 //?     .. _scc_bcompare_bt_compare:
 //?     .. c:var:: scc_bcompare bt_compare
 //?
 //?         Pointer to comparison function
+//?
+//?     .. _struct_scc_arena_bt_arena:
+//?     .. c:var:: struct scc_arena bt_arena
+//?
+//?         Node allocator
 //?
 //?     .. _unsigned_char_bt_fwoff:
 //?     .. c:var:: unsigned char bt_fwoff
@@ -157,8 +157,8 @@ struct scc_btree_base {
     unsigned short const bt_linkoff;
     size_t bt_size;
     struct scc_btnode_base *bt_root;
-    struct scc_arena bt_arena;
     scc_bcompare bt_compare;
+    struct scc_arena bt_arena;
     unsigned char bt_fwoff;
     unsigned char bt_data[];
 };
@@ -239,13 +239,13 @@ struct scc_btree_base {
 //?
 //?         See :ref:`bt_root <struct_scc_btnode_base_bt_root>`
 //?
-//?     .. c:var:: struct scc_arena bt_arena
-//?
-//?         See :ref:`bt_arena <struct_scc_arena_bt_arena>`
-//?
 //?     .. c:var:: scc_bcompare bt_compare
 //?
 //?         See :ref:`bt_compare <scc_bcompare_bt_compare>`
+//?
+//?     .. c:var:: struct scc_arena bt_arena
+//?
+//?         See :ref:`bt_arena <struct_scc_arena_bt_arena>`
 //?
 //?     .. c:var:: unsigned char bt_fwoff
 //?
@@ -277,8 +277,8 @@ struct scc_btree_base {
         unsigned short const bt_linkoff;                                                            \
         size_t bt_size;                                                                             \
         struct scc_btnode_base *bt_root;                                                            \
-        struct scc_arena bt_arena;                                                                  \
         scc_bcompare bt_compare;                                                                    \
+        struct scc_arena bt_arena;                                                                  \
         unsigned char bt_fwoff;                                                                     \
         unsigned char bt_bkoff;                                                                     \
         type bt_curr;                                                                               \
