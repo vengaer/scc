@@ -1,4 +1,29 @@
 {
+    "scc_btmap.h": {
+        "types": {
+            "scc_btmnode_int_int_order4": {
+                "from": "scc_btmnode_impl_layout",
+                "params": ["int", "int",  "4"]
+            },
+            "scc_btmnode_int_int_order5": {
+                "from": "scc_btmnode_impl_layout",
+                "params": ["int", "int", "5"]
+            },
+            "scc_btmap_int_int_order4": {
+                "from": "scc_btmap_impl_layout",
+                "params": ["int", "int", "4"]
+            },
+            "scc_btmap_int_int_order5": {
+                "from": "scc_btmap_impl_layout",
+                "params": ["int", "int", "5"]
+            }
+        },
+        "check": [
+            ["scc_btmnode_base", "scc_btmnode_int_int_order4", "scc_btmnode_int_int_order5"],
+            ["scc_btmap_base", "scc_btmap_int_int_order4", "scc_btmap_int_int_order5"]
+        ]
+
+    },
     "scc_btree.h": {
         "types": {
             "scc_btnode_int_order4": {
