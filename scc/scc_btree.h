@@ -540,7 +540,7 @@ void const *scc_btree_impl_find(void const *btree, size_t elemsize);
 //!     :returns: A const-qualified pointer to the element in the tree if found, otherwise
 //!               :code:`NULL`
 #define scc_btree_find(btree, value)                                                                    \
-    scc_btree_impl_find((*(btree) = (value), btree), sizeof(*(btree)))
+    scc_btree_impl_find((*(btree) = (value), (btree)), sizeof(*(btree)))
 
 //? .. c:function:: _Bool scc_btree_impl_remove(void *btree, size_t elemsize)
 //?
