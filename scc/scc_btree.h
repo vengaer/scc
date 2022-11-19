@@ -196,13 +196,6 @@ struct scc_btree_base {
 //?
 //?         Links to other nodes in the B-tree. At most
 //?         the :c:expr:`bt_nkeys + 1u` first nodes are used.
-//?
-//?         If zero-indexed bit 0 in :code:`bt_flags` is set,
-//?         :code:`bt_links[0]` refers to the in-order predecessor
-//?         of the node rather than one of its children. Similarly,
-//?         zero-indexed bit 1 in :code:`bt_flags` indicates that
-//?         :code:`bt_links[bt_nkeys - 1u]` refers to the in-order
-//?         successor of the node.
 #define scc_btnode_impl_layout(type, order)                                                     \
     struct {                                                                                    \
         unsigned char bt_flags;                                                                 \
