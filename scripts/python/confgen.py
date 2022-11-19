@@ -22,7 +22,7 @@ def load_configs(configs):
 
     return data
 
-def write(data, outfile):
+def write(data, semver, outfile):
     ''' Write the header '''
     formats = {
         'arch': 'SCC_ARCH_{}',
@@ -33,9 +33,23 @@ def write(data, outfile):
         'abi': 'SCC_ABI_{}',
         'CONFIG_ARENA_CHUNKSIZE': 'SCC_ARENA_CHUNKSIZE {}'
     }
+    major, minor, patch = semver.split('.')
     with FileWrHandle(outfile) if outfile is not None else StdoutWrHandle() as handle:
         handle.writeln('#ifndef SCC_CONFIG_H')
         handle.writeln('#define SCC_CONFIG_H\n')
+
+        handle.writeln('#ifndef SCC_VERSION_MAJOR')
+        handle.writeln(f'#define SCC_VERSION_MAJOR {major}')
+        handle.writeln('#endif\n')
+
+        handle.writeln('#ifndef SCC_VERSION_MINOR')
+        handle.writeln(f'#define SCC_VERSION_MINOR {minor}')
+        handle.writeln('#endif\n')
+
+        handle.writeln('#ifndef SCC_VERSION_PATCH')
+        handle.writeln(f'#define SCC_VERSION_PATCH {patch}')
+        handle.writeln('#endif\n')
+
         for var, fmt in formats.items():
             try:
                 name = fmt.format(data[var]).split(' ', maxsplit=1)[0]
@@ -47,15 +61,16 @@ def write(data, outfile):
                     raise
         handle.writeln('#endif /* SCC_CONFIG_H */')
 
-def main(configs, outfile):
+def main(configs, semver, outfile):
     ''' Main '''
     data = load_configs(configs)
-    write(data, outfile)
+    write(data, semver, outfile)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
             description='Generate configuration header')
     parser.add_argument('-o', '--outfile', action='store', default=None,
         help='Path to write the generated header document to')
+    parser.add_argument('semver', metavar='SEMVER', help='Semantic version')
     parser.add_argument('configs', nargs='+', help='Input configuration files')
     main(**vars(parser.parse_args()))

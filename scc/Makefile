@@ -7,7 +7,7 @@ __public_headers := $(addsuffix .h,$(addprefix $(__node_path)/scc_,btmap btree h
 
 $(__config_header): $(pyscripts)/confgen.$(pyext) $(archinfo) $(simdinfo) $(vecinfo) $(CONFIG)
 	$(call echo-gen,$(notdir $@))
-	$(PYTHON) $< $(filter-out $<,$^) -o $@
+	$(PYTHON) $< $(sover) $(filter-out $<,$^) -o $@
 	touch $@
 
 .PHONY: __clean_config_header
