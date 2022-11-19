@@ -55,7 +55,7 @@ typedef int(*scc_bcompare)(void const *, void const *);
 //!     Must be greater than 2. The implementation also
 //!     requires that it is smaller than :c:texpr:`SIZE_MAX / 2`, but
 //!     chosing values even remotely that size is ill-adviced.
-enum { SCC_BTREE_DEFAULT_ORDER = 6 };
+#define SCC_BTREE_DEFAULT_ORDER 6u
 #endif /* SCC_BTREE_DEFAULT_ORDER */
 
 scc_static_assert(SCC_BTREE_DEFAULT_ORDER > 2);
