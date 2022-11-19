@@ -5,7 +5,7 @@
 
 size_t scc_btmap_order(void const *btmap);
 void *scc_btmap_impl_with_order(void *base, size_t coff, size_t rootoff);
-size_t scc_btmap_impl_npad(void const *btree);
+size_t scc_btmap_impl_npad(void const *btmap);
 size_t scc_btmap_size(void const *btmap);
 
 //? .. c:enumerator:: SCC_BTMAP_FLAG_LEAF
