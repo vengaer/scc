@@ -10,7 +10,7 @@
 //?     starting at :code:`base` that is greater than or equal to :code:`key` as determined
 //?     by the comparison function :code:`compare`.
 //?
-//?     The function is a `bsearch <https://man7.org/linux/man-pages/man3/bsearch.3.html>`-like
+//?     The function is a `bsearch <https://man7.org/linux/man-pages/man3/bsearch.3.html>`_-like
 //?     adaptation of C++'s `std::lower_bound <https://en.cppreference.com/w/cpp/algorithm/lower_bound>`.
 //?
 //?     :param key: The key relative which the lower bound is to be found
