@@ -559,4 +559,43 @@ _Bool scc_btmap_impl_insert(void *btmapaddr, size_t keysize, size_t valsize);
         sizeof((*(btmapaddr))->btm_value)                                                               \
     )
 
+//? .. c:function:: void *scc_btmap_impl_find(void *btmap, size_t keysize, size_t valsize)
+//?
+//?     Internal search function. Attempts to located the key stored at :code:`btmap`
+//?     in the tree and, if found, return it's corresponding value
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param btmap: Handle to the btmap
+//?     :param keysize: Size of the keys in the map
+//?     :param valsize: Size of the values in the map
+//?     :returns: An unqualified pointer to the value corresponding to the
+//?               key stored at :code:`btmap`, or :code:`NULL` if the key
+//?               is not found in the map
+void *scc_btmap_impl_find(void *btmap, size_t keysize, size_t valsize);
+
+//! ..c:function:: void *scc_btmap_find(void *btmap, keytype key)
+//!
+//!     Search for and, if found, return a pointer to the value corresponding to
+//!     the given key.
+//!
+//!     The :code:`key` parameter must not necessarily be the same type as the one
+//!     with which the :code:`btmap` was instantiated. If it is not, it is
+//!     implicitly converted to the key type stored in the map.
+//!
+//!     :param btmap: Handle to the btmap
+//!     :param key: The key to search for
+//!     :returns: An unqualified pointer to the value corresponding to the given
+//!               :code:`key` argument, or :code:`NULL` if the key was not found
+//!               in the map
+#define scc_btmap_find(btmap, key)                                                                      \
+    scc_btmap_impl_find((                                                                               \
+            ((btmap)->btm_key = (key)), (btmap)                                                         \
+        ),                                                                                              \
+        sizeof((btmap)->btm_key),                                                                       \
+        sizeof((btmap)->btm_value)                                                                      \
+    )
+
 #endif /* SCC_BTMAP_H */

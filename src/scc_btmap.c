@@ -846,3 +846,25 @@ _Bool scc_btmap_impl_insert(void *btmapaddr, size_t keysize, size_t valsize) {
     }
     return scc_btmap_insert_non_preemptive(base, btmapaddr, keysize, valsize);
 }
+
+void *scc_btmap_impl_find(void *btmap, size_t keysize, size_t valsize) {
+    struct scc_btmap_base *base = scc_btmap_impl_base(btmap);
+
+    struct scc_btmnode_base *curr = base->btm_root;
+
+    size_t bound;
+    while(1) {
+        bound = scc_btmnode_lower_bound(base, curr, btmap, keysize);
+        if(scc_btmnode_keyeq(bound)) {
+            return scc_btmnode_value(base, curr, bound & BOUND_MASK, valsize);
+        }
+
+        if(scc_btmnode_is_leaf(curr)) {
+            break;
+        }
+
+        curr = scc_btmnode_child(base, curr, bound);
+    }
+
+    return 0;
+}
