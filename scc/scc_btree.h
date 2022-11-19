@@ -337,7 +337,7 @@ inline void *scc_btree_impl_with_order(void *base, size_t coff, size_t rootoff) 
 //!
 //!     :param type: The type to be stored in the B-tree
 //!     :param compare: Pointer to the comparison function to use
-//!     :param order: The :ref:`order <btree_order>` of the B-tree. Must be an even value
+//!     :param order: The :ref:`order <btree_order>` of the B-tree. Must be a value
 //!                   greater than 2
 //!     :returns: An opaque pointer to a B-tree allocated in the frame of the calling function,
 //!               or NULL if the order is invalid
