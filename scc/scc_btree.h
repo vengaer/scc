@@ -511,7 +511,7 @@ _Bool scc_btree_impl_insert(void *btreeaddr, size_t elemsize);
 #define scc_btree_insert(btreeaddr, value)                                                              \
     scc_btree_impl_insert((**(btreeaddr) = (value), btreeaddr), sizeof(**(btreeaddr)))
 
-//? .. c:function:: void const *scc_btree_impl_find(void *btree, size_t elemsize)
+//? .. c:function:: void const *scc_btree_impl_find(void const *btree, size_t elemsize)
 //?
 //?     Internal search function. Attempts to find the value stored at
 //?     :code:`btree` in the tree
