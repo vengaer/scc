@@ -1,6 +1,7 @@
 #include <scc/scc_algorithm.h>
 #include <scc/scc_bits.h>
 #include <scc/scc_btmap.h>
+#include <scc/scc_stack.h>
 
 #include <assert.h>
 #include <limits.h>
@@ -67,7 +68,7 @@ static inline _Bool scc_btmnode_is_leaf(struct scc_btmnode_base const *node) {
     return node->btm_flags & SCC_BTMAP_FLAG_LEAF;
 }
 
-//? .. c:function:: void scc_btnode_flags_clear(struct scc_btmnode_base *node)
+//? .. c:function:: void scc_btmnode_flags_clear(struct scc_btmnode_base *node)
 //?
 //?     Clear the flags f the given node
 //?
@@ -95,6 +96,31 @@ static inline void *scc_btmnode_keys(struct scc_btmap_base const *restrict base,
     return (unsigned char *)node + base->btm_keyoff;
 }
 
+//? .. c:function:: void *scc_btmnode_key(\
+//?     struct scc_btmap_base const *restrict base, \
+//?     struct scc_btmnode_base *restrict node, \
+//?     size_t n, size_t keysize)
+//?
+//?     Compute the address of the nth key in the given node
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Base address of the btmap
+//?     :param node: Base address of the node
+//?     :param n: Index of the key whose address is to be returned
+//?     :param keysize: Size of the keys in the map
+static inline void *scc_btmnode_key(
+    struct scc_btmap_base const *restrict base,
+    struct scc_btmnode_base *restrict node,
+    size_t n,
+    size_t keysize
+) {
+    assert(n < node->btm_nkeys);
+    return ((unsigned char *)scc_btmnode_keys(base, node)) + n * keysize;
+}
+
 //? .. c:function:: void *scc_btmnode_vals(struct scc_btmap_base const *restrict base, struct scc_btmnode_base *restrict node)
 //?
 //?     Compute address of the value array in the given node
@@ -113,7 +139,7 @@ static inline void *scc_btmnode_vals(struct scc_btmap_base const *restrict base,
 //? .. c:function:: void *scc_btmnode_value(\
 //?     struct scc_btmap_base const *restrict base, \
 //?     struct scc_btmnode_base *restrict node, \
-//?     size_t n, size_t valuesize)
+//?     size_t n, size_t valsize)
 //?
 //?     Compute the address of the nth value in the given node
 //?
@@ -124,15 +150,15 @@ static inline void *scc_btmnode_vals(struct scc_btmap_base const *restrict base,
 //?     :param base: Base address of the btmap
 //?     :param node: Base address of the node
 //?     :param n: Index of the value whose address is to be returned
-//?     :param valuesize: Size of the values in the map
+//?     :param valsize: Size of the values in the map
 static inline void *scc_btmnode_value(
     struct scc_btmap_base const *restrict base,
     struct scc_btmnode_base *restrict node,
     size_t n,
-    size_t valuesize
+    size_t valsize
 ) {
     assert(n < node->btm_nkeys);
-    return ((unsigned char *)scc_btmnode_vals(base, node)) + n * valuesize;
+    return ((unsigned char *)scc_btmnode_vals(base, node)) + n * valsize;
 }
 
 //? .. c:function:: struct scc_btmnode_base **scc_btmnode_links(\
@@ -238,7 +264,7 @@ static inline _Bool scc_btmnode_keyeq(size_t bound) {
 //?     struct scc_btmap_base const *restrict base, \
 //?     struct scc_btmnode_base *restrict node, \
 //?     void const *restrict kvpair, \
-//?     size_t bound, size_t valuesize)
+//?     size_t bound, size_t valsize)
 //?
 //?     Replace the value at the given bound with that in :code:`kvpair`
 //?
@@ -251,19 +277,19 @@ static inline _Bool scc_btmnode_keyeq(size_t bound) {
 //?     :param kvpair: Key-value pair from whilch the replacement value
 //?                    is to be taken
 //?     :param bound: Index to insert the value at
-//?     :param valuesize: Size of the values in the map
+//?     :param valsize: Size of the values in the map
 static inline void scc_btmnode_replace_value(
     struct scc_btmap_base const *restrict base,
     struct scc_btmnode_base *restrict node,
     void const *restrict kvpair,
     size_t bound,
-    size_t valuesize
+    size_t valsize
 ) {
-    void *val = scc_btmnode_value(base, node, bound, valuesize);
-    memcpy(val, (unsigned char const *)kvpair + base->btm_kvoff, valuesize);
+    void *val = scc_btmnode_value(base, node, bound, valsize);
+    memcpy(val, (unsigned char const *)kvpair + base->btm_kvoff, valsize);
 }
 
-//? .. c:function:: size_t scc_btmnode_empalce_leaf(\
+//? .. c:function:: void scc_btmnode_emplace_leaf(\
 //?     struct scc_btmap_base *restrict base, \
 //?     struct scc_btmnode_base *restrict node, \
 //?     void *restrict kvpair, \
@@ -283,14 +309,19 @@ static inline void scc_btmnode_replace_value(
 //?     :param keysize: Size of the keys in the map
 //?     :param valsize: Size of the values in the map
 //?     :returns: The lower bound of the newly inserted element
-static size_t scc_btmnode_emplace_leaf(
+static void scc_btmnode_emplace_leaf(
     struct scc_btmap_base *restrict base,
     struct scc_btmnode_base *restrict node,
     void *restrict kvpair,
     size_t keysize,
     size_t valsize
 ) {
-    size_t bound = scc_btmnode_lower_bound(base, node, kvpair, keysize) & BOUND_MASK;
+    size_t bound = scc_btmnode_lower_bound(base, node, kvpair, keysize);
+    if(scc_btmnode_keyeq(bound)) {
+        scc_btmnode_replace_value(base, node, kvpair, bound & BOUND_MASK, valsize);
+        return;
+    }
+
     unsigned char *keys = scc_btmnode_keys(base, node);
     unsigned char *vals = scc_btmnode_vals(base, node);
 
@@ -305,7 +336,66 @@ static size_t scc_btmnode_emplace_leaf(
     memcpy(keys + keyoff, kvpair, keysize);
     memcpy(vals + valoff, (unsigned char *)kvpair + base->btm_kvoff, valsize);
     ++node->btm_nkeys;
-    return bound;
+}
+
+//? .. c:function:: void scc_btmnode_emplace(\
+//?     struct scc_btmap_base *restrict base, \
+//?     struct scc_btmnode_base *restrict node,\
+//?     struct scc_btmnode_base *restrict child, \
+//?     void *restrict key, \
+//?     void *restrict value, \
+//?     size_t keysize, \
+//?     size_t valsize)
+//?
+//?     Insert the given key and value with accompanying child
+//?     subtree in non-leaf node. The given node must have at
+//?     least on vacant slot in its link array
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Base address of the btmap
+//?     :param node: The node to insert the value in
+//?     :param child: Root of the subtree to insert
+//?     :param key: The key to insert
+//?     :param value: The value corresponding to the given key
+//?     :param keysize: Size of the keys in the map
+//?     :param valsize: Size of the values in the map
+static void scc_btmnode_emplace(
+    struct scc_btmap_base *restrict base,
+    struct scc_btmnode_base *restrict node,
+    struct scc_btmnode_base *restrict child,
+    void *restrict key,
+    void *restrict value,
+    size_t keysize,
+    size_t valsize
+) {
+    size_t bound = scc_btmnode_lower_bound(base, node, key, keysize);
+
+    /* Tree already traversed, no way the eq bit is set */
+    assert(bound <= node->btm_nkeys);
+
+    unsigned char *keys = scc_btmnode_keys(base, node);
+    unsigned char *vals = scc_btmnode_vals(base, node);
+
+    size_t keyoff = bound * keysize;
+    size_t valoff = bound * valsize;
+
+    if(bound < node->btm_nkeys) {
+        memmove(keys + keyoff + keysize, keys + keyoff, (node->btm_nkeys - bound) * keysize);
+        memmove(vals + valoff + valsize, vals + valoff, (node->btm_nkeys - bound) * valsize);
+    }
+
+    memcpy(keys + keyoff, key, keysize);
+    memcpy(vals + valoff, value, valsize);
+    ++node->btm_nkeys;
+
+    struct scc_btmnode_base **links = scc_btmnode_links(base, node);
+    if(bound < node->btm_nkeys - 1u) {
+        memmove(links + bound + 2u, links + bound + 1u, (node->btm_nkeys - bound - 1u) * sizeof(*links));
+    }
+    links[bound + 1u] = child;
 }
 
 //? .. c:function:: int scc_btmnode_find_linkindex(\
@@ -430,6 +520,153 @@ static struct scc_btmnode_base *scc_btmnode_split_preemptive(
     return right;
 }
 
+//?`.. c:function:: struct scc_btmnode_base *scc_btmnode_split_non_preemptive(\
+//?     struct scc_btmap_base *restrict base, struct scc_btmnode_base *restrict node, \
+//?     struct scc_btmnode_base *restrict child, struct scc_btmnode_base *p,\
+//?     void *restrict key, void *restrict value, \
+//?     size_t keysize, size_t valsize)
+//?
+//?     Split the given node in two, moving keys and values as required. The supplied
+//?     key and value are treated as if inserted at their appropriate positions before
+//?     the split. The middlemost key-value pair to be moved to the parent node is
+//?     written to the first vacant slot int he newly allocated right nodeA
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Base address of the btmap
+//?     :param node: The node to split
+//?     :param child: Child link to insert
+//?     :param p: Parent of the given node, or :code:`NULL` if :c:texpr:`node == base->btm_root`
+//?     :param key: The key that were to be written to the node, causing the split
+//?     :param value: The value corresponding to the key
+//?     :param keysize: Size of the keys in the map
+//?     :param valsize: Size of the values in the map
+//?     :returns: Address of the new node allocated for the split, or :code:`NULL`
+//?               on allocation failure
+static struct scc_btmnode_base *scc_btmnode_split_non_preemptive(
+    struct scc_btmap_base *restrict base,
+    struct scc_btmnode_base *restrict node,
+    struct scc_btmnode_base *restrict child,
+    struct scc_btmnode_base *p,
+    void *restrict key,
+    void *restrict value,
+    size_t keysize,
+    size_t valsize
+) {
+    struct scc_btmnode_base *right = scc_arena_alloc(&base->btm_arena);
+    if(!right) {
+        return 0;
+    }
+    if(!p) {
+        p = scc_arena_alloc(&base->btm_arena);
+        if(!p) {
+            scc_arena_free(&base->btm_arena, right);
+            return 0;
+        }
+        base->btm_root = p;
+        scc_btmap_new_root(base, p, node, right);
+    }
+
+    size_t bound = scc_btmnode_lower_bound(base, node, key, keysize);
+    /* Tree has already been traversed once without
+     * finding any exact matches. Eq bit cannot be set */
+    assert(bound <= node->btm_nkeys);
+
+    node->btm_nkeys >>= 1u;
+    right->btm_nkeys = node->btm_nkeys;
+    right->btm_flags = node->btm_flags;
+
+    unsigned char *rkeys = scc_btmnode_keys(base, right);
+    unsigned char *rvals = scc_btmnode_vals(base, right);
+
+    unsigned char *lkeys = scc_btmnode_keys(base, node);
+    unsigned char *lvals = scc_btmnode_vals(base, node);
+
+    struct scc_btmnode_base **rlinks = scc_btmnode_links(base, right);
+    struct scc_btmnode_base **llinks = scc_btmnode_links(base, node);
+
+    void *nkey = scc_btmnode_key(base, right, right->btm_nkeys, keysize);
+    void *nval = scc_btmnode_value(base, right, right->btm_nkeys, valsize);
+
+    if(bound == node->btm_nkeys) {
+        memcpy(nkey, key, keysize);
+        memcpy(nval, value, valsize);
+        memcpy(rkeys, lkeys + node->btm_nkeys * keysize, right->btm_nkeys * keysize);
+        memcpy(rvals, lvals + node->btm_nkeys * valsize, right->btm_nkeys * valsize);
+        if(!scc_btmnode_is_leaf(node)) {
+            *rlinks = child;
+            memcpy(rlinks + 1u, llinks + node->btm_nkeys + 1u, right->btm_nkeys * sizeof(*rlinks));
+        }
+    }
+    else if(bound < node->btm_nkeys) {
+        memcpy(nkey, lkeys + (node->btm_nkeys - 1u) * keysize, keysize);
+        memcpy(nval, lvals + (node->btm_nkeys - 1u) * valsize, valsize);
+        size_t nmov = node->btm_nkeys - bound - 1u;
+        unsigned char *fkey = scc_btmnode_key(base, node, bound, keysize);
+        unsigned char *fval = scc_btmnode_value(base, node, bound, valsize);
+        if(nmov) {
+            memmove(fkey + keysize, fkey, nmov * keysize);
+            memmove(fval + valsize, fval, nmov * valsize);
+        }
+        memcpy(fkey, key, keysize);
+        memcpy(fval, value, valsize);
+        memcpy(rkeys, lkeys + node->btm_nkeys * keysize, right->btm_nkeys * keysize);
+        memcpy(rvals, lvals + node->btm_nkeys * valsize, right->btm_nkeys * valsize);
+
+        if(!scc_btmnode_is_leaf(node)) {
+            memcpy(rlinks, llinks + node->btm_nkeys, (right->btm_nkeys + 1u) * sizeof(*rlinks));
+            if(nmov) {
+                memmove(llinks + bound + 2u, llinks + bound + 1u, (node->btm_nkeys - bound) * sizeof(*llinks));
+            }
+            llinks[bound + 1u] = child;
+        }
+    }
+    else {
+        unsigned char *skey = scc_btmnode_key(base, node, node->btm_nkeys, keysize);
+        unsigned char *sval = scc_btmnode_value(base, node, node->btm_nkeys, valsize);
+        memcpy(nkey, skey, keysize);
+        memcpy(nval, sval, valsize);
+        skey += keysize;
+        sval += valsize;
+
+        size_t nbef = bound - node->btm_nkeys - 1u;
+        if(nbef) {
+            size_t nkbytes = nbef * keysize;
+            size_t nvbytes = nbef * valsize;
+            memcpy(rkeys, skey, nkbytes);
+            memcpy(rvals, sval, nvbytes);
+
+            skey += nkbytes;
+            rkeys += nkbytes;
+
+            sval += nvbytes;
+            rvals += nvbytes;
+        }
+
+        memcpy(rkeys, key, keysize);
+        memcpy(rvals, value, valsize);
+
+        size_t naft = (node->btm_nkeys << 1u) - bound;
+        if(naft) {
+            memcpy(rkeys + keysize, skey, naft * keysize);
+            memcpy(rvals + valsize, sval, naft * valsize);
+        }
+
+        if(!scc_btmnode_is_leaf(node)) {
+            ++nbef;
+            memcpy(rlinks, llinks + node->btm_nkeys + 1u, nbef * sizeof(*rlinks));
+            rlinks[nbef++] = child;
+            if(naft) {
+                memcpy(rlinks + nbef, llinks + node->btm_nkeys + nbef, naft * sizeof(*rlinks));
+            }
+        }
+    }
+
+    return right;
+}
+
 //? .. c:function:: _Bool scc_btmap_insert_preemptive(struct scc_btmap_base *base, \
 //?      void *btmapaddr, size_t keysize, size_t valsize)
 //?
@@ -451,7 +688,7 @@ static _Bool scc_btmap_insert_preemptive(struct scc_btmap_base *base, void *btma
 
     struct scc_btmnode_base *right;
     size_t bound;
-    while(true) {
+    while(1) {
         bound = scc_btmnode_lower_bound(base, curr, *(void **)btmapaddr, keysize);
         if(scc_btmnode_keyeq(bound)) {
             scc_btmnode_replace_value(base, curr, *(void **)btmapaddr, bound & BOUND_MASK, valsize);
@@ -483,6 +720,108 @@ static _Bool scc_btmap_insert_preemptive(struct scc_btmap_base *base, void *btma
     return true;
 }
 
+//? .. c:fuinction:: _Bool scc_btmap_insert_non_preemptive(\
+//?     struct scc_btmap_base *base, void *btmapaddr, size_t keysize, size_t valsize)
+//?
+//?     Insert the key-value pair in :c:texpr:`´(void **)btmapaddr` using :ref:`non-preemptive splitting <non_preemptive_split>`.
+//?     Calle donly for trees whose order is odd
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Base address of the btmap
+//?     :param btmapaddr: Address of the btmap handle
+//?     :param keysize: Size of the keys in the tree
+//?     :param valsize: Size of the values in the tree
+//?     :returns: :code:`true` if the value was successfully inserted, otherwise :code:`false`.
+static _Bool scc_btmap_insert_non_preemptive(struct scc_btmap_base *base, void *btmapaddr, size_t keysize, size_t valsize) {
+    _Bool inserted = false;
+
+    scc_stack(struct scc_btmnode_base *) stack = scc_stack_new(struct scc_btmnode_base *);
+
+    /* Root has parent NULL */
+    scc_stack_push(&stack, 0);
+
+    /* Splitting root requires new root */
+    size_t req_allocs = base->btm_root->btm_nkeys == base->btm_order - 1u;
+
+    size_t bound;
+    struct scc_btmnode_base *curr = base->btm_root;
+    while(1) {
+        if(curr->btm_nkeys == base->btm_order - 1u) {
+            ++req_allocs;
+        }
+        else {
+            req_allocs = 0u;
+        }
+
+        if(scc_btmnode_is_leaf(curr)) {
+            break;
+        }
+
+        if(!scc_stack_push(&stack, curr)) {
+            goto epilogue;
+        }
+
+        bound = scc_btmnode_lower_bound(base, curr, *(void **)btmapaddr, keysize);
+        if(scc_btmnode_keyeq(bound)) {
+            scc_btmnode_replace_value(base, curr, *(void **)btmapaddr, bound & BOUND_MASK, valsize);
+            inserted = true;
+            goto epilogue;
+        }
+        bound &= BOUND_MASK;
+        curr = scc_btmnode_child(base, curr, bound);
+    }
+
+    if(curr->btm_nkeys < base->btm_order - 1u) {
+        scc_btmnode_emplace_leaf(base, curr, *(void **)btmapaddr, keysize, valsize);
+        ++base->btm_size;
+        inserted = true;
+        goto epilogue;
+    }
+
+    assert(req_allocs);
+    /* Make sure map can't end up in invalid state due to
+     * allocation failures */
+    if(!scc_arena_reserve(&base->btm_arena, req_allocs)) {
+        goto epilogue;
+    }
+
+    struct scc_btmnode_base *p;
+    struct scc_btmnode_base *right = 0;
+    void *key = *(void **)btmapaddr;
+    void *value = (unsigned char *)key + base->btm_kvoff;
+    while(1) {
+        p = scc_stack_top(stack);
+
+        right = scc_btmnode_split_non_preemptive(base, curr, right, p, key, value, keysize, valsize);
+        /* Cannot fail thanks to reserve */
+        assert(right);
+        key = scc_btmnode_key(base, right, right->btm_nkeys, keysize);
+        value = scc_btmnode_value(base, right, right->btm_nkeys, valsize);
+
+        curr = p;
+        if(!curr || curr->btm_nkeys < base->btm_order - 1u) {
+            break;
+        }
+
+        scc_stack_pop(stack);
+    }
+
+    if(!curr) {
+        curr = base->btm_root;
+    }
+
+    scc_btmnode_emplace(base, curr, right, key, value, keysize, valsize);
+    ++base->btm_size;
+    inserted = true;
+
+epilogue:
+    scc_stack_free(stack);
+    return inserted;
+}
+
 void scc_btmap_free(void *btmap) {
     struct scc_btmap_base *base = scc_btmap_impl_base(btmap);
     scc_arena_release(&base->btm_arena);
@@ -505,5 +844,5 @@ _Bool scc_btmap_impl_insert(void *btmapaddr, size_t keysize, size_t valsize) {
     if(scc_bits_is_even(base->btm_order)) {
         return scc_btmap_insert_preemptive(base, btmapaddr, keysize, valsize);
     }
-    return false;
+    return scc_btmap_insert_non_preemptive(base, btmapaddr, keysize, valsize);
 }
