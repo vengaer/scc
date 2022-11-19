@@ -1,10 +1,14 @@
 #ifndef SCC_BTMAP_H
 #define SCC_BTMAP_H
 
+#include "scc_arena.h"
 #include "scc_btree.h"
+#include "scc_mem.h"
+
+#include <stddef.h>
 
 #ifndef SCC_BTMAP_DEFAULT_ORDER
-//! .. _scc_btree_default_order:
+//! .. _scc_btmap_default_order:
 //! .. c:macro:: SCC_BTMAP_DEFAULT_ORDER
 //!
 //!     Default :ref:`order <btree_order>` of B-treemaps
@@ -46,16 +50,43 @@
 #define scc_btmap(keytype, valuetype)                                                                           \
     scc_btmap_impl_pair(keytype, valuetype) *
 
-//? .. c:macro:: scc_btmnode_base
+//? .. _scc_btmnode_base:
+//? .. c:struct:: scc_btmnode_base
 //?
-//?     Alias for scc_btnode_base to provide a unified
-//?     naming scheme in the btmap while avoiding code
-//?     duplication
+//?     Generic B-treemap node structure
 //?
 //?     .. note::
 //?
 //?         Internal use only
-#define scc_btmnode_base scc_btnode_base
+//?
+//?     .. _unsigned_char_btm_flags:
+//?     .. c:var:: unsigned char btm_flags
+//?
+//?         Link flags. Used bits are as follows
+//?
+//?         .. list-table:: Flag Bits
+//?             :header-rows: 1
+//?
+//?             * - Bit
+//?               - Meaning
+//?             * - 0x01
+//?               - Node is a leaf
+//?
+//?     .. _unsigned_short_btm_nkeys:
+//?     .. c:var:: unsigned short btm_nkeys
+//?
+//?         Number of keys stored in the node
+//?
+//?     .. c:var:: unsigned char btm_data[]
+//?
+//?         FAM hiding type-specific details. See
+//?         :ref:`scc_btmnode_impl_layout <scc_btmnode_impl_layout>`
+//?         for details.
+struct scc_btmnode_base {
+    unsigned char btm_flags;
+    unsigned short btm_nkeys;
+    unsigned char btm_data[];
+};
 
 //? .. _scc_btmap_base:
 //? .. c:struct:: scc_btmap_base
@@ -144,11 +175,11 @@ struct scc_btmap_base {
 //?
 //?     .. c:var:: unsigned char btm_flags
 //?
-//?         See :ref:`bt_flags <unsigned_char_bt_flags>`.
+//?         See :ref:`btm_flags <unsigned_char_btm_flags>`.
 //?
 //?     .. c:var:: unsigned short btm_nkeys
 //?
-//?         See :ref:`bt_nkeys <unsigned_short_bt_nkeys>`.
+//?         See :ref:`bt_mnkeys <unsigned_short_btm_nkeys>`.
 //?
 //?     .. _type_btm_keys:
 //?     .. c:var:: type btm_keys[order - 1u]
@@ -282,7 +313,7 @@ struct scc_btmap_base {
 //!     :returns: An opaque pointer to a B-tree allocated in the frame of the calling function,
 //!               or NULL if the order is invalid
 #define scc_btmap_with_order(keytype, valuetype, compare, order)                                                        \
-    scc_btree_impl_with_order(&(scc_btmap_impl_layout(keytype, valuetype, order)) {                                     \
+    scc_btmap_impl_with_order(&(scc_btmap_impl_layout(keytype, valuetype, order)) {                                     \
             .btm_order = order,                                                                                         \
             .btm_keyoff = offsetof(scc_btmnode_impl_layout(keytype, valuetype, order), btm_keys),                       \
             .btm_valoff = offsetof(scc_btmnode_impl_layout(keytype, valuetype, order), btm_vals),                       \
@@ -297,7 +328,7 @@ struct scc_btmap_base {
 //! .. _scc_btmap_new:
 //! .. c:function:: void *scc_btmap_new(keytype, valuetype, scc_bcompare compare)
 //!
-//!     Instantiate a B-treemap of the configured :ref:`default order <scc_btree_default_order>`
+//!     Instantiate a B-treemap of the configured :ref:`default order <scc_btmap_default_order>`
 //!     storing instances of the given key and value types and using :code:`compare` for comparison.
 //!
 //!     Calling :code:`scc_btmap_new` is entirely equivalent to calling
@@ -312,7 +343,7 @@ struct scc_btmap_base {
 //!     :param compare: Pointer to the comparison function to use
 //!     :returns: An opaque pointer to a B-tree allocated in the frame of the calling function
 #define scc_btmap_new(keytype, valuetype, compare)                                                                      \
-    scc_btree_impl_new(&(scc_btmap_impl_layout(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER)) {                          \
+    scc_btmap_impl_new(&(scc_btmap_impl_layout(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER)) {                          \
             .btm_order = SCC_BTMAP_DEFAULT_ORDER,                                                                       \
             .btm_keyoff = offsetof(scc_btmnode_impl_layout(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER), btm_keys),     \
             .btm_valoff = offsetof(scc_btmnode_impl_layout(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER), btm_vals),     \
@@ -324,6 +355,96 @@ struct scc_btmap_base {
         offsetof(scc_btmap_impl_layout(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER), btm_rootmem)                       \
     )
 
+//? .. _scc_btmap_impl_new:
+//? .. c:function:: void *scc_btmap_impl_new(void *base, size_t coff, size_t rootoff)
+//?
+//?     Initialize the given B-treemap base struct and return the address of its
+//?     :ref:`btm_curr <kvpair_btm_curr>` member
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Address of the :ref:`struct scc_btmap_base <scc_btmap_base>` structure
+//?                  of the map
+//?     :param coff: Base-relative offset of the :ref:`btm_curr <kvpair_btm_curr>` member
+//?                  in the :code:`base` struct
+//?     :param rootoff: Base-relative offset of the memory allocated for the root node
+//?     :returns: Address of a handle suitable for referring to the given B-treemap
+void *scc_btmap_impl_new(void *base, size_t coff, size_t rootoff);
+
+//? .. c:function:: void *scc_btmap_impl_with_order(void *base, size_t coff, size_t rootoff)
+//?
+//?     Like :ref:`scc_btmap_impl_new <scc_btmap_impl_new>` but verifies the order
+//?     in the base structure. Should it prove invalid, the function returns NULL
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Base address of the B-tree
+//?     :param coff: Base-relative offset of the :ref:`bt_curr <type_bt_curr>` member
+//?                  in the base struct
+//?     :param rootoff: Base-relative offset of the memory allocated for the root node
+//?     :returns: Address of a handle suitable for referring to the given B-tree,
+//?               or :code:`NULL` if the order field is invalid
+inline void *scc_btmap_impl_with_order(void *base, size_t coff, size_t rootoff) {
+    unsigned order = ((struct scc_btmap_base *)base)->btm_order;
+    if(order < 3u) {
+        return 0;
+    }
+    return scc_btmap_impl_new(base, coff, rootoff);
+}
+
+//? .. c:function:: size_t scc_btmap_impl_npad(void const *btmap)
+//?
+//?     Compute the number of padding bytes between :ref:`btm_curr <kvpair_btm_curr>`
+//?     and :ref:`btm_fwoff <unsigned_char_btm_fwoff>`.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param btmap: Handle to the B-treemap
+//?     :returns: The number of padding bytes between :code:`btm_fwoff` and :code:`btm_curr`
+inline size_t scc_btmap_impl_npad(void const *btmap) {
+    return ((unsigned char const *)btmap)[-1] + sizeof(unsigned char);
+}
+
+//? .. c:macro:: scc_btmap_impl_base_qual(btmap, qual)
+//?
+//?     Obtain qualified pointer to the :ref:`struct scc_btmap_base <scc_btmap_base>`
+//?     corresponding to the given B-treemap handle
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param btmap: B-treemap handle
+//?     :param qual: Optioal qualifiers to apply to the returned pointer
+//?     :returns: Suitably qualified pointer to the base address of the given B-treemap
+#define scc_btmap_impl_base_qual(btmap, qual)                                                       \
+    scc_container_qual(                                                                             \
+        (unsigned char qual *)(btmap) - scc_btmap_impl_npad(btmap),                                 \
+        struct scc_btmap_base,                                                                      \
+        btm_fwoff,                                                                                  \
+        qual                                                                                        \
+    )
+
+//? .. c:macro:: scc_btmap_impl_base(btmap)
+//?
+//?     Obtain unqualified pointer to the base address of the given
+//?     :code:`btmap`.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param btmap: B-treemap handle
+//?     :returns: Base address of the given B-treemap
+#define scc_btmap_impl_base(btmap)                                                                  \
+    scc_btmap_impl_base_qual(btmap,)
+
 //! .. c:function:: void scc_btmap_free(void *btmap)
 //!
 //!     Reclaim memory allocated for :c:expr:`btmap`. The parameter must
@@ -331,9 +452,7 @@ struct scc_btmap_base {
 //!     :ref:`scc_btmap_with_order <scc_btmap_with_order>`.
 //!
 //!     :param btmap: B-treemap handle
-inline void scc_btmap_free(void *btmap) {
-    scc_btree_free(btmap);
-}
+void scc_btmap_free(void *btmap);
 
 //! .. c:function:: size_t scc_btmap_order(void const *btmap)
 //!
@@ -342,7 +461,8 @@ inline void scc_btmap_free(void *btmap) {
 //!     :param btmap: B-treemap handle
 //!     :returns: The order of the given B-treemap
 inline size_t scc_btmap_order(void const *btmap) {
-    return scc_btree_order(btmap);
+    struct scc_btmap_base const *base = scc_btmap_impl_base_qual(btmap, const);
+    return base->btm_order;
 }
 
 #endif /* SCC_BTMAP_H */
