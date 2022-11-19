@@ -465,4 +465,15 @@ inline size_t scc_btmap_order(void const *btmap) {
     return base->btm_order;
 }
 
+//! .. c:function:: size_t scc_btmap_size(void const *btmap)
+//!
+//!     Query the size of the given B-treemap
+//!
+//!     :param btmap: B-treemap handle
+//!     :returns: Size of the given B-treemap
+inline size_t scc_btmap_size(void const *btmap) {
+    struct scc_btmap_base const *base = scc_btmap_impl_base_qual(btmap, const);
+    return base->btm_size;
+}
+
 #endif /* SCC_BTMAP_H */
