@@ -115,7 +115,7 @@ struct scc_btnode_base {
 //?     .. _unsigned_short_const_bt_dataoff:
 //?     .. c:var:: unsigned short const bt_dataoff
 //?
-//?         Offset of each node's data relative its base address
+//?         Offset of each node's data array relative its base address
 //?
 //?     .. _unsigned_short_const_bt_linkoff:
 //?     .. c:var:: unsigned short const bt_linkoff
