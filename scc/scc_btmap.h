@@ -127,15 +127,15 @@ struct scc_btmnode_base {
 //?
 //?         Address of the root node
 //?
-//?     .. _struct_scc_arena_btm_arena:
-//?     .. c:var:: struct scc_arena btm_arena
-//?
-//?         Node allocator
-//?
 //?     .. _scc_bcompare_btm_compare:
 //?     .. c:var:: scc_bcompare btm_compare
 //?
 //?         Pointer to comparison function
+//?
+//?     .. _struct_scc_arena_btm_arena:
+//?     .. c:var:: struct scc_arena btm_arena
+//?
+//?         Node allocator
 //?
 //?     .. _unsigned_char_btm_fwoff:
 //?     .. c:var:: unsigned char btm_fwoff
@@ -153,8 +153,8 @@ struct scc_btmap_base {
     unsigned short const btm_linkoff;
     size_t btm_size;
     struct scc_btmnode_base *btm_root;
-    struct scc_arena btm_arena;
     scc_bcompare btm_compare;
+    struct scc_arena btm_arena;
     unsigned char btm_fwoff;
     unsigned char btm_data[];
 };
@@ -249,13 +249,13 @@ struct scc_btmap_base {
 //?
 //?         See :ref:`btm_root <struct_scc_btmnode_base_btm_root>`
 //?
-//?     .. c:var:: struct scc_arena btm_arena
-//?
-//?         See :ref:`btm_arena <struct_scc_arena_btm_arena>`
-//?
 //?     .. c:var:: scc_bcompare btm_compare
 //?
 //?         See :ref:`btm_compare <scc_bcompare_btm_compare>`
+//?
+//?     .. c:var:: struct scc_arena btm_arena
+//?
+//?         See :ref:`btm_arena <struct_scc_arena_btm_arena>`
 //?
 //?     .. c:var:: unsigned char btm_fwoff
 //?
@@ -288,8 +288,8 @@ struct scc_btmap_base {
         unsigned short const btm_linkoff;                                                                               \
         size_t btm_size;                                                                                                \
         struct scc_btmnode_base *btm_root;                                                                              \
-        struct scc_arena btm_arena;                                                                                     \
         scc_bcompare btm_compare;                                                                                       \
+        struct scc_arena btm_arena;                                                                                     \
         unsigned char btm_fwoff;                                                                                        \
         unsigned char btm_bkoff;                                                                                        \
         scc_btmap_impl_pair(keytype, valuetype) btm_curr;                                                               \
