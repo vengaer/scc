@@ -293,7 +293,7 @@ static inline void scc_btmnode_replace_value(
 //?     struct scc_btmap_base *restrict base, \
 //?     struct scc_btmnode_base *restrict node, \
 //?     void *restrict kvpair, \
-//?     size_t elemsize, \
+//?     size_t keysize, \
 //?     size_t valsize)
 //?
 //?     Insert the given value in the specified leaf node. The node must
@@ -440,7 +440,7 @@ static inline size_t scc_btmnode_find_linkindex(
 //?     struct scc_btmnode_base *restrict node, \
 //?     struct scc_btmnode_base *p, \
 //?     size_t keysize, \
-//?     size_t elemsize)
+//?     size_t valsize)
 //?
 //?     Split the given node in two, moving keys, values and links
 //?     as required. The given node is kept as the left child of p
@@ -822,6 +822,556 @@ epilogue:
     return inserted;
 }
 
+//? .. c:function:: void scc_btmnode_rotate_right(\
+//?     struct scc_btmap_base *restrict base, struct scc_btmnode_base *restrict node, \
+//?     struct scc_btmnode_base *restrict sibling, struct scc_btmnode_base *restrict p, \
+//?     size_t bound, size_t keysize, size_t valsize)
+//?
+//?     Rotate key-value pair from left sibling through parent and into the given node.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Base address of the ``btmap``
+//?     :param node: Base address of node to be rotated intgo
+//?     :param sibling: Base address of theleft sibling of :code:`node`
+//?     :param p: Base address of the parent node of :code:`node` and :code:`sibling`
+//?     :param bound: The index of :code:`node` of :code:`p`'s link array
+//?     :param keysize: Size of the keys in the map
+//?     :param valsize: Size of the values in the map
+static void scc_btmnode_rotate_right(
+    struct scc_btmap_base *restrict base,
+    struct scc_btmnode_base *restrict node,
+    struct scc_btmnode_base *restrict sibling,
+    struct scc_btmnode_base *restrict p,
+    size_t bound,
+    size_t keysize,
+    size_t valsize
+) {
+    unsigned char *nkeys = scc_btmnode_keys(base, node);
+    unsigned char *nvals = scc_btmnode_vals(base, node);
+
+    unsigned char *pkeyslot = scc_btmnode_key(base, p, bound - 1u, keysize);
+    unsigned char *pvalslot = scc_btmnode_value(base, p, bound - 1u, valsize);
+
+    unsigned char *skeyslot = scc_btmnode_key(base, sibling, sibling->btm_nkeys - 1u, keysize);
+    unsigned char *svalslot = scc_btmnode_value(base, sibling, sibling->btm_nkeys - 1u, valsize);
+
+    memmove(nkeys + keysize, nkeys, node->btm_nkeys * keysize);
+    memmove(nvals + valsize, nvals, node->btm_nkeys * valsize);
+
+    memcpy(nkeys, pkeyslot, keysize);
+    memcpy(nvals, pvalslot, valsize);
+
+    memcpy(pkeyslot, skeyslot, keysize);
+    memcpy(pvalslot, svalslot, valsize);
+
+    struct scc_btmnode_base **nlinks = scc_btmnode_links(base, node);
+    struct scc_btmnode_base *subtree = scc_btmnode_child(base, sibling, sibling->btm_nkeys--);
+
+    memmove(nlinks + 1u, nlinks, ++node->btm_nkeys * sizeof(*nlinks));
+    nlinks[0] = subtree;
+}
+
+//? .. c:function:: void scc_btmnode_rotate_left(\
+//?     struct scc_btmap_base *restrict base, struct scc_btmnode_base *restrict node, \
+//?     struct scc_btmnode_base *restrict sibling, struct scc_btmnode_base *restrict p, \
+//?     size_t bound, size_t keysize, size_t valsize)
+//?
+//?     Rotate value from right sibling through parent and into the given node.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Base address of the ``btmap``
+//?     :param node: Base address of the node to rotated into
+//?     :param sibling: Base address of the right sibling of :code:`node`
+//?     :param p: Base address of the parent node of :code:`node` and :code:`sibling`
+//?     :param bound: The index of :code:`node` in :code:`p`'s link array
+//?     :param keysize: Size of the keys in the map
+//?     :param valsize: Size of the values in the map
+static void scc_btmnode_rotate_left(
+    struct scc_btmap_base *restrict base,
+    struct scc_btmnode_base *restrict node,
+    struct scc_btmnode_base *restrict sibling,
+    struct scc_btmnode_base *restrict p,
+    size_t bound,
+    size_t keysize,
+    size_t valsize
+) {
+    unsigned char *nkeyslot = scc_btmnode_key(base, node, node->btm_nkeys, keysize);
+    unsigned char *nvalslot = scc_btmnode_value(base, node, node->btm_nkeys, valsize);
+
+    unsigned char *pkeyslot = scc_btmnode_key(base, p, bound, keysize);
+    unsigned char *pvalslot = scc_btmnode_value(base, p, bound, valsize);
+
+    unsigned char *skeys = scc_btmnode_keys(base, sibling);
+    unsigned char *svals = scc_btmnode_vals(base, sibling);
+
+    memcpy(nkeyslot, pkeyslot, keysize);
+    memcpy(nvalslot, pvalslot, valsize);
+
+    memcpy(pkeyslot, skeys, keysize);
+    memcpy(pvalslot, svals, valsize);
+
+    struct scc_btmnode_base **nlinks = scc_btmnode_links(base, node);
+    struct scc_btmnode_base **slinks = scc_btmnode_links(base, sibling);
+
+    nlinks[++node->btm_nkeys] = slinks[0];
+    memmove(slinks, slinks + 1u, sibling->btm_nkeys-- * sizeof(*slinks));
+
+    memmove(skeys, skeys + keysize, sibling->btm_nkeys * keysize);
+    memmove(svals, svals + valsize, sibling->btm_nkeys * valsize);
+}
+
+//? .. c:function:: void scc_btmnode_overwrite(\
+//?     struct scc_btmap_base *restrict base, struct scc_btmnode_base *restrict leaf, \
+//?     struct scc_btmnode_base *restrict found, size_t fbound, size_t keysize, \
+//?     size_t valsize, _Bool predecessor)
+//?
+//?    Swap the in-order predecessor or successor with the element at the index
+//?    :code:`fbound`  in the found node
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Base address of the ``btmap``
+//?     :param leaf: Leaf node to copy the predecessor or successor from
+//?     :param found: Internal node whose key-value pair is to be overwritten
+//?     :param fbound: Lower bound of the key-value pair to be overwritten in the
+//?                    internal node
+//?     :param keysize: Size of the keys in the ``btmap``
+//?     :param valsize: Size of the values in the ``btmap``
+//?     :param predecessor: :code:`true` if the key-value pair is to be overwritten
+//?                         with the in-order predecessor. If :code:`false`, the key-value
+//?                         pair is overwritten with the in-order successor
+static inline void scc_btmnode_overwrite(
+    struct scc_btmap_base *restrict base,
+    struct scc_btmnode_base *restrict leaf,
+    struct scc_btmnode_base *restrict found,
+    size_t fbound,
+    size_t keysize,
+    size_t valsize,
+    _Bool predecessor
+) {
+    size_t const idx = predecessor ? leaf->btm_nkeys - 1u : 0u;
+    unsigned char *key = scc_btmnode_key(base, leaf, idx, keysize);
+    unsigned char *value = scc_btmnode_value(base, leaf, idx, valsize);
+    memcpy(scc_btmnode_key(base, found, fbound, keysize), key, keysize);
+    memcpy(scc_btmnode_value(base, found, fbound, valsize), value, valsize);
+    --leaf->btm_nkeys;
+    if(!predecessor) {
+        memmove(key, key + keysize, leaf->btm_nkeys * keysize);
+        memmove(value, value + valsize, leaf->btm_nkeys * valsize);
+    }
+}
+
+//? .. c:function:: void scc_btmnode_merge(\
+//?     struct scc_btmap_base *restrict base, struct scc_btmnode_base *restrict node, \
+//?     struct scc_btmnode_base *restrict sibling, struct scc_btmnode_base *restrict p, \
+//?     size_t bound, size_t keysize, size_t valsize)
+//?
+//?     Generic merging of the given node with its left sibling, leaving parent links
+//?     untouched
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Baser address of the ``btmap``
+//?     :param node: Base address of the node to be rotated into
+//?     :param sibling: Base address of the left sibling of :code:`node`
+//?     :param p: Base address of the parent node of :code:`node` and :code:`sibling`
+//?     :param bound: The index of :code:`node` in :code:`p`'s link array
+//?     :param keysize: Size of the keys in the map
+//?     :param valsize: Size of the values in the map
+//?     :returns: Number of links that were moved left in :code:`p`'s link array
+static size_t scc_btmnode_merge(
+    struct scc_btmap_base *restrict base,
+    struct scc_btmnode_base *restrict node,
+    struct scc_btmnode_base *restrict sibling,
+    struct scc_btmnode_base *restrict p,
+    size_t bound,
+    size_t keysize,
+    size_t valsize
+) {
+    unsigned char *nkeys = scc_btmnode_keys(base, node);
+    unsigned char *nvals = scc_btmnode_vals(base, node);
+
+    unsigned char *skeyslot = scc_btmnode_key(base, sibling, sibling->btm_nkeys, keysize);
+    unsigned char *svalslot = scc_btmnode_value(base, sibling, sibling->btm_nkeys, valsize);
+
+    unsigned char *pkeyslot = scc_btmnode_key(base, p, bound, keysize);
+    unsigned char *pvalslot = scc_btmnode_value(base, p, bound, valsize);
+
+    /* Append key-value pair from parent to left sibling */
+    memcpy(skeyslot, pkeyslot, keysize);
+    memcpy(svalslot, pvalslot, valsize);
+
+    /* Keys and values from node to left sibling */
+    memcpy(skeyslot + keysize, nkeys, node->btm_nkeys * keysize);
+    memcpy(svalslot + valsize, nvals, node->btm_nkeys * valsize);
+
+    struct scc_btmnode_base **nlinks = scc_btmnode_links(base, node);
+    struct scc_btmnode_base **slinks = scc_btmnode_links(base, sibling);
+
+    if(!scc_btmnode_is_leaf(node)) {
+        assert(!scc_btmnode_is_leaf(sibling));
+        memcpy(slinks + sibling->btm_nkeys + 1u, nlinks, (node->btm_nkeys + 1u) * sizeof(*slinks));
+    }
+
+    sibling->btm_nkeys += node->btm_nkeys + 1u;
+    assert(sibling->btm_nkeys < base->btm_order);
+
+    size_t nmov = p->btm_nkeys - bound - 1u;
+    if(nmov) {
+        memmove(pkeyslot, pkeyslot + keysize, nmov * keysize);
+        memmove(pvalslot, pvalslot + valsize, nmov * valsize);
+    }
+    if(!--p->btm_nkeys) {
+        assert(!scc_bits_is_even(base->btm_order) || p == base->btm_root);
+        if(scc_bits_is_even(base->btm_order)) {
+            base->btm_root = sibling;
+        }
+    }
+
+    return nmov;
+}
+
+//? .. c:function:: void scc_btmnode_merge_left_non_preemptive(\
+//?     struct scc_btmap_base *restrict base, struct scc_btmnode_base *restrict node, \
+//?     struct scc_btmnode_base *restrict sibling, struct scc_btmnode_base *restrict p, \
+//?     size_t bound, size_t keysize, size_t valsize)
+//?
+//?     Merge the given node with its left sibling
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Base address of the ``btmap``
+//?     :param node. Base address of node to be rotated into
+//?     :param sibling: Base address ofhte left sibling of :code:`node`
+//?     :param p: Base address of the parent node of :code:`node` and :code:`sibling`
+//?     :param bound: The index of :code:`node` in :code:`p`'s link array
+//?     :param keysize: Size of the keys in the map
+//?     :param valsize: Size of the values in the map
+static inline void scc_btmnode_merge_left_non_preemptive(
+    struct scc_btmap_base *restrict base,
+    struct scc_btmnode_base *restrict node,
+    struct scc_btmnode_base *restrict sibling,
+    struct scc_btmnode_base *restrict p,
+    size_t bound,
+    size_t keysize,
+    size_t valsize
+) {
+    size_t nmov = scc_btmnode_merge(base, node, sibling, p, bound - 1u, keysize, valsize) + 1u;
+    if(bound <= p->btm_nkeys) {
+        struct scc_btmnode_base **plinks = scc_btmnode_links(base, p);
+        memmove(plinks + bound, plinks + bound + 1u, nmov * sizeof(*plinks));
+    }
+    scc_arena_try_free(&base->btm_arena, node);
+}
+
+//? .. c:function:: void scc_btmnode_merge_left_preemptive(\
+//?     struct scc_btmap_base *restrict base, struct scc_btmnode_base *restrict node, \
+//?     struct scc_btmnode_base *restrict sibling, struct scc_btmnode_base *restrict p, \
+//?     size_t bound, size_t keysize, size_t valsize)
+//?
+//?     Merge the given node with its left sibling, freeing the parent node
+//?     if required
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Base address of the ``btmap``
+//?     :param node: Base address of the node to be rotated intoA
+//?     :param sibling: Base address ofhte left sibling of :code:`node`
+//?     :param p: Base address of the parent node of :code:`node` and :code:`sibling`
+//?     :param bound: The index of :code:`node` in :code:`p`'s link array
+//?     :param keysize: Size of the keys in the map
+//?     :param valsize: Size of the values in the map
+static inline void scc_btmnode_merge_left_preemptive(
+    struct scc_btmap_base *restrict base,
+    struct scc_btmnode_base *restrict node,
+    struct scc_btmnode_base *restrict sibling,
+    struct scc_btmnode_base *restrict p,
+    size_t bound,
+    size_t keysize,
+    size_t valsize
+) {
+    scc_btmnode_merge_left_non_preemptive(base, node, sibling, p, bound, keysize, valsize);
+    if(!p->btm_nkeys) {
+        scc_arena_try_free(&base->btm_arena, p);
+    }
+}
+
+//? .. c:function:: void scc_btmnode_base_right_non_preemptive(\
+//?     struct scc_btmap_base *restrict base, struct scc_btmnode_base *restrict node, \
+//?     struct scc_btmnode_base *restrict sibling, struct scc_btmnode_base *restrict p, \
+//?     size_t bound, size_t keypsize, size_t valsize)
+//?
+//?     Merge the given node with its right sibling
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Base address of the ``btmap``
+//?     :param node: Base address of the node to be rotated into
+//?     :param sibling: Base address of the right sibling of :code:`node`
+//?     :param p: Base address of the parent node of :code:`node` and :code:`sibling`
+//?     :param bound: The index of :code:`node` in :code:`p`'s link array
+//?     :param keysize: Size of the keys in the map
+//?     :param valsize: Size of the values in the map
+static inline void scc_btmnode_merge_right_non_preemptive(
+    struct scc_btmap_base *restrict base,
+    struct scc_btmnode_base *restrict node,
+    struct scc_btmnode_base *restrict sibling,
+    struct scc_btmnode_base *restrict p,
+    size_t bound,
+    size_t keysize,
+    size_t valsize
+) {
+    size_t nmov = scc_btmnode_merge(base, sibling, node, p, bound, keysize, valsize);
+    if(p->btm_nkeys) {
+        struct scc_btmnode_base **plinks = scc_btmnode_links(base, p);
+        memmove(plinks + bound + 1u, plinks + bound + 2u, nmov * sizeof(*plinks));
+    }
+    scc_arena_try_free(&base->btm_arena, sibling);
+}
+
+//? .. c:function:: void scc_btmnode_merge_right_preemptive(\
+//?     struct scc_btmap_base *restrict base, struct scc_btmnode_base *restrict node, \
+//?     struct scc_btmnode_base *restrict sibling, struct scc_btmnode_base *restrict p, \
+//?     size_t bound, size_t keysize, size_t valsize)
+//?
+//?     Merge the given node with its right sibling, freeing the parent node as required
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Base address of the ``btmap``
+//?     :param node: Base address of the node to be rotated into
+//?     :param sibling: Base address of the right sibling of :code:`node`
+//?     :param p: Base address of the parent node of :code:`node` and :code:`sibling`
+//?     :param bound: The index of :code:`node` in :code:`p`'s link array
+//?     :param keysize: Size of the keys in the ``btmap``
+//?     :param valsize: Size of the values stored in the ``btmap``
+static inline void scc_btmnode_merge_right_preemptive(
+    struct scc_btmap_base *restrict base,
+    struct scc_btmnode_base *restrict node,
+    struct scc_btmnode_base *restrict sibling,
+    struct scc_btmnode_base *restrict p,
+    size_t bound,
+    size_t keysize,
+    size_t valsize
+) {
+    scc_btmnode_merge_right_non_preemptive(base, node, sibling, p, bound, keysize, valsize);
+    if(!p->btm_nkeys) {
+        scc_arena_try_free(&base->btm_arena, p);
+    }
+}
+
+//? .. c:function:: void scc_btmap_balance_preemptive(\
+//?     struct scc_btmap_base *restrict base, struct scc_btmnode_base *restrict next, \
+//?     struct scc_btmnode_base *restrict curr, size_t bound, size_t keysize, size_t valsize)
+//?
+//?     Balance ``btmap`` for preemptive removal
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Base address of the ``btmap``
+//?     :param next: The next node to traverse
+//?     :param curr: The current node being traversed. Parent of :code:`next`
+//?     :param bound: Index of :code:`next` in the link array of :code:`curr`
+//?     :param keysize: Size of the keys in the map
+//?     :param valsize: Size of the values in the map
+static struct scc_btmnode_base *scc_btmap_balance_preemptive(
+    struct scc_btmap_base *restrict base,
+    struct scc_btmnode_base *restrict next,
+    struct scc_btmnode_base *restrict curr,
+    size_t bound,
+    size_t keysize,
+    size_t valsize
+) {
+    size_t const borrow_lim = base->btm_order >> 1u;
+
+    struct scc_btmnode_base *sibling = 0;
+    if(bound) {
+        sibling = scc_btmnode_child(base, curr, bound - 1u);
+        if(sibling->btm_nkeys >= borrow_lim) {
+            scc_btmnode_rotate_right(base, next, sibling, curr, bound, keysize, valsize);
+            return next;
+        }
+    }
+
+    if(bound < curr->btm_nkeys) {
+        sibling = scc_btmnode_child(base, curr, bound + 1u);
+        if(sibling->btm_nkeys >= borrow_lim) {
+            scc_btmnode_rotate_left(base, next, sibling, curr, bound, keysize, valsize);
+        }
+        else {
+            scc_btmnode_merge_right_preemptive(base, next, sibling, curr, bound, keysize, valsize);
+        }
+        return next;
+    }
+
+    assert(sibling);
+    scc_btmnode_merge_left_preemptive(base, next, sibling, curr, bound, keysize, valsize);
+    return sibling;
+}
+
+//? .. c:function:: void scc_btmnode_remove_leaf(\
+//?     struct scc_btmap_base *restrict base, struct scc_btmnode_base *restrict node, \
+//?     size_t bound, size_t keysize, size_t valsize)
+//?
+//?     Remove the key-value pair at the specified index from the given leaf node. The node must
+//?     contain at least 2 keys-value pairs
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Base address of the ``btmap``
+//?     :param node: Leaf node from which the key-value pair is to be removed
+//?     :param index: Index of the value to be removed
+//?     :param keysize: Size of the keys in the map
+//?     :param valsize: Size of the values in the map
+static inline void scc_btmnode_remove_leaf(
+    struct scc_btmap_base *restrict base,
+    struct scc_btmnode_base *restrict node,
+    size_t index,
+    size_t keysize,
+    size_t valsize
+) {
+    assert(!scc_bits_is_even(base->btm_order) || node->btm_nkeys > 1u || node == base->btm_root);
+
+    size_t nmov = node->btm_nkeys - index - 1u;
+    --node->btm_nkeys;
+    if(!nmov) {
+        return;
+    }
+
+    unsigned char *key = scc_btmnode_key(base, node, index, keysize);
+    unsigned char *val = scc_btmnode_value(base, node, index, valsize);
+
+    memmove(key, key + keysize, nmov * keysize);
+    memmove(val, val + valsize, nmov * valsize);
+}
+
+//? .. c:function:: _Bool scc_btmap_remove_preemptive(\
+//?     struct scc_btmap_base *restrict base, void *restrict btmap, size_t keysize, size_t valsize)
+//?
+//?     Find and remove the value stored in the :code:`btm_curr` field using preemptive
+//?     merging
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Base address of the ``btmap``
+//?     :param btmap: ``btmap`` handle
+//?     :param keysize: Size of the keys stored in the ``btmap``
+//?     :param valsize: Size of the values stored in the ``btmap``
+//?     :returns: :code:`true` if the key-value pair vwas removed, :code:`false` if the
+//?               key was not found
+static _Bool scc_btmap_remove_preemptive(
+    struct scc_btmap_base *restrict base,
+    void *restrict btmap,
+    size_t keysize,
+    size_t valsize
+) {
+    size_t const borrow_lim = base->btm_order >> 1u;
+    _Bool swap_pred = true;
+
+    size_t fbound;
+    struct scc_btmnode_base *found = 0;
+
+    struct scc_btmnode_base *curr = base->btm_root;
+
+    size_t bound;
+    unsigned char *key;
+    struct scc_btmnode_base *next;
+
+    while(1) {
+        if(!found) {
+            bound = scc_btmnode_lower_bound(base, curr, btmap, keysize);
+        }
+        else if(found == curr) {
+            bound = fbound;
+        }
+        else {
+            bound = swap_pred * curr->btm_nkeys;
+        }
+
+        next = scc_btmnode_child(base, curr, bound & BOUND_MASK);
+        key = scc_btmnode_key(base, curr, bound & BOUND_MASK, keysize);
+
+        if(!found && scc_btmnode_keyeq(bound)) {
+            bound &= BOUND_MASK;
+            fbound = bound;
+            found = curr;
+            if(scc_btmnode_is_leaf(curr)) {
+                break;
+            }
+
+            if(next->btm_nkeys < borrow_lim && bound < curr->btm_nkeys) {
+                struct scc_btmnode_base *right = scc_btmnode_child(base, curr, bound + 1u);
+                if(right->btm_nkeys >= borrow_lim) {
+                    next = right;
+                    swap_pred = false;
+                }
+                else {
+                    scc_btmnode_merge_right_preemptive(base, next, right, curr, bound, keysize, valsize);
+                    found = next;
+                    fbound = scc_btmnode_lower_bound(base, found, btmap, keysize);
+                    assert(!scc_btmnode_keyeq(fbound));
+                }
+            }
+        }
+        else if(scc_btmnode_is_leaf(curr)) {
+            break;
+        }
+        else if(next->btm_nkeys < borrow_lim) {
+            next = scc_btmap_balance_preemptive(base, next, curr, bound, keysize, valsize);
+            /* Found key may be rotated into next node when balancing. If it is,
+             * the key is always in the next node */
+            if(curr == found) {
+                key = scc_btmnode_key(base, found, fbound, keysize);
+                if(found->btm_nkeys <= fbound || base->btm_compare(key, btmap)) {
+                    found = next;
+                    fbound = scc_btmnode_lower_bound(base, found, btmap, keysize);
+                    assert(!scc_btmnode_keyeq(fbound));
+                }
+            }
+        }
+
+        curr = next;
+    }
+
+    if(!found) {
+        return false;
+    }
+
+    if(scc_btmnode_is_leaf(found)) {
+        scc_btmnode_remove_leaf(base, found, fbound, keysize, valsize);
+    }
+    else {
+        scc_btmnode_overwrite(base, curr, found, fbound, keysize, valsize, swap_pred);
+    }
+
+    --base->btm_size;
+    return true;
+}
+
 void scc_btmap_free(void *btmap) {
     struct scc_btmap_base *base = scc_btmap_impl_base(btmap);
     scc_arena_release(&base->btm_arena);
@@ -867,4 +1417,12 @@ void *scc_btmap_impl_find(void *btmap, size_t keysize, size_t valsize) {
     }
 
     return 0;
+}
+
+_Bool scc_btmap_impl_remove(void *btmap, size_t keysize, size_t valsize) {
+    struct scc_btmap_base *base = scc_btmap_impl_base(btmap);
+    if(scc_bits_is_even(base->btm_order)) {
+        return scc_btmap_remove_preemptive(base, btmap, keysize, valsize);
+    }
+    return false;
 }

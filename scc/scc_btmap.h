@@ -598,4 +598,42 @@ void *scc_btmap_impl_find(void *btmap, size_t keysize, size_t valsize);
         sizeof((btmap)->btm_value)                                                                      \
     )
 
+//? .. c:function:: _Bool scc_btmap_impl_remove(void *btmap, size_t keysize, size_t valsize)
+//?
+//?     Internal removal function. Attempts to find and remove the key-value pair
+//?     identified by the key stored in the :code:`btm_curr` field.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param btmap: Handle to the ``btmap``
+//?     :param keysize: Size of the keys in the map
+//?     :param valsize: Size of the values in the map
+//?     :returns: :code:`true` if the key in :code:`btm_curr` field was found
+//?               and successfully removed. :code:`false` if no such key
+//?               is found in the map
+_Bool scc_btmap_impl_remove(void *btmap, size_t keysize, size_t valsize);
+
+//! .. c:function:: _Bool scc_btmap_remove(void btmap, ketype key)
+//!
+//!     Find and remove the key-value pair identified by the supplied key.
+//!
+//!     The :code:`key` parameter must not necessarily be the same type as the
+//!     one with which the ``btmap`` was instantiated. If it is not, the key
+//!     is implicitly converted to the type stored in the map.
+//!
+//!     :param btmap: B-treemap handle
+//!     :param key: The key identifying the key-value pair to remove
+//!     :returns: :code:`true` if the value was removed, :code:`false` if the
+//!               key was not found in the map
+#define scc_btmap_remove(btmap, key)                                                                    \
+    scc_btmap_impl_remove((                                                                             \
+            ((btmap)->btm_key = (key)), (btmap)                                                         \
+        ),                                                                                              \
+        sizeof((btmap)->btm_key),                                                                       \
+        sizeof((btmap)->btm_value)                                                                      \
+    )
+
+
 #endif /* SCC_BTMAP_H */

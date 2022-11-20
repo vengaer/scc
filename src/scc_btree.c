@@ -724,11 +724,12 @@ static void scc_btnode_rotate_left(
 //?         Internal use only
 //?
 //?     :param base: B-tree base address
-//?     :param node: Base address of node to be rotated into
+//?     :param node: Base address of the node to be rotated into
 //?     :param sibling: Base address of the left sibling of :code:`node`
 //?     :param p: Base address of the parent node of :code:`node` and :code:`sibling`
 //?     :param bound: The index of :code:`node` in :code:`p`'s link array
 //?     :param elemsize: Size of the elements in the B-tree
+//?     :returns: Number of links that were moved left in :code:`p`'s link array
 static size_t scc_btnode_merge(
     struct scc_btree_base *restrict base,
     struct scc_btnode_base *restrict node,
@@ -813,7 +814,7 @@ static inline void scc_btnode_merge_left_non_preemptive(
 //?         Internal use only
 //?
 //?     :param base: B-tree base address
-//?     :param node: Base address of node to be rotated into
+//?     :param node: Base address of the node to be rotated into
 //?     :param sibling: Base address of the left sibling of :code:`node`
 //?     :param p: Base address of the parent node of :code:`node` and :code:`sibling`
 //?     :param bound: The index of :code:`node` in :code:`p`'s link array
@@ -948,7 +949,7 @@ static struct scc_btnode_base *scc_btree_balance_preemptive(
 
 //? .. c:function:: void scc_btnode_remove_leaf(\
 //?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, \
-//?     size_t bound, size_t elemsize)
+//?     size_t index, size_t elemsize)
 //?
 //?     Remove the value at the specified index from the given leaf node. The node must
 //?     contains at least 2 keys
