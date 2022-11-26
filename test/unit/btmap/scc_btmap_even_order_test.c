@@ -70,3 +70,15 @@ void test_scc_btmap_insert_default_order(void) {
 
     scc_btmap_free(btmap);
 }
+
+void test_scc_btmap_insert_order_500(void) {
+    enum { TEST_SIZE = 6400 };
+    scc_btmap(int, int) btmap = scc_btmap_with_order(int, int, compare, 500);
+    for(int i = TEST_SIZE; i >= 0; --i) {
+        TEST_ASSERT_TRUE(scc_btmap_insert(&btmap, i, i << 1));
+        TEST_ASSERT_EQUAL_UINT64((TEST_SIZE - i) + 1ull, scc_btmap_size(btmap));
+        TEST_ASSERT_EQUAL_UINT32(0u, scc_btmap_inspect_invariants(btmap));
+    }
+    scc_btmap_free(btmap);
+}
+
