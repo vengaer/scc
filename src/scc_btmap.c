@@ -1372,9 +1372,173 @@ static _Bool scc_btmap_remove_preemptive(
     return true;
 }
 
-void scc_btmap_free(void *btmap) {
-    struct scc_btmap_base *base = scc_btmap_impl_base(btmap);
-    scc_arena_release(&base->btm_arena);
+//? .. c:function:: void scc_btmap_balance_non_preemptive(\
+//?     struct scc_btmap_base *rewstrict base, struct scc_btmnode_base *restrict curr, \
+//?     struct scc_btmnode_base **restrict nodes, size_t bounds, size_t keysize, size_t valsize)
+//?
+//?     Traverse the tree back towards the root, balancing as needed
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Base address of the ``btmap``
+//?     :param curr: Leaf node in which to start the traversal
+//?     :param nodes: Stack of nodes traversed while finding the leaf
+//?     :param bounds: Stack of bounds computed while finding ht eleaf. The
+//?                    nth bound in the stack is the index of the link in the
+//?                    nth node to obtain the n+1th node
+//?     :param keysize: Size of the keys in the map
+//?     :param valsize: Size of the values in the map
+static void scc_btmap_balance_non_preemptive(
+    struct scc_btmap_base *restrict base,
+    struct scc_btmnode_base *restrict curr,
+    scc_stack(struct scc_btmnode_base *) nodes,
+    scc_stack(size_t) bounds,
+    size_t keysize,
+    size_t valsize
+) {
+    assert(scc_stack_size(nodes) == scc_stack_size(bounds));
+
+    size_t const borrow_lim = (base->btm_order >> 1u) + 1u;
+    struct scc_btmnode_base *sibling = 0;
+    struct scc_btmnode_base *child;
+    size_t bound;
+
+    while(1) {
+        child = curr;
+        curr = scc_stack_top(nodes);
+        bound = scc_stack_top(bounds);
+
+        if(bound) {
+            sibling = scc_btmnode_child(base, curr, bound - 1u);
+            if(sibling->btm_nkeys >= borrow_lim) {
+                scc_btmnode_rotate_left(base, child, sibling, curr, bound, keysize, valsize);
+                continue;
+            }
+            scc_btmnode_merge_right_non_preemptive(base, child, sibling, curr, bound, keysize, valsize);
+            continue;
+        }
+
+        assert(sibling);
+        scc_btmnode_merge_left_non_preemptive(base, child, sibling, curr, bound, keysize, valsize);
+    }
+
+    if(!base->btm_root->btm_nkeys) {
+        child = *scc_btmnode_links(base, base->btm_root);
+        scc_arena_try_free(&base->btm_arena, base->btm_root);
+        base->btm_root = child;
+    }
+}
+
+//? .. c:function:: _Bool scc_btmap_remove_non_preemptive(\
+//?     struct scc_btmap_base *restrict base, void *restrict btmap, size_t keysize, size_t valsize)
+//?
+//?     Find and remove the key-value pair identified by the key in the :ref:`btm_curr <kvpair_btm_curr>`
+//?     field using non-preemptive merging
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Base address of the ``btmap``
+//?     :param btmap: ``btmap`` handle
+//?     :param keysize: Size of the keys in the map
+//?     :param valsize: Size of the values in the map
+//?     :returns: :code:`true` if the key-value pair was removed, :code:`false` if the
+//?               key was not found
+static _Bool scc_btmap_remove_non_preemptive(
+    struct scc_btmap_base *restrict base,
+    void *restrict btmap,
+    size_t keysize,
+    size_t valsize
+) {
+    size_t const borrow_lim = (base->btm_order >> 1u) + 1u;
+    size_t const origsz = base->btm_size;
+
+    _Bool swap_pred = true;
+
+    scc_stack(struct scc_btmnode_base *) nodes = scc_stack_new(struct scc_btmnode_base *);
+    scc_stack(size_t) bounds = scc_stack_new(size_t);
+
+    struct scc_btmnode_base *found = 0;
+    size_t fbound;
+
+    size_t bound;
+
+    struct scc_btmnode_base *curr = base->btm_root;
+    struct scc_btmnode_base *next;
+
+    /* Root has parent NULL */
+    if(!scc_stack_push(&nodes, 0) || !scc_stack_push(&bounds, 0)) {
+        goto epilogue;
+    }
+
+    _Bool keyeq = false;
+
+    while(1) {
+        if(!found) {
+            bound = scc_btmnode_lower_bound(base, curr, btmap, keysize);
+        }
+        else {
+            bound = swap_pred * curr->btm_nkeys;
+        }
+
+        next = scc_btmnode_child(base, curr, bound);
+        keyeq = scc_btmnode_keyeq(bound);
+        bound &= BOUND_MASK;
+
+        if(keyeq) {
+            assert(!found);
+            found = curr;
+            fbound = bound;
+
+            if(scc_btmnode_is_leaf(curr)) {
+                break;
+            }
+
+            if(next->btm_nkeys < borrow_lim && bound < curr->btm_nkeys) {
+                struct scc_btmnode_base *right = scc_btmnode_child(base, curr, bound + 1u);
+                if(right->btm_nkeys >= borrow_lim) {
+                    ++bound;
+                    next = right;
+                    swap_pred = false;
+                }
+            }
+        }
+
+        if(scc_btmnode_is_leaf(curr)) {
+            break;
+        }
+
+        if(scc_btmnode_is_leaf(curr)) {
+            break;
+        }
+
+        if(!scc_stack_push(&nodes, curr) || !scc_stack_push(&bounds, bound)) {
+            goto epilogue;
+        }
+        curr = next;
+    }
+
+    if(!found) {
+        goto epilogue;
+    }
+
+    if(scc_btmnode_is_leaf(found)) {
+        scc_btmnode_remove_leaf(base, found, fbound, keysize, valsize);
+    }
+    --base->btm_size;
+
+    if(base->btm_size) {
+        scc_btmap_balance_non_preemptive(base, curr, nodes, bounds, keysize, valsize);
+    }
+
+epilogue:
+    scc_stack_free(nodes);
+    scc_stack_free(bounds);
+
+    return base->btm_size < origsz;
 }
 
 void *scc_btmap_impl_new(void *base, size_t coff, size_t rootoff) {
@@ -1387,6 +1551,11 @@ void *scc_btmap_impl_new(void *base, size_t coff, size_t rootoff) {
     scc_btmap_set_bkoff(btmap, fwoff);
     return btmap;
 #undef base
+}
+
+void scc_btmap_free(void *btmap) {
+    struct scc_btmap_base *base = scc_btmap_impl_base(btmap);
+    scc_arena_release(&base->btm_arena);
 }
 
 _Bool scc_btmap_impl_insert(void *btmapaddr, size_t keysize, size_t valsize) {
@@ -1424,5 +1593,5 @@ _Bool scc_btmap_impl_remove(void *btmap, size_t keysize, size_t valsize) {
     if(scc_bits_is_even(base->btm_order)) {
         return scc_btmap_remove_preemptive(base, btmap, keysize, valsize);
     }
-    return false;
+    return scc_btmap_remove_non_preemptive(base, btmap, keysize, valsize);
 }
