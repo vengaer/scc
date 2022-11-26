@@ -512,8 +512,8 @@ static struct scc_btmnode_base *scc_btmnode_split_preemptive(
         memmove(pvals + (bound + 1u) * valsize, pvals + bound * valsize, (p->btm_nkeys - bound) * valsize);
         memmove(plinks + bound + 1u, plinks + bound, (p->btm_nkeys - bound + 1u) * sizeof(*plinks));
     }
-    memcpy(pkeys + bound * keysize, lkeys + node->btm_nkeys + keysize, keysize);
-    memcpy(pvals + bound * valsize, lvals + node->btm_nkeys + valsize, valsize);
+    memcpy(pkeys + bound * keysize, lkeys + node->btm_nkeys * keysize, keysize);
+    memcpy(pvals + bound * valsize, lvals + node->btm_nkeys * valsize, valsize);
     plinks[bound + 1u] = right;
     ++p->btm_nkeys;
 
