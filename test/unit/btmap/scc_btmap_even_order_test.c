@@ -82,3 +82,25 @@ void test_scc_btmap_insert_order_500(void) {
     scc_btmap_free(btmap);
 }
 
+void test_scc_btmap_insert_overwrite(void) {
+    enum { TEST_SIZE = 3200 };
+    int keys[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    scc_btmap(int, int) btmap = scc_btmap_with_order(int, int, compare, 32);
+
+    size_t expsize;
+    int *val;
+    for(int i = 0; i < TEST_SIZE; ++i) {
+        TEST_ASSERT_TRUE(scc_btmap_insert(&btmap, keys[i % scc_arrsize(keys)], i));
+        expsize = i >= (int)scc_arrsize(keys) ? scc_arrsize(keys) : i + 1ull;
+        TEST_ASSERT_EQUAL_UINT64(expsize, scc_btmap_size(btmap));
+        TEST_ASSERT_EQUAL_UINT32(0u, scc_btmap_inspect_invariants(btmap));
+
+        for(int j = i; j > 0 && j > i - (int)scc_arrsize(keys); --j) {
+            val = scc_btmap_find(btmap, j % scc_arrsize(keys));
+            TEST_ASSERT_TRUE(val);
+            TEST_ASSERT_EQUAL_INT32(j, *val);
+        }
+    }
+
+    scc_btmap_free(btmap);
+}
