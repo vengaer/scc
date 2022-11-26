@@ -1125,7 +1125,7 @@ static _Bool scc_btree_remove_preemptive(struct scc_btree_base *restrict base, v
 //?     :param base: B-tree base address
 //?     :param curr: Leaf node in which to start the traversal
 //?     :param nodes: Stack of nodes traversed while finding the leaf
-//?     :param bounds: Stack of bounds computed whilefinding the leaf. The
+//?     :param bounds: Stack of bounds computed while finding the leaf. The
 //?                    nth bound in the stack is the index of the link in the
 //?                    nth node to obtain the n+1th node
 //?     :param elemsize: Size of the elements in the B-tree
