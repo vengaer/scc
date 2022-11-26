@@ -36,3 +36,9 @@ void test_scc_btmap_insert_replace(void) {
 
     scc_btmap_free(btmap);
 }
+
+void test_scc_btmap_size_empty(void) {
+    scc_btmap(int, int) btmap = scc_btmap_new(int, int, compare);
+    TEST_ASSERT_EQUAL_UINT64(0ull, scc_btmap_size(btmap));
+    scc_btmap_free(btmap);
+}
