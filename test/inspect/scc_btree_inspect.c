@@ -75,7 +75,7 @@ scc_inspect_mask scc_btree_impl_inspect_invariants(void const *btree, size_t ele
                 }
             }
 
-            if(++ctx->idx >= ctx->node->bt_nkeys) {
+            if(ctx->idx++ >= ctx->node->bt_nkeys) {
                 scc_stack_pop(stack);
                 --depth;
             }
