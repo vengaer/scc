@@ -117,6 +117,16 @@ struct scc_btmnode_base {
 //?
 //?         Offset of echo node's array of link pointers
 //?
+//?     .. _unsigned_short_const_btm_keysize:
+//?     .. c:var:: unsigned short const btm_keysize
+//?
+//?         Size of the keys in the ``btmap``
+//?
+//?     .. _unsigned_short_const_btm_valsize:
+//?     .. c:var:: unsigned short const btm_valsize
+//?
+//?         Size of the values in the ``btmap``
+//?
 //?     .. _size_t_btm_size:
 //?     .. c:var:: size_t btm_size
 //?
@@ -157,6 +167,8 @@ struct scc_btmap_base {
     unsigned short const btm_keyoff;
     unsigned short const btm_valoff;
     unsigned short const btm_linkoff;
+    unsigned short const btm_keysize;
+    unsigned short const btm_valsize;
     size_t btm_size;
     struct scc_btmnode_base *btm_root;
     scc_bcompare btm_compare;
@@ -248,6 +260,14 @@ struct scc_btmap_base {
 //?
 //?         See :ref:`btm_linkoff <unsigned_short_const_btm_linkoff>`
 //?
+//?     .. c:var:: unsigned short const btm_keysize
+//?
+//?         See :ref:`btm_keysize <unsigned_short_const_btm_keysize>`
+//?
+//?     .. c:var:: unsigned short const btm_valsize
+//?
+//?         See :ref:`btm_valsize <unsigned_short_const_btm_valsize>`
+//?
 //?     .. c:var:: size_t btm_size
 //?
 //?         See :ref:`btm_size <size_t_btm_size>`
@@ -297,6 +317,8 @@ struct scc_btmap_base {
         unsigned short const btm_keyoff;                                                                                \
         unsigned short const btm_valoff;                                                                                \
         unsigned short const btm_linkoff;                                                                               \
+        unsigned short const btm_keysize;                                                                               \
+        unsigned short const btm_valsize;                                                                               \
         size_t btm_size;                                                                                                \
         struct scc_btmnode_base *btm_root;                                                                              \
         scc_bcompare btm_compare;                                                                                       \
@@ -330,6 +352,8 @@ struct scc_btmap_base {
             .btm_keyoff = offsetof(scc_btmnode_impl_layout(keytype, valuetype, order), btm_keys),                       \
             .btm_valoff = offsetof(scc_btmnode_impl_layout(keytype, valuetype, order), btm_vals),                       \
             .btm_linkoff = offsetof(scc_btmnode_impl_layout(keytype, valuetype, order), btm_links),                     \
+            .btm_keysize = sizeof(keytype),                                                                             \
+            .btm_valsize = sizeof(valuetype),                                                                           \
             .btm_arena = scc_arena_new(scc_btmnode_impl_layout(keytype, valuetype, order)),                             \
             .btm_compare = compare,                                                                                     \
             .btm_kvoff = offsetof(scc_btmap_impl_pair(keytype, valuetype), btm_value)                                   \
@@ -361,6 +385,8 @@ struct scc_btmap_base {
             .btm_keyoff = offsetof(scc_btmnode_impl_layout(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER), btm_keys),     \
             .btm_valoff = offsetof(scc_btmnode_impl_layout(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER), btm_vals),     \
             .btm_linkoff = offsetof(scc_btmnode_impl_layout(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER), btm_links),   \
+            .btm_keysize = sizeof(keytype),                                                                             \
+            .btm_valsize = sizeof(valuetype),                                                                           \
             .btm_arena = scc_arena_new(scc_btmnode_impl_layout(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER)),           \
             .btm_compare = compare,                                                                                     \
             .btm_kvoff = offsetof(scc_btmap_impl_pair(keytype, valuetype), btm_value)                                   \
@@ -490,7 +516,7 @@ inline size_t scc_btmap_size(void const *btmap) {
     return base->btm_size;
 }
 
-//? .. c:function:: _Bool scc_btmap_impl_insert(void *btmapaddr, size_t elemsize)
+//? .. c:function:: _Bool scc_btmap_impl_insert(void *btmapaddr)
 //?
 //?     Internal insertion function. Attempt to insert the value stored at
 //?     :c:texpr:`*(void **)btmapaddr` in the map.
@@ -500,12 +526,10 @@ inline size_t scc_btmap_size(void const *btmap) {
 //?         Internal use only
 //?
 //?     :param btmapaddr: Address of the B-treemap handle
-//?     :param keysize: Size of the elements stored in the map
-//?     :param valsize: Size of the values stored in the map
 //?     :returns: A :code:`_Bool` indicating whether insertion took place
 //?     :retval true: Insertion successful
 //?     :retval false: The value was already in the map, or allocation failure
-_Bool scc_btmap_impl_insert(void *btmapaddr, size_t keysize, size_t valsize);
+_Bool scc_btmap_impl_insert(void *btmapaddr);
 
 //! .. c:function:: _Bool scc_btmap_insert(void *btmapaddr, keytype key, valuetype value)
 //!
@@ -554,12 +578,10 @@ _Bool scc_btmap_impl_insert(void *btmapaddr, size_t keysize, size_t valsize);
             (*(btmapaddr))->btm_key = (key),                                                            \
             (*(btmapaddr))->btm_value = (value),                                                        \
             (btmapaddr)                                                                                 \
-        ),                                                                                              \
-        sizeof((*(btmapaddr))->btm_key),                                                                \
-        sizeof((*(btmapaddr))->btm_value)                                                               \
+        )                                                                                               \
     )
 
-//? .. c:function:: void *scc_btmap_impl_find(void *btmap, size_t keysize, size_t valsize)
+//? .. c:function:: void *scc_btmap_impl_find(void *btmap)
 //?
 //?     Internal search function. Attempts to located the key stored at :code:`btmap`
 //?     in the tree and, if found, return it's corresponding value
@@ -569,12 +591,10 @@ _Bool scc_btmap_impl_insert(void *btmapaddr, size_t keysize, size_t valsize);
 //?         Internal use only
 //?
 //?     :param btmap: Handle to the btmap
-//?     :param keysize: Size of the keys in the map
-//?     :param valsize: Size of the values in the map
 //?     :returns: An unqualified pointer to the value corresponding to the
 //?               key stored at :code:`btmap`, or :code:`NULL` if the key
 //?               is not found in the map
-void *scc_btmap_impl_find(void *btmap, size_t keysize, size_t valsize);
+void *scc_btmap_impl_find(void *btmap);
 
 //! .. c:function:: void *scc_btmap_find(void *btmap, keytype key)
 //!
@@ -593,12 +613,10 @@ void *scc_btmap_impl_find(void *btmap, size_t keysize, size_t valsize);
 #define scc_btmap_find(btmap, key)                                                                      \
     scc_btmap_impl_find((                                                                               \
             ((btmap)->btm_key = (key)), (btmap)                                                         \
-        ),                                                                                              \
-        sizeof((btmap)->btm_key),                                                                       \
-        sizeof((btmap)->btm_value)                                                                      \
+        )                                                                                               \
     )
 
-//? .. c:function:: _Bool scc_btmap_impl_remove(void *btmap, size_t keysize, size_t valsize)
+//? .. c:function:: _Bool scc_btmap_impl_remove(void *btmap)
 //?
 //?     Internal removal function. Attempts to find and remove the key-value pair
 //?     identified by the key stored in the :code:`btm_curr` field.
@@ -608,12 +626,10 @@ void *scc_btmap_impl_find(void *btmap, size_t keysize, size_t valsize);
 //?         Internal use only
 //?
 //?     :param btmap: Handle to the ``btmap``
-//?     :param keysize: Size of the keys in the map
-//?     :param valsize: Size of the values in the map
 //?     :returns: :code:`true` if the key in :code:`btm_curr` field was found
 //?               and successfully removed. :code:`false` if no such key
 //?               is found in the map
-_Bool scc_btmap_impl_remove(void *btmap, size_t keysize, size_t valsize);
+_Bool scc_btmap_impl_remove(void *btmap);
 
 //! .. c:function:: _Bool scc_btmap_remove(void btmap, ketype key)
 //!
@@ -630,9 +646,7 @@ _Bool scc_btmap_impl_remove(void *btmap, size_t keysize, size_t valsize);
 #define scc_btmap_remove(btmap, key)                                                                    \
     scc_btmap_impl_remove((                                                                             \
             ((btmap)->btm_key = (key)), (btmap)                                                         \
-        ),                                                                                              \
-        sizeof((btmap)->btm_key),                                                                       \
-        sizeof((btmap)->btm_value)                                                                      \
+        )                                                                                               \
     )
 
 
