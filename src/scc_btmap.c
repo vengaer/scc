@@ -117,7 +117,6 @@ static inline void *scc_btmnode_key(
     size_t n,
     size_t keysize
 ) {
-    assert(n < node->btm_nkeys);
     return ((unsigned char *)scc_btmnode_keys(base, node)) + n * keysize;
 }
 
@@ -157,7 +156,6 @@ static inline void *scc_btmnode_value(
     size_t n,
     size_t valsize
 ) {
-    assert(n < node->btm_nkeys);
     return ((unsigned char *)scc_btmnode_vals(base, node)) + n * valsize;
 }
 
