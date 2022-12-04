@@ -1408,8 +1408,23 @@ static void scc_btmap_balance_non_preemptive(
         curr = scc_stack_top(nodes);
         bound = scc_stack_top(bounds);
 
+        if(!curr || child->btm_nkeys >= borrow_lim - 1u) {
+            break;
+        }
+
+        scc_stack_pop(nodes);
+        scc_stack_pop(bounds);
+
         if(bound) {
             sibling = scc_btmnode_child(base, curr, bound - 1u);
+            if(sibling->btm_nkeys >= borrow_lim) {
+                scc_btmnode_rotate_right(base, child, sibling ,curr, bound, keysize, valsize);
+                continue;
+            }
+        }
+
+        if(bound < curr->btm_nkeys) {
+            sibling = scc_btmnode_child(base, curr, bound + 1u);
             if(sibling->btm_nkeys >= borrow_lim) {
                 scc_btmnode_rotate_left(base, child, sibling, curr, bound, keysize, valsize);
                 continue;
