@@ -5,6 +5,8 @@ COPY . /scc
 WORKDIR /scc
 
 RUN useradd -m builder                                                  &&  \
+    pacman-key --init                                                   &&  \
+    pacman -Sy --noconfirm archlinux-keyring                            &&  \
     pacman -Syu --noconfirm --needed make                                   \
                                      clang                                  \
                                      gcc                                    \
