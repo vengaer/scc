@@ -82,7 +82,7 @@ void test_scc_btmap_insert_order_500(void) {
     scc_btmap_free(btmap);
 }
 
-void test_scc_btmap_insert_overwrite(void) {
+void test_scc_btmap_even_insert_overwrite(void) {
     enum { TEST_SIZE = 3200 };
     int keys[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     scc_btmap(int, int) btmap = scc_btmap_with_order(int, int, compare, 32);
