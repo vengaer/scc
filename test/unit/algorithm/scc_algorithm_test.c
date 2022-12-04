@@ -66,4 +66,28 @@ void test_scc_algo_lower_bound_eq(void) {
         TEST_ASSERT_FALSE(ret & ~mask);
         TEST_ASSERT_EQUAL_UINT64(7ull, ret & mask);
     }
+    {
+        int data[] = {
+            0, 1, 2, 2, 3, 3, 3, 4,
+            4, 4, 4, 4, 4, 4, 4, 4,
+            6, 6, 6, 6, 6, 6, 6, 7,
+            7, 7, 7, 7, 7, 7, 7, 7,
+            8, 8, 8, 8, 8, 8, 8, 8
+        };
+        size_t ret = scc_algo_lower_bound_eq(&(int){ 4 }, data, scc_arrsize(data), sizeof(int), compare);
+        TEST_ASSERT_TRUE(ret & ~mask);
+        TEST_ASSERT_EQUAL_UINT64(7ull, ret & mask);
+    }
+    {
+        int data[] = {
+            0, 1, 2, 2, 3, 3, 3, 4,
+            4, 4, 4, 4, 4, 4, 4, 4,
+            6, 6, 6, 6, 6, 6, 6, 7,
+            7, 7, 7, 7, 7, 7, 7, 7,
+            8, 8, 8, 8, 8, 8, 8, 8
+        };
+        size_t ret = scc_algo_lower_bound_eq(&(int){ 13 }, data, scc_arrsize(data), sizeof(int), compare);
+        TEST_ASSERT_FALSE(ret & ~mask);
+        TEST_ASSERT_EQUAL_UINT64(scc_arrsize(data), ret & mask);
+    }
 }
