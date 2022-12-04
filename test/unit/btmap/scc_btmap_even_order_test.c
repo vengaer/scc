@@ -123,3 +123,56 @@ void test_scc_btmap_find(void) {
     }
     scc_btmap_free(btmap);
 }
+
+void test_scc_btmap_remove_leaf(void) {
+    int leafvals[] = { 0, 1, 3, 4, 5, 6 };
+
+    for(int i = 0; i < (int)scc_arrsize(leafvals); ++i) {
+        scc_btmap(int, int) btmap = scc_btmap_new(int, int, compare);
+
+        for(int j = 0; j < (int)scc_arrsize(leafvals) + 1; ++j) {
+            TEST_ASSERT_TRUE(scc_btmap_insert(&btmap, j, j));
+        }
+        TEST_ASSERT_TRUE(scc_btmap_remove(btmap, leafvals[i]));
+        TEST_ASSERT_EQUAL_UINT32(0u, scc_btmap_inspect_invariants(btmap));
+
+        int const *p;
+        for(int j = 0; j < (int)scc_arrsize(leafvals) + 1; ++j) {
+            if(j == leafvals[i]) {
+                continue;
+            }
+            p = scc_btmap_find(btmap, j);
+            TEST_ASSERT_TRUE(p);
+            TEST_ASSERT_EQUAL_INT32(j, *p);
+        }
+
+        TEST_ASSERT_FALSE(scc_btmap_find(btmap, leafvals[i]));
+
+        scc_btmap_free(btmap);
+    }
+}
+
+void test_scc_btmap_remove_root(void) {
+    scc_btmap(int, int) btmap = scc_btmap_new(int, int, compare);
+
+    for(int i = 0; i < 7; ++i) {
+        TEST_ASSERT_TRUE(scc_btmap_insert(&btmap, i, i));
+    }
+
+    TEST_ASSERT_TRUE(scc_btmap_remove(btmap, 2));
+    TEST_ASSERT_EQUAL_UINT32(0u, scc_btmap_inspect_invariants(btmap));
+
+    int const *p;
+    for(int i = 0; i < 7; ++i) {
+        p = scc_btmap_find(btmap, i);
+        if(i == 2) {
+            TEST_ASSERT_FALSE(p);
+        }
+        else {
+            TEST_ASSERT_TRUE(p);
+            TEST_ASSERT_EQUAL_INT32(i, *p);
+        }
+    }
+
+    scc_btmap_free(btmap);
+}
