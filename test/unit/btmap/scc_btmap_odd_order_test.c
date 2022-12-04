@@ -109,3 +109,26 @@ void test_scc_btmap_odd_insert_overwrite(void) {
 
     scc_btmap_free(btmap);
 }
+
+void test_scc_btmap_remove_odd_order(void) {
+    enum { TEST_SIZE = 320 };
+    scc_btmap(int, int) btmap = scc_btmap_with_order(int, int, compare, 5);
+
+    for(int i = 0;  i < TEST_SIZE; ++i) {
+        TEST_ASSERT_TRUE(scc_btmap_insert(&btmap, i, i - 1));
+    }
+
+    int const *p;
+    for(int i = 0; i < TEST_SIZE; ++i) {
+        TEST_ASSERT_TRUE(scc_btmap_remove(btmap, i));
+        TEST_ASSERT_EQUAL_UINT32(0u, scc_btmap_inspect_invariants(btmap));
+
+        for(int j = i + 1; j < TEST_SIZE; ++j) {
+            p = scc_btmap_find(btmap, j);
+            TEST_ASSERT_TRUE(p);
+            TEST_ASSERT_EQUAL_INT32(j - 1, *p);
+        }
+    }
+
+    scc_btmap_free(btmap);
+}
