@@ -16,9 +16,11 @@ size_t scc_algo_lower_bound_eq(void const *key, void const *base, size_t nmemb, 
     size_t end = nmemb;
     size_t middle;
     int cmp = 0;
+    size_t eq = 0u;
     if(nmemb < LOWER_BOUND_LINEAR_LIM) {
         for(; begin < nmemb; ++begin) {
             cmp = compare(key, (unsigned char const *)base + begin * size);
+            eq |= !cmp;
             if(cmp <= 0) {
                 break;
             }
@@ -28,6 +30,7 @@ size_t scc_algo_lower_bound_eq(void const *key, void const *base, size_t nmemb, 
         while(begin != end) {
             middle = begin + ((end - begin) >> 1u);
             cmp = compare(key, (unsigned char const *)base + middle * size);
+            eq |= !cmp;
             if(cmp <= 0) {
                 end = middle;
             }
@@ -37,5 +40,5 @@ size_t scc_algo_lower_bound_eq(void const *key, void const *base, size_t nmemb, 
         }
     }
 
-    return begin | (((size_t)!cmp) << SIZE_SHIFT);
+    return begin | (eq << SIZE_SHIFT);
 }
