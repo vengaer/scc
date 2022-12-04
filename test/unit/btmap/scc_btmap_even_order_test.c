@@ -104,3 +104,22 @@ void test_scc_btmap_insert_overwrite(void) {
 
     scc_btmap_free(btmap);
 }
+
+void test_scc_btmap_find(void) {
+    enum { TEST_SIZE = 3200 };
+
+    scc_btmap(int, int) btmap = scc_btmap_with_order(int, int, compare, 88);
+
+    int const *p;
+    for(int i = 0; i < TEST_SIZE; ++i) {
+        TEST_ASSERT_TRUE(scc_btmap_insert(&btmap, i, i << 1));
+        p = scc_btmap_find(btmap, i);
+        TEST_ASSERT_TRUE(p);
+        TEST_ASSERT_EQUAL_INT32(i << 1, *p);
+
+        for(int j = i + 1; j < TEST_SIZE; ++j) {
+            TEST_ASSERT_FALSE(scc_btmap_find(btmap, j));
+        }
+    }
+    scc_btmap_free(btmap);
+}
