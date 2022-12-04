@@ -185,6 +185,26 @@ static inline struct scc_btmnode_base *scc_btmnode_child(struct scc_btmap_base c
     return scc_btmnode_links(base, node)[n];
 }
 
+//? .. c:function:: void scc_btmap_new_root(\
+//?     struct scc_btmap_base const *restrict base, \
+//?     struct scc_btnode_base *restrict node, \
+//?     struct scc_btnode_base *restrict left, \
+//?     struct scc_btnode_base *restrict right)
+//?
+//?     Initialize the node parameter as if it were the new node of the
+//?     given ``btmap``
+//?
+//?     As splitting the previous root always yields a new root with a
+//?     single value, the new root always has exactly two links.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Base address of the ``btmap``
+//?     :param node: The node to be prepared as new root
+//?     :param left: Root of the left subtree
+//?     :param right: Root of the right subtree
 static inline void scc_btmap_new_root(
     struct scc_btmap_base const *restrict base,
     struct scc_btmnode_base *restrict node,
