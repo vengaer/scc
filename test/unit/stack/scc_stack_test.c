@@ -1,4 +1,4 @@
-#include <scc/scc_stack.h>
+#include <scc/stack.h>
 #include <scc/scc_vec.h>
 
 #include <unity.h>

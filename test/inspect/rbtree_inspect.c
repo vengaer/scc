@@ -1,7 +1,7 @@
 #include "rbtree_inspect.h"
 
 #include <scc/mem.h>
-#include <scc/scc_stack.h>
+#include <scc/stack.h>
 
 #include <stdbool.h>
 #include <stdio.h>

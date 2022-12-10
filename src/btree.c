@@ -1,6 +1,6 @@
 #include <scc/algorithm.h>
 #include <scc/btree.h>
-#include <scc/scc_stack.h>
+#include <scc/stack.h>
 
 #include <assert.h>
 #include <limits.h>

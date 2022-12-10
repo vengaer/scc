@@ -1,7 +1,7 @@
 #include "btmap_inspect.h"
 
 #include <scc/btmap.h>
-#include <scc/scc_stack.h>
+#include <scc/stack.h>
 #include <scc/scc_svec.h>
 #include <scc/scc_vec.h>
 
