@@ -1,6 +1,6 @@
 #include <scc/scc_algorithm.h>
 #include <scc/scc_bits.h>
-#include <scc/scc_btmap.h>
+#include <scc/btmap.h>
 #include <scc/scc_stack.h>
 
 #include <assert.h>

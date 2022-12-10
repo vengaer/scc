@@ -1,5 +1,5 @@
-#include <inspect/scc_btmap_inspect.h>
-#include <scc/scc_btmap.h>
+#include <inspect/btmap_inspect.h>
+#include <scc/btmap.h>
 #include <scc/scc_mem.h>
 
 #include <unity.h>

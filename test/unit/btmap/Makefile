@@ -1,7 +1,7 @@
 ifdef __node
 
 $(call push,btree_deps)
-btree_deps += vec
+btmap_deps += vec
 
 $(call decl-unit)
 

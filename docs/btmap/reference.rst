@@ -1,5 +1,5 @@
 Reference
 =========
 
-.. include:: ../../build/docs/scc_btmap_h.rst
-.. include:: ../../build/docs/scc_btmap_c.rst
+.. include:: ../../build/docs/btmap_h.rst
+.. include:: ../../build/docs/btmap_c.rst
