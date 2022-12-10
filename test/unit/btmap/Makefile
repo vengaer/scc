@@ -1,11 +1,11 @@
 ifdef __node
 
-$(call push,btree_deps)
+$(call push,btmap_deps)
 btmap_deps += vec
 
 $(call decl-unit)
 
-$(call pop,btree_deps)
+$(call pop,btmap_deps)
 
 else
 # Recurse to top level
