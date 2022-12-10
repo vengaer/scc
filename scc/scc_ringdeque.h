@@ -2,7 +2,7 @@
 #define SCC_RINGDEQUE_H
 
 #include "scc_assert.h"
-#include "scc_bits.h"
+#include "bits.h"
 #include "scc_mem.h"
 
 #include <stddef.h>

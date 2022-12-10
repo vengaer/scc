@@ -1,4 +1,4 @@
-#include <scc/scc_bits.h>
+#include <scc/bits.h>
 
 #include <math.h>
 

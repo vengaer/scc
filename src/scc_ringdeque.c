@@ -1,4 +1,3 @@
-#include <scc/scc_bits.h>
 #include <scc/scc_ringdeque.h>
 
 #include <assert.h>

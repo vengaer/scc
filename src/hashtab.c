@@ -1,4 +1,3 @@
-#include <scc/scc_bits.h>
 #include <scc/scc_dbg.h>
 #include <scc/hashtab.h>
 #include <scc/scc_mem.h>
