@@ -151,7 +151,7 @@ static void fuzz_insertion(void *map, uint32_t const *data, size_t ue, size_t si
             "Map size increased on overwrite"
         );
 
-        for(unsigned j = 0u; j < i; ++j) {
+        for(unsigned j = ue; j < i; ++j) {
             val = scc_btmap_find(btmap, data[j]);
             fuzz_assert(val, "Key %" PRIu32 " not found in map", data[j]);
             fuzz_assert(!*val, "Value mapping to key %" PRIu32 " not cleared", data[j]);
