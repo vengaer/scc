@@ -2,7 +2,7 @@
 #define SCC_BTMAP_H
 
 #include "scc_arena.h"
-#include "scc_btree.h"
+#include "btree.h"
 #include "scc_mem.h"
 
 #include <stddef.h>

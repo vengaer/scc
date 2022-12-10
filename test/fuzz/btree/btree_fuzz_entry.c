@@ -1,7 +1,7 @@
 #include <fuzzer/assertion.h>
 #include <fuzzer/dbg.h>
-#include <inspect/scc_btree_inspect.h>
-#include <scc/scc_btree.h>
+#include <inspect/btree_inspect.h>
+#include <scc/btree.h>
 
 #include <inttypes.h>
 #include <stdbool.h>

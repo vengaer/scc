@@ -1,5 +1,5 @@
-#include <inspect/scc_btree_inspect.h>
-#include <scc/scc_btree.h>
+#include <inspect/btree_inspect.h>
+#include <scc/btree.h>
 #include <scc/scc_mem.h>
 
 #include <unity.h>

@@ -1,5 +1,5 @@
 #include <scc/scc_algorithm.h>
-#include <scc/scc_btree.h>
+#include <scc/btree.h>
 #include <scc/scc_stack.h>
 
 #include <assert.h>

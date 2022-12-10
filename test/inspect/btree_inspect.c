@@ -1,6 +1,6 @@
-#include "scc_btree_inspect.h"
+#include "btree_inspect.h"
 
-#include <scc/scc_btree.h>
+#include <scc/btree.h>
 #include <scc/scc_stack.h>
 #include <scc/scc_svec.h>
 #include <scc/scc_vec.h>
