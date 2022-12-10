@@ -1,7 +1,7 @@
 #ifndef SCC_BTREE_H
 #define SCC_BTREE_H
 
-#include "scc_arena.h"
+#include "arena.h"
 #include "scc_assert.h"
 #include "scc_bits.h"
 #include "scc_mem.h"

@@ -1,4 +1,4 @@
-#include <scc/scc_arena.h>
+#include <scc/arena.h>
 #include <scc/scc_dbg.h>
 
 #include <assert.h>

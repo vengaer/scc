@@ -1,7 +1,7 @@
 #ifndef SCC_RBTREE_H
 #define SCC_RBTREE_H
 
-#include "scc_arena.h"
+#include "arena.h"
 #include "scc_mem.h"
 #include "scc_pp_token.h"
 
