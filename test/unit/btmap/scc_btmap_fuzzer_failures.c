@@ -46,11 +46,11 @@ static void run_fuzzer_test(void *restrict map,  uint32_t const *restrict data, 
     }
 
     for(unsigned i = 0u; i < ue; ++i) {
-        TEST_ASSERT_EQUAL_UINT64(ue, scc_btmap_size(btmap));
+        TEST_ASSERT_EQUAL_UINT64(ue - i, scc_btmap_size(btmap));
         TEST_ASSERT_TRUE(scc_btmap_remove(btmap, data[i]));
         TEST_ASSERT_EQUAL_UINT32(0u, scc_btmap_inspect_invariants(btmap));
 
-        for(unsigned j = 1u; j < ue; ++j) {
+        for(unsigned j = i + 1; j < ue; ++j) {
             val = scc_btmap_find(btmap, data[j]);
             TEST_ASSERT_TRUE(!!val);
             TEST_ASSERT_EQUAL_UINT32(data[j] << 1u, *val);
@@ -66,6 +66,16 @@ void test_scc_btmap_fuzzer_failure0(void) {
     };
 
     scc_btmap(uint32_t, uint32_t) btmap = scc_btmap_with_order(uint32_t, uint32_t, compare, 0x2bu);
+    run_fuzzer_test(btmap, data, scc_arrsize(data), scc_arrsize(data));
+    scc_btmap_free(btmap);
+}
+
+void test_scc_btmap_fuzzer_failure1(void) {
+    uint32_t const data[] = {
+        0x92e74848u, 0x48484848u
+    };
+
+    scc_btmap(uint32_t, uint32_t) btmap = scc_btmap_with_order(uint32_t, uint32_t, compare, 0x92u);
     run_fuzzer_test(btmap, data, scc_arrsize(data), scc_arrsize(data));
     scc_btmap_free(btmap);
 }
