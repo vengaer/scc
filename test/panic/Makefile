@@ -8,7 +8,7 @@ panicparser   := $(pyscripts)/testparser.$(pyext)
 panicmanifest := $(__node_builddir)/manifest.mk
 panicsrcvar   := panicsrc
 
-__sccobj      := $(addsuffix .$(oext),$(addprefix $(sccbuilddir)/scc_,svec vec))
+__sccobj      := $(addsuffix .$(oext),$(addprefix $(sccbuilddir)/,svec vec))
 
 $(if $(call eq,$(MAKECMDGOALS),check),\
     $(eval -include $(panicmanifest)))
