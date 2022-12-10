@@ -3,10 +3,11 @@ ifdef __node
 testdir    := $(__node_path)
 inspectdir := $(__node_path)/inspect
 
+$(call include-node,inspect)
+
 $(call include-node,assert)
 $(call include-node,buildsystem)
 $(call include-node,fuzz)
-$(call include-node,inspect)
 $(call include-node,panic)
 $(call include-node,perf)
 $(call include-node,unit)

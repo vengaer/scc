@@ -68,7 +68,7 @@
             "name": "CONFIG_FUZZ_TARGET",
             "depends": ["CONFIG_FUZZ"],
             "entrytype": "string",
-            "choices": ["btree", "hashmap", "hashtab", "rbtree", "svec", "lower_bound"],
+            "choices": ["btree", "hashmap", "hashtab", "rbmap", "rbtree", "svec", "lower_bound"],
             "default": "",
             "help": "The container to fuzz"
         },
