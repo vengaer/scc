@@ -1,4 +1,4 @@
-#include <scc/scc_panic.h>
+#include <scc/panic.h>
 #include <scc/scc_svec.h>
 
 #include <assert.h>
