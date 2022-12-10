@@ -723,6 +723,13 @@ static _Bool scc_btmap_insert_non_preemptive(struct scc_btmap_base *base, void *
             req_allocs = 0u;
         }
 
+        bound = scc_btmnode_lower_bound(base, curr, *(void **)btmapaddr);
+        if(scc_btmnode_keyeq(bound)) {
+            scc_btmnode_replace_value(base, curr, *(void **)btmapaddr, bound & BOUND_MASK);
+            inserted = true;
+            goto epilogue;
+        }
+
         if(scc_btmnode_is_leaf(curr)) {
             break;
         }
@@ -731,12 +738,6 @@ static _Bool scc_btmap_insert_non_preemptive(struct scc_btmap_base *base, void *
             goto epilogue;
         }
 
-        bound = scc_btmnode_lower_bound(base, curr, *(void **)btmapaddr);
-        if(scc_btmnode_keyeq(bound)) {
-            scc_btmnode_replace_value(base, curr, *(void **)btmapaddr, bound & BOUND_MASK);
-            inserted = true;
-            goto epilogue;
-        }
         bound &= BOUND_MASK;
         curr = scc_btmnode_child(base, curr, bound);
     }
