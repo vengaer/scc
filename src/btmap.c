@@ -327,6 +327,7 @@ static void scc_btmnode_emplace_leaf(struct scc_btmap_base *restrict base, struc
     memcpy(keys + keyoff, kvpair, base->btm_keysize);
     memcpy(vals + valoff, (unsigned char *)kvpair + base->btm_kvoff, base->btm_valsize);
     ++node->btm_nkeys;
+    ++base->btm_size;
 }
 
 //? .. c:function:: void scc_btmnode_emplace(\
@@ -685,7 +686,6 @@ static _Bool scc_btmap_insert_preemptive(struct scc_btmap_base *base, void *btma
     }
 
     scc_btmnode_emplace_leaf(base, curr, *(void **)btmapaddr);
-    ++base->btm_size;
     return true;
 }
 
@@ -743,7 +743,6 @@ static _Bool scc_btmap_insert_non_preemptive(struct scc_btmap_base *base, void *
 
     if(curr->btm_nkeys < base->btm_order - 1u) {
         scc_btmnode_emplace_leaf(base, curr, *(void **)btmapaddr);
-        ++base->btm_size;
         inserted = true;
         goto epilogue;
     }
