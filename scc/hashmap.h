@@ -3,7 +3,7 @@
 
 #include "scc_assert.h"
 #include "bits.h"
-#include "scc_config.h"
+#include "config.h"
 #include "scc_mem.h"
 
 #include <stddef.h>

@@ -2,7 +2,7 @@
 #define SCC_ARENA_H
 
 #include "scc_assert.h"
-#include "scc_config.h"
+#include "config.h"
 #include "scc_mem.h"
 
 #include <stddef.h>
