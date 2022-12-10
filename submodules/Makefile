@@ -43,7 +43,7 @@ $(benchmarkalib): $(call reeval,cpu_cores,$(benchmarkalib))
 $(benchmarkmain_alib): $(call reeval,cpu_cores,$(benchmarkmain_alib))
 
 $(benchmarkbuilddir)/$(__cmake_cache): $(submodules) | $(benchmarkbuilddir)
-	$(CMAKE) -E $(dir $@) $(CMAKE) $(bnechmark_buildflags) $(dir $(dir $@))
+	$(CMAKE) -E chdir $(dir $@) $(CMAKE) $(benchmark_buildflags) $(benchmarkdir)
 
 $(benchmarkalib) $(benchmarkmain_alib)&: $(benchmarkbuilddir)/$(__cmake_cache)
 	$(CMAKE) --build $(benchmarkbuilddir) --parallel $(cpu_cores) --config Release
