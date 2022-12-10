@@ -581,6 +581,27 @@ inline _Bool scc_rbtree_empty(void const *rbtree) {
 //!     :param rbtree: rbtree handle
 void scc_rbtree_free(void *rbtree);
 
+//? .. c:function:: void *scc_rbtree_impl_generic_insert(void *rbtreeaddr, size_t elemsize)
+//?
+//?     Internal insertion function. Attempt to insert the value stored at
+//?     :c:texpr:`*(void **)rbtreeaddr` in the tree. If the tree already contains
+//?     and instance of the value in question, the function returns an address to
+//?     said in-tree element. Otherwise, either rbtreeaddr or ``NULL`` are returned,
+//?     depending whether or not the internal memory allocation was successful.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param rbtreeaddr: Address of the rbtree handle
+//?     :param elemsize: Size of the elements stored in the rbtree
+//?     :returns: The address of one of the following
+//?     :retval NULL: Memory allocation failure
+//?     :retval *(void **)rbtreeaddr: The value was successfully inserted
+//?     :retval other address: The tree already contained the value to be inserted,
+//?                            the address returned is that of the internal element
+void *scc_rbtree_impl_generic_insert(void *rbtreeaddr, size_t elemsize);
+
 //? .. c:function:: _Bool scc_rbtree_impl_insert(void *rbtreeaddr, size_t elemsize)
 //?
 //?     Internal insertion function. Attempt to insert the value stored at
@@ -595,7 +616,9 @@ void scc_rbtree_free(void *rbtree);
 //?     :returns: A :code:`_Bool` indicating whether insertion took place
 //?     :retval true: Insertion successful
 //?     :retval false: The value was already in the tree, or allocation failure
-_Bool scc_rbtree_impl_insert(void *rbtreeaddr, size_t elemsize);
+inline _Bool scc_rbtree_impl_insert(void *rbtreeaddr, size_t elemsize) {
+    return scc_rbtree_impl_generic_insert(rbtreeaddr, elemsize) == *(void **)rbtreeaddr;
+}
 
 //! .. c:function:: _Bool scc_rbtree_insert(void *rbtreeaddr, type value)
 //!

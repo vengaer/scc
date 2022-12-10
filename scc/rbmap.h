@@ -206,9 +206,29 @@ inline void scc_rbmap_free(void *map) {
     scc_rbtree_free(map);
 }
 
+//? .. c:function:: _Bool scc_rbmap_impl_insert(void *rbmapaddr, size_t elemsize)
+//?
+//?     Internal insertion function. Attempt to insert the value stored at
+//?     :c:texpr:`*(void **)rbmapaddr` in the map. If the key is already present,
+//?     its corresponding value is updated
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param rbmapaddr: Address of the rbmap handle
+//?     :param valsize: Size of the values stored in the map
+//?     :param valoff: Offset of the value in the key-value pair
+//?     :returns: A :code:`_Bool` indicating whether insertion took place
+//?     :retval true: New key-value pair inserted
+//?     :retval true: Value of preexisting key-value pair updated
+//?     :retval false: Memory allocation failure
+_Bool scc_rbmap_impl_insert(void *rbmapaddr, size_t elemsize, size_t valoff);
+
 //! .. c:function:: _Bool scc_rbmap_insert(void *mapaddr, keytype key, valuetype value)
 //!
-//!     Insert the given key-value pair into the rbtree.
+//!     Insert the given key-value pair into the rbtree. If the key is already present
+//!     in the map, its corresponding value is updated to the given one.
 //!
 //!     Neither the :code:`key` nor :code:`value` parameters must necessarily be the
 //!     same type as those with which the rbmap was instantiated. If they are not, they
@@ -218,8 +238,9 @@ inline void scc_rbmap_free(void *map) {
 //!     :param key: The key to insert in the map
 //!     :param value: The value to insert in the map
 //!     :returns: A :code:`_Bool` indicating whether the insertion took place
-//!     :retval true: The key-value pair was inserted
-//!     :retval false: The key was already in the map, or memory allocation failure
+//?     :retval true: New key-value pair inserted
+//?     :retval true: Value of preexisting key-value pair updated
+//?     :retval false: Memory allocation failure
 //!
 //!     .. code-block:: C
 //!         :caption: Insert the pair {1, 2}, {2, 4} and {3, 6} in an rbmap
@@ -238,12 +259,14 @@ inline void scc_rbmap_free(void *map) {
 //!
 //!         scc_rbmap_free(rbmap);
 #define scc_rbmap_insert(mapaddr, key, value)                                               \
-    scc_rbtree_impl_insert((                                                                \
+    scc_rbmap_impl_insert((                                                                 \
             (*(mapaddr))->rm_key = (key),                                                   \
             (*(mapaddr))->rm_value = (value),                                               \
             (mapaddr)                                                                       \
         ),                                                                                  \
-        sizeof(**(mapaddr))                                                                 \
+        sizeof(*(mapaddr)),                                                                 \
+        ((unsigned char const *)&(*(mapaddr))->rm_value -                                   \
+            (unsigned char const *)&(*(mapaddr))->rm_key)                                   \
     )
 
 //? .. c:function:: void *scc_rbmap_impl_find(void *map, size_t valoff)

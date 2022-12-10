@@ -15,6 +15,7 @@ void const *scc_rbtree_impl_iterstop(void const *rbtree);
 size_t scc_rbnode_link_offset(struct scc_rbnode_base const *node);
 _Bool scc_rbnode_thread(struct scc_rbnode_base const *node, enum scc_rbdir dir);
 size_t scc_rbnode_bkoff(void const *iter);
+_Bool scc_rbtree_impl_insert(void *rbtreeaddr, size_t elemsize);
 
 //? .. c:enum:: @flags
 //?
@@ -513,9 +514,12 @@ static inline _Bool scc_rbtree_insert_empty(struct scc_rbtree_base *restrict bas
     return true;
 }
 
-//? .. c:function:: _Bool scc_rbtree_insert_nonempty(struct scc_rbtree_base *restrict base, void const *restrict handle, size_t elemsize)
+//? .. c:function:: void *scc_rbtree_insert_nonempty(struct scc_rbtree_base *restrict base, void const *restrict handle, size_t elemsize)
 //?
-//?     Insert the value at :c:expr:`*handle` inte the non-empty rbtree
+//?     Insert the value at :c:expr:`*handle` inte the non-empty rbtree.
+//?     If the tree already contains the value, return the address of the
+//?     in-tree element. If the value is inserted, return the address of the
+//?     given handle. Otherwise, return ``NULL``.
 //?
 //?     .. note::
 //?
@@ -524,11 +528,11 @@ static inline _Bool scc_rbtree_insert_empty(struct scc_rbtree_base *restrict bas
 //?     :param base: Base address of the rbtree
 //?     :param handle: rbtree handle
 //?     :param elemsize: Size of the elements in the tree
-//?     :returns: :code:`true` if the vlaue was inserted, otherwise :code:`false`.
-//?     :retval true: The value was inserted
-//?     :retval false: The value was already present in the tree
-//?     :retval false: Allocation failure
-static _Bool scc_rbtree_insert_nonempty(struct scc_rbtree_base *restrict base, void const *restrict handle, size_t elemsize) {
+//?     :returns: One of the following
+//?     :retval NULL: If memory allocation failed
+//?     :retval handle: If insertion was successul
+//?     :retval other address: Address of in-tree node value
+static void *scc_rbtree_insert_nonempty(struct scc_rbtree_base *restrict base, void *handle, size_t elemsize) {
     struct scc_rbnode_base *n = base->rb_root;
     struct scc_rbnode_base *p = (void *)&base->rb_sentinel;
     struct scc_rbnode_base *gp = &(struct scc_rbnode_base) { .rn_left = p };
@@ -546,7 +550,7 @@ static _Bool scc_rbtree_insert_nonempty(struct scc_rbtree_base *restrict base, v
         if(!rel) {
             /* Already in tree */
             scc_rbnode_mkblack(base->rb_root);
-            return false;
+            return scc_rbnode_value(base, n);
         }
         dir = rel <= 0;
         if(scc_rbnode_thread(n, dir)) {
@@ -563,7 +567,7 @@ static _Bool scc_rbtree_insert_nonempty(struct scc_rbtree_base *restrict base, v
     struct scc_rbnode_base *new = scc_rbnode_new(base, handle, elemsize);
     if(!new) {
         scc_rbnode_mkblack(base->rb_root);
-        return false;
+        return 0;
     }
 
     /* Prepare node for insertion */
@@ -580,7 +584,7 @@ static _Bool scc_rbtree_insert_nonempty(struct scc_rbtree_base *restrict base, v
     scc_rbnode_mkblack(base->rb_root);
 
     ++base->rb_size;
-    return true;
+    return handle;
 }
 
 void *scc_rbtree_impl_new(void *base, size_t coff) {
@@ -606,10 +610,13 @@ void scc_rbtree_free(void *rbtree) {
     scc_arena_release(&base->rb_arena);
 }
 
-_Bool scc_rbtree_impl_insert(void *rbtreeaddr, size_t elemsize) {
+void *scc_rbtree_impl_generic_insert(void *rbtreeaddr, size_t elemsize) {
     struct scc_rbtree_base *base = scc_rbtree_impl_base(*(void **)rbtreeaddr);
     if(!base->rb_size) {
-        return scc_rbtree_insert_empty(base, *(void **)rbtreeaddr, elemsize);
+        if(scc_rbtree_insert_empty(base, *(void **)rbtreeaddr, elemsize)) {
+            return *(void **)rbtreeaddr;
+        }
+        return 0;
     }
 
     return scc_rbtree_insert_nonempty(base, *(void **)rbtreeaddr, elemsize);

@@ -1,5 +1,8 @@
 #include <scc/rbmap.h>
 
+#include <stdbool.h>
+#include <string.h>
+
 #define rb_root rb_sentinel.rs_left
 
 size_t scc_rbmap_size(void const *map);
@@ -84,6 +87,22 @@ static inline void *scc_rbmnode_value(
     size_t valoff
 ) {
     return (unsigned char *)scc_rbnode_value(base, node) + valoff;
+}
+
+_Bool scc_rbmap_impl_insert(void *rbmapaddr, size_t elemsize, size_t valoff) {
+    unsigned char *addr = scc_rbtree_impl_generic_insert(rbmapaddr, elemsize);
+    if(!addr) {
+        return false;
+    }
+
+    if(addr == *(void **)rbmapaddr) {
+        return true;
+    }
+
+    /* Preexisting entry, update value */
+    unsigned char const *raddr = ((unsigned char const *)*(void **)rbmapaddr) + valoff;
+    memcpy(addr + valoff, raddr, elemsize - valoff);
+    return true;
 }
 
 void *scc_rbmap_impl_find(void *map, size_t valoff) {
