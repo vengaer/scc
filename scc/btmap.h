@@ -147,8 +147,8 @@ struct scc_btmnode_base {
 //?
 //?         Node allocator
 //?
-//?     .. _unsigned_short_btm_kvoff
-//?     .. c:var:: struct unsigned short const btm_kvoff
+//?     .. _unsigned_short_btm_kvoff:
+//?     .. c:var:: unsigned short const btm_kvoff
 //?
 //?         Offset of the value in the
 //?         :ref:`key-value pair <scc_btmap_impl_pair>`
@@ -161,7 +161,7 @@ struct scc_btmnode_base {
 //?
 //?     .. c:var:: unsigned char btm_data[]
 //?
-//?         FAM used for storing :ref:`bt_curr <type_bt_curr>`
+//?         FAM used for storing :ref:`bt_curr <kvpair_btm_curr>`
 struct scc_btmap_base {
     unsigned short const btm_order;
     unsigned short const btm_keyoff;
@@ -296,7 +296,7 @@ struct scc_btmap_base {
 //?     .. c:var:: unsigned char btm_bkoff
 //?
 //?         Number of padding bytes between :ref:`btm_fwoff <unsigned_char_btm_fwoff>`
-//?         and :ref:`btm_curr <type_btm_curr>`
+//?         and :ref:`btm_curr <kvpair_btm_curr>`
 //?
 //?     .. _kvpair_btm_curr:
 //?     .. c:var:: kvpair btm_curr

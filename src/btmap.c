@@ -220,8 +220,8 @@ static inline void scc_btmap_new_root(
 
 //? .. _scc_btmnode_lower_bound:
 //? .. c:function:: size_t scc_btmnode_lower_bound(\
-//?     struct scc_btmap_base const *base,
-//?     struct scc_btmnode_base *node,
+//?     struct scc_btmap_base const *base, \
+//?     struct scc_btmnode_base *node, \
 //?     void const *restrict value)
 //?
 //?     Compute the lower bound given the key in the supplied node.
@@ -497,7 +497,7 @@ static struct scc_btmnode_base *scc_btmnode_split_preemptive(
     return right;
 }
 
-//?`.. c:function:: struct scc_btmnode_base *scc_btmnode_split_non_preemptive(\
+//? .. c:function:: struct scc_btmnode_base *scc_btmnode_split_non_preemptive(\
 //?     struct scc_btmap_base *restrict base, struct scc_btmnode_base *restrict node, \
 //?     struct scc_btmnode_base *restrict child, struct scc_btmnode_base *p,\
 //?     void *restrict key, void *restrict value)
@@ -642,8 +642,8 @@ static struct scc_btmnode_base *scc_btmnode_split_non_preemptive(
 //? .. c:function:: _Bool scc_btmap_insert_preemptive(struct scc_btmap_base *base, \
 //?      void *btmapaddr)
 //?
-//?     Insert the key-value pair in :c:texpr:`*(void **)btmapaddr``using
-//?     :ref:`preemptive splitting <preemptive_splitting>`. The order of the underlying
+//?     Insert the key-value pair in :c:texpr:`*(void **)btmapaddr` using
+//?     :ref:`preemptive splitting <preemptive_split>`. The order of the underlying
 //?     is assumed to be even.
 //?
 //?     .. note::
@@ -689,7 +689,7 @@ static _Bool scc_btmap_insert_preemptive(struct scc_btmap_base *base, void *btma
     return true;
 }
 
-//? .. c:fuinction:: _Bool scc_btmap_insert_non_preemptive(\
+//? .. c:function:: _Bool scc_btmap_insert_non_preemptive(\
 //?     struct scc_btmap_base *base, void *btmapaddr)
 //?
 //?     Insert the key-value pair in :c:texpr:`(void **)btmapaddr` using :ref:`non-preemptive splitting <non_preemptive_split>`.
@@ -1003,7 +1003,7 @@ static size_t scc_btmnode_merge(
 //?         Internal use only
 //?
 //?     :param base: Base address of the ``btmap``
-//?     :param node. Base address of node to be rotated into
+//?     :param node: Base address of node to be rotated into
 //?     :param sibling: Base address ofhte left sibling of :code:`node`
 //?     :param p: Base address of the parent node of :code:`node` and :code:`sibling`
 //?     :param bound: The index of :code:`node` in :code:`p`'s link array
@@ -1290,7 +1290,7 @@ static _Bool scc_btmap_remove_preemptive(struct scc_btmap_base *restrict base, v
 }
 
 //? .. c:function:: void scc_btmap_balance_non_preemptive(\
-//?     struct scc_btmap_base *rewstrict base, struct scc_btmnode_base *restrict curr, \
+//?     struct scc_btmap_base *restrict base, struct scc_btmnode_base *restrict curr, \
 //?     struct scc_btmnode_base **restrict nodes, size_t bounds)
 //?
 //?     Traverse the tree back towards the root, balancing as needed
