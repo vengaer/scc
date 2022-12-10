@@ -118,7 +118,7 @@ static void fuzz_insertion(void *map, uint32_t const *data, size_t ue, size_t si
             "Map size increased on overwrite"
         );
 
-        for(unsigned j = 0u; j < i; ++j) {
+        for(unsigned j = ue; j < i; ++j) {
             val = scc_rbmap_find(rbmap, data[j]);
             fuzz_assert(val, "Key %" PRIu32 " not found in map", data[j]);
             fuzz_assert(!*val, "Value mapping to key %" PRIu32 " not cleared", data[j]);
@@ -152,7 +152,7 @@ static void fuzz_traversal(void *map, uint32_t *data, size_t ue) {
 static void fuzz_removal(void *map, uint32_t const *data, size_t ue) {
     scc_rbmap(uint32_t, uint32_t) rbmap = map;
     for(unsigned i = 0u; i < ue; ++i) {
-        fuzz_assert(scc_rbmap_size(rbmap) == ue, "Size mismatch");
+        fuzz_assert(scc_rbmap_size(rbmap) == ue - i, "Size mismatch");
         fuzz_assert(
             scc_rbmap_remove(rbmap, data[i]),
             "Error removing %" PRIu32, data[i]
