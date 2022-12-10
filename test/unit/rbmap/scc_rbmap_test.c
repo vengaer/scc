@@ -1,6 +1,6 @@
 #include <inspect/scc_rbtree_inspect.h>
 #include <scc/mem.h>
-#include <scc/scc_rbmap.h>
+#include <scc/rbmap.h>
 
 #include <unity.h>
 

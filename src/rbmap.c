@@ -1,4 +1,4 @@
-#include <scc/scc_rbmap.h>
+#include <scc/rbmap.h>
 
 #define rb_root rb_sentinel.rs_left
 
