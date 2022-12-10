@@ -1,7 +1,7 @@
 #ifndef HASHTAB_FUZZ_PROBING_H
 #define HASHTAB_FUZZ_PROBING_H
 
-#include <scc/scc_hashtab.h>
+#include <scc/hashtab.h>
 
 #include <stdint.h>
 

@@ -1,6 +1,6 @@
 #include <asm/asm_generic.h>
-#include <inspect/scc_hashtab_inspect.h>
-#include <scc/scc_hashtab.h>
+#include <inspect/hashtab_inspect.h>
+#include <scc/hashtab.h>
 
 #include <stdbool.h>
 #include <string.h>

@@ -1,4 +1,4 @@
-#include <scc/scc_hashtab.h>
+#include <scc/hashtab.h>
 #include <scc/scc_mem.h>
 
 #include <stdbool.h>

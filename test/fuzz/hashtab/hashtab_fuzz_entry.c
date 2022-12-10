@@ -4,7 +4,7 @@
 
 #include <fuzzer/assertion.h>
 #include <fuzzer/dbg.h>
-#include <scc/scc_hashtab.h>
+#include <scc/hashtab.h>
 
 #include <assert.h>
 #include <stdbool.h>

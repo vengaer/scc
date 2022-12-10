@@ -1,4 +1,4 @@
-#include "scc_hashtab_inspect.h"
+#include "hashtab_inspect.h"
 
 #include <scc/scc_mem.h>
 

@@ -1,7 +1,7 @@
 #ifndef SCC_HASHTAB_INSPECT_H
 #define SCC_HASHTAB_INSPECT_H
 
-#include <scc/scc_hashtab.h>
+#include <scc/hashtab.h>
 
 struct scc_hashtab_base *scc_hashtab_inspect_base(void *tab);
 scc_hashtab_metatype *scc_hashtab_inspect_metadata(void *tab);

@@ -1,5 +1,5 @@
-#include <inspect/scc_hashtab_inspect.h>
-#include <scc/scc_hashtab.h>
+#include <inspect/hashtab_inspect.h>
+#include <scc/hashtab.h>
 #include <scc/scc_mem.h>
 
 #include <stdbool.h>

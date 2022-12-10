@@ -2,7 +2,7 @@
 #include "hashtab_creation.h"
 
 #include <perfutil/memory.h>
-#include <scc/scc_hashtab.h>
+#include <scc/hashtab.h>
 
 #include <stdbool.h>
 
