@@ -1,5 +1,5 @@
 #include <scc/hashmap.h>
-#include <scc/scc_perf.h>
+#include <scc/perf.h>
 
 #include "asm/asm_generic.h"
 

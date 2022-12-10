@@ -1,6 +1,6 @@
 #include <scc/hashtab.h>
 #include <scc/mem.h>
-#include <scc/scc_perf.h>
+#include <scc/perf.h>
 #include "asm/asm_generic.h"
 
 #include <assert.h>
