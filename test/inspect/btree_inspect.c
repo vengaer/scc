@@ -2,7 +2,7 @@
 
 #include <scc/btree.h>
 #include <scc/stack.h>
-#include <scc/scc_svec.h>
+#include <scc/svec.h>
 #include <scc/scc_vec.h>
 
 #include <assert.h>

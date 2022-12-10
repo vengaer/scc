@@ -11,7 +11,7 @@
 //!
 //!     Capacity of the stack buffer used for small-size
 //!     optimization. May be overridden by defining it
-//!     before including the scc_svec.h header.
+//!     before including the svec.h header.
 //!
 //!     .. note::
 //!

@@ -2,7 +2,7 @@
 #include "svec_fuzz_push_pop.h"
 #include "svec_fuzz_traversal.h"
 
-#include <scc/scc_svec.h>
+#include <scc/svec.h>
 
 #include <stdbool.h>
 #include <stddef.h>

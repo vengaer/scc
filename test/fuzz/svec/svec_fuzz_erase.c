@@ -1,6 +1,6 @@
 #include "svec_fuzz_erase.h"
 
-#include <scc/scc_svec.h>
+#include <scc/svec.h>
 
 #include <inttypes.h>
 #include <stdio.h>

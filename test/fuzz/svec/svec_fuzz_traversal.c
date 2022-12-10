@@ -1,6 +1,6 @@
 #include "svec_fuzz_traversal.h"
 
-#include <scc/scc_svec.h>
+#include <scc/svec.h>
 
 #include <inttypes.h>
 #include <stdio.h>

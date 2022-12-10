@@ -1,5 +1,5 @@
 Reference
 =========
 
-.. include:: ../../build/docs/scc_svec_h.rst
-.. include:: ../../build/docs/scc_svec_c.rst
+.. include:: ../../build/docs/svec_h.rst
+.. include:: ../../build/docs/svec_c.rst

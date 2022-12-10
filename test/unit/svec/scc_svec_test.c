@@ -1,4 +1,4 @@
-#include <scc/scc_svec.h>
+#include <scc/svec.h>
 
 #include <unity.h>
 

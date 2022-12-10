@@ -2,7 +2,7 @@
 #define SCC_STACK_H
 
 #include "pp_token.h"
-#include "scc_svec.h"
+#include "svec.h"
 
 #ifndef SCC_STACK_CONTAINER
 //! .. c:macro:: SCC_STACK_CONTAINER

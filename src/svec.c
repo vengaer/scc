@@ -1,5 +1,5 @@
 #include <scc/panic.h>
-#include <scc/scc_svec.h>
+#include <scc/svec.h>
 
 #include <assert.h>
 #include <stdbool.h>
