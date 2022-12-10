@@ -1248,7 +1248,8 @@ static _Bool scc_btmap_remove_preemptive(struct scc_btmap_base *restrict base, v
                     scc_btmnode_merge_right_preemptive(base, next, right, curr, bound);
                     found = next;
                     fbound = scc_btmnode_lower_bound(base, found, btmap);
-                    assert(!scc_btmnode_keyeq(fbound));
+                    assert(scc_btmnode_keyeq(fbound));
+                    fbound &= BOUND_MASK;
                 }
             }
         }
@@ -1264,7 +1265,8 @@ static _Bool scc_btmap_remove_preemptive(struct scc_btmap_base *restrict base, v
                 if(found->btm_nkeys <= fbound || base->btm_compare(key, btmap)) {
                     found = next;
                     fbound = scc_btmnode_lower_bound(base, found, btmap);
-                    assert(!scc_btmnode_keyeq(fbound));
+                    assert(scc_btmnode_keyeq(fbound));
+                    fbound &= BOUND_MASK;
                 }
             }
         }
