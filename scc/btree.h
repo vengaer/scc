@@ -2,7 +2,7 @@
 #define SCC_BTREE_H
 
 #include "arena.h"
-#include "scc_assert.h"
+#include "scc_dbg.h"
 #include "bits.h"
 #include "scc_mem.h"
 

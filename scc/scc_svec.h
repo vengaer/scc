@@ -1,7 +1,7 @@
 #ifndef SCC_SVEC_H
 #define SCC_SVEC_H
 
-#include "scc_assert.h"
+#include "scc_dbg.h"
 #include "scc_mem.h"
 #include "scc_pp_token.h"
 

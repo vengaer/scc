@@ -1,7 +1,7 @@
 #ifndef SCC_HASHMAP_H
 #define SCC_HASHMAP_H
 
-#include "scc_assert.h"
+#include "scc_dbg.h"
 #include "bits.h"
 #include "config.h"
 #include "scc_mem.h"

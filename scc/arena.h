@@ -1,7 +1,7 @@
 #ifndef SCC_ARENA_H
 #define SCC_ARENA_H
 
-#include "scc_assert.h"
+#include "scc_dbg.h"
 #include "config.h"
 #include "scc_mem.h"
 

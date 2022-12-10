@@ -1,7 +1,7 @@
 #ifndef SCC_HASHTAB_H
 #define SCC_HASHTAB_H
 
-#include "scc_assert.h"
+#include "scc_dbg.h"
 #include "bits.h"
 #include "config.h"
 #include "scc_mem.h"

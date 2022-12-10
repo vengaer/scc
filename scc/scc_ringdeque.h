@@ -1,7 +1,7 @@
 #ifndef SCC_RINGDEQUE_H
 #define SCC_RINGDEQUE_H
 
-#include "scc_assert.h"
+#include "scc_dbg.h"
 #include "bits.h"
 #include "scc_mem.h"
 
