@@ -1,5 +1,5 @@
 #include <scc/stack.h>
-#include <scc/scc_vec.h>
+#include <scc/vec.h>
 
 #include <unity.h>
 

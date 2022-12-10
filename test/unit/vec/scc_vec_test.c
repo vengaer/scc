@@ -1,5 +1,5 @@
 #include <scc/mem.h>
-#include <scc/scc_vec.h>
+#include <scc/vec.h>
 
 #include <errno.h>
 #include <stdio.h>

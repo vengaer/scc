@@ -1,4 +1,4 @@
-#include <scc/scc_vec.h>
+#include <scc/vec.h>
 
 void test_scc_vec_pop_safe_panic(void) {
     int *vec = scc_vec_new(int);

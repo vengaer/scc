@@ -3,7 +3,7 @@
 #include <scc/btree.h>
 #include <scc/stack.h>
 #include <scc/svec.h>
-#include <scc/scc_vec.h>
+#include <scc/vec.h>
 
 #include <assert.h>
 #include <string.h>
