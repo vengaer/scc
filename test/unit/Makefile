@@ -16,11 +16,11 @@ define __unit-obj
 $(strip
     $(if $(1),$(eval __uo_subdir := /$(1)))
     $(patsubst $(srcdir)/%.$(cext),$(builddir)/scc$(__uo_subdir)/%.$(oext),
-        $(wildcard $(patsubst %,$(srcdir)/*%*.$(cext),$(__node) $($(__node)_deps))))
+        $(wildcard $(patsubst %,$(srcdir)/%*.$(cext),$(__node) $($(__node)_deps))))
     $(patsubst $(inspectdir)/%.$(cext),$(inspectbuilddir)$(__uo_subdir)/%.$(oext),
-        $(wildcard $(inspectdir)/*$(__node)*.$(cext)))
+        $(wildcard $(inspectdir)/$(__node)*.$(cext)))
     $(patsubst $(asdir)/%.$(asext),$(asbuilddir)/%.$(oext),
-        $(wildcard $(patsubst %,$(asdir)/*%*.$(asext),$(__node) $($(__node)_deps))))
+        $(wildcard $(patsubst %,$(asdir)/%*.$(asext),$(__node) $($(__node)_deps))))
     $(if $($(__node)_deps),
         $(patsubst $(inspectdir)/%.$(cext),$(inspectbuilddir)$(__uo_subdir)/%.$(oext),
             $(wildcard $(addprefix $(inspectdir)/*,$(addsuffix *.$(cext),$($(__node)_deps))))))
