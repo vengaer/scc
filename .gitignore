@@ -10,6 +10,7 @@ scc/config.h
 
 submodules/*.stamp
 
+test/fuzz/corpora/btmap/*
 test/fuzz/corpora/btree/*
 test/fuzz/corpora/hashmap/*
 test/fuzz/corpora/hashtab/*
@@ -18,6 +19,7 @@ test/fuzz/corpora/rbmap/*
 test/fuzz/corpora/rbtree/*
 test/fuzz/corpora/svec/*
 
+!test/fuzz/corpora/btmap/corpus_*
 !test/fuzz/corpora/btree/corpus_*
 !test/fuzz/corpora/hashmap/corpus_*
 !test/fuzz/corpora/hashtab/corpus_*
