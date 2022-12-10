@@ -1,4 +1,4 @@
-#include <scc/scc_algorithm.h>
+#include <scc/algorithm.h>
 #include <scc/btree.h>
 #include <scc/scc_stack.h>
 

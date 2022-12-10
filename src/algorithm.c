@@ -1,4 +1,4 @@
-#include <scc/scc_algorithm.h>
+#include <scc/algorithm.h>
 
 #include <limits.h>
 

@@ -1,4 +1,4 @@
-#include <scc/scc_algorithm.h>
+#include <scc/algorithm.h>
 #include <scc/scc_mem.h>
 
 #include <stddef.h>

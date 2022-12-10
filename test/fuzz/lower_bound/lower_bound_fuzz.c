@@ -1,4 +1,4 @@
-#include <scc/scc_algorithm.h>
+#include <scc/algorithm.h>
 #include <fuzzer/assertion.h>
 #include <fuzzer/dbg.h>
 
