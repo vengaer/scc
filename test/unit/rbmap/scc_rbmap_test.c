@@ -16,9 +16,6 @@ void test_scc_rbmap_insert(void) {
     for(int i = 0; i < TEST_SIZE; i++) {
         TEST_ASSERT_TRUE(scc_rbmap_insert(&rbmap, i, i));
         TEST_ASSERT_EQUAL_UINT64(i + 1ull, scc_rbmap_size(rbmap));
-        for(int j = 0; j <= i; j++) {
-            TEST_ASSERT_FALSE(scc_rbmap_insert(&rbmap, j, j));
-        }
         mask = scc_rbtree_inspect_properties(rbmap);
         TEST_ASSERT_EQUAL_UINT64(mask & SCC_RBTREE_ERR_MASK, 0ull);
     }
@@ -114,5 +111,21 @@ void test_scc_rbmap_foreach_reversed(void) {
         TEST_ASSERT_EQUAL_INT32(i--, iter->key);
         TEST_ASSERT_FALSE(!!iter->value);
     }
+    scc_rbmap_free(rbmap);
+}
+
+void test_scc_rbmap_update_existing(void) {
+    scc_rbmap(int, int) rbmap = scc_rbmap_new(int, int, compare);
+
+    TEST_ASSERT_TRUE(scc_rbmap_insert(&rbmap, 1, 1));
+    TEST_ASSERT_EQUAL_UINT64(1ull, scc_rbmap_size(rbmap));
+
+    TEST_ASSERT_TRUE(scc_rbmap_insert(&rbmap, 1, 2));
+    TEST_ASSERT_EQUAL_UINT64(1ull, scc_rbmap_size(rbmap));
+
+    int *val = scc_rbmap_find(rbmap, 1);
+    TEST_ASSERT_TRUE(!!val);
+    TEST_ASSERT_EQUAL_INT32(2, *val);
+
     scc_rbmap_free(rbmap);
 }
