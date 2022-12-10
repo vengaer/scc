@@ -1,5 +1,5 @@
 #include <scc/mem.h>
-#include <scc/scc_rbtree.h>
+#include <scc/rbtree.h>
 
 #include <assert.h>
 #include <limits.h>

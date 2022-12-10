@@ -1,7 +1,7 @@
 #ifndef SCC_RBTREE_INSPECT_H
 #define SCC_RBTREE_INSPECT_H
 
-#include <scc/scc_rbtree.h>
+#include <scc/rbtree.h>
 
 #include <limits.h>
 

@@ -1,4 +1,4 @@
-#include "scc_rbtree_inspect.h"
+#include "rbtree_inspect.h"
 
 #include <scc/mem.h>
 #include <scc/scc_stack.h>

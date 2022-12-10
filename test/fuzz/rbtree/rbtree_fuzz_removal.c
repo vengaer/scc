@@ -1,5 +1,5 @@
 #include <fuzzer/assertion.h>
-#include <inspect/scc_rbtree_inspect.h>
+#include <inspect/rbtree_inspect.h>
 
 #include "rbtree_fuzz_removal.h"
 

@@ -1,6 +1,6 @@
 #include <fuzzer/dbg.h>
-#include <inspect/scc_rbtree_inspect.h>
-#include <scc/scc_rbtree.h>
+#include <inspect/rbtree_inspect.h>
+#include <scc/rbtree.h>
 
 #include "rbtree_fuzz_insertion.h"
 #include "rbtree_fuzz_removal.h"

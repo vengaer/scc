@@ -1,7 +1,7 @@
 #ifndef RBTREE_FUZZ_TRAVERSAL_H
 #define RBTREE_FUZZ_TRAVERSAL_H
 
-#include <scc/scc_rbtree.h>
+#include <scc/rbtree.h>
 
 #include <stddef.h>
 #include <stdint.h>

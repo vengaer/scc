@@ -23,7 +23,7 @@ $(strip
         $(wildcard $(patsubst %,$(asdir)/*%*.$(asext),$(__node) $($(__node)_deps))))
     $(if $($(__node)_deps),
         $(patsubst $(inspectdir)/%.$(cext),$(inspectbuilddir)$(__uo_subdir)/%.$(oext),
-            $(wildcard $(addprefix $(inspectdir)/scc_,$(addsuffix *.$(cext),$($(__node)_deps))))))
+            $(wildcard $(addprefix $(inspectdir)/*,$(addsuffix *.$(cext),$($(__node)_deps))))))
     $(eval __uo_subdir :=))
 endef
 

@@ -1,7 +1,7 @@
 #ifndef SCC_RBMAP_H
 #define SCC_RBMAP_H
 
-#include "scc_rbtree.h"
+#include "rbtree.h"
 
 #include <stddef.h>
 
