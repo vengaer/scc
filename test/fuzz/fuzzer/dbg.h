@@ -1,7 +1,7 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
-#include <scc/scc_pp_token.h>
+#include <scc/pp_token.h>
 
 #include <stdio.h>
 

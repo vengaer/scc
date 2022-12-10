@@ -1,7 +1,7 @@
 #ifndef SCC_STACK_H
 #define SCC_STACK_H
 
-#include "scc_pp_token.h"
+#include "pp_token.h"
 #include "scc_svec.h"
 
 #ifndef SCC_STACK_CONTAINER

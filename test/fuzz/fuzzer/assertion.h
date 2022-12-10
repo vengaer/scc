@@ -1,7 +1,7 @@
 #ifndef ASSERTION_H
 #define ASSERTION_H
 
-#include <scc/scc_pp_token.h>
+#include <scc/pp_token.h>
 
 #include <stdio.h>
 #include <stdlib.h>

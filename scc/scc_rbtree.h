@@ -3,7 +3,7 @@
 
 #include "arena.h"
 #include "mem.h"
-#include "scc_pp_token.h"
+#include "pp_token.h"
 
 #include <stddef.h>
 

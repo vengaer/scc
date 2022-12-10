@@ -1,7 +1,7 @@
 #ifndef SCC_PANIC_H
 #define SCC_PANIC_H
 
-#include "scc_pp_token.h"
+#include "pp_token.h"
 
 #include <stdio.h>
 #include <stdlib.h>
