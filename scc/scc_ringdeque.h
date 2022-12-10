@@ -1,8 +1,8 @@
 #ifndef SCC_RINGDEQUE_H
 #define SCC_RINGDEQUE_H
 
-#include "scc_dbg.h"
 #include "bits.h"
+#include "bug.h"
 #include "scc_mem.h"
 
 #include <stddef.h>

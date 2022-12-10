@@ -2,8 +2,8 @@
 #define SCC_BTREE_H
 
 #include "arena.h"
-#include "scc_dbg.h"
 #include "bits.h"
+#include "bug.h"
 #include "scc_mem.h"
 
 #include <stddef.h>

@@ -1,5 +1,5 @@
-#ifndef SCC_DBG_H
-#define SCC_DBG_H
+#ifndef SCC_BUG_H
+#define SCC_BUG_H
 
 #include <assert.h>
 
@@ -53,4 +53,4 @@
 #define scc_static_assert_cond_only_0(cond, msg)    \
     scc_static_assert_cond_only_1(cond)
 
-#endif /* SCC_DBG_H */
+#endif /* SCC_BUG_H */

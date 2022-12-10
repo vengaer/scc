@@ -1,8 +1,8 @@
 #ifndef SCC_HASHMAP_H
 #define SCC_HASHMAP_H
 
-#include "scc_dbg.h"
 #include "bits.h"
+#include "bug.h"
 #include "config.h"
 #include "scc_mem.h"
 
