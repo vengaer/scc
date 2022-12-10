@@ -1,4 +1,4 @@
-#include "scc_hashmap_inspect.h"
+#include "hashmap_inspect.h"
 
 scc_hashmap_metatype *scc_hashmap_inspect_metadata(void *map) {
     struct scc_hashmap_base *base = scc_hashmap_inspect_base(map);

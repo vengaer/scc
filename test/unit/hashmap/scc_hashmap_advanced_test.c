@@ -1,4 +1,4 @@
-#include <scc/scc_hashmap.h>
+#include <scc/hashmap.h>
 
 #include <stdbool.h>
 #include <stddef.h>

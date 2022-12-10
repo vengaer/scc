@@ -1,5 +1,5 @@
 #include <fuzzer/assertion.h>
-#include <scc/scc_hashmap.h>
+#include <scc/hashmap.h>
 
 #include "hashmap_fuzz_removal.h"
 
