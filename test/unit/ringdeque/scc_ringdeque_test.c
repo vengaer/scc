@@ -1,4 +1,4 @@
-#include <scc/scc_ringdeque.h>
+#include <scc/ringdeque.h>
 
 #include <unity.h>
 
