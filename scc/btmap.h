@@ -3,7 +3,7 @@
 
 #include "arena.h"
 #include "btree.h"
-#include "scc_mem.h"
+#include "mem.h"
 
 #include <stddef.h>
 

@@ -1,6 +1,6 @@
 #include <inspect/btmap_inspect.h>
 #include <scc/btmap.h>
-#include <scc/scc_mem.h>
+#include <scc/mem.h>
 
 #include <string.h>
 

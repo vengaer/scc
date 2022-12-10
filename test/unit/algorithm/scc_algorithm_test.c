@@ -1,5 +1,5 @@
 #include <scc/algorithm.h>
-#include <scc/scc_mem.h>
+#include <scc/mem.h>
 
 #include <stddef.h>
 

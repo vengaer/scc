@@ -1,7 +1,7 @@
 #ifndef SCC_VEC_H
 #define SCC_VEC_H
 
-#include "scc_mem.h"
+#include "mem.h"
 #include "scc_pp_token.h"
 
 #include <stddef.h>

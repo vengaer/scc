@@ -1,6 +1,6 @@
 #include <inspect/btree_inspect.h>
 #include <scc/btree.h>
-#include <scc/scc_mem.h>
+#include <scc/mem.h>
 
 #include <unity.h>
 

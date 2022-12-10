@@ -1,6 +1,6 @@
 #include "scc_rbtree_inspect.h"
 
-#include <scc/scc_mem.h>
+#include <scc/mem.h>
 #include <scc/scc_stack.h>
 
 #include <stdbool.h>

@@ -1,4 +1,4 @@
-#include <scc/scc_mem.h>
+#include <scc/mem.h>
 #include <scc/scc_rbtree.h>
 
 #include <assert.h>

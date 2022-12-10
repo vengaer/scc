@@ -1,6 +1,6 @@
 #include "hashtab_inspect.h"
 
-#include <scc/scc_mem.h>
+#include <scc/mem.h>
 
 struct scc_hashtab_base *scc_hashtab_inspect_base(void *tab) {
     struct scc_hashtab_base *base = scc_container(

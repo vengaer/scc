@@ -1,5 +1,5 @@
 #include <scc/arena.h>
-#include <scc/scc_mem.h>
+#include <scc/mem.h>
 
 #include <unity.h>
 

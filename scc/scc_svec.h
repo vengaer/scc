@@ -2,7 +2,7 @@
 #define SCC_SVEC_H
 
 #include "bug.h"
-#include "scc_mem.h"
+#include "mem.h"
 #include "scc_pp_token.h"
 
 #include <stddef.h>

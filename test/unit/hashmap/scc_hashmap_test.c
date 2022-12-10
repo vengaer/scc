@@ -1,7 +1,7 @@
 #include <inspect/hashmap_inspect.h>
 
 #include <scc/hashmap.h>
-#include <scc/scc_mem.h>
+#include <scc/mem.h>
 
 #include <stdbool.h>
 #include <limits.h>

@@ -3,7 +3,7 @@
 
 #include "bug.h"
 #include "config.h"
-#include "scc_mem.h"
+#include "mem.h"
 
 #include <stddef.h>
 
