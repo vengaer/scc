@@ -10,4 +10,5 @@ Welcome to scc's documentation!
     collections
     lifetime
     configuration/index
+    build
     tldr
