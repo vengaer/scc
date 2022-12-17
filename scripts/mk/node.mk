@@ -101,6 +101,8 @@ $(if $(1),
     $(call __exit-node))
 endef
 
+include-node-if = $(if $(1),$(call include-node,$(2)))
+
 # Generate objects on the form $(__node_builddir)/STEM$(3).$(oext) for each file with extension
 # $(2) in directory $(1) where $(3) is an optional suffix to be appended to the object stem
 # $(call wildcard-obj,SRCDIR,EXTENSION[,SUFFIX])

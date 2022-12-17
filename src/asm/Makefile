@@ -3,7 +3,7 @@ ifdef __node
 asdir      := $(__node_path)/$(arch_lower)/$(abi_lower)
 asbuilddir := $(__node_builddir)/$(arch_lower)/$(abi_lower)
 
-$(if $(__simd_enable),$(call include-node,$(arch_lower)))
+$(call include-node-if,$(__simd_enable),$(arch_lower))
 
 else
 # Recurse to top level
