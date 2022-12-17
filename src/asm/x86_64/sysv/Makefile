@@ -1,6 +1,6 @@
 ifdef __node
 
-__assrc     := $(wildcard $(__node_path)/scc_hash*.$(asext))
+__assrc     := $(wildcard $(__node_path)/hash*.$(asext))
 __node_obj  := $(patsubst $(__node_path)/%.$(asext),$(__node_builddir)/%.$(oext),$(__assrc))
 asmexpander := $(pyscripts)/asmexpander.$(pyext)
 asmsrcdir   := $(__node_path)
