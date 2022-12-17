@@ -8,6 +8,7 @@ Welcome to scc's documentation!
     :maxdepth: 2
 
     collections
+    design/index
     lifetime
     configuration/index
     build

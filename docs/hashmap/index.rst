@@ -1,3 +1,5 @@
+.. _scc_hashmap:
+
 ===========
 scc_hashmap
 ===========

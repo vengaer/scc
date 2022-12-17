@@ -1,3 +1,5 @@
+.. _scc_hashtab:
+
 ===========
 scc_hashtab
 ===========
