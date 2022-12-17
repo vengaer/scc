@@ -1,4 +1,4 @@
-#include "isolssb.S"
+#include "isomssb.S"
 
 # Wrap index of slot computation
 #
@@ -173,7 +173,7 @@
     testl   %r9d, %r9d                      # Check for probe end
     jz      8f
 
-    isolssbl    %r9d, %r8d                  # Isolate rigthmost 1 bit
+    isomssbl    %r9d, %r8d                  # Isolate rigthmost 1 bit
 
     vpmovmskb   %ymm2, %r8d                 # Extract bitmask
 
@@ -304,7 +304,7 @@
     testl   %r8d, %r8d                      # Check for probe end
     jz      3f
 
-    isolssbl    %r8d, %ecx                  # Isolate rigthmost 1 bit
+    isomssbl    %r8d, %ecx                  # Isolate rigthmost 1 bit
     subl    $1, %r8d                        # Create mask
     andl    %r8d, %r15d                     # Mask out matches beyond probe end
     jz      4f

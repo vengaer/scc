@@ -9,7 +9,7 @@
 #
 # Return:
 #   \r0: The result of \r0 & ~(\r0 - 1)
-.macro isolssbl  r0, r1
+.macro isomssbl  r0, r1
     leal    -1(\r0), \r1
     notl    \r1
     andl    \r1, \r0

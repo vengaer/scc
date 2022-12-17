@@ -1,4 +1,4 @@
-#include "isolssb.S"
+#include "isomssb.S"
 
 # Wrap index of slot computation
 #
@@ -167,7 +167,7 @@
     testl   %r8d, %r8d                      # Check for probe end
     jz      8f
 
-    isolssbl    %r8d, %r9d                  # Isolate rightmost set bit
+    isomssbl    %r8d, %r9d                  # Isolate rightmost set bit
     leal    -1(%r9d), %r9d
     andl    %r9d, %ecx                      # Mask out matches beyond probe end
     jz      1f
@@ -227,7 +227,7 @@
     testl   %r8d, %r8d                      # Check for probe end
     jz      6f
 
-    isolssbl    %r8d, %r10d                 # Isolate rightmost set bit
+    isomssbl    %r8d, %r10d                 # Isolate rightmost set bit
     leal    -1(%r10d), %r10d
     andl    %r10d, %ecx                     # Mask out matches beyond probe end
     jnz     5f
@@ -294,7 +294,7 @@
     jmp     1b
 
 3: # Probe end in vector
-    isolssbl    %r8d, %r9d                  # Isolate rightmost set bit
+    isomssbl    %r8d, %r9d                  # Isolate rightmost set bit
     leal    -1(%r9d), %r9d
     andl    %r9d, %r15d                     # Mask out matches beyond probe end
     jz      3f
