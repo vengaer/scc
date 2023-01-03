@@ -169,7 +169,12 @@ void test_scc_hashtab_remove(void) {
  * values that have yet to be removed are.
  */
 void test_scc_hashtab_interleaved_remove_find(void) {
+#ifdef SCC_SIMD_ENABLED
     enum { TESTSIZE = 2048 };
+#else
+    /* Software emulation significantly slower */
+    enum { TESTSIZE = 512 };
+#endif
     scc_hashtab(int) tab = scc_hashtab_new(int, eq);
 
     for(int i = 0; i < TESTSIZE; ++i) {
