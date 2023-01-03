@@ -161,6 +161,8 @@ $(call include-node,vec)
 
 $(call include-node-if,$(__simd_enable),avx2)
 
+$(call include-node-if-not,$(__simd_enable),swsimd)
+
 $(call pop,LDLIBS)
 $(call pop,LDFLAGS)
 $(call pop,CPPFLAGS)

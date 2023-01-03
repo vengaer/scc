@@ -1,5 +1,8 @@
 ifdef __node
 
+swsimddir      := $(__node_path)
+swsimdbuilddir := $(__node_builddir)
+
 __node_obj := $(call wildcard-obj,$(__node_path),$(cext))
 $(solib) $(alib): $(__node_obj)
 
