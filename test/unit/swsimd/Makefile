@@ -7,7 +7,7 @@ CPPFLAGS := $(filter-out -DSCC_VECSIZE%,$(CPPFLAGS))
 CPPFLAGS := $(filter-out -DSCC_SIMD_ISA_%,$(CPPFLAGS))
 CPPFLAGS += -DSCC_VECSIZE=$(ullsize)
 
-swsimd_deps += hashtab
+swsimd_deps += hashtab hashmap
 
 $(call decl-unit)
 
