@@ -183,7 +183,7 @@ long long scc_hashtab_probe_insert(
 
     long long empty_slot = -1ll;
     for(unsigned i = slot_adj; i < sizeof(curr); ++i) {
-        if(!read_byte(occ_match, i) && base->ht_eq(vals + i * elemsize, handle)) {
+        if(!read_byte(occ_match, i) && base->ht_eq(vals + (i + start) * elemsize, handle)) {
             /* Already in table */
             return -1ll;
         }
