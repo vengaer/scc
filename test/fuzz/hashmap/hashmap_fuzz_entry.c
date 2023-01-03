@@ -3,6 +3,7 @@
 
 #include <fuzzer/dbg.h>
 
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -60,12 +61,12 @@ int LLVMFuzzerTestOneInput(uint8_t const *data, size_t size) {
 
     uint32_t *kit;
     dbg_pr("Keys:\n");
-    dbg_pr_n(kit, keys, size, "%u ", *kit);
+    dbg_pr_n(kit, keys, size, "%#04" PRIx32 " ", *kit);
     dbg_pr("\n");
 
     uint16_t *vit;
     dbg_pr("Values:\n");
-    dbg_pr_n(vit, vals, size, "%u ", *vit);
+    dbg_pr_n(vit, vals, size, "%#02" PRIx32 " ", *vit);
     dbg_pr("\n");
 
     hashmap_fuzz_insertion(&map, keys, vals, end, size);
