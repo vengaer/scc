@@ -145,3 +145,103 @@ long long scc_hashtab_probe_find(
 
     return -1ll;
 }
+
+long long scc_hashtab_probe_insert(
+    struct scc_hashtab_base const *base,
+    void const *handle,
+    size_t elemsize,
+    unsigned long long hash
+) {
+    /* 7 high bits of hash, packed */
+    scc_vectype metamask = scc_hashtab_gen_metamask(hash);
+    scc_vectype ones = ~(scc_vectype)0u;
+    /* Metadata array */
+    unsigned char const *meta = (unsigned char const *)base + base->ht_mdoff;
+    /* Value array */
+    unsigned char const *vals = (unsigned char const *)handle + elemsize;
+
+    /* Start slot */
+    size_t sslot = hash & (base->ht_capacity - 1u);
+    scc_vectype const *ldaddr = scc_hashtab_align_vecld(meta + sslot);
+
+    /* Aligned offset */
+    size_t start = (unsigned char const *)ldaddr - meta;
+    /* Slot adjustment for aligning */
+    size_t const slot_adj = (sslot - start);
+    assert(slot_adj < CHAR_BIT);
+
+    scc_vectype curr = *ldaddr;
+    /* Rounding may have caused matches to wrap, treat them as occupied */
+    curr |= ~((~(scc_vectype)0u) << slot_adj);
+
+    /* MSB 1 if vacant */
+    scc_vectype vacant = curr ^ ones;
+    /* All zeroes for non-vacant with matching hash */
+    scc_vectype occ_match = curr ^ metamask;
+    /* All zeroes for probe end */
+    scc_vectype probe_end = curr ^ 0u;
+
+    long long empty_slot = -1ll;
+    for(unsigned i = slot_adj; i < sizeof(curr); ++i) {
+        if(!read_byte(occ_match, i) && base->ht_eq(vals + i * elemsize, handle)) {
+            /* Already in table */
+            return -1ll;
+        }
+        if(empty_slot == -1ll && read_byte(vacant, i) & 0x80u) {
+            empty_slot = (long long)(i + start);
+        }
+        if(!read_byte(probe_end, i)) {
+            /* Found end, done probing */
+            return empty_slot;
+        }
+    }
+
+    /* Advance and wrap */
+    size_t slot = (start + sizeof(scc_vectype)) & (base->ht_capacity - 1u);
+
+    /* Look through the bulk of the table */
+    while(slot != start) {
+        curr = *(scc_vectype const *)(meta + slot);
+        vacant = curr ^ ones;
+        occ_match = curr ^ metamask;
+        probe_end = curr ^ 0u;
+
+        for(unsigned i = 0u; i < sizeof(curr); ++i) {
+            if(!read_byte(occ_match, i) && base->ht_eq(vals + (slot + i) * elemsize, handle)) {
+                return -1ll;
+            }
+            if(empty_slot == -1ll && read_byte(vacant, i) & 0x80u) {
+                empty_slot = (long long)(slot + i);
+            }
+            if(!read_byte(probe_end, i)) {
+                /* Found end, done probing */
+                return empty_slot;
+            }
+        }
+
+        /* Advance */
+        slot = (slot + sizeof(scc_vectype)) & (base->ht_capacity - 1u);
+    }
+
+    /* Residual */
+    if(slot_adj) {
+        curr = *(scc_vectype const *)(meta + slot);
+        vacant = curr ^ ones;
+        occ_match = curr ^ metamask;
+        probe_end = curr ^ 0u;
+        for(unsigned i = 0u; i < slot_adj; ++i) {
+            if(!read_byte(occ_match, i) && base->ht_eq(vals + (slot + i) * elemsize, handle)) {
+                return -1ll;
+            }
+            if(empty_slot == -1ll && read_byte(vacant, i) & 0x80u) {
+                empty_slot = (long long)(slot + i);
+            }
+            if(!read_byte(probe_end, i)) {
+                /* Found end, done probing */
+                return empty_slot;
+            }
+        }
+    }
+
+    return -1ll;
+}
