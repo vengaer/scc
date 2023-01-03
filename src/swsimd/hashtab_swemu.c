@@ -24,6 +24,21 @@ scc_static_assert(CHAR_BIT >= 8, "Non-conformant implementation");
 
 scc_static_assert(sizeof(scc_vectype) < SCC_HASHTAB_STATIC_CAPACITY);
 
+//? .. c:function:: unsigned char read_byte(scc_vectype vec, unsigned i)
+//?
+//?     Read the ith byte in the given vector
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param vec: The vector to read from
+//?     :param i: The index of the byte to read
+//?     :returns: The ith byte of the given vector
+static inline unsigned char read_byte(scc_vectype vec, unsigned i) {
+    return (vec >> i * CHAR_BIT) & UCHAR_MAX;
+}
+
 //? .. c:function:: scc_vectype scc_hashtab_gen_metamask(unsigned long long hash)
 //?
 //?     Broadcast high 7 bits of the hash to each byte in a vector. Set
@@ -96,7 +111,7 @@ long long scc_hashtab_probe_find(
     /* Compare, matching bytes are all zeroes */
     curr ^= metamask;
     for(unsigned i = 0u ; i < sizeof(curr); ++i) {
-        if(!((unsigned char const *)curr)[i] && !base->ht_eq(vals + (start + i) * elemsize, handle)) {
+        if(!read_byte(curr, i) && !base->ht_eq(vals + (start + i) * elemsize, handle)) {
             return (long long)(start + i);
         }
     }
@@ -110,7 +125,7 @@ long long scc_hashtab_probe_find(
 
         /* Check elements */
         for(unsigned i = 0u; i < sizeof(curr); ++i) {
-            if(!((unsigned char const *)curr)[i] && !base->ht_eq(vals + (slot + i) * elemsize, handle)) {
+            if(!read_byte(curr, i) && !base->ht_eq(vals + (slot + i) * elemsize, handle)) {
                 return (long long)(slot + i);
             }
         }
@@ -122,7 +137,7 @@ long long scc_hashtab_probe_find(
     if(slot_adj) {
         curr = *(scc_vectype const *)(meta + slot);
         for(unsigned i = 0u; i < slot_adj; ++i) {
-            if(!((unsigned char const *)curr)[i] && !base->ht_eq(vals + (slot + i) * elemsize, handle)) {
+            if(!read_byte(curr, i) && !base->ht_eq(vals + (slot + i) * elemsize, handle)) {
                 return (long long)(slot + i);
             }
         }
