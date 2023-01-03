@@ -1,10 +1,12 @@
 FROM archlinux:latest
 LABEL maintainer="vilhelm.engstrom@tuta.io"
 
-COPY . /scc
-WORKDIR /scc
+RUN useradd -m builder
 
-RUN useradd -m builder                                                              &&  \
+COPY . /home/builder/scc
+WORKDIR /home/builder/scc
+
+RUN chown -R builder:builder /home/builder/scc                                      &&  \
     pacman-key --init                                                               &&  \
     pacman -Sy --noconfirm archlinux-keyring                                        &&  \
     pacman -Syu --noconfirm --needed make                                               \
@@ -15,12 +17,11 @@ RUN useradd -m builder                                                          
                                      llvm                                               \
                                      ruby                                               \
                                      cmake                                              \
-                                     rust                               &&              \
-    cargo install --path /scc/submodules/conftool --root /usr/local     &&              \
+                                     rust                                           &&  \
+    cargo install --path /home/builder/scc/submodules/conftool --root /usr/local    &&  \
     pacman -Rns --noconfirm rust                                        &&              \
     pip install --no-cache setuptools                                                   \
                            sphinx-rtd-theme                                             \
-                           pycparser                                                &&  \
-    chown -R builder:builder /scc
+                           pycparser
 
 USER builder
