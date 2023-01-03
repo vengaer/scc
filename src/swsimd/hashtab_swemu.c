@@ -121,8 +121,7 @@ long long scc_hashtab_probe_find(
     /* Residual */
     if(slot_adj) {
         curr = *(scc_vectype const *)(meta + slot);
-        curr &= ~((~(scc_vectype)0u) << slot_adj);
-        for(unsigned i = 0u; i < sizeof(curr); ++i) {
+        for(unsigned i = 0u; i < slot_adj; ++i) {
             if(!((unsigned char const *)curr)[i] && !base->ht_eq(vals + (slot + i) * elemsize, handle)) {
                 return (long long)(slot + i);
             }
