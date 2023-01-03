@@ -111,7 +111,7 @@ long long scc_hashtab_probe_find(
     /* Compare, matching bytes are all zeroes */
     curr ^= metamask;
     for(unsigned i = 0u ; i < sizeof(curr); ++i) {
-        if(!read_byte(curr, i) && !base->ht_eq(vals + (start + i) * elemsize, handle)) {
+        if(!read_byte(curr, i) && base->ht_eq(vals + (start + i) * elemsize, handle)) {
             return (long long)(start + i);
         }
     }
@@ -125,7 +125,7 @@ long long scc_hashtab_probe_find(
 
         /* Check elements */
         for(unsigned i = 0u; i < sizeof(curr); ++i) {
-            if(!read_byte(curr, i) && !base->ht_eq(vals + (slot + i) * elemsize, handle)) {
+            if(!read_byte(curr, i) && base->ht_eq(vals + (slot + i) * elemsize, handle)) {
                 return (long long)(slot + i);
             }
         }
@@ -137,7 +137,7 @@ long long scc_hashtab_probe_find(
     if(slot_adj) {
         curr = *(scc_vectype const *)(meta + slot);
         for(unsigned i = 0u; i < slot_adj; ++i) {
-            if(!read_byte(curr, i) && !base->ht_eq(vals + (slot + i) * elemsize, handle)) {
+            if(!read_byte(curr, i) && base->ht_eq(vals + (slot + i) * elemsize, handle)) {
                 return (long long)(slot + i);
             }
         }
