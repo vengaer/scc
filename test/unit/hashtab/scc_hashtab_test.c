@@ -220,7 +220,7 @@ void test_scc_hashtab_insertion_probe_stop(void) {
 
         for(unsigned j = 0u; j < scc_hashtab_capacity(tab); ++j) {
             if(!md[j]) {
-                done = false;
+                done = true;
                 break;
             }
         }
