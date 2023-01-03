@@ -31,8 +31,11 @@ $(strip
         $(wildcard $(srcdir)/*$(__node).$(cext)))
     $(patsubst $(srcdir)/%.$(cext),$(__node_builddir)/%.$(oext),
         $(wildcard $(addsuffix .$(cext),$(addprefix $(srcdir)/*,$($(__node)_deps)))))
-    $(patsubst $(asdir)/%.$(asext),$(__node_builddir)/%.$(oext),
-        $(wildcard $(asdir)/*$(__node)*.$(asext)))
+    $(if $(__simd_enable),
+        $(patsubst $(asdir)/%.$(asext),$(__node_builddir)/%.$(oext),
+            $(wildcard $(asdir)/*$(__node)*.$(asext))),
+      $(patsubst $(swsimddir)/%.$(cext),$(swsimdbuilddir)/%.$(oext),
+          $(wildcard $(patsubst %,$(swsimddir)/%*.$(cext),$(__node) $($(__node)_deps) swvec))))
     $(patsubst $(inspectdir)/%.$(cext),$(__node_builddir)/%.$(oext),
         $(wildcard $(inspectdir)/*$(__node)*.$(cext)))
     $(if $($(__node)_deps),
