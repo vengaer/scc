@@ -41,7 +41,7 @@ scc          := scc
 
 scripts      := $(root)/scripts
 mkscripts    := $(scripts)/mk
-pyscripts    := $(scripts)/python
+pyscripts    := $(scripts)/py
 
 .PHONY: all
 all:

@@ -26,4 +26,4 @@ def build_dir(project_root):
 
 @pytest.fixture
 def pyscripts_in_path(project_root):
-    sys.path.append(f'{project_root}/scripts/python')
+    sys.path.append(f'{project_root}/scripts/py')
