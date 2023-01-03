@@ -15,7 +15,7 @@ __config_md5mk    := $(confbuilddir)/md5.$(mkext)
 -include $(__config_md5mk)
 -include $(CONFIG)
 
-config_stamp      := $(confbuilddir)/.$(config_md5)
+config_stamp      := $(confbuilddir)/_$(config_md5)
 
 __conftool_spec   := $(root)/.conftool.$(jsonext)
 __validate_config := $(builddir)/.config.valid.stamp
@@ -34,6 +34,7 @@ $(__config_md5mk): $(CONFIG) $(md5script) | $(confbuilddir)
 	$(PYTHON) $(md5script) -f make $< -o $@
 
 $(config_stamp): | $(confbuilddir)
+	$(RM) $(RMFLAGS) $(wildcard $(dir $@)/_*)
 	$(TOUCH) $@
 
 __simd_enable    := $(call is-set,$(CONFIG_SIMD))
