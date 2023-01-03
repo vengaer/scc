@@ -128,8 +128,6 @@ long long scc_hashtab_probe_insert(
     assert(slot_adj < CHAR_BIT);
 
     scc_vectype curr = *ldaddr;
-    /* Rounding may have caused matches to wrap, treat them as occupied */
-    curr |= ~((~(scc_vectype)0u) << slot_adj);
 
     /* MSB 1 if vacant */
     scc_vectype vacant = curr ^ ones;
