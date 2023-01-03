@@ -37,7 +37,7 @@ LNFLAGS      := -sf
 RMFLAGS      := -rf
 TOUCHFLAGS   :=
 PYTESTFLAGS  := -v
-PYLINTFLAGS  := --fail-under=10.0 --rcfile $(pyscripts)/.pylintrc
+PYLINTFLAGS  := --fail-under=10.0 --rcfile $(pyscripts)/.pylintrc --score=n
 
 submodules   := submodules/.init.stamp
 
