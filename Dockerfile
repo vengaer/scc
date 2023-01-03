@@ -19,7 +19,6 @@ RUN chown -R builder:builder /home/builder/scc                                  
                                      cmake                                              \
                                      rust                                           &&  \
     cargo install --path /home/builder/scc/submodules/conftool --root /usr/local    &&  \
-    pacman -Rns --noconfirm rust                                        &&              \
     pip install --no-cache setuptools                                                   \
                            sphinx-rtd-theme                                             \
                            pycparser
