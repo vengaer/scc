@@ -22,7 +22,7 @@ def load_configs(configs):
 
     return data
 
-def write(data, semver, outfile):
+def write(data, semver, outfile, enable_simd):
     ''' Write the header '''
     formats = {
         'arch': 'SCC_ARCH_{}',
@@ -50,6 +50,11 @@ def write(data, semver, outfile):
         handle.writeln(f'#define SCC_VERSION_PATCH {patch}')
         handle.writeln('#endif\n')
 
+        if enable_simd:
+            handle.writeln('#ifndef SCC_SIMD_ENABLED')
+            handle.writeln('#define SCC_SIMD_ENABLED')
+            handle.writeln('#endif\n')
+
         for var, fmt in formats.items():
             try:
                 name = fmt.format(data[var]).split(' ', maxsplit=1)[0]
@@ -61,16 +66,17 @@ def write(data, semver, outfile):
                     raise
         handle.writeln('#endif /* SCC_CONFIG_H */')
 
-def main(configs, semver, outfile):
+def main(configs, semver, outfile, enable_simd):
     ''' Main '''
     data = load_configs(configs)
-    write(data, semver, outfile)
+    write(data, semver, outfile, enable_simd)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
             description='Generate configuration header')
     parser.add_argument('-o', '--outfile', action='store', default=None,
         help='Path to write the generated header document to')
+    parser.add_argument('-s', '--enable-simd', help='Enable SIMD support', action='store_true')
     parser.add_argument('semver', metavar='SEMVER', help='Semantic version')
     parser.add_argument('configs', nargs='+', help='Input configuration files')
     main(**vars(parser.parse_args()))

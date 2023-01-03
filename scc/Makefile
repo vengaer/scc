@@ -7,7 +7,7 @@ __public_headers := $(addsuffix .h,btmap btree hashmap hashtab rbmap rbtree ring
 
 $(__config_header): $(pyscripts)/confgen.$(pyext) $(archinfo) $(simdinfo) $(vecinfo) $(config_stamp)
 	$(call echo-gen,$(notdir $@))
-	$(PYTHON) $< $(sover) $(filter-out $<,$^) -o $@
+	$(PYTHON) $< $(sover) $(filter-out $<,$^) -o $@ $(if $(__simd_enable),--enable-simd)
 	touch $@
 
 .PHONY: __clean_config_header
