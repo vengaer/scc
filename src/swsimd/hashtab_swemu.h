@@ -22,6 +22,7 @@ struct scc_hashtab_base;
 //?     :returns: Index of the slot to insert the element in, or -1
 //?               if the element is already present
 long long scc_hashtab_probe_insert(struct scc_hashtab_base const *base, void const *handle, size_t elemsize, unsigned long long hash);
+
 //? .. c:function:: long long scc_hashtab_probe_find(struct scc_hashtab_base const *base, \
 //?     void const *handle, size_t elemsize, unsigned long long hash)
 //?

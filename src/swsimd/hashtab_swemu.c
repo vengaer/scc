@@ -105,10 +105,16 @@ long long scc_hashtab_probe_find(
 
     scc_vectype curr = *ldaddr;
 
-    /* Compare, matching bytes are all zeroes */
-    curr ^= metamask;
+    /* All zeroes for non-vacant with matching hash */
+    scc_vectype occ_match = curr ^ metamask;
+    /* All zeroes for probe end */
+    scc_vectype probe_end = curr ^ 0u;
+
     for(unsigned i = slot_adj; i < sizeof(curr); ++i) {
-        if(!read_byte(curr, i) && base->ht_eq(vals + (start + i) * elemsize, handle)) {
+        if(!read_byte(probe_end, i)) {
+            return -1ll;
+        }
+        if(!read_byte(occ_match, i) && base->ht_eq(vals + (start + i) * elemsize, handle)) {
             return (long long)(start + i);
         }
     }
@@ -118,11 +124,16 @@ long long scc_hashtab_probe_find(
 
     /* Look through the bulk of the table */
     while(slot != start) {
-        curr = *(scc_vectype const *)(meta + slot) ^ metamask;
+        curr = *(scc_vectype const *)(meta + slot);
+        occ_match = curr ^ metamask;
+        probe_end = curr ^ 0u;
 
         /* Check elements */
         for(unsigned i = 0u; i < sizeof(curr); ++i) {
-            if(!read_byte(curr, i) && base->ht_eq(vals + (slot + i) * elemsize, handle)) {
+            if(!read_byte(probe_end, i)) {
+                return -1ll;
+            }
+            if(!read_byte(occ_match, i) && base->ht_eq(vals + (slot + i) * elemsize, handle)) {
                 return (long long)(slot + i);
             }
         }
@@ -133,8 +144,13 @@ long long scc_hashtab_probe_find(
     /* Residual */
     if(slot_adj) {
         curr = *(scc_vectype const *)(meta + slot) ^ metamask;
+        occ_match = curr ^ metamask;
+        probe_end = curr ^ 0u;
         for(unsigned i = 0u; i < slot_adj; ++i) {
-            if(!read_byte(curr, i) && base->ht_eq(vals + (slot + i) * elemsize, handle)) {
+            if(!read_byte(probe_end, i)) {
+                return -1ll;
+            }
+            if(!read_byte(occ_match, i) && base->ht_eq(vals + (slot + i) * elemsize, handle)) {
                 return (long long)(slot + i);
             }
         }
