@@ -38,3 +38,19 @@ void test_swsimd_hashtab_simple_find_insert_probe(void) {
     }
     scc_hashtab_free(tab);
 }
+
+void test_swsimd_hashtab_probe_on_rehash(void) {
+    scc_hashtab(int) tab = scc_hashtab_new(int, eq);
+    size_t const cap = scc_hashtab_capacity(tab);
+    int const *p;
+    for(unsigned i = 0; i < 2 * cap; ++i) {
+        TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, (int)i));
+
+        for(unsigned j = 0u; j < i; ++j) {
+            p = scc_hashtab_find(tab, (int)j);
+            TEST_ASSERT_TRUE(!!p);
+            TEST_ASSERT_EQUAL_INT32(j, *p);
+        }
+    }
+    scc_hashtab_free(tab);
+}
