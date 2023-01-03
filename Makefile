@@ -26,6 +26,10 @@ builddir     := $(root)/build
 dirs         += $(builddir)
 srcdir       := $(root)/src
 
+scripts      := $(root)/scripts
+mkscripts    := $(scripts)/mk
+pyscripts    := $(scripts)/py
+
 TIDYFLAGS     = --warnings-as-errors=* --checks=$(tidychecks)
 
 MKDIRFLAGS   := -p
@@ -33,15 +37,11 @@ LNFLAGS      := -sf
 RMFLAGS      := -rf
 TOUCHFLAGS   :=
 PYTESTFLAGS  := -v
-PYLINTFLAGS  := --fail-under=10.0
+PYLINTFLAGS  := --fail-under=10.0 --rcfile $(pyscripts)/.pylintrc
 
 submodules   := submodules/.init.stamp
 
 scc          := scc
-
-scripts      := $(root)/scripts
-mkscripts    := $(scripts)/mk
-pyscripts    := $(scripts)/py
 
 .PHONY: all
 all:
