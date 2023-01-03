@@ -1,43 +1,13 @@
 #include "hashtab_swemu.h"
+#include "swvec.h"
 
 #include <scc/bug.h>
 #include <scc/hashtab.h>
 
 #include <assert.h>
 #include <limits.h>
-#include <stdint.h>
-#include <string.h>
-
-//? .. c:type:: unsigned long long scc_vectype
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     Vector type used in simd emulation
-typedef unsigned long long scc_vectype;
-
-scc_static_assert(sizeof(scc_vectype) == SCC_VECSIZE, "Unexpected vector size");
-/* Standard mandates that UCHAR_MAX >= 255 meaning a byte must be
- * at least 8 bits */
-scc_static_assert(CHAR_BIT >= 8, "Non-conformant implementation");
 
 scc_static_assert(sizeof(scc_vectype) < SCC_HASHTAB_STATIC_CAPACITY);
-
-//? .. c:function:: unsigned char read_byte(scc_vectype vec, unsigned i)
-//?
-//?     Read the ith byte in the given vector
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param vec: The vector to read from
-//?     :param i: The index of the byte to read
-//?     :returns: The ith byte of the given vector
-static inline unsigned char read_byte(scc_vectype vec, unsigned i) {
-    return (vec >> i * CHAR_BIT) & UCHAR_MAX;
-}
 
 //? .. c:function:: scc_vectype scc_hashtab_gen_metamask(unsigned long long hash)
 //?
@@ -51,33 +21,7 @@ static inline unsigned char read_byte(scc_vectype vec, unsigned i) {
 //?     :param hash: The hash of the element
 //?     :returns: A vector where each byte contains 0x80 | <7 MSB of hash>
 static inline scc_vectype scc_hashtab_gen_metamask(unsigned long long hash) {
-    /* Cannot assume sizeof(scc_vectype) */
-    scc_vectype metamask = 0u;
-    for(unsigned i = 0u; i < sizeof(metamask); ++i) {
-        metamask = (metamask << 8u) | 0x01u;
-    }
-    unsigned char meta = 0x80 | (hash >> (sizeof(metamask) * CHAR_BIT - (CHAR_BIT - 1u)));
-
-    /* Broadcast metabyte to all bytes in the vector */
-    return metamask * meta;
-}
-
-//? .. c:function:: scc_vectype const *scc_hashtab_align_vecld(unsigned char const *ldaddr)
-//?
-//?     Align :code:`ldaddr` down to the nearest multiple of :c:texpr:`sizeof(scc_vectype)`
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param ldaddr: The address to be aligned
-//?     :returns: :code:`ldaddr` rounded down to the nearest multiple
-//?               of :c:texpr:`sizeof(scc_vectype)`
-static scc_vectype const *scc_hashtab_align_vecld(unsigned char const *ldaddr) {
-    unsigned char byte;
-    memcpy(&byte, &ldaddr, sizeof(byte));
-    unsigned char aligned = byte & ~(sizeof(scc_vectype) - 1u);
-    return (void const *)(ldaddr + aligned - byte);
+    return scc_swvec_bcast(0x80u | (hash >> (sizeof(scc_vectype) * CHAR_BIT - (CHAR_BIT - 1u))));
 }
 
 long long scc_hashtab_probe_find(
@@ -95,7 +39,7 @@ long long scc_hashtab_probe_find(
 
     /* Start slot */
     size_t sslot = hash & (base->ht_capacity - 1u);
-    scc_vectype const *ldaddr = scc_hashtab_align_vecld(meta + sslot);
+    scc_vectype const *ldaddr = scc_swvec_align_load(meta + sslot);
 
     /* Aligned offset */
     size_t start = (unsigned char const *)ldaddr - meta;
@@ -111,10 +55,10 @@ long long scc_hashtab_probe_find(
     scc_vectype probe_end = curr ^ 0u;
 
     for(unsigned i = slot_adj; i < sizeof(curr); ++i) {
-        if(!read_byte(probe_end, i)) {
+        if(!scc_swvec_read_byte(probe_end, i)) {
             return -1ll;
         }
-        if(!read_byte(occ_match, i) && base->ht_eq(vals + (start + i) * elemsize, handle)) {
+        if(!scc_swvec_read_byte(occ_match, i) && base->ht_eq(vals + (start + i) * elemsize, handle)) {
             return (long long)(start + i);
         }
     }
@@ -130,10 +74,10 @@ long long scc_hashtab_probe_find(
 
         /* Check elements */
         for(unsigned i = 0u; i < sizeof(curr); ++i) {
-            if(!read_byte(probe_end, i)) {
+            if(!scc_swvec_read_byte(probe_end, i)) {
                 return -1ll;
             }
-            if(!read_byte(occ_match, i) && base->ht_eq(vals + (slot + i) * elemsize, handle)) {
+            if(!scc_swvec_read_byte(occ_match, i) && base->ht_eq(vals + (slot + i) * elemsize, handle)) {
                 return (long long)(slot + i);
             }
         }
@@ -147,10 +91,10 @@ long long scc_hashtab_probe_find(
         occ_match = curr ^ metamask;
         probe_end = curr ^ 0u;
         for(unsigned i = 0u; i < slot_adj; ++i) {
-            if(!read_byte(probe_end, i)) {
+            if(!scc_swvec_read_byte(probe_end, i)) {
                 return -1ll;
             }
-            if(!read_byte(occ_match, i) && base->ht_eq(vals + (slot + i) * elemsize, handle)) {
+            if(!scc_swvec_read_byte(occ_match, i) && base->ht_eq(vals + (slot + i) * elemsize, handle)) {
                 return (long long)(slot + i);
             }
         }
@@ -175,7 +119,7 @@ long long scc_hashtab_probe_insert(
 
     /* Start slot */
     size_t sslot = hash & (base->ht_capacity - 1u);
-    scc_vectype const *ldaddr = scc_hashtab_align_vecld(meta + sslot);
+    scc_vectype const *ldaddr = scc_swvec_align_load(meta + sslot);
 
     /* Aligned offset */
     size_t start = (unsigned char const *)ldaddr - meta;
@@ -196,14 +140,14 @@ long long scc_hashtab_probe_insert(
 
     long long empty_slot = -1ll;
     for(unsigned i = slot_adj; i < sizeof(curr); ++i) {
-        if(!read_byte(occ_match, i) && base->ht_eq(vals + (i + start) * elemsize, handle)) {
+        if(!scc_swvec_read_byte(occ_match, i) && base->ht_eq(vals + (i + start) * elemsize, handle)) {
             /* Already in table */
             return -1ll;
         }
-        if(empty_slot == -1ll && read_byte(vacant, i) & 0x80u) {
+        if(empty_slot == -1ll && scc_swvec_read_byte(vacant, i) & 0x80u) {
             empty_slot = (long long)(i + start);
         }
-        if(!read_byte(probe_end, i)) {
+        if(!scc_swvec_read_byte(probe_end, i)) {
             /* Found end, done probing */
             return empty_slot;
         }
@@ -220,13 +164,13 @@ long long scc_hashtab_probe_insert(
         probe_end = curr ^ 0u;
 
         for(unsigned i = 0u; i < sizeof(curr); ++i) {
-            if(!read_byte(occ_match, i) && base->ht_eq(vals + (slot + i) * elemsize, handle)) {
+            if(!scc_swvec_read_byte(occ_match, i) && base->ht_eq(vals + (slot + i) * elemsize, handle)) {
                 return -1ll;
             }
-            if(empty_slot == -1ll && read_byte(vacant, i) & 0x80u) {
+            if(empty_slot == -1ll && scc_swvec_read_byte(vacant, i) & 0x80u) {
                 empty_slot = (long long)(slot + i);
             }
-            if(!read_byte(probe_end, i)) {
+            if(!scc_swvec_read_byte(probe_end, i)) {
                 /* Found end, done probing */
                 return empty_slot;
             }
@@ -243,13 +187,13 @@ long long scc_hashtab_probe_insert(
         occ_match = curr ^ metamask;
         probe_end = curr ^ 0u;
         for(unsigned i = 0u; i < slot_adj; ++i) {
-            if(!read_byte(occ_match, i) && base->ht_eq(vals + (slot + i) * elemsize, handle)) {
+            if(!scc_swvec_read_byte(occ_match, i) && base->ht_eq(vals + (slot + i) * elemsize, handle)) {
                 return -1ll;
             }
-            if(empty_slot == -1ll && read_byte(vacant, i) & 0x80u) {
+            if(empty_slot == -1ll && scc_swvec_read_byte(vacant, i) & 0x80u) {
                 empty_slot = (long long)(slot + i);
             }
-            if(!read_byte(probe_end, i)) {
+            if(!scc_swvec_read_byte(probe_end, i)) {
                 /* Found end, done probing */
                 return empty_slot;
             }

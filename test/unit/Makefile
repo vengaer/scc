@@ -23,7 +23,7 @@ $(strip
         $(patsubst $(asdir)/%.$(asext),$(asbuilddir)/%.$(oext),
             $(wildcard $(patsubst %,$(asdir)/%*.$(asext),$(__node) $($(__node)_deps)))),
       $(patsubst $(swsimddir)/%.$(cext),$(swsimdbuilddir)/%.$(oext),
-          $(wildcard $(patsubst %,$(swsimddir)/%*.$(cext),$(__node) $($(__node)_deps)))))
+          $(wildcard $(patsubst %,$(swsimddir)/%*.$(cext),$(__node) $($(__node)_deps) swvec))))
     $(if $($(__node)_deps),
         $(patsubst $(inspectdir)/%.$(cext),$(inspectbuilddir)$(__uo_subdir)/%.$(oext),
             $(wildcard $(addprefix $(inspectdir)/*,$(addsuffix *.$(cext),$($(__node)_deps))))))
