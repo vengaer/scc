@@ -104,13 +104,10 @@ long long scc_hashtab_probe_find(
     assert(slot_adj < CHAR_BIT);
 
     scc_vectype curr = *ldaddr;
-    /* Rounding may have caused matches to wrap,
-     * mask them out */
-    curr &= (~(scc_vectype)0u) << slot_adj;
 
     /* Compare, matching bytes are all zeroes */
     curr ^= metamask;
-    for(unsigned i = 0u ; i < sizeof(curr); ++i) {
+    for(unsigned i = slot_adj; i < sizeof(curr); ++i) {
         if(!read_byte(curr, i) && base->ht_eq(vals + (start + i) * elemsize, handle)) {
             return (long long)(start + i);
         }
