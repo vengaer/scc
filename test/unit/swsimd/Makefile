@@ -5,7 +5,7 @@ $(call push,swsimd_deps)
 
 CPPFLAGS := $(filter-out -DSCC_VECSIZE%,$(CPPFLAGS))
 CPPFLAGS := $(filter-out -DSCC_SIMD_ISA_%,$(CPPFLAGS))
-CPPFLAGS += -DSCC_VECSIZE=8
+CPPFLAGS += -DSCC_VECSIZE=$(ullsize)
 swsimd_deps += hashtab
 
 __node_obj := $(call wildcard-obj,$(srcdir)/swsimd,$(cext))
