@@ -17,7 +17,7 @@ MKDIR        := mkdir
 LN           := ln
 RM           := rm
 TOUCH        := touch
-PYTHON       := python
+PYTHON       := python3
 PYTEST       := pytest
 PYLINT       := pylint
 
