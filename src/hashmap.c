@@ -13,8 +13,6 @@ enum { SCC_HASHMAP_OCCUPIED = 0x80 };
 enum { SCC_HASHMAP_VACATED = 0x7f };
 enum { SCC_HASHMAP_HASHSHIFT = 57 };
 
-#define SCC_HASHMAP_DUPLICATE (~(~0ull >> 1u))
-
 size_t scc_hashmap_impl_bkpad(void const *map);
 size_t scc_hashmap_capacity(void const *map);
 size_t scc_hashmap_size(void const *map);

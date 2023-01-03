@@ -42,6 +42,16 @@
 //?         Internal use only
 #define SCC_HASHMAP_GUARDSZ ((unsigned)SCC_VECSIZE - 1u)
 
+//? .. c:macro:: SCC_HASHMAP_DUPLICATE
+//?
+//?     Bit set when encountering an existing key during
+//?     insertion
+//?
+//?     .. note::
+//?
+//?         Internal use only
+#define SCC_HASHMAP_DUPLICATE (~(~0ull >> 1u))
+
 //? .. c:enumerator:: SCc_HASHMAP_STACKCAP
 //?
 //?     Capacity of the on-stack buffer used initially by the
