@@ -19,8 +19,11 @@ $(strip
         $(wildcard $(patsubst %,$(srcdir)/%*.$(cext),$(__node) $($(__node)_deps))))
     $(patsubst $(inspectdir)/%.$(cext),$(inspectbuilddir)$(__uo_subdir)/%.$(oext),
         $(wildcard $(inspectdir)/$(__node)*.$(cext)))
-    $(patsubst $(asdir)/%.$(asext),$(asbuilddir)/%.$(oext),
-        $(wildcard $(patsubst %,$(asdir)/%*.$(asext),$(__node) $($(__node)_deps))))
+    $(if $(__simd_enable),
+        $(patsubst $(asdir)/%.$(asext),$(asbuilddir)/%.$(oext),
+            $(wildcard $(patsubst %,$(asdir)/%*.$(asext),$(__node) $($(__node)_deps)))),
+      $(patsubst $(swsimddir)/%.$(cext),$(swsimdbuilddir)/%.$(oext),
+          $(wildcard $(patsubst %,$(swsimddir)/%*.$(cext),$(__node) $($(__node)_deps)))))
     $(if $($(__node)_deps),
         $(patsubst $(inspectdir)/%.$(cext),$(inspectbuilddir)$(__uo_subdir)/%.$(oext),
             $(wildcard $(addprefix $(inspectdir)/*,$(addsuffix *.$(cext),$($(__node)_deps))))))
@@ -58,11 +61,11 @@ $(eval
 
     $(__node_builddir)/%.$(oext): $(__node_path)/%.$(cext) | $(__node_builddir)
 	    $$(call echo-cc,$$(notdir $$@))
-	    $(CC) -o $$@ $$< $(CFLAGS) $(CPPFLAGS)
+	    $(CC) -o $$@ $$< $$(CFLAGS) $$(CPPFLAGS)
 
     $(__node_builddir)/%.$(oext): $(srcdir)/%.$(cext) | $(__node_builddir)
 	    $$(call echo-cc,$$(notdir $$@))
-	    $(CC) -o $$@ $$< $(CFLAGS) $(CPPFLAGS)
+	    $(CC) -o $$@ $$< $$(CFLAGS) $$(CPPFLAGS)
 
     check: $(__chk)
 )
@@ -155,6 +158,8 @@ $(call include-node,ringdeque)
 $(call include-node,stack)
 $(call include-node,svec)
 $(call include-node,vec)
+
+$(call include-node-if,$(__simd_enable),avx2)
 
 $(call pop,LDLIBS)
 $(call pop,LDFLAGS)
