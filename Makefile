@@ -122,6 +122,6 @@ docker:
 $(VERBOSE).SILENT:
 
 $(__all_obj): $(__config_header)
-$(__all_obj): $(__all_mkfiles) $(wildcard $(mkscripts)/*.$(mkext)) $(wildcard $(root)/.config)
-$(__all_obj): $(__validate_config)
+$(__all_obj): $(__all_mkfiles) $(wildcard $(mkscripts)/*.$(mkext))
+$(__all_obj): $(config_stamp)
 -include $(patsubst %.$(oext),%.$(dext),$(__all_obj))

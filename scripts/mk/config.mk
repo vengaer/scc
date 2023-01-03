@@ -7,9 +7,17 @@ include $(mkscripts)/refl.mk
 
 CONFTOOL          := conftool
 CONFIG            := $(root)/.config
--include $(CONFIG)
-__conftool_spec   := $(root)/.conftool.$(jsonext)
+confbuilddir      := $(builddir)/config
+dirs              += $(confbuilddir)
+md5script         := $(pyscripts)/md5sum.py
+__config_md5mk    := $(confbuilddir)/md5.$(mkext)
 
+-include $(__config_md5mk)
+-include $(CONFIG)
+
+config_stamp      := $(confbuilddir)/.$(config_md5)
+
+__conftool_spec   := $(root)/.conftool.$(jsonext)
 __validate_config := $(builddir)/.config.valid.stamp
 
 # Deliberate omit $(__conftool_spec) dependency here to avoid
@@ -20,6 +28,12 @@ $(CONFIG):
 
 $(__validate_config): $(CONFIG) $(__all_mkfiles) | $(builddir)
 	$(CONFTOOL) -c $< validate
+	$(TOUCH) $@
+
+$(__config_md5mk): $(CONFIG) $(md5script) | $(confbuilddir)
+	$(PYTHON) $(md5script) -f make $< -o $@
+
+$(config_stamp): | $(confbuilddir)
 	$(TOUCH) $@
 
 __simd_enable    := $(call is-set,$(CONFIG_SIMD))
