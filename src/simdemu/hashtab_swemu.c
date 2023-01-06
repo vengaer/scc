@@ -87,7 +87,7 @@ long long scc_hashtab_probe_find(
 
     /* Residual */
     if(slot_adj) {
-        curr = *(scc_vectype const *)(meta + slot) ^ metamask;
+        curr = *(scc_vectype const *)(meta + slot);
         occ_match = curr ^ metamask;
         probe_end = curr ^ 0u;
         for(unsigned i = 0u; i < slot_adj; ++i) {
