@@ -17,10 +17,10 @@ mergeflags         := -merge=1 $(CORPUSDIR) $(SCC_FUZZ_CORPORA)
 dirs               += $(CORPUSDIR)
 
 proffile           := LLVM_PROFILE_FILE
-export $(proffile) := $(builddir)/.fuzz.profraw
-profdata           := $(builddir)/.fuzz.profdata
+$(proffile)         = $(__node_builddir)/fuzz.profraw
+profdata            = $(__node_builddir)/fuzz.profdata
 
-LLVM_PROFFLAGS     := merge -sparse $($(proffile)) -o $(profdata)
+LLVM_PROFFLAGS      = merge -sparse $($(proffile)) -o $(profdata)
 LLVM_COVFLAGS       = $(fuzztarget) -instr-profile=$(profdata)
 LLVM_COV_SHOW       = $(LLVM_COV) show $(LLVM_COVFLAGS)
 LLVM_COV_REPORT     = $(LLVM_COV) report $(LLVM_COVFLAGS)
@@ -76,13 +76,13 @@ $(eval
 	    $$(CC) -o $$@ $$^ $(LDFLAGS) $(LDLIBS)
 
     fuzz: $(fuzztarget) | $(CORPUSDIR)
-	    $$< $(FUZZERFLAGS)
+	    $(proffile)=$($(proffile)) $$< $(FUZZERFLAGS)
 	    $(LLVM_PROFDATA) $(LLVM_PROFFLAGS)
 	    $(LLVM_COV_SHOW)
 		$(LLVM_COV_REPORT)
 
     merge: $(fuzztarget)
-	    $$< $(mergeflags))
+	    $(proffile)=$($(proffile)) $$< $(mergeflags))
 endef
 
 fuzz: $$(call require,fuzz,SCC_FUZZ_TARGET)
