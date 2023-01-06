@@ -2,6 +2,7 @@ ifndef __Lint_mk
 __Lint_mk := -
 
 include $(mkscripts)/ext.mk
+include $(mkscripts)/vars.mk
 
 __lint_py    := $(patsubst $(pyscripts)/%,$(builddir)/.lint.%.stamp,$(wildcard $(pyscripts)/*.$(pyext)))
 
@@ -11,8 +12,7 @@ tidyignore   := clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHand
                 readability-uppercase-literal-suffix readability-magic-numbers       \
                 cert-dcl16-c readability-identifier-length
 
-__comma      :=,
-tidychecks   := $(subst $(subst ,, ),$(__comma),$(addsuffix -*,$(tidyenable)) $(addprefix -,$(tidyignore)))
+tidychecks   := $(subst $(subst ,, ),$(comma),$(addsuffix -*,$(tidyenable)) $(addprefix -,$(tidyignore)))
 
 __mcompat    := $(pyscripts)/mcompatchk.$(pyext)
 __mcompatcfg := $(root)/.mcompat.$(jsonext)

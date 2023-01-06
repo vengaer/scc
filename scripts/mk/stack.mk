@@ -2,18 +2,19 @@ ifndef __Stack_mk
 __Stack_mk := _
 
 $(if $(mkscripts),,$(error mkscritps is empty))
+
 include $(mkscripts)/expr.mk
+include $(mkscripts)/vars.mk
 
 __stack_top_sym        := >>:
 __stack_join_sym       := <<>>
 __stack_empty_ent      := <<-
-__space                := $(subst ,, )
 
 __stack-assert-nonempty = $(call assert,$(call not,$(call stack-empty,$(1))),Stack is empty)
 
 # Initialize a stack with name $(1) with value $(2). $(2) may be empty
 # $(call stack-init,NAME[,INIT])
-stack-init              = $(eval $(1) := $(__stack_top_sym)$(subst $(__space),$(__stack_join_sym),$(strip $(2))))
+stack-init              = $(eval $(1) := $(__stack_top_sym)$(subst $(space),$(__stack_join_sym),$(strip $(2))))
 
 # Check if stack $(1) is empty
 # $(call stack-empty,STACK)
@@ -21,7 +22,7 @@ stack-empty             = $(call not,$(subst $(__stack_top_sym),,$($(strip $(1))
 
 # Push a value $(2) onto the stack $(1)
 # $(call stack-push,STACK,VALUE)
-stack-push              = $(eval $(1) := $(__stack_top_sym)$(subst $(__space),$(__stack_join_sym),$(strip $(if $(2),$(2),$(__stack_empty_ent)))) $(subst $(__stack_top_sym),,$($(strip $(1)))))
+stack-push              = $(eval $(1) := $(__stack_top_sym)$(subst $(space),$(__stack_join_sym),$(strip $(if $(2),$(2),$(__stack_empty_ent)))) $(subst $(__stack_top_sym),,$($(strip $(1)))))
 
 # Pop the topmost value off the stack $(1)
 # $(call stack-pop,STACK)

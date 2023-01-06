@@ -1,9 +1,9 @@
 ifndef __Echo_mk
 __Echo_mk := _
 
-__space     := $(subst ,, )
+include $(mkscripts)/vars.mk
 
-echo-raw     = $(info $(__space)$(1) $(2))
+echo-raw     = $(info $(space)$(1) $(2))
 echo-gen     = $(call echo-raw,GEN, $(1))
 echo-as      = $(call echo-raw,AS,  $(1))
 echo-cc      = $(call echo-raw,CC , $(1))
