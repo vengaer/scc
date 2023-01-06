@@ -47,10 +47,7 @@ $(eval
 
     # Back up node-local objects
     $(call stack-push,__obj_stack,$(__node_obj))
-    $(eval __node_obj :=)
-
-    # Back up volatile variables
-    $(call volatile-push))
+    $(eval __node_obj :=))
 endef
 
 define __exit-node
@@ -72,9 +69,6 @@ $(eval
     $(eval __node_obj := $(call stack-top,__obj_stack))
     $(call stack-pop,__obj_stack)
     $(call __node_debug,restored obj: $(__node_obj))
-
-    # Restore volatile variables
-    $(call volatile-pop)
 
     # Restore node path
     $(eval __node_path := $(patsubst %/$(__node),%,$(__node_path)))
