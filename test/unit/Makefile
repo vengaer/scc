@@ -1,6 +1,6 @@
 ifdef __node
 
-runnersuffix    := _runner
+runnersuffix    := runner
 
 $(call push,CFLAGS)
 $(call push,CPPFLAGS)
@@ -36,7 +36,7 @@ define decl-unit
 $(eval
     $(eval __unitsrc   := $(wildcard $(__node_path)/*.$(cext)))
     $(eval __chk       := $(patsubst $(__node_path)/%.$(cext),$(__node_builddir)/.chk.%.stamp,$(__unitsrc)))
-    $(eval __runners   := $(patsubst $(__node_path)/%.$(cext),$(__node_builddir)/%$(runnersuffix),$(__unitsrc)))
+    $(eval __runners   := $(patsubst $(__node_path)/%.$(cext),$(__node_builddir)/%_$(runnersuffix),$(__unitsrc)))
     $(eval __unitobj   := $(call __unit-obj))
 
     # Prevent make from removing generated runners
@@ -45,17 +45,17 @@ $(eval
     # Recipies for running tests
     $(foreach __s,$(__chk),
         $(__s): $(call reeval,CPPFLAGS,$(__s))
-        $(__s): $(patsubst $(__node_builddir)/.chk.%.stamp,$(__node_builddir)/%$(runnersuffix),$(__s))
+        $(__s): $(patsubst $(__node_builddir)/.chk.%.stamp,$(__node_builddir)/%_$(runnersuffix),$(__s))
 	        $$<
 	        $(TOUCH) $$@)
 
     # Runner source generation
-    $(__node_builddir)/%$(runnersuffix).$(cext): $(__node_path)/%.$(cext) $(submodules) | $(__node_builddir)
+    $(__node_builddir)/%_$(runnersuffix).$(cext): $(__node_path)/%.$(cext) $(submodules) | $(__node_builddir)
 	    $$(call echo-gen,$$(notdir $$@))
 	    $(RB) $(unitygenerator) $$< $$@
 
     $(foreach __r,$(__runners),
-        $(__r): $(__r).$(oext) $(patsubst %$(runnersuffix),%.$(oext),$(__r)) $(__unitobj) $(unityalib)
+        $(__r): $(__r).$(oext) $(patsubst %_$(runnersuffix),%.$(oext),$(__r)) $(__unitobj) $(unityalib)
 	        $$(call echo-ld,$$(notdir $$@))
 	        $(LD) -o $$@ $$^ $(LDFLAGS))
 
@@ -78,40 +78,48 @@ $(eval
     $(eval CFLAGS += $(__mull_cflags))
     $(eval LDFLAGS += $(__mull_ldflags))
 
-    $(eval __mut_builddir := $(__node_builddir)/mutation)
+    $(eval __mut_builddir := $(subst /unit/,/mutate/,$(__node_builddir)))
     $(eval dirs += $(__mut_builddir))
 
     $(eval __mutsrc     := $(wildcard $(__node_path)/*.$(cext)))
-    $(eval __mut        := $(patsubst $(__node_path)/%.$(cext),$(__mut_builddir)/.mut.%.stamp,$(__mutsrc)))
-    $(eval __mutrunners := $(patsubst $(__node_path)/%.$(cext),$(__mut_builddir)/%_mut$(runnersuffix),$(__mutsrc)))
+    $(eval __mutstu     := $(__mut_builddir)/$(__node)_all_tests.$(cext))
+    $(eval __mut        := $(__mut_builddir)/.mut.$(__node).stamp)
+    $(eval __mutrunner  := $(__mut_builddir)/$(__node)_mut$(runnersuffix))
+
+    $(eval __mutstuobj  := $(patsubst %.$(cext),%.$(oext),$(__mutstu)))
     $(eval __mutobj     := $(call __mutate-obj))
+    $(eval __mutgendobj := $(__mutrunner).$(oext) $(__mutstu:.$(cext)=.$(oext)))
+
+    $(eval __all_obj    += $(__mutgendobj))
 
     $(foreach __o,$(__mutobj),
         $(if $(findstring mutate,$(__o)),$(eval __all_obj += $(__o))))
 
-    .SECONDARY: $(addsuffix .$(cext),$(__mutrunners))
+    $(eval __set_mullcfg := MULL_CONFIG=$(__node_path)/mull.yml)
+
+    .SECONDARY: $(__mutstu) $(__mutrunner).$(cext)
 
     # Running mutation tests
-    $(foreach __s,$(__mut),
-        $(__s): $(call reeval,CFLAGS,$(__s))
-        $(__s): $(call reeval,LDFLAGS,$(__s))
-        $(__s): $(call reeval,CPPFLAGS,$(__s))
-        $(__s): $(patsubst $(__mut_builddir)/.mut.%.stamp,$(__mut_builddir)/%_mut$(runnersuffix),$(__s)) $(mull_runner)
-	        MULL_CONFIG=$(__node_path)/mull.yml $(mull_runner) $$<
-	        $(TOUCH) $$@)
+    $(__mut): $(call reeval,CFLAGS,$(__mut))
+    $(__mut): $(call reeval,LDFLAGS,$(__mut))
+    $(__mut): $(call reeval,CPPFLAGS,$(__mut))
+    $(__mut): $(patsubst $(__mut_builddir)/.mut.%.stamp,$(__mut_builddir)/%_mut$(runnersuffix),$(__mut)) $(mull_runner)
+	    $(__set_mullcfg) $(mull_runner) $$<
+	    $(TOUCH) $$@
+
+    # Generate single TU containing all tests
+    $(__mutstu): $(pyscripts)/cat.$(pyext) $(__mutsrc) | $(__mut_builddir)
+	    $$(call echo-gen,$$(notdir $$@))
+	    $(PYTHON) $$< $$(filter-out $$<,$$^) -o $$@
 
     # Generate runner source
-    $(__mut_builddir)/%_mut$(runnersuffix).$(cext): $(__node_path)/%.$(cext) $(submodules) | $(__mut_builddir)
+    $(__mutrunner).$(cext): $(__mutstu) $(submodules) | $(__mut_builddir)
 	    $$(call echo-gen,$$(notdir $$@))
 	    $(RB) $(unitygenerator) $$< $$@
 
-    $(foreach __r,$(__mutrunners),
-        $(eval __all_obj += $(__r).$(oext))
-        $(__r): $(__r).$(oext) $(patsubst %_mut$(runnersuffix),%.$(oext),$(__r)) $(__mutobj) $(unityalib)
-	        $$(call echo-ld,$$(notdir $$@))
-	        $(LD) -o $$@ $$^ $(LDLIBS) $$(LDFLAGS)
-
-        $(eval __all_obj += $(__r).$(oext)))
+    $(__mutrunner): $(__mutgendobj) $(__mutobj) $(unityalib)
+	    $$(call echo-ld,$$(notdir $$@))
+	    $(LD) -o $$@ $$^ $(LDLIBS) $$(LDFLAGS)
 
     $(__mut_builddir)/%.$(oext): $(__mut_builddir)/%.$(cext) $(mull_ir_frontend)
 	    $$(call echo-cc,$(notdir $(__mut_builddir))/$$(notdir $$@))
