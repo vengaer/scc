@@ -13,7 +13,8 @@ RUN chown -R builder:builder /home/builder/scc                                  
                                      clang                                              \
                                      gcc                                                \
                                      git                                                \
-                                     python{,-sphinx,-pip,-pylint,-pytest,-aiofiles}    \
+                                     python{,-sphinx,-pip,-pylint}                      \
+                                     python-{pytest,aiofiles,pyelftools}                \
                                      llvm                                               \
                                      ruby                                               \
                                      cmake                                              \
