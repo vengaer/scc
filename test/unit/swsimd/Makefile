@@ -10,8 +10,6 @@ CPPFLAGS += -DSCC_VECSIZE=$(ullsize)
 $(call include-node,hashmap_simdemu)
 $(call include-node,hashtab_simdemu)
 
-swsimd_deps += hashtab hashmap
-
 $(call pop,CPPFLAGS)
 
 else
