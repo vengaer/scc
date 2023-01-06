@@ -102,7 +102,7 @@ $(eval
     $(__mut): $(call reeval,LDFLAGS,$(__mut))
     $(__mut): $(call reeval,CPPFLAGS,$(__mut))
     $(__mut): $(patsubst $(__mut_builddir)/.mut.%.stamp,$(__mut_builddir)/%_mut$(runnersuffix),$(__mut)) $(mull_runner)
-	    $(__set_mullcfg) $(mull_runner) $$<
+	    $(__set_mullcfg) $(mull_runner) $$< $(MULLFLAGS)
 	    $(TOUCH) $$@
 
     # Generate single TU containing all tests
