@@ -12,14 +12,12 @@ async def aread(index, file):
         return index, await handle.read()
 
 async def cat(files, outfile):
-    files = {f for f in files}
-
-    raw = await asyncio.gather(*(aread(i, f) for i, f in enumerate(files)))
+    raw = await asyncio.gather(*(aread(i, f) for i, f in enumerate(set(files))))
     raw = sorted(raw, key=lambda t: t[0])
 
     with StdoutWrHandle() if outfile is None else FileWrHandle(outfile) as handle:
-        for _, f in raw:
-            handle.writeln(f)
+        for _, content in raw:
+            handle.writeln(content)
 
 async def main():
     parser = argparse.ArgumentParser('Concatenate files')
