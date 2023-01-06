@@ -1,22 +1,18 @@
 ifdef __node
 
 $(call push,CPPFLAGS)
-$(call push,swsimd_deps)
 
+# Force SIMD emulation
 CPPFLAGS := $(filter-out -DSCC_VECSIZE%,$(CPPFLAGS))
 CPPFLAGS := $(filter-out -DSCC_SIMD_ISA_%,$(CPPFLAGS))
 CPPFLAGS += -DSCC_VECSIZE=$(ullsize)
 
+$(call include-node,hashmap_simdemu)
+$(call include-node,hashtab_simdemu)
+
 swsimd_deps += hashtab hashmap
 
-$(call decl-unit)
-
-$(call pop,swsimd_deps)
 $(call pop,CPPFLAGS)
-
-$(__node_builddir)/%.$(oext): $(srcdir)/swsimd/%.$(cext) | $(__node_builddir)
-	$(call echo-cc,$(notdir $@))
-	$(CC) -o $@ $< $(CFLAGS) $(CPPFLAGS)
 
 else
 # Recurse to top level

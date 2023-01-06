@@ -1,0 +1,15 @@
+ifdef __node
+
+$(call decl-unit)
+
+$(__node_builddir)/%.$(oext): $(srcdir)/swsimd/%.$(cext) | $(__node_builddir)
+	$(call echo-cc,$(notdir $@))
+	$(CC) -o $@ $< $(CFLAGS) $(CPPFLAGS)
+
+else
+# Recurse to top level
+__recurse := $(if $(MAKECMDGOALS),$(MAKECMDGOALS),__recurse)
+.PHONY: $(__recurse)
+$(__recurse):
+	@$(MAKE) $(MAKECMDGOALS) -C $(CURDIR)/.. --no-print-directory
+endif
