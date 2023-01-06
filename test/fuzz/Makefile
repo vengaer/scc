@@ -22,8 +22,8 @@ profdata           := $(builddir)/.fuzz.profdata
 
 LLVM_PROFFLAGS     := merge -sparse $($(proffile)) -o $(profdata)
 LLVM_COVFLAGS       = $(fuzztarget) -instr-profile=$(profdata)
-LLVM_COV_SHOW       = show $(LLVM_COVFLAGS)
-LLVM_COV_REPORT     = report $(LLVM_COVFLAGS)
+LLVM_COV_SHOW       = $(LLVM_COV) show $(LLVM_COVFLAGS)
+LLVM_COV_REPORT     = $(LLVM_COV) report $(LLVM_COVFLAGS)
 
 define __fuzz-obj
 $(strip
@@ -74,7 +74,8 @@ $(eval
     fuzz: $(fuzztarget) | $(CORPUSDIR)
 	    $$< $(FUZZERFLAGS)
 	    $(LLVM_PROFDATA) $(LLVM_PROFFLAGS)
-	    $(LLVM_COV) $(LLVM_COV_SHOW)
+	    $(LLVM_COV_SHOW)
+		$(LLVM_COV_REPORT)
 
     merge: $(fuzztarget)
 	    $$< $(mergeflags))
