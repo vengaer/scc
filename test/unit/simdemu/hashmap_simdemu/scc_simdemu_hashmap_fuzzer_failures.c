@@ -11,7 +11,7 @@
 #include <unity.h>
 
 static bool eq(void const *left, void const *right) {
-    return *(int const *)left == *(int const *)right;
+    return *(uint32_t const *)left == *(uint32_t const *)right;
 }
 
 static void run_fuzzer_test(uint32_t const *restrict keys, uint16_t const *restrict vals, size_t n) {
