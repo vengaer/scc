@@ -1,6 +1,7 @@
 #include "hashmap_fuzz_insertion.h"
 #include "hashmap_fuzz_removal.h"
 
+#include <fuzzer/assertion.h>
 #include <fuzzer/dbg.h>
 
 #include <inttypes.h>
@@ -68,6 +69,13 @@ int LLVMFuzzerTestOneInput(uint8_t const *data, size_t size) {
     dbg_pr("Values:\n");
     dbg_pr_n(vit, vals, size, "%#04" PRIx32 " ", *vit);
     dbg_pr("\n");
+
+    for(unsigned i = 0u; i < end; ++i) {
+        fuzz_assert(scc_hashmap_insert(&map, keys[i], vals[i]),
+            "Could not insert { %" PRIu32 ", %" PRIu16 "}", keys[i], vals[i]);
+        fuzz_assert(scc_hashmap_remove(map, keys[i]),
+            "Could not remove { %" PRIu32 ", %" PRIu16 "}", keys[i], vals[i]);
+    }
 
     hashmap_fuzz_insertion(&map, keys, vals, end, size);
     hashmap_fuzz_removal(&map, keys, end, size);
