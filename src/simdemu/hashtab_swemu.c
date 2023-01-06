@@ -198,5 +198,6 @@ long long scc_hashtab_probe_insert(
         }
     }
 
-    return -1ll;
+    assert(empty_slot != -1ll);
+    return empty_slot;
 }
