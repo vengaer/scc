@@ -1,6 +1,6 @@
 #include <inspect/hashtab_inspect.h>
 #include <scc/hashtab.h>
-#include <swsimd/simd_swemu.h>
+#include <simdemu/simd_swemu.h>
 
 #include <stdbool.h>
 
@@ -15,7 +15,7 @@ static unsigned long long ident(void const *data, size_t len) {
     return *(int const *)data;
 }
 
-void test_swsimd_hashtab_simple_find_insert_probe(void) {
+void test_simdemu_hashtab_simple_find_insert_probe(void) {
     static int const data[] = {
         1, 4, 8, 10, 14, 17, 21, 25
     };
@@ -39,7 +39,7 @@ void test_swsimd_hashtab_simple_find_insert_probe(void) {
     scc_hashtab_free(tab);
 }
 
-void test_swsimd_hashtab_probe_on_rehash(void) {
+void test_simdemu_hashtab_probe_on_rehash(void) {
     scc_hashtab(int) tab = scc_hashtab_new(int, eq);
     size_t const cap = scc_hashtab_capacity(tab);
     int const *p;

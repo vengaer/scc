@@ -8,7 +8,7 @@
 #endif
 
 #else
-#include "../swsimd/simd_swemu.h"
+#include "../simdemu/simd_swemu.h"
 #endif
 
 #endif /* ASM_GENERIC_H */

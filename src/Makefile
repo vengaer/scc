@@ -11,7 +11,7 @@ __scc_srcdir := $(__node_path)
 sccbuilddir  := $(__node_builddir)
 
 $(call include-node,asm)
-$(call include-node-if-not,$(__simd_enable),swsimd)
+$(call include-node-if-not,$(__simd_enable),simdemu)
 
 $(solink): $(solinkcompat) | $(builddir)
 	$(call echo-ln,$(notdir $@))

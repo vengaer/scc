@@ -34,8 +34,8 @@ $(strip
     $(if $(__simd_enable),
         $(patsubst $(asdir)/%.$(asext),$(__node_builddir)/%.$(oext),
             $(wildcard $(asdir)/*$(__node)*.$(asext))),
-      $(patsubst $(swsimddir)/%.$(cext),$(__node_builddir)/%.$(oext),
-          $(wildcard $(patsubst %,$(swsimddir)/%*.$(cext),$(__node) $($(__node)_deps) swvec))))
+      $(patsubst $(simdemudir)/%.$(cext),$(__node_builddir)/%.$(oext),
+          $(wildcard $(patsubst %,$(simdemudir)/%*.$(cext),$(__node) $($(__node)_deps) swvec))))
     $(patsubst $(inspectdir)/%.$(cext),$(__node_builddir)/%.$(oext),
         $(wildcard $(inspectdir)/*$(__node)*.$(cext)))
     $(if $($(__node)_deps),
@@ -60,7 +60,7 @@ $(eval
 	    $$(call echo-cc,$(__node)/$$(notdir $$@))
 	    $$(CC) -o $$@ $$< $(CFLAGS) $(CPPFLAGS)
 
-    $(__node_builddir)/%.$(oext): $(swsimddir)/%.$(cext) | $(__node_builddir)
+    $(__node_builddir)/%.$(oext): $(simdemudir)/%.$(cext) | $(__node_builddir)
 	    $$(call echo-cc,$(__node)/$$(notdir $$@))
 	    $$(CC) -o $$@ $$< $(CFLAGS) $(CPPFLAGS)
 

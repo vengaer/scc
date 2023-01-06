@@ -40,7 +40,7 @@ static void run_fuzzer_test(uint32_t const *restrict keys, uint16_t const *restr
     scc_hashmap_free(map);
 }
 
-void test_scc_swsimd_hashmap_fuzzer_failure0(void) {
+void test_scc_simdemu_hashmap_fuzzer_failure0(void) {
     static uint32_t const keys[] = {
         0x00000000, 0xa3a3a3a3, 0xe8e80053, 0xe8e8e8e8,
         0x000000e8, 0x01d2f75c, 0x5d7c3d2b, 0x0000003f,

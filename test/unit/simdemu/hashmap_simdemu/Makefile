@@ -2,7 +2,7 @@ ifdef __node
 
 $(call decl-unit)
 
-$(__node_builddir)/%.$(oext): $(srcdir)/swsimd/%.$(cext) | $(__node_builddir)
+$(__node_builddir)/%.$(oext): $(srcdir)/simdemu/%.$(cext) | $(__node_builddir)
 	$(call echo-cc,$(notdir $@))
 	$(CC) -o $@ $< $(CFLAGS) $(CPPFLAGS)
 

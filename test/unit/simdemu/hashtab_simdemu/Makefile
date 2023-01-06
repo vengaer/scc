@@ -1,12 +1,8 @@
 ifdef __node
 
-swsimddir      := $(__node_path)
-swsimdbuilddir := $(__node_builddir)
+$(call decl-unit)
 
-__node_obj := $(call wildcard-obj,$(__node_path),$(cext))
-$(solib) $(alib): $(__node_obj)
-
-$(__node_builddir)/%.$(oext): $(__node_path)/%.$(cext) | $(__node_builddir)
+$(__node_builddir)/%.$(oext): $(srcdir)/simdemu/%.$(cext) | $(__node_builddir)
 	$(call echo-cc,$(notdir $@))
 	$(CC) -o $@ $< $(CFLAGS) $(CPPFLAGS)
 

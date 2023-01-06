@@ -22,8 +22,8 @@ $(strip
     $(if $(__simd_enable),
         $(patsubst $(asdir)/%.$(asext),$(asbuilddir)/%.$(oext),
             $(wildcard $(patsubst %,$(asdir)/%*.$(asext),$(__node) $($(__node)_deps)))),
-      $(patsubst $(swsimddir)/%.$(cext),$(swsimdbuilddir)/%.$(oext),
-          $(wildcard $(patsubst %,$(swsimddir)/%*.$(cext),$(__node) $($(__node)_deps) swvec))))
+      $(patsubst $(simdemudir)/%.$(cext),$(simdemubuilddir)/%.$(oext),
+          $(wildcard $(patsubst %,$(simdemudir)/%*.$(cext),$(__node) $($(__node)_deps) swvec))))
     $(if $($(__node)_deps),
         $(patsubst $(inspectdir)/%.$(cext),$(inspectbuilddir)$(__uo_subdir)/%.$(oext),
             $(wildcard $(addprefix $(inspectdir)/*,$(addsuffix *.$(cext),$($(__node)_deps))))))
@@ -161,7 +161,7 @@ $(call include-node,vec)
 
 $(call include-node-if,$(__simd_enable),avx2)
 
-$(call include-node-if-not,$(__simd_enable),swsimd)
+$(call include-node-if-not,$(__simd_enable),simdemu)
 
 $(call pop,LDLIBS)
 $(call pop,LDFLAGS)
