@@ -4,6 +4,7 @@ import abc
 import contextlib
 import dataclasses
 import inspect
+import os
 import re
 
 from elftools.elf.elffile import ELFFile
@@ -97,7 +98,7 @@ class _MutationCommand(_MullUserCommand):
 
     @classmethod
     def _filter_mutators(cls, strings):
-        ''' Find the strings mull uses to look up mutations
+        ''' Find the strings Mull uses to look up mutations
         in environment '''
 
         pattern = re.compile(cls.envregex)
@@ -137,7 +138,7 @@ class _MutationCommand(_MullUserCommand):
         return self.mutations[idx]
 
 class ListMutations(_MutationCommand):
-    ''' List available mull mutations '''
+    ''' List available Mull mutations '''
 
     def invoke(self, arg, from_tty):
         self._list_mutations()
@@ -147,7 +148,7 @@ class ListMutations(_MutationCommand):
         return 'ls'
 
 class EnableMutation(_MutationCommand):
-    ''' Enable specific mull mutation. Parameter is the index into
+    ''' Enable specific Mull mutation. Parameter is the index into
  the mutation list a shown by mull-ls '''
 
     def invoke(self, arg, from_tty):
@@ -159,7 +160,7 @@ class EnableMutation(_MutationCommand):
         return 'enable'
 
 class DisableMutation(_MutationCommand):
-    ''' Disable specific mull mutation. Parameters is the index into
+    ''' Disable specific Mull mutation. Parameters is the index into
  the mutation list as shown by mull-ls'''
 
     def invoke(self, arg, from_tty):
@@ -177,7 +178,19 @@ class DisableMutation(_MutationCommand):
     def cmd(self):
         return 'disable'
 
+class DisableAllMutations(_MutationCommand):
+    ''' Disable all Mull mutations '''
+
+    def invoke(self, arg, from_tty):
+        for mut in self.mutations:
+            gdb.execute(f'unset env {mut.envvar}')
+
+    @property
+    def cmd(self):
+        return 'disable-all'
+
 Source()
 ListMutations()
 EnableMutation()
 DisableMutation()
+DisableAllMutations()
