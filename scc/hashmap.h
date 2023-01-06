@@ -52,15 +52,20 @@
 //?         Internal use only
 #define SCC_HASHMAP_DUPLICATE (~(~0ull >> 1u))
 
-//? .. c:enumerator:: SCc_HASHMAP_STACKCAP
-//?
-//?     Capacity of the on-stack buffer used initially by the
-//?     hash map. Must be a power of 2 >= 32
-//?
-//?     .. note::
-//?
-//?         Internal use only
+#ifndef SCC_HASHMAP_STACKCAP
+//! .. c:enumerator:: SCC_HASHMAP_STACKCAP
+//!
+//!     Capacity of the on-stack buffer used initially by the
+//!     hash map. The value may be overridden by defining it before
+//!     including the header
+//!
+//!     Must be a power of 2 and >= 32
+//!
+//!     .. note::
+//!
+//!         Internal use only
 enum { SCC_HASHMAP_STACKCAP = 32 };
+#endif
 
 scc_static_assert(SCC_HASHMAP_STACKCAP >= 32);
 scc_static_assert(scc_bits_is_power_of_2(SCC_HASHMAP_STACKCAP));
