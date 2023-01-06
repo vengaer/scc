@@ -12,6 +12,7 @@ RUN chown -R builder:builder /home/builder/scc                                  
     pacman -Syu --noconfirm --needed make                                               \
                                      clang                                              \
                                      gcc                                                \
+                                     gdb                                                \
                                      git                                                \
                                      python{,-sphinx,-pip,-pylint}                      \
                                      python-{pytest,aiofiles,pyelftools}                \
