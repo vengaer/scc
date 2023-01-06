@@ -25,7 +25,7 @@ void test_swsimd_hashtab_simple_find_insert_probe(void) {
         TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, data[i]));
     }
 
-    TEST_ASSERT_EQUAL_UINT64(SCC_HASHTAB_STATIC_CAPACITY, scc_hashtab_capacity(tab));
+    TEST_ASSERT_EQUAL_UINT64(SCC_HASHTAB_STACKCAP, scc_hashtab_capacity(tab));
 
     int const *p;
     for(unsigned i = 0u; i < scc_arrsize(data); ++i) {

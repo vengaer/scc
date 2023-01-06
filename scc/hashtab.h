@@ -18,19 +18,19 @@
 
 #define SCC_HASHTAB_GUARDSZ ((unsigned)SCC_VECSIZE - 1u)
 
-#ifndef SCC_HASHTAB_STATIC_CAPACITY
-//! .. c:enumerator:: SCC_HASHTAB_STATIC_CAPACITY
+#ifndef SCC_HASHTAB_STACKCAP
+//! .. c:enumerator:: SCC_HASHTAB_STACKCAP
 //!
 //!     Capacity of the buffer used for the hash table small-size
 //!     optimization. The value may be overridden by defining
 //!     it before including the header.
 //!
 //!     Must be a power of 2 and larger than or equal to 32
-enum { SCC_HASHTAB_STATIC_CAPACITY = 32 };
+enum { SCC_HASHTAB_STACKCAP = 32 };
 #endif
 
-scc_static_assert(SCC_HASHTAB_STATIC_CAPACITY >= 32);
-scc_static_assert(scc_bits_is_power_of_2(SCC_HASHTAB_STATIC_CAPACITY));
+scc_static_assert(SCC_HASHTAB_STACKCAP >= 32);
+scc_static_assert(scc_bits_is_power_of_2(SCC_HASHTAB_STACKCAP));
 
 //! .. c:type:: _Bool(*scc_hashtab_eq)(void const *, void const *)
 //!
@@ -240,7 +240,7 @@ struct scc_hashtab_base {
 //?             field to allow for operating on an lvalue.
 //?
 //?         .. _type_ht_data:
-//?         .. c:var:: type ht_data[SCC_HASHTAB_STATIC_CAPACITY]
+//?         .. c:var:: type ht_data[SCC_HASHTAB_STACKCAP]
 //?
 //?             The data array in which the actual elements of the table are stored.
 //?
@@ -279,8 +279,8 @@ struct scc_hashtab_base {
         unsigned char ht_fwoff;                                             \
         unsigned char ht_bkoff;                                             \
         type ht_curr;                                                       \
-        type ht_data[SCC_HASHTAB_STATIC_CAPACITY];                          \
-        scc_hashtab_metatype ht_meta[SCC_HASHTAB_STATIC_CAPACITY];          \
+        type ht_data[SCC_HASHTAB_STACKCAP];                                 \
+        scc_hashtab_metatype ht_meta[SCC_HASHTAB_STACKCAP];                 \
         scc_hashtab_metatype ht_guard[SCC_HASHTAB_GUARDSZ];                 \
     }
 
@@ -335,7 +335,7 @@ void *scc_hashtab_impl_new(struct scc_hashtab_base *base, size_t coff, size_t md
         (void *)&(scc_hashtab_impl_layout(type)){                           \
             .ht_eq = eq,                                                    \
             .ht_hash = hash,                                                \
-            .ht_capacity = SCC_HASHTAB_STATIC_CAPACITY                      \
+            .ht_capacity = SCC_HASHTAB_STACKCAP                             \
         },                                                                  \
         offsetof(scc_hashtab_impl_layout(type), ht_curr),                   \
         offsetof(scc_hashtab_impl_layout(type), ht_meta)                    \

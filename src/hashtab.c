@@ -307,7 +307,7 @@ void *scc_hashtab_impl_new(struct scc_hashtab_base *base, size_t coff, size_t md
     base->ht_fwoff = scc_hashtab_calcpad(coff);
     unsigned char *tab = (unsigned char *)base + coff;
     SCC_ON_PERFTRACK(
-        base->ht_perf.ev_bytesz = mdoff + (SCC_HASHTAB_STATIC_CAPACITY + SCC_HASHTAB_GUARDSZ) * sizeof(scc_hashtab_metatype)
+        base->ht_perf.ev_bytesz = mdoff + (SCC_HASHTAB_STACKCAP + SCC_HASHTAB_GUARDSZ) * sizeof(scc_hashtab_metatype)
     );
     scc_hashtab_set_bkoff(tab, base->ht_fwoff);
     return tab;

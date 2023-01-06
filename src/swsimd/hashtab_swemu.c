@@ -7,7 +7,7 @@
 #include <assert.h>
 #include <limits.h>
 
-scc_static_assert(sizeof(scc_vectype) < SCC_HASHTAB_STATIC_CAPACITY);
+scc_static_assert(sizeof(scc_vectype) < SCC_HASHTAB_STACKCAP);
 
 //? .. c:function:: scc_vectype scc_hashtab_gen_metamask(unsigned long long hash)
 //?
