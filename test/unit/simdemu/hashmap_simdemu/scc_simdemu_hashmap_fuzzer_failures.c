@@ -1,5 +1,3 @@
-#include <inspect/hashmap_inspect.h>
-
 #include <scc/bug.h>
 #include <scc/hashmap.h>
 #include <scc/mem.h>
