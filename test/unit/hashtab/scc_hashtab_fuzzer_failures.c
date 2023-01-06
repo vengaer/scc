@@ -5,7 +5,7 @@
 
 #include <unity.h>
 
-static bool eq(void const *left, void const *right) {
+static bool ueq(void const *left, void const *right) {
     return *(unsigned const *)left == *(unsigned const *)right;
 }
 
@@ -19,7 +19,7 @@ void test_scc_hashtab_fuzzer_failure0(void) {
         690563338, 688549161, 3727239465, 2749835747,
         3823577571, 14879295
     };
-    scc_hashtab(unsigned) tab = scc_hashtab_new(unsigned, eq);
+    scc_hashtab(unsigned) tab = scc_hashtab_new(unsigned, ueq);
 
     for(unsigned i = 0u; i < scc_arrsize(data); ++i) {
         TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, data[i]));
@@ -43,7 +43,7 @@ void test_scc_hashtab_fuzzer_failure1(void) {
         174982861, 673778285, 702753065, 171959271,
         3823304931
     };
-    scc_hashtab(unsigned) tab = scc_hashtab_new(unsigned, eq);
+    scc_hashtab(unsigned) tab = scc_hashtab_new(unsigned, ueq);
 
     for(unsigned i = 0u; i < scc_arrsize(data); ++i) {
         TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, data[i]));
@@ -96,7 +96,7 @@ void test_scc_hashtab_fuzzer_failure2(void) {
         171959271,  3823304940
     };
 
-    scc_hashtab(unsigned) tab = scc_hashtab_new(unsigned, eq);
+    scc_hashtab(unsigned) tab = scc_hashtab_new(unsigned, ueq);
 
     unsigned const *elem;
     for(unsigned i = 0u; i < scc_arrsize(data); ++i) {
@@ -134,7 +134,7 @@ void test_scc_hashtab_fuzzer_failure3(void) {
         171959271,  3823304940
     };
 
-    scc_hashtab(unsigned) tab = scc_hashtab_new(unsigned, eq);
+    scc_hashtab(unsigned) tab = scc_hashtab_new(unsigned, ueq);
 
     for(unsigned i = 0u; i < scc_arrsize(data); ++i) {
         TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, data[i]));
@@ -188,7 +188,7 @@ void test_scc_hashtab_fuzzer_failure4(void) {
         3926540259, 4194538, 2048, 3941263872,
         3941264106, 15526634, 14876672, 3808428032
     };
-    scc_hashtab(unsigned) tab = scc_hashtab_new(unsigned, eq);
+    scc_hashtab(unsigned) tab = scc_hashtab_new(unsigned, ueq);
 
     unsigned const *elem;
     for(unsigned i = 0u; i < scc_arrsize(data); ++i) {
@@ -248,7 +248,7 @@ void test_scc_hashtab_fuzzer_failure5(void) {
         3810066553, 171107299,  2197750784, 2382619406,
         767622514,  4210688979, 4281335807, 4292551621
     };
-    scc_hashtab(unsigned) tab = scc_hashtab_new(unsigned, eq);
+    scc_hashtab(unsigned) tab = scc_hashtab_new(unsigned, ueq);
 
     unsigned const *elem;
     for(unsigned i = 0u; i < scc_arrsize(data); ++i) {
@@ -282,7 +282,7 @@ void test_scc_hashtab_fuzzer_failure6(void) {
     static unsigned const data[] = {
         435286510, 170, 4294967081
     };
-    scc_hashtab(unsigned) tab = scc_hashtab_new(unsigned, eq);
+    scc_hashtab(unsigned) tab = scc_hashtab_new(unsigned, ueq);
 
     unsigned const *elem;
     for(unsigned i = 0u; i < scc_arrsize(data); ++i) {
@@ -330,7 +330,7 @@ void test_scc_hashtab_fuzzer_failure7(void) {
         1162167788, 14934784,   84215046,   3676554501,
         2161837311
     };
-    scc_hashtab(unsigned) tab = scc_hashtab_new(unsigned, eq);
+    scc_hashtab(unsigned) tab = scc_hashtab_new(unsigned, ueq);
 
     unsigned const *elem;
     for(unsigned i = 0u; i < scc_arrsize(data); ++i) {
@@ -377,7 +377,7 @@ void test_scc_hashtab_fuzzer_failure8(void) {
         452984577,  3823312099, 2296371,    3693732649,
         9165,       3808428036, 171321600,
     };
-    scc_hashtab(unsigned) tab = scc_hashtab_new(unsigned, eq);
+    scc_hashtab(unsigned) tab = scc_hashtab_new(unsigned, ueq);
 
     unsigned const *elem;
     for(unsigned i = 0u; i < scc_arrsize(data); ++i) {
