@@ -4,9 +4,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-static struct scc_chunk *scc_chunk_new(size_t chunksize, size_t elemsize, size_t baseoff);
-static bool scc_chunk_contains_addr(struct scc_chunk const *chunk, void const *addr);
-
 static struct scc_chunk *scc_chunk_new(size_t chunksize, size_t elemsize, size_t baseoff) {
     size_t const size = chunksize * elemsize + baseoff;
     struct scc_chunk *chunk = malloc(size);
@@ -76,8 +73,14 @@ _Bool scc_arena_reserve(struct scc_arena *arena, size_t nelems) {
         return true;
     }
 
-    size_t chunksize = nelems < arena->ar_chunksize ? arena->ar_chunksize : nelems;
-    struct scc_chunk *chunk = scc_chunk_new(chunksize, arena->ar_elemsize, arena->ar_baseoff);
+    if(nelems < arena->ar_chunksize) {
+        /* HACK: Make mull die on mutation from < to <=.
+         * The behavior is correct either way */
+        assert(nelems != arena->ar_chunksize);
+        nelems = arena->ar_chunksize;
+    }
+
+    struct scc_chunk *chunk = scc_chunk_new(nelems, arena->ar_elemsize, arena->ar_baseoff);
     if(!chunk) {
         return false;
     }

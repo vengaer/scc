@@ -313,3 +313,10 @@ void test_scc_arena_size_of_reserved_chunk(void) {
     TEST_ASSERT_GREATER_THAN_UINT64(arena.ar_chunksize, (chunk->ch_end - arena.ar_baseoff) / sizeof(int));
     scc_arena_release(&arena);
 }
+
+
+void test_scc_arena_reserve_same_size(void) {
+    struct scc_arena arena = scc_arena_new(int);
+    TEST_ASSERT_TRUE(scc_arena_reserve(&arena, arena.ar_chunksize));
+    scc_arena_release(&arena);
+}
