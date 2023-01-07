@@ -349,11 +349,9 @@ bool scc_hashtab_impl_reserve(void *tabaddr, size_t capacity, size_t elemsize) {
         return true;
     }
     if(!scc_bits_is_power_of_2(capacity)) {
-        size_t newcap = base->ht_capacity << 1u;
-        while(newcap < capacity) {
-            newcap <<= 1;
-        }
-        capacity = newcap;
+        unsigned n;
+        for(n = 0u; capacity; capacity >>= 1u, ++n);
+        capacity = 1u << n;
     }
     assert(scc_bits_is_power_of_2(capacity));
     if(!scc_hashtab_rehash(tabaddr, base, elemsize, capacity)) {
