@@ -552,7 +552,7 @@ static void *scc_rbtree_insert_nonempty(struct scc_rbtree_base *restrict base, v
             scc_rbnode_mkblack(base->rb_root);
             return scc_rbnode_value(base, n);
         }
-        dir = rel <= 0;
+        dir = rel < 1;
         if(scc_rbnode_thread(n, dir)) {
             break;
         }
@@ -636,7 +636,7 @@ void const *scc_rbtree_impl_find(void const *rbtree) {
             return scc_rbnode_value_qual(base, n, const);
         }
 
-        dir = rel <= 0;
+        dir = rel < 1;
         p = n;
         n = scc_rbnode_link_qual(n, dir, const);
     }
@@ -662,7 +662,7 @@ _Bool scc_rbtree_impl_remove(void *rbtree, size_t elemsize) {
             found = n;
         }
 
-        dir = rel <= 0;
+        dir = rel < 1;
 
         if(!scc_rbnode_red(n) && !scc_rbnode_red_safe(n, dir)) {
             p = scc_rbtree_balance_removal(n, p, gp, dir);
