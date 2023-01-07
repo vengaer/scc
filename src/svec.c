@@ -46,8 +46,10 @@ static inline size_t scc_svec_bytesize(size_t capacity, size_t elemsize, size_t 
 //?     :param current: Current capacity of the svec
 //?     :returns: The size the svec would have after the next sizeup
 static inline size_t scc_svec_calc_new_capacity(size_t current) {
-    return current + (current < SCC_SVEC_MAX_CAPACITY_INCREASE ?
-                                current : SCC_SVEC_MAX_CAPACITY_INCREASE);
+    if(current > SCC_SVEC_MAX_CAPACITY_INCREASE) {
+        return current + SCC_SVEC_MAX_CAPACITY_INCREASE;
+    }
+    return current << 1u | 1u;
 }
 
 //? .. c:function:: struct scc_svec_base *scc_svec_alloc(\

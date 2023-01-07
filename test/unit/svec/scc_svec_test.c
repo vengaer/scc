@@ -59,9 +59,15 @@ void test_scc_svec_allocation_behavior(void) {
 
     for(unsigned cap = i; i < CHUNKSIZE; i++) {
         if(i >= cap) {
-            cap <<= 1u;
+            cap = (cap << 1u) | 1u;
         }
         TEST_ASSERT_TRUE(scc_svec_push(&svec, i));
+        TEST_ASSERT_EQUAL_UINT8(1, ((unsigned char *)svec)[-1]);
+        TEST_ASSERT_EQUAL_UINT64(cap, scc_svec_capacity(svec));
+    }
+
+    for(unsigned cap = scc_svec_capacity(svec); scc_svec_size(svec) < cap; ++i) {
+        TEST_ASSERT_TRUE(scc_svec_push(&svec, 0));
         TEST_ASSERT_EQUAL_UINT8(1, ((unsigned char *)svec)[-1]);
         TEST_ASSERT_EQUAL_UINT64(cap, scc_svec_capacity(svec));
     }
@@ -444,5 +450,15 @@ void test_scc_svec_resize_no_unnecessary_realloc(void) {
     void *va = svec;
     TEST_ASSERT_TRUE(scc_svec_resize(&svec, 31));
     TEST_ASSERT_EQUAL_PTR(va, svec);
+    scc_svec_free(svec);
+}
+
+void test_scc_svec_sizeup_limit(void) {
+    scc_svec(int) svec = scc_svec_new(int);
+
+    TEST_ASSERT_TRUE(scc_svec_resize(&svec, 4096));
+    TEST_ASSERT_TRUE(scc_svec_push(&svec, 0));
+    /* To catch specific mutation when recalculating capacity */
+    TEST_ASSERT_EQUAL_UINT64((4096u << 1u) + 1ull, scc_svec_capacity(svec));
     scc_svec_free(svec);
 }
