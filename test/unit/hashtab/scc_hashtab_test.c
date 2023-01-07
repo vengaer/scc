@@ -290,3 +290,24 @@ void test_scc_hashtab_rehash_limit(void) {
 
     scc_hashtab_free(tab);
 }
+
+void test_scc_hashtab_metadata_address_on_rehash(void) {
+    scc_hashtab(int) tab = scc_hashtab_new(int, eq);
+    size_t cap = scc_hashtab_capacity(tab);
+    for(int i = 0; i < (int)cap; ++i) {
+        TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, i));
+    }
+
+    TEST_ASSERT_GREATER_THAN_UINT64(cap, scc_hashtab_capacity(tab));
+    unsigned char *md = (unsigned char *)tab + (scc_hashtab_capacity(tab) + 1) * sizeof(int);
+
+    /* Align pointer */
+    unsigned char lb;
+    memcpy(&lb, &md, sizeof(lb));
+    size_t const align = scc_alignof(scc_hashtab_metatype);
+    lb = (lb + align - 1) & ~(align - 1);
+    memcpy(&md, &lb, sizeof(lb));
+
+    TEST_ASSERT_EQUAL_PTR(md, scc_hashtab_inspect_metadata(tab));
+    scc_hashtab_free(tab);
+}
