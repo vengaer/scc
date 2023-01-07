@@ -2,6 +2,9 @@ ifdef __node
 
 runnersuffix    := runner
 
+testsccbuilddir := $(__node_builddir)/scc
+dirs            += $(testsccbuilddir)
+
 $(call push,CPPFLAGS)
 $(call push,LDFLAGS)
 $(call push,LDLIBS)
@@ -12,7 +15,7 @@ LDLIBS          += -lunity -lm
 
 define __unit-obj
 $(strip
-    $(patsubst $(srcdir)/%.$(cext),$(builddir)/scc/%.$(oext),
+    $(patsubst $(srcdir)/%.$(cext),$(testsccbuilddir)/%.$(oext),
         $(wildcard $(patsubst %,$(srcdir)/%*.$(cext),$(__node) $($(__node)_deps))))
     $(patsubst $(inspectdir)/%.$(cext),$(inspectbuilddir)/%.$(oext),
         $(wildcard $(inspectdir)/$(__node)*.$(cext)))
@@ -172,6 +175,10 @@ $(call include-node-if-not,$(__simd_enable),simdemu)
 $(call pop,LDLIBS)
 $(call pop,LDFLAGS)
 $(call pop,CPPFLAGS)
+
+$(testsccbuilddir)/%.$(oext): $(__scc_srcdir)/%.$(cext) | $(testsccbuilddir)
+	$(call echo-cc,$(notdir $@))
+	$(CC) -o $@ $< $(CFLAGS) $(CPPFLAGS)
 
 else
 # Recurse to top level
