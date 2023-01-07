@@ -79,7 +79,7 @@ $(eval
 	    $(proffile)=$($(proffile)) $$< $(FUZZERFLAGS)
 	    $(LLVM_PROFDATA) $(LLVM_PROFFLAGS)
 	    $(LLVM_COV_SHOW)
-		$(LLVM_COV_REPORT)
+	    $(LLVM_COV_REPORT)
 
     merge: $(fuzztarget)
 	    $(proffile)=$($(proffile)) $$< $(mergeflags))
