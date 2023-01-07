@@ -295,3 +295,12 @@ void test_scc_arena_chunk_lower_boundary(void) {
     TEST_ASSERT_FALSE(scc_arena_try_free(&arena, chunk));
     scc_arena_release(&arena);
 }
+
+void test_scc_arena_reserve_no_unnecessary_allocs(void) {
+    struct scc_arena arena = scc_arena_new(int);
+    (void)scc_arena_alloc(&arena);
+    struct scc_chunk *chunk = arena.ar_current;
+    TEST_ASSERT_TRUE(scc_arena_reserve(&arena, arena.ar_chunksize - 1u));
+    TEST_ASSERT_EQUAL_PTR(chunk, arena.ar_current);
+    scc_arena_release(&arena);
+}
