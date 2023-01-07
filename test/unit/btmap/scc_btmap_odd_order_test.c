@@ -132,3 +132,9 @@ void test_scc_btmap_remove_odd_order(void) {
 
     scc_btmap_free(btmap);
 }
+
+void test_scc_btmap_remove_non_existent(void) {
+    scc_btmap(int, int) btmap = scc_btmap_with_order(int, int, ocompare, 5);
+    TEST_ASSERT_FALSE(scc_btmap_remove(btmap, 38));
+    scc_btmap_free(btmap);
+}
