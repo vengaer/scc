@@ -1,3 +1,4 @@
+#include <scc/bug.h>
 #include <scc/hashtab.h>
 #include <scc/mem.h>
 #include <scc/perf.h>
@@ -197,7 +198,9 @@ static struct scc_hashtab_base *scc_hashtab_realloc(
     mdoff = (mdoff + align - 1) & ~(align - 1);
     assert((mdoff & ~(align - 1)) == mdoff);
 
-    size_t const size = mdoff + (cap + SCC_HASHTAB_GUARDSZ) * sizeof(scc_hashtab_metatype);
+
+    scc_static_assert(sizeof(scc_hashtab_metatype) == 1u);
+    size_t const size = mdoff + cap + SCC_HASHTAB_GUARDSZ;
 
     /* Allocate new hash table
      * Ignore clang tidy complaining about struct scc_hashtab_base being
@@ -303,13 +306,15 @@ void const *scc_hashtab_impl_find(void const *tab, size_t elemsize) {
 }
 
 void *scc_hashtab_impl_new(struct scc_hashtab_base *base, size_t coff, size_t mdoff) {
-    scc_canary_init((unsigned char *)base + mdoff + (base->ht_capacity + SCC_HASHTAB_GUARDSZ) * sizeof(scc_hashtab_metatype), SCC_HASHTAB_CANARYSZ);
     base->ht_mdoff = mdoff;
     base->ht_fwoff = scc_hashtab_calcpad(coff);
     unsigned char *tab = (unsigned char *)base + coff;
-    SCC_ON_PERFTRACK(
-        base->ht_perf.ev_bytesz = mdoff + (SCC_HASHTAB_STACKCAP + SCC_HASHTAB_GUARDSZ) * sizeof(scc_hashtab_metatype)
-    );
+
+    scc_static_assert(sizeof(scc_hashtab_metatype) == 1u);
+
+    scc_canary_init((unsigned char *)base + mdoff + base->ht_capacity + SCC_HASHTAB_GUARDSZ, SCC_HASHTAB_CANARYSZ);
+    SCC_ON_PERFTRACK(base->ht_perf.ev_bytesz = mdoff + SCC_HASHTAB_STACKCAP + SCC_HASHTAB_GUARDSZ);
+
     scc_hashtab_set_bkoff(tab, base->ht_fwoff);
     return tab;
 }
