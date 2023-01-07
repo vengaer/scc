@@ -34,7 +34,7 @@ size_t scc_algo_lower_bound_eq(void const *key, void const *base, size_t nmemb, 
             if(cmp <= 0) {
                 end = middle;
             }
-            else if(cmp > 0) {
+            else {
                 begin = middle + 1u;
             }
         }
