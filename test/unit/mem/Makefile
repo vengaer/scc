@@ -1,6 +1,7 @@
 ifdef __node
 
 $(call decl-unit)
+$(call decl-mutate)
 
 else
 # Recurse to top level

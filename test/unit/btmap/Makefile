@@ -4,6 +4,7 @@ $(call push,btmap_deps)
 btmap_deps += vec
 
 $(call decl-unit)
+$(call decl-mutate)
 
 $(call pop,btmap_deps)
 

@@ -4,6 +4,7 @@ $(call push,btree_deps)
 btree_deps += vec
 
 $(call decl-unit)
+$(call decl-mutate)
 
 $(call pop,btree_deps)
 

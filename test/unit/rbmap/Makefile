@@ -4,6 +4,7 @@ $(call push,rbmap_deps)
 rbmap_deps += svec
 
 $(call decl-unit)
+$(call decl-mutate)
 
 $(call pop,rbmap_deps)
 

@@ -4,6 +4,7 @@ $(call push,stack_deps)
 stack_deps += vec
 
 $(call decl-unit)
+$(call decl-mutate)
 
 $(call pop,stack_deps)
 
