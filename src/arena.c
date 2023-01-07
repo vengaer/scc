@@ -17,7 +17,7 @@ static struct scc_chunk *scc_chunk_new(size_t chunksize, size_t elemsize, size_t
     chunk->ch_refcount = 1;
     /* Offset of second element */
     chunk->ch_offset = baseoff;
-    /* Offset of element after last in chunk */
+    /* Offset of last element in chunk */
     chunk->ch_end = chunk->ch_offset - elemsize + chunksize * elemsize;
     chunk->ch_next = 0;
     return chunk;
