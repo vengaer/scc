@@ -4,17 +4,21 @@
 
 #include <unity.h>
 
+#ifdef SCC_MUTATION_TEST
+enum { OTEST_SIZE = 64 };
+#else
+enum { OTEST_SIZE = 3200 };
+#endif
+
 int ocompare(void const *l, void const *r) {
     return *(int const *)l - *(int const *)r;
 }
 
 void test_scc_btmap_insert_odd_order(void) {
-    enum { TEST_SIZE = 3200 };
-
     scc_btmap(int, int) btmap = scc_btmap_with_order(int, int, ocompare, 5);
 
     int *p;
-    for(int i = 0; i < TEST_SIZE; ++i) {
+    for(int i = 0; i < OTEST_SIZE; ++i) {
         TEST_ASSERT_TRUE(scc_btmap_insert(&btmap, i, i << 1));
         TEST_ASSERT_EQUAL_UINT64(i + 1ull, scc_btmap_size(btmap));
         TEST_ASSERT_EQUAL_UINT32(0u, scc_btmap_inspect_invariants(btmap));
@@ -30,17 +34,15 @@ void test_scc_btmap_insert_odd_order(void) {
 }
 
 void test_scc_btmap_insert_odd_order_reverse(void) {
-    enum { TEST_SIZE = 5000 };
-
     scc_btmap(int, int) btmap = scc_btmap_with_order(int, int, ocompare, 7);
 
     int *p;
-    for(int i = TEST_SIZE; i > 0; --i) {
+    for(int i = OTEST_SIZE; i > 0; --i) {
         TEST_ASSERT_TRUE(scc_btmap_insert(&btmap, i, i + 1));
-        TEST_ASSERT_EQUAL_UINT64(TEST_SIZE - i + 1ull, scc_btmap_size(btmap));
+        TEST_ASSERT_EQUAL_UINT64(OTEST_SIZE - i + 1ull, scc_btmap_size(btmap));
         TEST_ASSERT_EQUAL_UINT32(0u, scc_btmap_inspect_invariants(btmap));
 
-        for(int j = TEST_SIZE; j > i; --j) {
+        for(int j = OTEST_SIZE; j > i; --j) {
             p = scc_btmap_find(btmap, j);
             TEST_ASSERT_TRUE(p);
             TEST_ASSERT_EQUAL_INT32(j + 1, *p);
@@ -88,13 +90,12 @@ void test_scc_btmap_insert_odd_order_middle_split(void) {
 }
 
 void test_scc_btmap_odd_insert_overwrite(void) {
-    enum { TEST_SIZE = 3200 };
     int keys[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     scc_btmap(int, int) btmap = scc_btmap_with_order(int, int, ocompare, 32);
 
     size_t expsize;
     int *val;
-    for(int i = 0; i < TEST_SIZE; ++i) {
+    for(int i = 0; i < OTEST_SIZE; ++i) {
         TEST_ASSERT_TRUE(scc_btmap_insert(&btmap, keys[i % scc_arrsize(keys)], i));
         expsize = i >= (int)scc_arrsize(keys) ? scc_arrsize(keys) : i + 1ull;
         TEST_ASSERT_EQUAL_UINT64(expsize, scc_btmap_size(btmap));
@@ -111,19 +112,18 @@ void test_scc_btmap_odd_insert_overwrite(void) {
 }
 
 void test_scc_btmap_remove_odd_order(void) {
-    enum { TEST_SIZE = 320 };
     scc_btmap(int, int) btmap = scc_btmap_with_order(int, int, ocompare, 5);
 
-    for(int i = 0;  i < TEST_SIZE; ++i) {
+    for(int i = 0;  i < OTEST_SIZE; ++i) {
         TEST_ASSERT_TRUE(scc_btmap_insert(&btmap, i, i - 1));
     }
 
     int const *p;
-    for(int i = 0; i < TEST_SIZE; ++i) {
+    for(int i = 0; i < OTEST_SIZE; ++i) {
         TEST_ASSERT_TRUE(scc_btmap_remove(btmap, i));
         TEST_ASSERT_EQUAL_UINT32(0u, scc_btmap_inspect_invariants(btmap));
 
-        for(int j = i + 1; j < TEST_SIZE; ++j) {
+        for(int j = i + 1; j < OTEST_SIZE; ++j) {
             p = scc_btmap_find(btmap, j);
             TEST_ASSERT_TRUE(p);
             TEST_ASSERT_EQUAL_INT32(j - 1, *p);

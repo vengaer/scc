@@ -80,8 +80,10 @@ endef
 define decl-mutate
 $(eval
     $(call push,CFLAGS)
+    $(call push,CPPFLAGS)
     $(call push,LDFLAGS)
     $(eval CFLAGS += $(__mull_cflags))
+    $(eval CPPFLAGS += -DSCC_MUTATION_TEST)
     $(eval LDFLAGS += $(__mull_ldflags))
 
     $(eval __mut_builddir := $(subst /unit/,/mutate/,$(__node_builddir)))
@@ -150,6 +152,7 @@ $(eval
     mutate: $(__mut)
 
     $(call pop,LDFLAGS)
+    $(call pop,CPPFLAGS)
     $(call pop,CFLAGS))
 endef
 
