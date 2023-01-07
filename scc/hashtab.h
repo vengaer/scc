@@ -3,6 +3,7 @@
 
 #include "bits.h"
 #include "bug.h"
+#include "canary.h"
 #include "config.h"
 #include "mem.h"
 
@@ -16,7 +17,26 @@
 //!     :param type: Type of the elements to be stored in the table
 #define scc_hashtab(type) type *
 
+//? .. c:macro:: SCC_HASHTAB_GUARDSZ
+//?
+//?     Size of the hashtab metadata guard used to allow
+//?     unaligned vector loads without corrupting adjacent
+//?     data.
+//?
+//?     .. note::
+//?
+//?         Internal use only
 #define SCC_HASHTAB_GUARDSZ ((unsigned)SCC_VECSIZE - 1u)
+
+//? .. c:macro:: SCC_HASHTAB_CANARYSZ
+//?
+//?     Size of the stack canary placed after the
+//?     metadata guard
+//?
+//?     .. note::
+//?
+//?         Internal use only
+#define SCC_HASHTAB_CANARYSZ 32u
 
 #ifndef SCC_HASHTAB_STACKCAP
 //! .. c:enumerator:: SCC_HASHTAB_STACKCAP
@@ -282,6 +302,7 @@ struct scc_hashtab_base {
         type ht_data[SCC_HASHTAB_STACKCAP];                                 \
         scc_hashtab_metatype ht_meta[SCC_HASHTAB_STACKCAP];                 \
         scc_hashtab_metatype ht_guard[SCC_HASHTAB_GUARDSZ];                 \
+        SCC_CANARY_INJECT(SCC_HASHTAB_CANARYSZ)                             \
     }
 
 //? .. c:function:: void *scc_hashtab_impl_new(struct scc_hashtab_base *base, size_t coff, size_t mdoff)

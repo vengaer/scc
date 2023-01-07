@@ -6,7 +6,7 @@ $(call push,CPPFLAGS)
 $(call push,LDFLAGS)
 $(call push,LDLIBS)
 
-CPPFLAGS        := -I$(unityinc) -I$(testdir) $(filter-out -DNDEBUG,$(CPPFLAGS)) -I$(srcdir)
+CPPFLAGS        := -I$(unityinc) -I$(testdir) $(filter-out -DNDEBUG,$(CPPFLAGS)) -I$(srcdir) -DSCC_CANARY_ENABLED
 LDFLAGS         += -L$(unitydir)
 LDLIBS          += -lunity -lm
 

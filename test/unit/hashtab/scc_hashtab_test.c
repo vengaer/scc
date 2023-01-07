@@ -11,6 +11,13 @@ static bool eq(void const *left, void const *right) {
     return *(int const *)left == *(int const *)right;
 }
 
+static unsigned long long ident(void const *data, size_t size) {
+    (void)size;
+    int d = *(int const *)data;
+    TEST_ASSERT_GREATER_OR_EQUAL_INT32(0, d);
+    return d;
+}
+
 static bool contains(int *tab, int value) {
     scc_hashtab_metatype *md = scc_hashtab_inspect_metadata(tab);
     int *data = scc_hashtab_inspect_data(tab);
@@ -257,5 +264,14 @@ void test_scc_hashtab_find_probe_stop(void) {
     /* Should not cause infinite loop*/
     TEST_ASSERT_FALSE(scc_hashtab_find(tab, 1));
 
+    scc_hashtab_free(tab);
+}
+
+void test_scc_hashtab_metadata_mirroring_no_overflow(void) {
+    scc_hashtab(int) tab = scc_hashtab_with_hash(int, eq, ident);
+    unsigned char const *canary = scc_hashtab_inspect_canary(tab);
+    TEST_ASSERT_TRUE(scc_canary_intact(canary, SCC_HASHTAB_CANARYSZ));
+    TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, SCC_HASHTAB_GUARDSZ));
+    TEST_ASSERT_TRUE(scc_canary_intact(canary, SCC_HASHTAB_CANARYSZ));
     scc_hashtab_free(tab);
 }

@@ -2,7 +2,7 @@ ifdef __node
 
 $(call push,avx2_deps)
 
-avx2_deps += hashtab
+avx2_deps += canary hashtab
 
 $(call decl-unit)
 
