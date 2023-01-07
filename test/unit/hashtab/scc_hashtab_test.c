@@ -275,3 +275,18 @@ void test_scc_hashtab_metadata_mirroring_no_overflow(void) {
     TEST_ASSERT_TRUE(scc_canary_intact(canary, SCC_HASHTAB_CANARYSZ));
     scc_hashtab_free(tab);
 }
+
+void test_scc_hashtab_rehash_limit(void) {
+    scc_hashtab(int) tab = scc_hashtab_new(int, eq);
+    size_t cap = scc_hashtab_capacity(tab);
+    size_t rehash_lim = (cap * 0.875f) + 1.0;
+    for(unsigned i = 0u; i < rehash_lim; ++i) {
+        TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, i));
+        TEST_ASSERT_EQUAL_UINT64(cap, scc_hashtab_capacity(tab));
+    }
+
+    TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, rehash_lim + 1u));
+    TEST_ASSERT_GREATER_THAN_UINT64(cap, scc_hashtab_capacity(tab));
+
+    scc_hashtab_free(tab);
+}
