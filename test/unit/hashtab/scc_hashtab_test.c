@@ -358,3 +358,15 @@ void test_scc_hashtab_reverse_non_optimal_capacity(void) {
 
     scc_hashtab_free(tab);
 }
+
+void test_scc_hashtab_metadata_scrubbing_on_clear(void) {
+    scc_hashtab(int) tab = scc_hashtab_with_hash(int, eq, ident);
+    TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, (int)scc_hashtab_capacity(tab) - 1));
+    TEST_ASSERT_EQUAL_UINT64(1ull, scc_hashtab_size(tab));
+    scc_hashtab_clear(tab);
+    TEST_ASSERT_EQUAL_UINT64(0ull, scc_hashtab_size(tab));
+
+    TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, 1));
+    TEST_ASSERT_FALSE(!!scc_hashtab_find(tab, (int)scc_hashtab_capacity(tab) - 1));
+    scc_hashtab_free(tab);
+}
