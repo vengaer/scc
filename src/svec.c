@@ -138,10 +138,10 @@ void *scc_svec_impl_from(
 bool scc_svec_impl_resize(void *svecaddr, size_t size, size_t elemsize) {
     size_t const currsize = scc_svec_size(*(void **)svecaddr);
 
-    if(!size || currsize == size) {
+    if(!size) {
         return true;
     }
-    if(currsize > size) {
+    if(currsize >= size) {
         scc_svec_impl_base(*(void **)svecaddr)->sv_size = size;
         return true;
     }
@@ -152,6 +152,7 @@ bool scc_svec_impl_resize(void *svecaddr, size_t size, size_t elemsize) {
 
     unsigned char *baseaddr = *(void **)svecaddr;
     size_t zsize = (size - currsize) * elemsize;
+    assert(zsize);
 
     memset(baseaddr + currsize * elemsize, 0, zsize);
     scc_svec_impl_base(*(void **)svecaddr)->sv_size = size;

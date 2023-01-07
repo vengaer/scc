@@ -437,3 +437,12 @@ void test_scc_svec_alloc_on_reverse_only_if_required(void) {
     TEST_ASSERT_FALSE(scc_svec_is_allocd(svec));
     scc_svec_free(svec);
 }
+
+void test_scc_svec_resize_no_unnecessary_realloc(void) {
+    scc_svec(int) svec = scc_svec_new(int);
+    TEST_ASSERT_TRUE(scc_svec_resize(&svec, 31));
+    void *va = svec;
+    TEST_ASSERT_TRUE(scc_svec_resize(&svec, 31));
+    TEST_ASSERT_EQUAL_PTR(va, svec);
+    scc_svec_free(svec);
+}
