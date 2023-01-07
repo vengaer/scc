@@ -178,3 +178,20 @@ void test_scc_btmap_remove_root(void) {
 
     scc_btmap_free(btmap);
 }
+
+void test_scc_btmap_insert_descending_order(void) {
+    scc_btmap(int, int) btmap = scc_btmap_new(int, int, ecompare);
+
+    for(int i = 32; i; --i) {
+        TEST_ASSERT_TRUE(scc_btmap_insert(&btmap, i, i));
+    }
+
+    int const *val;
+    for(int i = 1; i < 33; ++i) {
+        val = scc_btmap_find(btmap, i);
+        TEST_ASSERT_TRUE(!!val);
+        TEST_ASSERT_EQUAL_INT32(i, *val);
+    }
+
+    scc_btmap_free(btmap);
+}
