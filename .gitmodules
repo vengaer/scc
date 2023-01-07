@@ -15,5 +15,5 @@
 	url = https://github.com/eliben/pycparser.git
 [submodule "submodules/mull"]
 	path = submodules/mull
-	url = https://github.com/mull-project/mull
+	url = https://github.com/vengaer/mull
 	ignore = dirty
