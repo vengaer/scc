@@ -6,6 +6,6 @@ __mull_ldflags = -fexperimental-new-pass-manager -fpass-plugin=$(mull_ir_fronten
 
 __ldpaths     := $(addprefix --ld-search-path=,$(wildcard $(addsuffix lib,/ /usr/ /usr/local/)))
 
-MULLFLAGS      = --no-test-output --workers=$(cpu_cores) $(__ldpaths)
+MULLFLAGS      = --no-test-output --strict --workers=$(cpu_cores) $(__ldpaths)
 
 endif
