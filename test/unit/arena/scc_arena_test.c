@@ -286,3 +286,12 @@ void test_scc_arena_reserve_insufficient_space(void) {
 
     scc_arena_release(&arena);
 }
+
+void test_scc_arena_chunk_lower_boundary(void) {
+    struct scc_arena arena = scc_arena_new(int);
+    (void)scc_arena_alloc(&arena);
+    struct scc_chunk *chunk = arena.ar_current;
+    TEST_ASSERT_TRUE(!!chunk);
+    TEST_ASSERT_FALSE(scc_arena_try_free(&arena, chunk));
+    scc_arena_release(&arena);
+}
