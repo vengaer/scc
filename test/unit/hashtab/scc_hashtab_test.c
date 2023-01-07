@@ -339,3 +339,13 @@ void test_scc_hashtab_fnv1a64(void) {
         TEST_ASSERT_EQUAL_UINT64(hashes[i], hash);
     }
 }
+
+void test_scc_hashtab_no_unnecessary_reserve_alloc(void) {
+    scc_hashtab(int) tab = scc_hashtab_new(int, eq);
+
+    void const *orig = tab;
+    TEST_ASSERT_TRUE(scc_hashtab_reserve(&tab, scc_hashtab_capacity(tab)));
+    TEST_ASSERT_EQUAL_PTR(orig, tab);
+
+    scc_hashtab_free(tab);
+}
