@@ -3,6 +3,19 @@
 
 #include <stddef.h>
 
+//? .. c:function:: _Bool scc_algo_impl_lower_bound_is_linear(size_t size)
+//?
+//?     Query whether the complexity of the call to :ref:`scc_algo_lower_bound <scc_algo_lower_bound>` or
+//?     :ref:`scc_lower_bound_eq <scc_algo_lower_bound_eq>` with a sequence of the given size would be linear.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param size: Size of the sequence
+//?     :returns: :code:`true` if the search would be linear, otherwise :code:`false`
+_Bool scc_algo_impl_lower_bound_is_linear(size_t size);
+
 //? .. _scc_algo_lower_bound:
 //? .. c:function:: size_t scc_algo_lower_bound(void const *key, void const *base, size_t nmemb, size_t size, int(*compare)(void const *, void const *))
 //?

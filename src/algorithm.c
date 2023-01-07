@@ -7,6 +7,10 @@
 
 #define LOWER_BOUND_LINEAR_LIM 20u
 
+_Bool scc_algo_impl_lower_bound_is_linear(size_t size) {
+    return size < LOWER_BOUND_LINEAR_LIM;
+}
+
 size_t scc_algo_lower_bound(void const *key, void const *base, size_t nmemb, size_t size, int(*compare)(void const *, void const *)) {
     return scc_algo_lower_bound_eq(key, base, nmemb, size, compare) & SIZE_MASK;
 }
@@ -17,7 +21,7 @@ size_t scc_algo_lower_bound_eq(void const *key, void const *base, size_t nmemb, 
     size_t middle;
     int cmp = 0;
     size_t eq = 0u;
-    if(nmemb < LOWER_BOUND_LINEAR_LIM) {
+    if(scc_algo_impl_lower_bound_is_linear(nmemb)) {
         for(; begin < nmemb; ++begin) {
             cmp = compare(key, (unsigned char const *)base + begin * size);
             eq |= !cmp;

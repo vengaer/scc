@@ -96,3 +96,8 @@ void test_scc_algo_lower_bound_size_respected(void) {
     int data[] = { 1, 2, 3, 4, 5 };
     TEST_ASSERT_EQUAL_UINT64(3u, scc_algo_lower_bound(&data[4], data, 3u, sizeof(data[0]), compare));
 }
+
+void test_scc_algo_lower_bound_linear_limit(void) {
+    TEST_ASSERT_TRUE(scc_algo_impl_lower_bound_is_linear(19u));
+    TEST_ASSERT_FALSE(scc_algo_impl_lower_bound_is_linear(20u));
+}
