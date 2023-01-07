@@ -7,7 +7,7 @@
 
 #include <unity.h>
 
-static int compare(void const *l, void const *r) {
+static int u32compare(void const *l, void const *r) {
     uint32_t leftval = *(uint32_t const *)l;
     uint32_t rightval = *(uint32_t const *)r;
     return (leftval < rightval ? -1 : 1) * !(leftval == rightval);
@@ -65,7 +65,7 @@ void test_scc_btmap_fuzzer_failure0(void) {
         0x2b00301bu
     };
 
-    scc_btmap(uint32_t, uint32_t) btmap = scc_btmap_with_order(uint32_t, uint32_t, compare, 0x2bu);
+    scc_btmap(uint32_t, uint32_t) btmap = scc_btmap_with_order(uint32_t, uint32_t, u32compare, 0x2bu);
     run_fuzzer_test(btmap, data, scc_arrsize(data), scc_arrsize(data));
     scc_btmap_free(btmap);
 }
@@ -75,7 +75,7 @@ void test_scc_btmap_fuzzer_failure1(void) {
         0x92e74848u, 0x48484848u
     };
 
-    scc_btmap(uint32_t, uint32_t) btmap = scc_btmap_with_order(uint32_t, uint32_t, compare, 0x92u);
+    scc_btmap(uint32_t, uint32_t) btmap = scc_btmap_with_order(uint32_t, uint32_t, u32compare, 0x92u);
     run_fuzzer_test(btmap, data, scc_arrsize(data), scc_arrsize(data));
     scc_btmap_free(btmap);
 }
@@ -85,7 +85,7 @@ void test_scc_btmap_fuzzer_failure2(void) {
         0x03ffffffu, 0xff000000u
     };
 
-    scc_btmap(uint32_t, uint32_t) btmap = scc_btmap_with_order(uint32_t, uint32_t, compare, 0x03u);
+    scc_btmap(uint32_t, uint32_t) btmap = scc_btmap_with_order(uint32_t, uint32_t, u32compare, 0x03u);
     run_fuzzer_test(btmap, data, scc_arrsize(data), scc_arrsize(data));
     scc_btmap_free(btmap);
 }
@@ -95,7 +95,7 @@ void test_scc_btmap_fuzzer_failure3(void) {
         0xa6ccccccu, 0xccccccccu, 0xccccccccu, 0xccccccccu
     };
 
-    scc_btmap(uint32_t, uint32_t) btmap = scc_btmap_with_order(uint32_t, uint32_t, compare, 0xa6u);
+    scc_btmap(uint32_t, uint32_t) btmap = scc_btmap_with_order(uint32_t, uint32_t, u32compare, 0xa6u);
     run_fuzzer_test(btmap, data, 2u, scc_arrsize(data));
     scc_btmap_free(btmap);
 }
@@ -105,7 +105,7 @@ void test_scc_btmap_fuzzer_failure4(void) {
         3014917892u, 3014898611u, 565425075u, 3573547007u
     };
 
-    scc_btmap(uint32_t, uint32_t) btmap = scc_btmap_with_order(uint32_t, uint32_t, compare, 0x04u);
+    scc_btmap(uint32_t, uint32_t) btmap = scc_btmap_with_order(uint32_t, uint32_t, u32compare, 0x04u);
     run_fuzzer_test(btmap, data, scc_arrsize(data), scc_arrsize(data));
     scc_btmap_free(btmap);
 }

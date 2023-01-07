@@ -6,27 +6,27 @@
 
 #include <unity.h>
 
-int compare(void const *l, void const *r) {
+int ecompare(void const *l, void const *r) {
     return *(int const *)l - *(int const *)r;
 }
 
 void test_scc_btmap_new(void) {
-    scc_btmap(int, int) btmap = scc_btmap_new(int, int, compare);
+    scc_btmap(int, int) btmap = scc_btmap_new(int, int, ecompare);
     scc_btmap_free(btmap);
 }
 
 void test_scc_btmap_with_order(void) {
-    scc_btmap(int, int) btmap = scc_btmap_with_order(int, int, compare, 4);
+    scc_btmap(int, int) btmap = scc_btmap_with_order(int, int, ecompare, 4);
     TEST_ASSERT_EQUAL_UINT64(4ull, scc_btmap_order(btmap));
     scc_btmap_free(btmap);
 
-    btmap = scc_btmap_with_order(int, int, compare, 32);
+    btmap = scc_btmap_with_order(int, int, ecompare, 32);
     TEST_ASSERT_EQUAL_UINT64(32ull, scc_btmap_order(btmap));
     scc_btmap_free(btmap);
 }
 
 void test_scc_btmap_insert_replace(void) {
-    scc_btmap(int, int) btmap = scc_btmap_new(int, int, compare);
+    scc_btmap(int, int) btmap = scc_btmap_new(int, int, ecompare);
     TEST_ASSERT_TRUE(scc_btmap_insert(&btmap, 1, 1));
     TEST_ASSERT_EQUAL_UINT64(1ull, scc_btmap_size(btmap));
 
@@ -40,7 +40,7 @@ void test_scc_btmap_insert_replace(void) {
 }
 
 void test_scc_btmap_size_empty(void) {
-    scc_btmap(int, int) btmap = scc_btmap_new(int, int, compare);
+    scc_btmap(int, int) btmap = scc_btmap_new(int, int, ecompare);
     TEST_ASSERT_EQUAL_UINT64(0ull, scc_btmap_size(btmap));
     scc_btmap_free(btmap);
 }
@@ -51,7 +51,7 @@ void test_scc_btmap_insert_default_order(void) {
     int r;
     str s;
     str *sp;
-    scc_btmap(int, str) btmap = scc_btmap_new(int, str, compare);
+    scc_btmap(int, str) btmap = scc_btmap_new(int, str, ecompare);
     for(int i = 0; i < TEST_SIZE; ++i) {
         r = snprintf(s.p, sizeof(s.p), "s%d", i);
         TEST_ASSERT_TRUE(r >= 0 && r < (int)sizeof(s.p));
@@ -73,7 +73,7 @@ void test_scc_btmap_insert_default_order(void) {
 
 void test_scc_btmap_insert_order_500(void) {
     enum { TEST_SIZE = 6400 };
-    scc_btmap(int, int) btmap = scc_btmap_with_order(int, int, compare, 500);
+    scc_btmap(int, int) btmap = scc_btmap_with_order(int, int, ecompare, 500);
     for(int i = TEST_SIZE; i >= 0; --i) {
         TEST_ASSERT_TRUE(scc_btmap_insert(&btmap, i, i << 1));
         TEST_ASSERT_EQUAL_UINT64((TEST_SIZE - i) + 1ull, scc_btmap_size(btmap));
@@ -85,7 +85,7 @@ void test_scc_btmap_insert_order_500(void) {
 void test_scc_btmap_even_insert_overwrite(void) {
     enum { TEST_SIZE = 3200 };
     int keys[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-    scc_btmap(int, int) btmap = scc_btmap_with_order(int, int, compare, 32);
+    scc_btmap(int, int) btmap = scc_btmap_with_order(int, int, ecompare, 32);
 
     size_t expsize;
     int *val;
@@ -108,7 +108,7 @@ void test_scc_btmap_even_insert_overwrite(void) {
 void test_scc_btmap_find(void) {
     enum { TEST_SIZE = 3200 };
 
-    scc_btmap(int, int) btmap = scc_btmap_with_order(int, int, compare, 88);
+    scc_btmap(int, int) btmap = scc_btmap_with_order(int, int, ecompare, 88);
 
     int const *p;
     for(int i = 0; i < TEST_SIZE; ++i) {
@@ -128,7 +128,7 @@ void test_scc_btmap_remove_leaf(void) {
     int leafvals[] = { 0, 1, 3, 4, 5, 6 };
 
     for(int i = 0; i < (int)scc_arrsize(leafvals); ++i) {
-        scc_btmap(int, int) btmap = scc_btmap_new(int, int, compare);
+        scc_btmap(int, int) btmap = scc_btmap_new(int, int, ecompare);
 
         for(int j = 0; j < (int)scc_arrsize(leafvals) + 1; ++j) {
             TEST_ASSERT_TRUE(scc_btmap_insert(&btmap, j, j));
@@ -153,7 +153,7 @@ void test_scc_btmap_remove_leaf(void) {
 }
 
 void test_scc_btmap_remove_root(void) {
-    scc_btmap(int, int) btmap = scc_btmap_new(int, int, compare);
+    scc_btmap(int, int) btmap = scc_btmap_new(int, int, ecompare);
 
     for(int i = 0; i < 7; ++i) {
         TEST_ASSERT_TRUE(scc_btmap_insert(&btmap, i, i));
