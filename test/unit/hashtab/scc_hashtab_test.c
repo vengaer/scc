@@ -349,3 +349,12 @@ void test_scc_hashtab_no_unnecessary_reserve_alloc(void) {
 
     scc_hashtab_free(tab);
 }
+
+void test_scc_hashtab_reverse_non_optimal_capacity(void) {
+    scc_hashtab(int) tab = scc_hashtab_new(int, eq);
+
+    TEST_ASSERT_TRUE(scc_hashtab_reserve(&tab, 4155));
+    TEST_ASSERT_EQUAL_UINT64(8192ull, scc_hashtab_capacity(tab));
+
+    scc_hashtab_free(tab);
+}
