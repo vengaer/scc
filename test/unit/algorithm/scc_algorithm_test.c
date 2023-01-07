@@ -91,3 +91,8 @@ void test_scc_algo_lower_bound_eq(void) {
         TEST_ASSERT_EQUAL_UINT64(scc_arrsize(data), ret & mask);
     }
 }
+
+void test_scc_algo_lower_bound_size_respected(void) {
+    int data[] = { 1, 2, 3, 4, 5 };
+    TEST_ASSERT_EQUAL_UINT64(3u, scc_algo_lower_bound(&data[4], data, 3u, sizeof(data[0]), compare));
+}
