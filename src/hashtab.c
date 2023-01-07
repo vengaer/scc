@@ -386,6 +386,7 @@ bool scc_hashtab_impl_remove(void *tab, size_t elemsize) {
 void scc_hashtab_clear(void *tab) {
     struct scc_hashtab_base *base = scc_hashtab_impl_base(tab);
     scc_hashtab_metatype *md = scc_hashtab_metadata(base);
-    memset(md, 0, (base->ht_capacity + SCC_HASHTAB_GUARDSZ) * sizeof(*md));
+    scc_static_assert(sizeof(*md) == 1u);
+    memset(md, 0, base->ht_capacity + SCC_HASHTAB_GUARDSZ);
     base->ht_size = 0u;
 }
