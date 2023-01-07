@@ -251,7 +251,8 @@ static bool scc_hashtab_rehash(void **tab, struct scc_hashtab_base *base, size_t
 
     scc_hashtab_metatype *md = scc_hashtab_metadata(base);
 
-    for(size_t i = 0u; base->ht_size && i < base->ht_capacity; ++i) {
+    for(size_t i = 0u; base->ht_size; ++i) {
+        assert(i < base->ht_capacity);
         if(md[i] & SCC_HASHTAB_OCCUPIED) {
             memcpy(newtab, (unsigned char *)*(void **)tab + (i + 1u) * elemsize, elemsize);
             scc_bug_on(!scc_hashtab_emplace(newtab, newbase, elemsize));
