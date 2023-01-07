@@ -309,37 +309,6 @@ void scc_vec_impl_erase_range(void *vec, size_t first, size_t end, size_t elemsi
 #define scc_vec_erase_range(vec, first, end)                            \
     scc_vec_impl_erase_range(vec, first, end, sizeof(*(vec)))
 
-/* scc_vec_impl_at_check
- *
- * Internal use only
- *
- * Verify that the given index is within the range of the given
- * vector. If this is the case, the given index is returned.
- * Otherwise, the program is terminated.
- *
- * void *vec
- *      The vec instance in question
- *
- * size_t index
- *      The index at which the vec is to be accessed
- */
-size_t scc_vec_impl_at_check(void *vec, size_t index);
-
-/* scc_vec_at
- *
- * Provides bounds-checked access to the elements of the
- * vector. Equivalent to applying [] to the vec apart from
- * the program being terminated should an OOB access be attempted
- *
- * scc_vec(type) vec
- *      The vec instance
- *
- * size_t index
- *      The index at which the element is to be accessed
- */
-#define scc_vec_at(vec, index)                                          \
-    ((vec)[scc_vec_impl_at_check(vec, index)])
-
 /* scc_vec_impl_push_ensure_capacity
  *
  * Internal use only
@@ -475,18 +444,6 @@ inline _Bool scc_vec_empty(void const *vec) {
 inline void scc_vec_pop(void *vec) {
     --scc_vec_impl_base(vec)->sv_size;
 }
-
-/* scc_vec_pop_safe
- *
- * Bounds-checked pop the last value off
- * the vector. Should the vector already
- * be empty at the time of the call, the
- * program is terminated
- *
- * void *vec
- *      The vec instance
- */
-void scc_vec_pop_safe(void *vec);
 
 /* scc_vec_clear
  *

@@ -104,36 +104,6 @@ void test_scc_vec_pop(void) {
     scc_vec_free(vec);
 }
 
-void test_scc_vec_pop_safe(void) {
-    enum { TEST_SIZE = 368 };
-    scc_vec(int) vec = scc_vec_new(int);
-
-    TEST_ASSERT_TRUE(scc_vec_reserve(&vec, TEST_SIZE));
-    for(int i = 0; i < TEST_SIZE; i++) {
-        TEST_ASSERT_TRUE(scc_vec_push(&vec, i));
-    }
-    TEST_ASSERT_EQUAL_UINT64(TEST_SIZE, scc_vec_size(vec));
-
-    for(int i = TEST_SIZE - 1; i >= 0; i--) {
-        TEST_ASSERT_EQUAL_INT32(i, vec[scc_vec_size(vec) - 1]);
-        scc_vec_pop_safe(vec);
-        TEST_ASSERT_EQUAL_INT32(i, scc_vec_size(vec));
-    }
-
-    scc_vec_free(vec);
-}
-
-void test_scc_vec_at(void) {
-    enum { TEST_SIZE = 368 };
-    scc_vec(int) vec = scc_vec_new(int);
-    for(int i = 0; i < TEST_SIZE; i++) {
-        TEST_ASSERT_TRUE(scc_vec_push(&vec, i));
-        TEST_ASSERT_EQUAL_INT32(i, scc_vec_at(vec, i));
-    }
-
-    scc_vec_free(vec);
-}
-
 void test_scc_vec_resize_sizeup(void) {
     scc_vec(int) vec = scc_vec_new(int);
     TEST_ASSERT_TRUE(scc_vec_resize(vec, 38));

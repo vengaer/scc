@@ -1,4 +1,3 @@
-#include <scc/panic.h>
 #include <scc/svec.h>
 
 #include <assert.h>
@@ -190,13 +189,6 @@ void scc_svec_impl_erase_range(void *svec, size_t first, size_t end, size_t elem
     memmove(dstaddr, srcaddr, nbytes);
 }
 
-size_t scc_svec_impl_at_check(void *svec, size_t index) {
-    if(scc_svec_size(svec) <= index) {
-        scc_panic("Attempt to access element %zu in vector of size %zu", index, scc_svec_size(svec));
-    }
-    return index;
-}
-
 bool scc_svec_impl_push_ensure_capacity(void *svec, size_t elemsize) {
     size_t const capacity = scc_svec_capacity(*(void **)svec);
     if(scc_svec_size(*(void **)svec) < capacity) {
@@ -217,11 +209,3 @@ void scc_svec_free(void *svec) {
         free(scc_svec_impl_base(svec));
     }
 }
-
-void scc_svec_pop_safe(void *svec) {
-    if(!scc_svec_size(svec)) {
-        scc_panic("Attempt to pop element from vector of size 0");
-    }
-    scc_svec_pop(svec);
-}
-

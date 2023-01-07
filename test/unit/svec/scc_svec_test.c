@@ -196,18 +196,6 @@ void test_scc_svec_pop(void) {
     scc_svec_free(svec);
 }
 
-void test_scc_svec_pop_safe(void) {
-    int *svec = scc_svec_from(int, 1, 2, 3);
-    TEST_ASSERT_EQUAL_UINT64(3ull, scc_svec_size(svec));
-    scc_svec_pop_safe(svec);
-    TEST_ASSERT_EQUAL_UINT64(2ull, scc_svec_size(svec));
-    scc_svec_pop_safe(svec);
-    TEST_ASSERT_EQUAL_UINT64(1ull, scc_svec_size(svec));
-    scc_svec_pop_safe(svec);
-    TEST_ASSERT_EQUAL_UINT64(0ull, scc_svec_size(svec));
-    scc_svec_free(svec);
-}
-
 void test_scc_svec_erase(void) {
     enum { TEST_SIZE = 212 };
     enum { ERASE_IDX0 = 118 };
@@ -323,16 +311,6 @@ void test_scc_svec_erase_range_end(void) {
         TEST_ASSERT_EQUAL_INT32(i, svec[i]);
     }
 
-    scc_svec_free(svec);
-}
-
-void test_scc_svec_at(void) {
-    enum { TEST_SIZE = 368 };
-    scc_svec(int) svec = scc_svec_new(int);
-    for(int i = 0; i < TEST_SIZE; i++) {
-        TEST_ASSERT_TRUE(scc_svec_push(&svec, i));
-        TEST_ASSERT_EQUAL_INT32(i, scc_svec_at(svec, i));
-    }
     scc_svec_free(svec);
 }
 

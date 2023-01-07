@@ -408,34 +408,6 @@ void scc_svec_impl_erase_range(void *svec, size_t first, size_t end, size_t elem
 #define scc_svec_erase_range(svec, first, end)                          \
     scc_svec_impl_erase_range(svec, first, end, sizeof(*(svec)))
 
-//? .. c:function:: size_t scc_svec_impl_at_check(void *svec, size_t index)
-//?
-//?     Verify that the given index would not index beyond the end of
-//?     the svec. If this is the case, the given index is returned,
-//?     otherwise, the program is terminated.
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param svec: Handle to the svec instance in question
-//?     :param index: The index at which the svec is to be accessed
-size_t scc_svec_impl_at_check(void *svec, size_t index);
-
-//! .. c:function:: type scc_svec_at(void *svec, size_t index)
-//!
-//!     Accesses the indexth element in the given vector, with
-//!     bounds checking. If the index is out-of-bounds, the process
-//!     is terminated as if by calling exit_
-//!
-//!     :param svec: Handle to the svec to index
-//!     :param index: Index of the element to be accessed
-//!     :returns: The indexth element in the given svec
-//!
-//! .. _exit: https://man7.org/linux/man-pages/man3/exit.3.html
-#define scc_svec_at(svec, index)                                        \
-    ((svec)[scc_svec_impl_at_check(svec, index)])
-
 //! .. c:function:: type operator[](void *svec, size_t index)
 //!
 //!     Accesses the indexth element in the given svec without
@@ -598,15 +570,6 @@ inline _Bool scc_svec_empty(void const *svec) {
 inline void scc_svec_pop(void *svec) {
     --scc_svec_impl_base(svec)->sv_size;
 }
-
-//! .. c:function:: void scc_svec_pop_safe(void *svec)
-//!
-//!     Pop the last value off the vector, with bounds
-//!     checking. Should the vector already be empty, the
-//!     program is terminated as if by calling exit_.
-//!
-//!     :param svec: Handle to svec to pop from
-void scc_svec_pop_safe(void *svec);
 
 //! .. c:function:: void scc_svec_clear(void *svec)
 //!
