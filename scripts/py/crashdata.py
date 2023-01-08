@@ -22,7 +22,7 @@ def read_and_dump(file, outfile, skip, group):
     with open(file, 'rb') as handle:
         data = handle.read()[skip:]
 
-    fmt = f'0x{{:0{group}x}}'
+    fmt = f'0x{{:0{2 * int(group)}x}}'
     with FileWrHandle(outfile) if outfile is not None else StdoutWrHandle() as handle:
         handle.write(f'{_TYPES[int(group)]} data[] = {{\n{4 * " "}')
         with open(file, 'rb') as infile:
