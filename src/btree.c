@@ -668,7 +668,8 @@ static void scc_btnode_rotate_right(
     struct scc_btnode_base **nlinks = scc_btnode_links(base, node);
     struct scc_btnode_base *subtree = scc_btnode_child(base, sibling, sibling->bt_nkeys--);
 
-    memmove(nlinks + 1u, nlinks, ++node->bt_nkeys * sizeof(*nlinks));
+    ++node->bt_nkeys;
+    memmove(nlinks + 1u, nlinks, node->bt_nkeys * sizeof(*nlinks));
     nlinks[0] = subtree;
 }
 
@@ -708,7 +709,8 @@ static void scc_btnode_rotate_left(
     struct scc_btnode_base **slinks = scc_btnode_links(base, sibling);
 
     nlinks[++node->bt_nkeys] = slinks[0];
-    memmove(slinks, slinks + 1u, sibling->bt_nkeys-- * sizeof(*slinks));
+    memmove(slinks, slinks + 1u, sibling->bt_nkeys * sizeof(*slinks));
+    --sibling->bt_nkeys;
     memmove(sslot, sslot + elemsize, sibling->bt_nkeys * elemsize);
 }
 
