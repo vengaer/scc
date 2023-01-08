@@ -324,10 +324,8 @@ static inline void scc_btmnode_replace_value(
 //?     :returns: The lower bound of the newly inserted element
 static void scc_btmnode_emplace_leaf(struct scc_btmap_base *restrict base, struct scc_btmnode_base *restrict node, void *restrict kvpair) {
     size_t bound = scc_btmnode_lower_bound(base, node, kvpair);
-    if(scc_btmnode_keyeq(bound)) {
-        scc_btmnode_replace_value(base, node, kvpair, bound & BOUND_MASK);
-        return;
-    }
+    /* Should be guaranteed at call site */
+    assert(!scc_btmnode_keyeq(bound));
 
     unsigned char *keys = scc_btmnode_keys(base, node);
     unsigned char *vals = scc_btmnode_vals(base, node);
