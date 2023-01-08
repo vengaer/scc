@@ -662,7 +662,9 @@ static void scc_btnode_rotate_right(
     unsigned char *pslot = scc_btnode_value(base, p, bound - 1u, elemsize);
     unsigned char *sslot = scc_btnode_value(base, sibling, sibling->bt_nkeys - 1u, elemsize);
 
-    scc_memmove(nslot + elemsize, nslot, node->bt_nkeys * elemsize);
+    if(node->bt_nkeys) {
+        scc_memmove(nslot + elemsize, nslot, node->bt_nkeys * elemsize);
+    }
     scc_memcpy(nslot, pslot, elemsize);
     scc_memcpy(pslot, sslot, elemsize);
 
