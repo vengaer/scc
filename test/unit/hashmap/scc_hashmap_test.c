@@ -3,8 +3,9 @@
 #include <scc/hashmap.h>
 #include <scc/mem.h>
 
-#include <stdbool.h>
 #include <limits.h>
+#include <stdbool.h>
+#include <string.h>
 
 #include <unity.h>
 
@@ -253,4 +254,30 @@ void test_scc_hashmap_rehash_limit(void) {
     TEST_ASSERT_GREATER_THAN_UINT64(cap, scc_hashmap_capacity(map));
 
     scc_hashmap_free(map);
+}
+
+void test_scc_hashmap_fnv1a64(void) {
+    static char const *strings[] = {
+        "permian",
+        "palaeocene",
+        "eocene",
+        "oligocene"
+    };
+
+    static unsigned long long hashes[] = {
+        0x88224508f1e2e011ull,
+        0x7b96bcef58fde340ull,
+        0xfc0e1183fbd62254ull,
+        0x83b3ee57387597f2ull
+    };
+
+    scc_static_assert(ULLONG_MAX >= 0xffffffffffffffffull,
+                        "Non-confromant implementation (n2310 5.2.4.2.1)");
+
+    unsigned long long hash;
+    scc_static_assert(scc_arrsize(strings) == scc_arrsize(hashes));
+    for(unsigned i = 0u; i < scc_arrsize(hashes); ++i) {
+        hash = scc_hashmap_fnv1a(strings[i], strlen(strings[i]));
+        TEST_ASSERT_EQUAL_UINT64(hashes[i], hash);
+    }
 }
