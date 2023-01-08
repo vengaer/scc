@@ -1,5 +1,6 @@
 #include "btmap_inspect.h"
 
+#include <scc/bits.h>
 #include <scc/btmap.h>
 #include <scc/stack.h>
 #include <scc/svec.h>
@@ -62,7 +63,12 @@ scc_inspect_mask scc_btmap_impl_inspect_invariants(void const *btmap, size_t key
         }
         else {
             if(!(ctx->node->btm_flags & SCC_BTMAP_FLAG_LEAF)) {
-                if(ctx->node != base->btm_root && (ctx->min || ctx->max) && ctx->node->btm_nkeys < ((base->btm_order >> 1u) - 1u)) {
+                if(ctx->node == base->btm_root) {
+                    if(ctx->node->btm_nkeys < 1u) {
+                        mask |= SCC_BTMAP_ERR_ROOT;
+                    }
+                }
+                else if(ctx->node->btm_nkeys < (base->btm_order >> 1u) - scc_bits_is_even(base->btm_order)) {
                     mask |= SCC_BTMAP_ERR_CHILDREN;
                 }
             }
