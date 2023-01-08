@@ -469,3 +469,13 @@ void test_scc_btree_fuzzer_failure15(void) {
     run_fuzzer_test(btree, data, scc_arrsize(data));
     scc_btree_free(btree);
 }
+
+void test_scc_btree_fuzzer_failure16(void) {
+    static unsigned char const data[] = {
+        0x03, 0x03, 0xc6, 0xe2, 0xb9, 0x72, 0x00, 0xb5,
+        0xff, 0x7f, 0x00, 0x00
+    };
+    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, ucompare, 0x03);
+    run_fuzzer_test(btree, data, scc_arrsize(data));
+    scc_btree_free(btree);
+}
