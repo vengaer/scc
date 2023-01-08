@@ -1,3 +1,4 @@
+#include <scc/mem.h>
 #include <scc/rbmap.h>
 
 #include <stdbool.h>
@@ -101,7 +102,7 @@ _Bool scc_rbmap_impl_insert(void *rbmapaddr, size_t elemsize, size_t valoff) {
 
     /* Preexisting entry, update value */
     unsigned char const *raddr = ((unsigned char const *)*(void **)rbmapaddr) + valoff;
-    memcpy(addr + valoff, raddr, elemsize - valoff);
+    scc_memcpy(addr + valoff, raddr, elemsize - valoff);
     return true;
 }
 
