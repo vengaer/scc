@@ -573,7 +573,7 @@ static _Bool scc_btree_insert_preemptive(struct scc_btree_base *base, void *btre
 //?     :param elemsize: Size of the elements in the tree
 //?     :returns: :code:`true` if the value was successfully inserted, otherwise :code:`false`.
 static _Bool scc_btree_insert_non_preemptive(struct scc_btree_base *base, void *btreeaddr, size_t elemsize) {
-    size_t origsz = base->bt_size;
+    bool success = false;
     scc_stack(struct scc_btnode_base *) stack = scc_stack_new(struct scc_btnode_base *);
 
     /* Root has parent NULL */
@@ -609,6 +609,7 @@ static _Bool scc_btree_insert_non_preemptive(struct scc_btree_base *base, void *
     if(!scc_btnode_full(base, curr)) {
         scc_btnode_emplace_leaf(base, curr, *(void **)btreeaddr, elemsize);
         ++base->bt_size;
+        success = true;
         goto epilogue;
     }
 
@@ -644,10 +645,11 @@ static _Bool scc_btree_insert_non_preemptive(struct scc_btree_base *base, void *
 
     scc_btnode_emplace(base, curr, right, value, elemsize);
     ++base->bt_size;
+    success = true;
 
 epilogue:
     scc_stack_free(stack);
-    return origsz < base->bt_size;
+    return success;
 }
 
 //? .. c:function:: void scc_btnode_rotate_right(\
