@@ -819,11 +819,8 @@ static inline void scc_btnode_merge_left_non_preemptive(
     size_t bound,
     size_t elemsize
 ) {
-    size_t nmov = scc_btnode_merge(base, node, sibling, p, bound - 1u, elemsize) + 1u;
-    if(bound <= p->bt_nkeys) {
-        struct scc_btnode_base **plinks = scc_btnode_links(base, p);
-        scc_memmove(plinks + bound, plinks + bound + 1u, nmov * sizeof(*plinks));
-    }
+    (void)scc_btnode_merge(base, node, sibling, p, bound - 1u, elemsize);
+    assert(p->bt_nkeys < bound);
     scc_arena_try_free(&base->bt_arena, node);
 }
 
