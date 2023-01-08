@@ -1391,7 +1391,7 @@ static void scc_btmap_balance_non_preemptive(
 //?     :returns: :code:`true` if the key-value pair was removed, :code:`false` if the
 //?               key was not found
 static _Bool scc_btmap_remove_non_preemptive(struct scc_btmap_base *restrict base, void *restrict btmap) {
-    size_t const borrow_lim = (base->btm_order >> 1u) + 1u;
+    size_t const borrow_lim = (base->btm_order >> 1u);
     size_t const origsz = base->btm_size;
 
     _Bool swap_pred = true;
