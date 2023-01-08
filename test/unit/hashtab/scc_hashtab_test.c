@@ -9,6 +9,12 @@
 
 #include <unity.h>
 
+#ifdef SCC_MUTATION_TEST
+enum { TEST_SIZE = 64 };
+#else
+enum { TEST_SIZE = 512 };
+#endif
+
 static bool eq(void const *left, void const *right) {
     return *(int const *)left == *(int const *)right;
 }
@@ -51,10 +57,9 @@ void test_scc_hashtab_bkoff(void) {
  * insertion succeeds
  */
 void test_scc_hashtab_insert(void) {
-    enum { TESTSIZE = 11 };
     scc_hashtab(int) tab = scc_hashtab_new(int, eq);
 
-    for(int i = 0; i < TESTSIZE; ++i) {
+    for(int i = 0; i < TEST_SIZE; ++i) {
         TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, i));
         TEST_ASSERT_EQUAL_UINT64(i + 1ull, scc_hashtab_size(tab));
 
@@ -114,9 +119,8 @@ void test_scc_hashtab_reserve(void) {
  * and verify that the values are still present
  */
 void test_scc_hashtab_reserve_retains_values(void) {
-    enum { TESTSIZE = 256 };
     scc_hashtab(int) tab = scc_hashtab_new(int, eq);
-    for(int i = 0; i < TESTSIZE; ++i) {
+    for(int i = 0; i < TEST_SIZE; ++i) {
         TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, i));
 
         for(int j = 0; j <= i; ++j) {
@@ -127,7 +131,7 @@ void test_scc_hashtab_reserve_retains_values(void) {
     TEST_ASSERT_TRUE(scc_hashtab_reserve(&tab, (cap << 1u) + 1u));
     TEST_ASSERT_GREATER_THAN_UINT64(cap, scc_hashtab_capacity(tab));
 
-    for(int i = 0; i < TESTSIZE; ++i) {
+    for(int i = 0; i < TEST_SIZE; ++i) {
         TEST_ASSERT_TRUE(scc_hashtab_find(tab, i));
     }
     scc_hashtab_free(tab);
@@ -139,11 +143,10 @@ void test_scc_hashtab_reserve_retains_values(void) {
  * verify that no values are lost
  */
 void test_scc_hashtab_interleaved_insert_find(void) {
-    enum { TESTSIZE = 4096 };
     scc_hashtab(int) tab = scc_hashtab_new(int, eq);
 
     int const *elem;
-    for(int i = 0; i < TESTSIZE; ++i) {
+    for(int i = 0; i < TEST_SIZE; ++i) {
         TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, i));
         for(int j = 0; j <= i; ++j) {
             elem = scc_hashtab_find(tab, j);
@@ -178,14 +181,13 @@ void test_scc_hashtab_remove(void) {
  * values that have yet to be removed are.
  */
 void test_scc_hashtab_interleaved_remove_find(void) {
-    enum { TESTSIZE = 2048 };
     scc_hashtab(int) tab = scc_hashtab_new(int, eq);
 
-    for(int i = 0; i < TESTSIZE; ++i) {
+    for(int i = 0; i < TEST_SIZE; ++i) {
         TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, i));
     }
 
-    for(int i = 0; i < TESTSIZE; ++i) {
+    for(int i = 0; i < TEST_SIZE; ++i) {
         TEST_ASSERT_TRUE(scc_hashtab_remove(tab, i));
 
         /* Values not present */
@@ -195,7 +197,7 @@ void test_scc_hashtab_interleaved_remove_find(void) {
         }
 
         /* Values still present */
-        for(int j = i + 1; j < TESTSIZE; ++j) {
+        for(int j = i + 1; j < TEST_SIZE; ++j) {
             TEST_ASSERT_TRUE(!!scc_hashtab_find(tab, j));
         }
     }
