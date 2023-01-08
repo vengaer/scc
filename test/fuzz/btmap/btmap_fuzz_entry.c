@@ -15,6 +15,7 @@ static int compare(void const *l, void const *r);
 static void fuzz_insertion(void *map, uint32_t const *data, size_t ue, size_t size);
 static void fuzz_find(void *map, uint32_t const *data, size_t ue);
 static void fuzz_removal(void *map, uint32_t const *data, size_t ue);
+static void fuzz_nonexistent(void *map, uint32_t const *data, size_t ue);
 
 int LLVMFuzzerTestOneInput(uint8_t const *data, size_t size) {
     scc_btmap(uint32_t, uint32_t) btmap;
@@ -74,6 +75,7 @@ int LLVMFuzzerTestOneInput(uint8_t const *data, size_t size) {
     fuzz_insertion(btmap, buf, unique_end, size);
     fuzz_find(btmap, buf, unique_end);
     fuzz_removal(btmap, buf, unique_end);
+    fuzz_nonexistent(btmap, buf, unique_end);
 
     free(buf);
     scc_btmap_free(btmap);
@@ -202,4 +204,24 @@ static void fuzz_removal(void *map, uint32_t const *data, size_t ue) {
     }
 
     fuzz_assert(!scc_btmap_size(btmap), "Map not empty");
+}
+
+static void fuzz_nonexistent(void *map, uint32_t const *data, size_t ue) {
+    scc_btmap(uint32_t, uint32_t) btmap = map;
+    uint32_t nonexistent = 0u;
+    bool found = false;
+    fuzz_assert(ue < UINT32_MAX);
+    while(!found) {
+        found = true;
+        for(size_t i = 0u; i < ue; ++i) {
+            if(nonexistent == data[i]) {
+                ++nonexistent;
+                found = false;
+            }
+            break;
+        }
+    }
+
+    fuzz_assert(!scc_btmap_find(btmap, nonexistent));
+    fuzz_assert(!scc_btmap_remove(btmap, nonexistent));
 }
