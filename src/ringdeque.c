@@ -103,9 +103,9 @@ static bool scc_ringdeque_grow(void **dequeaddr, size_t newcap, size_t elemsize)
     size_t befwrap = prev->rd_capacity - prev->rd_begin;
     size_t first = befwrap * elemsize;
     unsigned char *firstsrc = (unsigned char *)*dequeaddr + prev->rd_begin * elemsize;
-    memcpy(data, firstsrc, first);
+    scc_memcpy(data, firstsrc, first);
     if(prev->rd_begin) {
-        memcpy(data + first, *dequeaddr, (prev->rd_size - befwrap) * elemsize);
+        scc_memcpy(data + first, *dequeaddr, (prev->rd_size - befwrap) * elemsize);
     }
     base->rd_begin = 0;
     base->rd_end = base->rd_size;
