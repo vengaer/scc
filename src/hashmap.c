@@ -291,7 +291,8 @@ static bool scc_hashmap_rehash(
     unsigned char *keybase = (unsigned char *)*(void **)map + base->hm_pairsize;
     unsigned char *valbase = scc_hashmap_vals(base);
 
-    for(size_t i = 0u; base->hm_size && i < base->hm_capacity; ++i) {
+    for(size_t i = 0u; base->hm_size; ++i) {
+        assert(i < base->hm_capacity);
         if(md[i] & SCC_HASHMAP_OCCUPIED) {
             /* Copy key */
             memcpy(newmap, keybase + i * keysize, keysize);
