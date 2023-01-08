@@ -389,7 +389,7 @@ static void scc_btmnode_emplace(
 //?     struct scc_btmnode_base *restrict node, \
 //?     struct scc_btmnode_base *restrict p)
 //?
-//?     Find and reutrn the index of the given node in the link
+//?     Find and return the index of the given node in the link
 //?     array of p
 //?
 //?     .. note::
@@ -409,13 +409,8 @@ static inline size_t scc_btmnode_find_linkindex(
     void *val = scc_btmnode_keys(base, node);
     size_t bound = scc_btmnode_lower_bound(base, p, val) & BOUND_MASK;
     struct scc_btmnode_base **plinks = scc_btmnode_links(base, p);
-    for(unsigned i = bound; i <= p->btm_nkeys; ++i) {
-        if(plinks[i] == node) {
-            return i;
-        }
-    }
-
-    return base->btm_order;
+    assert(plinks[bound] == node);
+    return bound;
 }
 
 //? .. c:function:: struct scc_btmnode_base *scc_btmnode_split_preemptive(\
