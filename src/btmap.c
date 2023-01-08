@@ -1254,7 +1254,8 @@ static _Bool scc_btmap_remove_preemptive(struct scc_btmap_base *restrict base, v
                 break;
             }
 
-            if(next->btm_nkeys < borrow_lim && bound < curr->btm_nkeys) {
+            if(next->btm_nkeys < borrow_lim) {
+                assert(bound < curr->btm_nkeys);
                 struct scc_btmnode_base *right = scc_btmnode_child(base, curr, bound + 1u);
                 if(right->btm_nkeys >= borrow_lim) {
                     next = right;
