@@ -1226,7 +1226,7 @@ static void scc_btree_balance_non_preemptive(
 //?     :returns: :code:`true` if the value was removed, :code:`false` if the value
 //?               wasn't found
 static _Bool scc_btree_remove_non_preemptive(struct scc_btree_base *restrict base, void *restrict btree, size_t elemsize) {
-    size_t const origsz = base->bt_size;
+    bool success = false;
 
     scc_stack(struct scc_btnode_base *) nodes = scc_stack_new(struct scc_btnode_base *);
     scc_stack(size_t) bounds = scc_stack_new(size_t);
@@ -1286,6 +1286,7 @@ static _Bool scc_btree_remove_non_preemptive(struct scc_btree_base *restrict bas
         scc_btnode_overwrite(base, curr, found, fbound, elemsize, true);
     }
     --base->bt_size;
+    success = true;
 
     if(base->bt_size) {
         scc_btree_balance_non_preemptive(base, curr, nodes, bounds, elemsize);
@@ -1295,7 +1296,7 @@ epilogue:
     scc_stack_free(nodes);
     scc_stack_free(bounds);
 
-    return base->bt_size < origsz;
+    return success;
 }
 
 void *scc_btree_impl_new(void *base, size_t coff, size_t rootoff) {
