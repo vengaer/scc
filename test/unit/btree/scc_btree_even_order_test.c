@@ -4,6 +4,12 @@
 
 #include <unity.h>
 
+#ifdef SCC_MUTATION_TEST
+enum { ETEST_SIZE = 64 };
+#else
+enum { ETEST_SIZE = 3200 };
+#endif
+
 int ecompare(void const *l, void const *r) {
     return *(int const *)l - *(int const *)r;
 }
@@ -30,9 +36,8 @@ void test_scc_btree_size_empty(void) {
 }
 
 void test_scc_btree_insert_default_order(void) {
-    enum { TEST_SIZE = 3200 };
     scc_btree(int) btree = scc_btree_new(int, ecompare);
-    for(int i = 0; i < TEST_SIZE; ++i) {
+    for(int i = 0; i < ETEST_SIZE; ++i) {
         TEST_ASSERT_TRUE(scc_btree_insert(&btree, i));
         TEST_ASSERT_EQUAL_UINT64(i + 1ull, scc_btree_size(btree));
         TEST_ASSERT_EQUAL_UINT32(0u, scc_btree_inspect_invariants(btree));
@@ -46,22 +51,20 @@ void test_scc_btree_insert_default_order(void) {
 }
 
 void test_scc_btree_insert_order_328(void) {
-    enum { TEST_SIZE = 6400 };
     scc_btree(int) btree = scc_btree_with_order(int, ecompare, 328);
-    for(int i = TEST_SIZE; i >= 0; --i) {
+    for(int i = ETEST_SIZE; i >= 0; --i) {
         TEST_ASSERT_TRUE(scc_btree_insert(&btree, i));
-        TEST_ASSERT_EQUAL_UINT64((TEST_SIZE - i) + 1ull, scc_btree_size(btree));
+        TEST_ASSERT_EQUAL_UINT64((ETEST_SIZE - i) + 1ull, scc_btree_size(btree));
         TEST_ASSERT_EQUAL_UINT32(0u, scc_btree_inspect_invariants(btree));
     }
     scc_btree_free(btree);
 }
 
 void test_scc_btree_insert_non_monotonic(void) {
-    enum { TEST_SIZE = 3200 };
     int data[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     scc_btree(int) btree = scc_btree_with_order(int, ecompare, 32);
 
-    for(int i = 0; i < TEST_SIZE; ++i) {
+    for(int i = 0; i < ETEST_SIZE; ++i) {
         TEST_ASSERT_TRUE(scc_btree_insert(&btree, data[i % scc_arrsize(data)]));
         TEST_ASSERT_EQUAL_UINT64(i + 1ull, scc_btree_size(btree));
         TEST_ASSERT_EQUAL_UINT32(0u, scc_btree_inspect_invariants(btree));
@@ -71,18 +74,16 @@ void test_scc_btree_insert_non_monotonic(void) {
 }
 
 void test_scc_btree_find(void) {
-    enum { TEST_SIZE = 3200 };
-
     scc_btree(int) btree = scc_btree_with_order(int, ecompare, 88);
 
     int const *p;
-    for(int i = 0; i < TEST_SIZE; ++i) {
+    for(int i = 0; i < ETEST_SIZE; ++i) {
         TEST_ASSERT_TRUE(scc_btree_insert(&btree, i));
         p = scc_btree_find(btree, i);
         TEST_ASSERT_TRUE(p);
         TEST_ASSERT_EQUAL_INT32(i, *p);
 
-        for(int j = i + 1; j < TEST_SIZE; ++j) {
+        for(int j = i + 1; j < ETEST_SIZE; ++j) {
             TEST_ASSERT_FALSE(scc_btree_find(btree, j));
         }
     }
