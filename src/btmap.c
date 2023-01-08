@@ -54,6 +54,22 @@ static inline void scc_btmap_root_init(struct scc_btmap_base *base, void *root) 
     base->btm_root->btm_flags |= SCC_BTMAP_FLAG_LEAF;
 }
 
+//? .. c:function:: void scc_btmnode_full(struct scc_btmap_base const *base, struct scc_btmnode_base const *node)
+//?
+//?     Determine whether the given node is full or not
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Base address of the btmap
+//?     :param node: The node to check
+//?     :returns: :code:`true` if the node is full, otherwise :code:`false`
+static inline _Bool scc_btmnode_full(struct scc_btmap_base const *base, struct scc_btmnode_base const *node) {
+    assert(node->btm_nkeys < base->btm_order);
+    return node->btm_nkeys == base->btm_order - 1u;
+}
+
 //? .. c:function:: _Bool scc_btmnode_is_leaf(struct scc_btmnode_base const *node)
 //?
 //?     Determine if the given node is a leaf
@@ -662,7 +678,7 @@ static _Bool scc_btmap_insert_preemptive(struct scc_btmap_base *base, void *btma
         }
         bound &= BOUND_MASK;
 
-        if(curr->btm_nkeys == base->btm_order - 1u) {
+        if(scc_btmnode_full(base, curr)) {
             right = scc_btmnode_split_preemptive(base, curr, p);
             if(!right) {
                 return false;
@@ -707,12 +723,12 @@ static _Bool scc_btmap_insert_non_preemptive(struct scc_btmap_base *base, void *
     scc_stack_push(&stack, 0);
 
     /* Splitting root requires new root */
-    size_t req_allocs = base->btm_root->btm_nkeys == base->btm_order - 1u;
+    size_t req_allocs = scc_btmnode_full(base, base->btm_root);
 
     size_t bound;
     struct scc_btmnode_base *curr = base->btm_root;
     while(1) {
-        if(curr->btm_nkeys == base->btm_order - 1u) {
+        if(scc_btmnode_full(base, curr)) {
             ++req_allocs;
         }
         else {
@@ -738,7 +754,7 @@ static _Bool scc_btmap_insert_non_preemptive(struct scc_btmap_base *base, void *
         curr = scc_btmnode_child(base, curr, bound);
     }
 
-    if(curr->btm_nkeys < base->btm_order - 1u) {
+    if(!scc_btmnode_full(base, curr)) {
         scc_btmnode_emplace_leaf(base, curr, *(void **)btmapaddr);
         inserted = true;
         goto epilogue;
@@ -765,7 +781,7 @@ static _Bool scc_btmap_insert_non_preemptive(struct scc_btmap_base *base, void *
         value = scc_btmnode_value(base, right, right->btm_nkeys);
 
         curr = p;
-        if(!curr || curr->btm_nkeys < base->btm_order - 1u) {
+        if(!curr || !scc_btmnode_full(base, curr)) {
             break;
         }
 
