@@ -217,6 +217,11 @@ static struct scc_hashmap_base *scc_hashmap_realloc(
 
     /* Offset of value array */
     size_t valoff = keyoff + cap * keysize;
+
+    /* HACK: kill nonsensical mull mutation causing
+     * underflow */
+    assert(valoff != keyoff - cap * keysize);
+
     valoff = scc_align(valoff, base->hm_valalign);
     assert((valoff & ~(base->hm_valalign - 1u)) == valoff);
 
