@@ -1076,7 +1076,8 @@ static inline void scc_btmnode_merge_right_non_preemptive(
     size_t bound
 ) {
     size_t nmov = scc_btmnode_merge(base, sibling, node, p, bound);
-    if(p->btm_nkeys) {
+    if(nmov) {
+        assert(p->btm_nkeys);
         struct scc_btmnode_base **plinks = scc_btmnode_links(base, p);
         scc_memmove(plinks + bound + 1u, plinks + bound + 2u, nmov * sizeof(*plinks));
     }
