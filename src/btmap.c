@@ -1400,14 +1400,14 @@ static _Bool scc_btmap_remove_non_preemptive(struct scc_btmap_base *restrict bas
     while(1) {
         if(!found) {
             bound = scc_btmnode_lower_bound(base, curr, btmap);
+            keyeq = scc_btmnode_keyeq(bound);
+            bound &= BOUND_MASK;
         }
         else {
             bound = swap_pred * curr->btm_nkeys;
         }
 
         next = scc_btmnode_child(base, curr, bound);
-        keyeq = scc_btmnode_keyeq(bound);
-        bound &= BOUND_MASK;
 
         if(keyeq) {
             assert(!found);
@@ -1426,6 +1426,7 @@ static _Bool scc_btmap_remove_non_preemptive(struct scc_btmap_base *restrict bas
                     swap_pred = false;
                 }
             }
+            keyeq = false;
         }
 
         if(scc_btmnode_is_leaf(curr)) {
