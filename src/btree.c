@@ -1090,7 +1090,8 @@ static _Bool scc_btree_remove_preemptive(struct scc_btree_base *restrict base, v
                 break;
             }
 
-            if(next->bt_nkeys < borrow_lim && bound < curr->bt_nkeys) {
+            if(next->bt_nkeys < borrow_lim) {
+                assert(bound < curr->bt_nkeys);
                 struct scc_btnode_base *right = scc_btnode_child(base, curr, bound + 1u);
                 if(right->bt_nkeys >= borrow_lim) {
                     next = right;
