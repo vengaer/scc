@@ -287,7 +287,7 @@ static inline void scc_btmnode_replace_value(
     size_t bound
 ) {
     void *val = scc_btmnode_value(base, node, bound);
-    memcpy(val, (unsigned char const *)kvpair + base->btm_kvoff, base->btm_valsize);
+    scc_memcpy(val, (unsigned char const *)kvpair + base->btm_kvoff, base->btm_valsize);
 }
 
 //? .. c:function:: void scc_btmnode_emplace_leaf(\
@@ -320,12 +320,12 @@ static void scc_btmnode_emplace_leaf(struct scc_btmap_base *restrict base, struc
     size_t valoff = bound * base->btm_valsize;
 
     if(bound < node->btm_nkeys) {
-        memmove(keys + keyoff + base->btm_keysize, keys + keyoff, (node->btm_nkeys - bound) * base->btm_keysize);
-        memmove(vals + valoff + base->btm_valsize, vals + valoff, (node->btm_nkeys - bound) * base->btm_valsize);
+        scc_memmove(keys + keyoff + base->btm_keysize, keys + keyoff, (node->btm_nkeys - bound) * base->btm_keysize);
+        scc_memmove(vals + valoff + base->btm_valsize, vals + valoff, (node->btm_nkeys - bound) * base->btm_valsize);
     }
 
-    memcpy(keys + keyoff, kvpair, base->btm_keysize);
-    memcpy(vals + valoff, (unsigned char *)kvpair + base->btm_kvoff, base->btm_valsize);
+    scc_memcpy(keys + keyoff, kvpair, base->btm_keysize);
+    scc_memcpy(vals + valoff, (unsigned char *)kvpair + base->btm_kvoff, base->btm_valsize);
     ++node->btm_nkeys;
     ++base->btm_size;
 }
@@ -369,17 +369,17 @@ static void scc_btmnode_emplace(
     size_t valoff = bound * base->btm_valsize;
 
     if(bound < node->btm_nkeys) {
-        memmove(keys + keyoff + base->btm_keysize, keys + keyoff, (node->btm_nkeys - bound) * base->btm_keysize);
-        memmove(vals + valoff + base->btm_valsize, vals + valoff, (node->btm_nkeys - bound) * base->btm_valsize);
+        scc_memmove(keys + keyoff + base->btm_keysize, keys + keyoff, (node->btm_nkeys - bound) * base->btm_keysize);
+        scc_memmove(vals + valoff + base->btm_valsize, vals + valoff, (node->btm_nkeys - bound) * base->btm_valsize);
     }
 
-    memcpy(keys + keyoff, key, base->btm_keysize);
-    memcpy(vals + valoff, value, base->btm_valsize);
+    scc_memcpy(keys + keyoff, key, base->btm_keysize);
+    scc_memcpy(vals + valoff, value, base->btm_valsize);
     ++node->btm_nkeys;
 
     struct scc_btmnode_base **links = scc_btmnode_links(base, node);
     if(bound < node->btm_nkeys - 1u) {
-        memmove(links + bound + 2u, links + bound + 1u, (node->btm_nkeys - bound - 1u) * sizeof(*links));
+        scc_memmove(links + bound + 2u, links + bound + 1u, (node->btm_nkeys - bound - 1u) * sizeof(*links));
     }
     links[bound + 1u] = child;
 }
@@ -472,10 +472,10 @@ static struct scc_btmnode_base *scc_btmnode_split_preemptive(
 
     right->btm_flags = node->btm_flags;
 
-    memcpy(rkeys, lkeys + (node->btm_nkeys + 1u) * base->btm_keysize, right->btm_nkeys * base->btm_keysize);
-    memcpy(rvals, lvals + (node->btm_nkeys + 1u) * base->btm_valsize, right->btm_nkeys * base->btm_valsize);
+    scc_memcpy(rkeys, lkeys + (node->btm_nkeys + 1u) * base->btm_keysize, right->btm_nkeys * base->btm_keysize);
+    scc_memcpy(rvals, lvals + (node->btm_nkeys + 1u) * base->btm_valsize, right->btm_nkeys * base->btm_valsize);
     if(!scc_btmnode_is_leaf(node)) {
-        memcpy(rlinks, llinks + node->btm_nkeys + 1, (node->btm_nkeys + 1u) * sizeof(*rlinks));
+        scc_memcpy(rlinks, llinks + node->btm_nkeys + 1, (node->btm_nkeys + 1u) * sizeof(*rlinks));
     }
 
     size_t bound = scc_btmnode_find_linkindex(base, node, p);
@@ -485,12 +485,12 @@ static struct scc_btmnode_base *scc_btmnode_split_preemptive(
     unsigned char *pvals = scc_btmnode_vals(base, p);
     struct scc_btmnode_base **plinks = scc_btmnode_links(base, p);
     if(bound < p->btm_nkeys) {
-        memmove(pkeys + (bound + 1u) * base->btm_keysize, pkeys + bound * base->btm_keysize, (p->btm_nkeys - bound) * base->btm_keysize);
-        memmove(pvals + (bound + 1u) * base->btm_valsize, pvals + bound * base->btm_valsize, (p->btm_nkeys - bound) * base->btm_valsize);
-        memmove(plinks + bound + 1u, plinks + bound, (p->btm_nkeys - bound + 1u) * sizeof(*plinks));
+        scc_memmove(pkeys + (bound + 1u) * base->btm_keysize, pkeys + bound * base->btm_keysize, (p->btm_nkeys - bound) * base->btm_keysize);
+        scc_memmove(pvals + (bound + 1u) * base->btm_valsize, pvals + bound * base->btm_valsize, (p->btm_nkeys - bound) * base->btm_valsize);
+        scc_memmove(plinks + bound + 1u, plinks + bound, (p->btm_nkeys - bound + 1u) * sizeof(*plinks));
     }
-    memcpy(pkeys + bound * base->btm_keysize, lkeys + node->btm_nkeys * base->btm_keysize, base->btm_keysize);
-    memcpy(pvals + bound * base->btm_valsize, lvals + node->btm_nkeys * base->btm_valsize, base->btm_valsize);
+    scc_memcpy(pkeys + bound * base->btm_keysize, lkeys + node->btm_nkeys * base->btm_keysize, base->btm_keysize);
+    scc_memcpy(pvals + bound * base->btm_valsize, lvals + node->btm_nkeys * base->btm_valsize, base->btm_valsize);
     plinks[bound + 1u] = right;
     ++p->btm_nkeys;
 
@@ -563,34 +563,34 @@ static struct scc_btmnode_base *scc_btmnode_split_non_preemptive(
     void *nval = scc_btmnode_value(base, right, right->btm_nkeys);
 
     if(bound == node->btm_nkeys) {
-        memcpy(nkey, key, base->btm_keysize);
-        memcpy(nval, value, base->btm_valsize);
-        memcpy(rkeys, lkeys + node->btm_nkeys * base->btm_keysize, right->btm_nkeys * base->btm_keysize);
-        memcpy(rvals, lvals + node->btm_nkeys * base->btm_valsize, right->btm_nkeys * base->btm_valsize);
+        scc_memcpy(nkey, key, base->btm_keysize);
+        scc_memcpy(nval, value, base->btm_valsize);
+        scc_memcpy(rkeys, lkeys + node->btm_nkeys * base->btm_keysize, right->btm_nkeys * base->btm_keysize);
+        scc_memcpy(rvals, lvals + node->btm_nkeys * base->btm_valsize, right->btm_nkeys * base->btm_valsize);
         if(!scc_btmnode_is_leaf(node)) {
             *rlinks = child;
-            memcpy(rlinks + 1u, llinks + node->btm_nkeys + 1u, right->btm_nkeys * sizeof(*rlinks));
+            scc_memcpy(rlinks + 1u, llinks + node->btm_nkeys + 1u, right->btm_nkeys * sizeof(*rlinks));
         }
     }
     else if(bound < node->btm_nkeys) {
-        memcpy(nkey, lkeys + (node->btm_nkeys - 1u) * base->btm_keysize, base->btm_keysize);
-        memcpy(nval, lvals + (node->btm_nkeys - 1u) * base->btm_valsize, base->btm_valsize);
+        scc_memcpy(nkey, lkeys + (node->btm_nkeys - 1u) * base->btm_keysize, base->btm_keysize);
+        scc_memcpy(nval, lvals + (node->btm_nkeys - 1u) * base->btm_valsize, base->btm_valsize);
         size_t nmov = node->btm_nkeys - bound - 1u;
         unsigned char *fkey = scc_btmnode_key(base, node, bound);
         unsigned char *fval = scc_btmnode_value(base, node, bound);
         if(nmov) {
-            memmove(fkey + base->btm_keysize, fkey, nmov * base->btm_keysize);
-            memmove(fval + base->btm_valsize, fval, nmov * base->btm_valsize);
+            scc_memmove(fkey + base->btm_keysize, fkey, nmov * base->btm_keysize);
+            scc_memmove(fval + base->btm_valsize, fval, nmov * base->btm_valsize);
         }
-        memcpy(fkey, key, base->btm_keysize);
-        memcpy(fval, value, base->btm_valsize);
-        memcpy(rkeys, lkeys + node->btm_nkeys * base->btm_keysize, right->btm_nkeys * base->btm_keysize);
-        memcpy(rvals, lvals + node->btm_nkeys * base->btm_valsize, right->btm_nkeys * base->btm_valsize);
+        scc_memcpy(fkey, key, base->btm_keysize);
+        scc_memcpy(fval, value, base->btm_valsize);
+        scc_memcpy(rkeys, lkeys + node->btm_nkeys * base->btm_keysize, right->btm_nkeys * base->btm_keysize);
+        scc_memcpy(rvals, lvals + node->btm_nkeys * base->btm_valsize, right->btm_nkeys * base->btm_valsize);
 
         if(!scc_btmnode_is_leaf(node)) {
-            memcpy(rlinks, llinks + node->btm_nkeys, (right->btm_nkeys + 1u) * sizeof(*rlinks));
+            scc_memcpy(rlinks, llinks + node->btm_nkeys, (right->btm_nkeys + 1u) * sizeof(*rlinks));
             if(nmov) {
-                memmove(llinks + bound + 2u, llinks + bound + 1u, (node->btm_nkeys - bound) * sizeof(*llinks));
+                scc_memmove(llinks + bound + 2u, llinks + bound + 1u, (node->btm_nkeys - bound) * sizeof(*llinks));
             }
             llinks[bound + 1u] = child;
         }
@@ -598,8 +598,8 @@ static struct scc_btmnode_base *scc_btmnode_split_non_preemptive(
     else {
         unsigned char *skey = scc_btmnode_key(base, node, node->btm_nkeys);
         unsigned char *sval = scc_btmnode_value(base, node, node->btm_nkeys);
-        memcpy(nkey, skey, base->btm_keysize);
-        memcpy(nval, sval, base->btm_valsize);
+        scc_memcpy(nkey, skey, base->btm_keysize);
+        scc_memcpy(nval, sval, base->btm_valsize);
         skey += base->btm_keysize;
         sval += base->btm_valsize;
 
@@ -607,8 +607,8 @@ static struct scc_btmnode_base *scc_btmnode_split_non_preemptive(
         if(nbef) {
             size_t nkbytes = nbef * base->btm_keysize;
             size_t nvbytes = nbef * base->btm_valsize;
-            memcpy(rkeys, skey, nkbytes);
-            memcpy(rvals, sval, nvbytes);
+            scc_memcpy(rkeys, skey, nkbytes);
+            scc_memcpy(rvals, sval, nvbytes);
 
             skey += nkbytes;
             rkeys += nkbytes;
@@ -617,21 +617,21 @@ static struct scc_btmnode_base *scc_btmnode_split_non_preemptive(
             rvals += nvbytes;
         }
 
-        memcpy(rkeys, key, base->btm_keysize);
-        memcpy(rvals, value, base->btm_valsize);
+        scc_memcpy(rkeys, key, base->btm_keysize);
+        scc_memcpy(rvals, value, base->btm_valsize);
 
         size_t naft = (node->btm_nkeys << 1u) - bound;
         if(naft) {
-            memcpy(rkeys + base->btm_keysize, skey, naft * base->btm_keysize);
-            memcpy(rvals + base->btm_valsize, sval, naft * base->btm_valsize);
+            scc_memcpy(rkeys + base->btm_keysize, skey, naft * base->btm_keysize);
+            scc_memcpy(rvals + base->btm_valsize, sval, naft * base->btm_valsize);
         }
 
         if(!scc_btmnode_is_leaf(node)) {
             ++nbef;
-            memcpy(rlinks, llinks + node->btm_nkeys + 1u, nbef * sizeof(*rlinks));
+            scc_memcpy(rlinks, llinks + node->btm_nkeys + 1u, nbef * sizeof(*rlinks));
             rlinks[nbef++] = child;
             if(naft) {
-                memcpy(rlinks + nbef, llinks + node->btm_nkeys + nbef, naft * sizeof(*rlinks));
+                scc_memcpy(rlinks + nbef, llinks + node->btm_nkeys + nbef, naft * sizeof(*rlinks));
             }
         }
     }
@@ -821,19 +821,19 @@ static void scc_btmnode_rotate_right(
     unsigned char *skeyslot = scc_btmnode_key(base, sibling, sibling->btm_nkeys - 1u);
     unsigned char *svalslot = scc_btmnode_value(base, sibling, sibling->btm_nkeys - 1u);
 
-    memmove(nkeys + base->btm_keysize, nkeys, node->btm_nkeys * base->btm_keysize);
-    memmove(nvals + base->btm_valsize, nvals, node->btm_nkeys * base->btm_valsize);
+    scc_memmove(nkeys + base->btm_keysize, nkeys, node->btm_nkeys * base->btm_keysize);
+    scc_memmove(nvals + base->btm_valsize, nvals, node->btm_nkeys * base->btm_valsize);
 
-    memcpy(nkeys, pkeyslot, base->btm_keysize);
-    memcpy(nvals, pvalslot, base->btm_valsize);
+    scc_memcpy(nkeys, pkeyslot, base->btm_keysize);
+    scc_memcpy(nvals, pvalslot, base->btm_valsize);
 
-    memcpy(pkeyslot, skeyslot, base->btm_keysize);
-    memcpy(pvalslot, svalslot, base->btm_valsize);
+    scc_memcpy(pkeyslot, skeyslot, base->btm_keysize);
+    scc_memcpy(pvalslot, svalslot, base->btm_valsize);
 
     struct scc_btmnode_base **nlinks = scc_btmnode_links(base, node);
     struct scc_btmnode_base *subtree = scc_btmnode_child(base, sibling, sibling->btm_nkeys--);
 
-    memmove(nlinks + 1u, nlinks, ++node->btm_nkeys * sizeof(*nlinks));
+    scc_memmove(nlinks + 1u, nlinks, ++node->btm_nkeys * sizeof(*nlinks));
     nlinks[0] = subtree;
 }
 
@@ -869,20 +869,21 @@ static void scc_btmnode_rotate_left(
     unsigned char *skeys = scc_btmnode_keys(base, sibling);
     unsigned char *svals = scc_btmnode_vals(base, sibling);
 
-    memcpy(nkeyslot, pkeyslot, base->btm_keysize);
-    memcpy(nvalslot, pvalslot, base->btm_valsize);
+    scc_memcpy(nkeyslot, pkeyslot, base->btm_keysize);
+    scc_memcpy(nvalslot, pvalslot, base->btm_valsize);
 
-    memcpy(pkeyslot, skeys, base->btm_keysize);
-    memcpy(pvalslot, svals, base->btm_valsize);
+    scc_memcpy(pkeyslot, skeys, base->btm_keysize);
+    scc_memcpy(pvalslot, svals, base->btm_valsize);
 
     struct scc_btmnode_base **nlinks = scc_btmnode_links(base, node);
     struct scc_btmnode_base **slinks = scc_btmnode_links(base, sibling);
 
     nlinks[++node->btm_nkeys] = slinks[0];
-    memmove(slinks, slinks + 1u, sibling->btm_nkeys-- * sizeof(*slinks));
+    scc_memmove(slinks, slinks + 1u, sibling->btm_nkeys * sizeof(*slinks));
+    --sibling->btm_nkeys;
 
-    memmove(skeys, skeys + base->btm_keysize, sibling->btm_nkeys * base->btm_keysize);
-    memmove(svals, svals + base->btm_valsize, sibling->btm_nkeys * base->btm_valsize);
+    scc_memmove(skeys, skeys + base->btm_keysize, sibling->btm_nkeys * base->btm_keysize);
+    scc_memmove(svals, svals + base->btm_valsize, sibling->btm_nkeys * base->btm_valsize);
 }
 
 //? .. c:function:: void scc_btmnode_overwrite(\
@@ -914,12 +915,12 @@ static inline void scc_btmnode_overwrite(
     size_t const idx = predecessor ? leaf->btm_nkeys - 1u : 0u;
     unsigned char *key = scc_btmnode_key(base, leaf, idx);
     unsigned char *value = scc_btmnode_value(base, leaf, idx);
-    memcpy(scc_btmnode_key(base, found, fbound), key, base->btm_keysize);
-    memcpy(scc_btmnode_value(base, found, fbound), value, base->btm_valsize);
+    scc_memcpy(scc_btmnode_key(base, found, fbound), key, base->btm_keysize);
+    scc_memcpy(scc_btmnode_value(base, found, fbound), value, base->btm_valsize);
     --leaf->btm_nkeys;
     if(!predecessor) {
-        memmove(key, key + base->btm_keysize, leaf->btm_nkeys * base->btm_keysize);
-        memmove(value, value + base->btm_valsize, leaf->btm_nkeys * base->btm_valsize);
+        scc_memmove(key, key + base->btm_keysize, leaf->btm_nkeys * base->btm_keysize);
+        scc_memmove(value, value + base->btm_valsize, leaf->btm_nkeys * base->btm_valsize);
     }
 }
 
@@ -958,19 +959,19 @@ static size_t scc_btmnode_merge(
     unsigned char *pvalslot = scc_btmnode_value(base, p, bound);
 
     /* Append key-value pair from parent to left sibling */
-    memcpy(skeyslot, pkeyslot, base->btm_keysize);
-    memcpy(svalslot, pvalslot, base->btm_valsize);
+    scc_memcpy(skeyslot, pkeyslot, base->btm_keysize);
+    scc_memcpy(svalslot, pvalslot, base->btm_valsize);
 
     /* Keys and values from node to left sibling */
-    memcpy(skeyslot + base->btm_keysize, nkeys, node->btm_nkeys * base->btm_keysize);
-    memcpy(svalslot + base->btm_valsize, nvals, node->btm_nkeys * base->btm_valsize);
+    scc_memcpy(skeyslot + base->btm_keysize, nkeys, node->btm_nkeys * base->btm_keysize);
+    scc_memcpy(svalslot + base->btm_valsize, nvals, node->btm_nkeys * base->btm_valsize);
 
     struct scc_btmnode_base **nlinks = scc_btmnode_links(base, node);
     struct scc_btmnode_base **slinks = scc_btmnode_links(base, sibling);
 
     if(!scc_btmnode_is_leaf(node)) {
         assert(!scc_btmnode_is_leaf(sibling));
-        memcpy(slinks + sibling->btm_nkeys + 1u, nlinks, (node->btm_nkeys + 1u) * sizeof(*slinks));
+        scc_memcpy(slinks + sibling->btm_nkeys + 1u, nlinks, (node->btm_nkeys + 1u) * sizeof(*slinks));
     }
 
     sibling->btm_nkeys += node->btm_nkeys + 1u;
@@ -978,8 +979,8 @@ static size_t scc_btmnode_merge(
 
     size_t nmov = p->btm_nkeys - bound - 1u;
     if(nmov) {
-        memmove(pkeyslot, pkeyslot + base->btm_keysize, nmov * base->btm_keysize);
-        memmove(pvalslot, pvalslot + base->btm_valsize, nmov * base->btm_valsize);
+        scc_memmove(pkeyslot, pkeyslot + base->btm_keysize, nmov * base->btm_keysize);
+        scc_memmove(pvalslot, pvalslot + base->btm_valsize, nmov * base->btm_valsize);
     }
     if(!--p->btm_nkeys) {
         assert(!scc_bits_is_even(base->btm_order) || p == base->btm_root);
@@ -1017,7 +1018,7 @@ static inline void scc_btmnode_merge_left_non_preemptive(
     size_t nmov = scc_btmnode_merge(base, node, sibling, p, bound - 1u) + 1u;
     if(bound <= p->btm_nkeys) {
         struct scc_btmnode_base **plinks = scc_btmnode_links(base, p);
-        memmove(plinks + bound, plinks + bound + 1u, nmov * sizeof(*plinks));
+        scc_memmove(plinks + bound, plinks + bound + 1u, nmov * sizeof(*plinks));
     }
     scc_arena_try_free(&base->btm_arena, node);
 }
@@ -1078,7 +1079,7 @@ static inline void scc_btmnode_merge_right_non_preemptive(
     size_t nmov = scc_btmnode_merge(base, sibling, node, p, bound);
     if(p->btm_nkeys) {
         struct scc_btmnode_base **plinks = scc_btmnode_links(base, p);
-        memmove(plinks + bound + 1u, plinks + bound + 2u, nmov * sizeof(*plinks));
+        scc_memmove(plinks + bound + 1u, plinks + bound + 2u, nmov * sizeof(*plinks));
     }
     scc_arena_try_free(&base->btm_arena, sibling);
 }
@@ -1185,8 +1186,8 @@ static inline void scc_btmnode_remove_leaf(struct scc_btmap_base *restrict base,
     unsigned char *key = scc_btmnode_key(base, node, n);
     unsigned char *val = scc_btmnode_value(base, node, n);
 
-    memmove(key, key + base->btm_keysize, nmov * base->btm_keysize);
-    memmove(val, val + base->btm_valsize, nmov * base->btm_valsize);
+    scc_memmove(key, key + base->btm_keysize, nmov * base->btm_keysize);
+    scc_memmove(val, val + base->btm_valsize, nmov * base->btm_valsize);
 }
 
 //? .. c:function:: _Bool scc_btmap_remove_preemptive(\
