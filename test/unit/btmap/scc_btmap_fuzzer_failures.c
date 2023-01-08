@@ -129,3 +129,14 @@ void test_scc_btmap_fuzzer_failure6(void) {
     run_fuzzer_test(btmap, data, scc_arrsize(data), scc_arrsize(data));
     scc_btmap_free(btmap);
 }
+
+void test_scc_btmap_fuzzer_failure7(void) {
+    static uint32_t const data[] = {
+        0xbf001005, 0x00000000, 0xbfff0800, 0x6e747a00,
+        0x000d3432, 0x0000003f
+    };
+
+    scc_btmap(uint32_t, uint32_t) btmap = scc_btmap_with_order(uint32_t, uint32_t, u32compare, 0x05u);
+    run_fuzzer_test(btmap, data, scc_arrsize(data), scc_arrsize(data));
+    scc_btmap_free(btmap);
+}
