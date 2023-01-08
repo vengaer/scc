@@ -239,3 +239,18 @@ void test_scc_hashmap_find_probe_stop(void) {
 
     scc_hashmap_free(map);
 }
+
+void test_scc_hashmap_rehash_limit(void) {
+    scc_hashmap(int, int) map = scc_hashmap_new(int, int, eq);
+    size_t cap = scc_hashmap_capacity(map);
+    size_t rehash_lim = (cap * 0.875f) + 1.0;
+    for(int i = 0u; i < (int)rehash_lim; ++i) {
+        TEST_ASSERT_TRUE(scc_hashmap_insert(&map, i, i));
+        TEST_ASSERT_EQUAL_UINT64(cap, scc_hashmap_capacity(map));
+    }
+
+    TEST_ASSERT_TRUE(scc_hashmap_insert(&map, (int)rehash_lim + 1, 0));
+    TEST_ASSERT_GREATER_THAN_UINT64(cap, scc_hashmap_capacity(map));
+
+    scc_hashmap_free(map);
+}
