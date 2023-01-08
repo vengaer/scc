@@ -1391,10 +1391,7 @@ static void scc_btmap_balance_non_preemptive(
 //?     :returns: :code:`true` if the key-value pair was removed, :code:`false` if the
 //?               key was not found
 static _Bool scc_btmap_remove_non_preemptive(struct scc_btmap_base *restrict base, void *restrict btmap) {
-    size_t const borrow_lim = (base->btm_order >> 1u);
     size_t const origsz = base->btm_size;
-
-    _Bool swap_pred = true;
 
     scc_stack(struct scc_btmnode_base *) nodes = scc_stack_new(struct scc_btmnode_base *);
     scc_stack(size_t) bounds = scc_stack_new(size_t);
@@ -1421,7 +1418,7 @@ static _Bool scc_btmap_remove_non_preemptive(struct scc_btmap_base *restrict bas
             bound &= BOUND_MASK;
         }
         else {
-            bound = swap_pred * curr->btm_nkeys;
+            bound = curr->btm_nkeys;
         }
 
         next = scc_btmnode_child(base, curr, bound);
@@ -1430,24 +1427,7 @@ static _Bool scc_btmap_remove_non_preemptive(struct scc_btmap_base *restrict bas
             assert(!found);
             found = curr;
             fbound = bound;
-
-            if(scc_btmnode_is_leaf(curr)) {
-                break;
-            }
-
-            if(next->btm_nkeys < borrow_lim && bound < curr->btm_nkeys) {
-                struct scc_btmnode_base *right = scc_btmnode_child(base, curr, bound + 1u);
-                if(right->btm_nkeys >= borrow_lim) {
-                    ++bound;
-                    next = right;
-                    swap_pred = false;
-                }
-            }
             keyeq = false;
-        }
-
-        if(scc_btmnode_is_leaf(curr)) {
-            break;
         }
 
         if(scc_btmnode_is_leaf(curr)) {
