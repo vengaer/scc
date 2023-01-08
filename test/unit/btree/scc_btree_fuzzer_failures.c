@@ -4,7 +4,7 @@
 
 #include <unity.h>
 
-int compare(void const *l, void const *r) {
+int ucompare(void const *l, void const *r) {
     return *(unsigned char const *)l - *(unsigned char const *)r;
 }
 
@@ -20,7 +20,7 @@ void test_scc_btree_fuzzer_failure0(void) {
         0,   0,   0,   0,   0,   0,   0,   0,   118, 118, 118, 118, 118
 
     };
-    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, compare, 10);
+    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, ucompare, 10);
 
     unsigned char const *p;
     for(size_t i = 0u; i < scc_arrsize(data); ++i) {
@@ -71,7 +71,7 @@ void test_scc_btree_fuzzer_failure1(void) {
         0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   118, 118,
         118, 118, 118
     };
-    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, compare, 11);
+    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, ucompare, 11);
 
     unsigned char const *p;
     for(size_t i = 0u; i < scc_arrsize(data); ++i) {
@@ -135,7 +135,7 @@ void test_scc_btree_fuzzer_failure2(void) {
         0,   0,   0,   98,  0,   0,   0,   0,   0,   0,   0,
         0,   0,   0,   0,   0,   0,   118, 118, 118, 118, 118
     };
-    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, compare, 10);
+    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, ucompare, 10);
 
     unsigned char const *p;
     for(size_t i = 0u; i < scc_arrsize(data); ++i) {
@@ -152,7 +152,7 @@ void test_scc_btree_fuzzer_failure2(void) {
 
 void test_scc_btree_fuzzer_failure3(void) {
     static unsigned char const data[] = { 0x01, 0x00, 0x00, 0x62, 0xb0, 0x00, 0x52, 0xa5, 0x74, 0x00, 0xe9 };
-    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, compare, 0x04);
+    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, ucompare, 0x04);
 
     for(size_t i = 0u; i < scc_arrsize(data); ++i) {
         TEST_ASSERT_TRUE(scc_btree_insert(&btree, data[i]));
@@ -167,7 +167,7 @@ void test_scc_btree_fuzzer_failure3(void) {
 
 void test_scc_btree_fuzzer_failure4(void) {
     static unsigned char const data[] = { 0x0e, 0x0e, 0x03, 0x14, 0x00, 0xbb, 0x00, 0x0e, 0x0e, 0x03, 0x14, 0x00, 0xbb, 0x00, 0xe1 };
-    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, compare, 0x0e);
+    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, ucompare, 0x0e);
 
     for(size_t i = 0u; i < scc_arrsize(data); ++i) {
         TEST_ASSERT_TRUE(scc_btree_insert(&btree, data[i]));
@@ -193,7 +193,7 @@ void test_scc_btree_fuzzer_failure5(void) {
         0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x49, 0x00, 0xe9
     };
-    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, compare, 0x04);
+    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, ucompare, 0x04);
 
     for(size_t i = 0u; i < scc_arrsize(data); ++i) {
         TEST_ASSERT_TRUE(scc_btree_insert(&btree, data[i]));
@@ -222,7 +222,7 @@ void test_scc_btree_fuzzer_failure6(void) {
         0x74, 0x00, 0xe9
     };
 
-    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, compare, 0x04);
+    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, ucompare, 0x04);
 
     for(size_t i = 0u; i < scc_arrsize(data); ++i) {
         TEST_ASSERT_TRUE(scc_btree_insert(&btree, data[i]));
@@ -262,7 +262,7 @@ void test_scc_btree_fuzzer_failure7(void) {
         0x76, 0x76
     };
 
-    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, compare, 0x0a);
+    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, ucompare, 0x0a);
 
     for(size_t i = 0u; i < scc_arrsize(data); ++i) {
         TEST_ASSERT_TRUE(scc_btree_insert(&btree, data[i]));
@@ -303,7 +303,7 @@ void test_scc_btree_fuzzer_failure8(void) {
         0x76, 0x76, 0x76, 0x76, 0x76
     };
 
-    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, compare, 0x0a);
+    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, ucompare, 0x0a);
 
     for(size_t i = 0u; i < scc_arrsize(data); ++i) {
         TEST_ASSERT_TRUE(scc_btree_insert(&btree, data[i]));
@@ -435,7 +435,7 @@ void test_scc_btree_fuzzer_failure9(void) {
         0xf1, 0x00, 0xe1
     };
 
-    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, compare, 0x08);
+    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, ucompare, 0x08);
 
     for(size_t i = 0u; i < scc_arrsize(data); ++i) {
         TEST_ASSERT_TRUE(scc_btree_insert(&btree, data[i]));
@@ -513,7 +513,7 @@ void test_scc_btree_fuzzer_failure10(void) {
     };
 
 
-    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, compare, 0x0a);
+    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, ucompare, 0x0a);
 
     for(size_t i = 0u; i < scc_arrsize(data); ++i) {
         TEST_ASSERT_TRUE(scc_btree_insert(&btree, data[i]));
@@ -539,7 +539,7 @@ void test_scc_btree_fuzzer_failure11(void) {
         0x32, 0x00, 0xe1
     };
 
-    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, compare, 0x03);
+    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, ucompare, 0x03);
 
     for(size_t i = 0u; i < scc_arrsize(data); ++i) {
         TEST_ASSERT_TRUE(scc_btree_insert(&btree, data[i]));
@@ -565,7 +565,7 @@ void test_scc_btree_fuzzer_failure12(void) {
         0x29, 0x9a, 0x00, 0xe1
     };
 
-    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, compare, 0x03);
+    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, ucompare, 0x03);
 
     for(size_t i = 0u; i < scc_arrsize(data); ++i) {
         TEST_ASSERT_TRUE(scc_btree_insert(&btree, data[i]));
@@ -591,7 +591,7 @@ void test_scc_btree_fuzzer_failure13(void) {
         0x14, 0x00, 0x00, 0x00, 0xbb, 0x00, 0xe1
     };
 
-    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, compare, 0x03);
+    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, ucompare, 0x03);
 
     for(size_t i = 0u; i < scc_arrsize(data); ++i) {
         TEST_ASSERT_TRUE(scc_btree_insert(&btree, data[i]));
@@ -622,7 +622,7 @@ void test_scc_btree_fuzzer_failure14(void) {
         170, 170, 170, 170, 170, 170, 90, 170,
         170, 219
     };
-    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, compare, 0x04);
+    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, ucompare, 0x04);
 
     for(size_t i = 0u; i < scc_arrsize(data); ++i) {
         TEST_ASSERT_TRUE(scc_btree_insert(&btree, data[i]));
@@ -649,7 +649,7 @@ void test_scc_btree_fuzzer_failure15(void) {
         3,  3,   3,   3,   3,   3,   3,
         3,  3, 250, 255, 225, 226
     };
-    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, compare, 0x03);
+    scc_btree(unsigned char) btree = scc_btree_with_order(unsigned char, ucompare, 0x03);
 
     for(size_t i = 0u; i < scc_arrsize(data); ++i) {
         TEST_ASSERT_TRUE(scc_btree_insert(&btree, data[i]));

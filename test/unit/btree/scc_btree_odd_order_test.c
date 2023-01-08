@@ -4,14 +4,14 @@
 
 #include <unity.h>
 
-int compare(void const *l, void const *r) {
+int ocompare(void const *l, void const *r) {
     return *(int const *)l - *(int const *)r;
 }
 
 void test_scc_btree_insert_odd_order(void) {
     enum { TEST_SIZE = 3200 };
 
-    scc_btree(int) btree = scc_btree_with_order(int, compare, 5);
+    scc_btree(int) btree = scc_btree_with_order(int, ocompare, 5);
 
     for(int i = 0; i < TEST_SIZE; ++i) {
         TEST_ASSERT_TRUE(scc_btree_insert(&btree, i));
@@ -29,7 +29,7 @@ void test_scc_btree_insert_odd_order(void) {
 void test_scc_btree_insert_odd_order_reverse(void) {
     enum { TEST_SIZE = 5000 };
 
-    scc_btree(int) btree = scc_btree_with_order(int, compare, 7);
+    scc_btree(int) btree = scc_btree_with_order(int, ocompare, 7);
 
     for(int i = TEST_SIZE; i > 0; --i) {
         TEST_ASSERT_TRUE(scc_btree_insert(&btree, i));
@@ -46,7 +46,7 @@ void test_scc_btree_insert_odd_order_reverse(void) {
 
 void test_scc_btree_insert_odd_order_middle_split(void) {
 
-    scc_btree(int) btree = scc_btree_with_order(int, compare, 5);
+    scc_btree(int) btree = scc_btree_with_order(int, ocompare, 5);
     for(int i = 0; i < 15; ++i) {
         TEST_ASSERT_TRUE(scc_btree_insert(&btree, i));
         for(int j = 0; j < i; ++j) {
@@ -72,7 +72,7 @@ void test_scc_btree_insert_odd_order_middle_split(void) {
 void test_scc_btree_insert_non_monotonic_odd_order(void) {
     enum { TEST_SIZE = 3200 };
     int data[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-    scc_btree(int) btree = scc_btree_with_order(int, compare, 5);
+    scc_btree(int) btree = scc_btree_with_order(int, ocompare, 5);
 
     for(int i = 0; i < TEST_SIZE; ++i) {
         TEST_ASSERT_TRUE(scc_btree_insert(&btree, data[i % scc_arrsize(data)]));
@@ -85,7 +85,7 @@ void test_scc_btree_insert_non_monotonic_odd_order(void) {
 
 void test_scc_btree_remove_odd_order(void) {
     enum { TEST_SIZE = 320 };
-    scc_btree(int) btree = scc_btree_with_order(int, compare, 5);
+    scc_btree(int) btree = scc_btree_with_order(int, ocompare, 5);
 
     for(int i = 0;  i < TEST_SIZE; ++i) {
         TEST_ASSERT_TRUE(scc_btree_insert(&btree, i));

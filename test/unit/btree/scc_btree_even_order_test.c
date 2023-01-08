@@ -4,34 +4,34 @@
 
 #include <unity.h>
 
-int compare(void const *l, void const *r) {
+int ecompare(void const *l, void const *r) {
     return *(int const *)l - *(int const *)r;
 }
 
 void test_scc_btree_new(void) {
-    scc_btree(int) btree = scc_btree_new(int, compare);
+    scc_btree(int) btree = scc_btree_new(int, ecompare);
     scc_btree_free(btree);
 }
 
 void test_scc_btree_with_order(void) {
-    scc_btree(int) btree = scc_btree_with_order(int, compare, 4);
+    scc_btree(int) btree = scc_btree_with_order(int, ecompare, 4);
     TEST_ASSERT_EQUAL_UINT64(4ull, scc_btree_order(btree));
     scc_btree_free(btree);
 
-    btree = scc_btree_with_order(int, compare, 32);
+    btree = scc_btree_with_order(int, ecompare, 32);
     TEST_ASSERT_EQUAL_UINT64(32ull, scc_btree_order(btree));
     scc_btree_free(btree);
 }
 
 void test_scc_btree_size_empty(void) {
-    scc_btree(int) btree = scc_btree_new(int, compare);
+    scc_btree(int) btree = scc_btree_new(int, ecompare);
     TEST_ASSERT_EQUAL_UINT64(0ull, scc_btree_size(btree));
     scc_btree_free(btree);
 }
 
 void test_scc_btree_insert_default_order(void) {
     enum { TEST_SIZE = 3200 };
-    scc_btree(int) btree = scc_btree_new(int, compare);
+    scc_btree(int) btree = scc_btree_new(int, ecompare);
     for(int i = 0; i < TEST_SIZE; ++i) {
         TEST_ASSERT_TRUE(scc_btree_insert(&btree, i));
         TEST_ASSERT_EQUAL_UINT64(i + 1ull, scc_btree_size(btree));
@@ -47,7 +47,7 @@ void test_scc_btree_insert_default_order(void) {
 
 void test_scc_btree_insert_order_328(void) {
     enum { TEST_SIZE = 6400 };
-    scc_btree(int) btree = scc_btree_with_order(int, compare, 328);
+    scc_btree(int) btree = scc_btree_with_order(int, ecompare, 328);
     for(int i = TEST_SIZE; i >= 0; --i) {
         TEST_ASSERT_TRUE(scc_btree_insert(&btree, i));
         TEST_ASSERT_EQUAL_UINT64((TEST_SIZE - i) + 1ull, scc_btree_size(btree));
@@ -59,7 +59,7 @@ void test_scc_btree_insert_order_328(void) {
 void test_scc_btree_insert_non_monotonic(void) {
     enum { TEST_SIZE = 3200 };
     int data[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-    scc_btree(int) btree = scc_btree_with_order(int, compare, 32);
+    scc_btree(int) btree = scc_btree_with_order(int, ecompare, 32);
 
     for(int i = 0; i < TEST_SIZE; ++i) {
         TEST_ASSERT_TRUE(scc_btree_insert(&btree, data[i % scc_arrsize(data)]));
@@ -73,7 +73,7 @@ void test_scc_btree_insert_non_monotonic(void) {
 void test_scc_btree_find(void) {
     enum { TEST_SIZE = 3200 };
 
-    scc_btree(int) btree = scc_btree_with_order(int, compare, 88);
+    scc_btree(int) btree = scc_btree_with_order(int, ecompare, 88);
 
     int const *p;
     for(int i = 0; i < TEST_SIZE; ++i) {
@@ -93,7 +93,7 @@ void test_scc_btree_remove_leaf(void) {
     int leafvals[] = { 0, 1, 3, 4, 5, 6 };
 
     for(int i = 0; i < (int)scc_arrsize(leafvals); ++i) {
-        scc_btree(int) btree = scc_btree_new(int, compare);
+        scc_btree(int) btree = scc_btree_new(int, ecompare);
 
         for(int j = 0; j < (int)scc_arrsize(leafvals) + 1; ++j) {
             TEST_ASSERT_TRUE(scc_btree_insert(&btree, j));
@@ -118,7 +118,7 @@ void test_scc_btree_remove_leaf(void) {
 }
 
 void test_scc_btree_remove_root(void) {
-    scc_btree(int) btree = scc_btree_new(int, compare);
+    scc_btree(int) btree = scc_btree_new(int, ecompare);
 
     for(int i = 0; i < 7; ++i) {
         TEST_ASSERT_TRUE(scc_btree_insert(&btree, i));
