@@ -13,6 +13,13 @@ static bool eq(void const *left, void const *right) {
     return *(int const *)left == *(int const *)right;
 }
 
+static unsigned long long ident(void const *data, size_t size) {
+    (void)size;
+    int d = *(int const *)data;
+    TEST_ASSERT_GREATER_OR_EQUAL_INT32(0, d);
+    return d;
+}
+
 /* test_scc_hashmap_new
  *
  * Initialize a hash map, verify its size and free it
@@ -280,4 +287,16 @@ void test_scc_hashmap_fnv1a64(void) {
         hash = scc_hashmap_fnv1a(strings[i], strlen(strings[i]));
         TEST_ASSERT_EQUAL_UINT64(hashes[i], hash);
     }
+}
+
+void test_scc_hashmap_metadata_scrubbing_on_clear(void) {
+    scc_hashmap(int, int) map = scc_hashmap_with_hash(int, int, eq, ident);
+    TEST_ASSERT_TRUE(scc_hashmap_insert(&map, scc_hashmap_capacity(map) - 1, 0));
+    TEST_ASSERT_EQUAL_UINT64(1ull, scc_hashmap_size(map));
+    scc_hashmap_clear(map);
+    TEST_ASSERT_EQUAL_UINT64(0ull, scc_hashmap_size(map));
+
+    TEST_ASSERT_TRUE(scc_hashmap_insert(&map, 1, 0));
+    TEST_ASSERT_FALSE(!!scc_hashmap_find(map, (int)scc_hashmap_capacity(map) - 1));
+    scc_hashmap_free(map);
 }
