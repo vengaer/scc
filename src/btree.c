@@ -302,7 +302,7 @@ static inline size_t scc_btnode_find_linkindex(
     void *val = scc_btnode_data(base, node);
     size_t bound = scc_btnode_lower_bound(base, p, val, elemsize);
     struct scc_btnode_base **plinks = scc_btnode_links(base, p);
-    for(unsigned i = bound; i < p->bt_nkeys + 1u; ++i) {
+    for(unsigned i = bound; i <= p->bt_nkeys; ++i) {
         if(plinks[i] == node) {
             return i;
         }
