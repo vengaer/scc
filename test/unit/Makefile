@@ -9,7 +9,8 @@ $(call push,CPPFLAGS)
 $(call push,LDFLAGS)
 $(call push,LDLIBS)
 
-CPPFLAGS        := -I$(unityinc) -I$(testdir) $(filter-out -DNDEBUG,$(CPPFLAGS)) -I$(srcdir) -DSCC_CANARY_ENABLED
+CPPFLAGS        := -I$(unityinc) -I$(testdir) $(filter-out -DNDEBUG,$(CPPFLAGS)) -I$(srcdir)
+CPPFLAGS        += -DSCC_CANARY_ENABLED -DSCC_INTERCEPT_NULLSIZE_COPIES
 LDFLAGS         += -L$(unitydir)
 LDLIBS          += -lunity -lm
 
