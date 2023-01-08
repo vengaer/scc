@@ -95,6 +95,22 @@ int LLVMFuzzerTestOneInput(uint8_t const *data, size_t size) { /* NOLINT(readabi
         }
     }
 
+    bool done = false;
+    uint16_t unique = 0u;
+    while(!done) {
+        done = true;
+        for(uint8_t i = 0u; i < size; ++i) {
+            if(unique == data[i]) {
+                done = false;
+                ++unique;
+            }
+        }
+    }
+    if(unique != UINT8_MAX + 1u) {
+        fuzz_assert(!scc_btree_find(btree, unique));
+        fuzz_assert(!scc_btree_remove(btree, unique));
+    }
+
     scc_btree_free(btree);
     return 0;
 }
