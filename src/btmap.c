@@ -564,6 +564,7 @@ static struct scc_btmnode_base *scc_btmnode_split_non_preemptive(
         unsigned char *fkey = scc_btmnode_key(base, node, bound);
         unsigned char *fval = scc_btmnode_value(base, node, bound);
         if(nmov) {
+            assert(nmov < base->btm_order);
             scc_memmove(fkey + base->btm_keysize, fkey, nmov * base->btm_keysize);
             scc_memmove(fval + base->btm_valsize, fval, nmov * base->btm_valsize);
         }
