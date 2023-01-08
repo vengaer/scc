@@ -120,7 +120,7 @@ void *scc_rbmap_impl_find(void *map, size_t valoff) {
             return scc_rbmnode_value(base, n, valoff);
         }
 
-        dir = rel <= 0;
+        dir = rel < 1;
         p = n;
         n = scc_rbnode_link_qual(n, dir, const);
     }
