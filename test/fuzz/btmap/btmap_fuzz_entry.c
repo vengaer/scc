@@ -68,7 +68,7 @@ int LLVMFuzzerTestOneInput(uint8_t const *data, size_t size) {
 
     uint32_t const *it = 0;
     dbg_pr("Data:\n");
-    dbg_pr_n(it, buf, size, "%" PRIu32 " ", *it);
+    dbg_pr_n(it, buf, size, "%#08" PRIx32 " ", *it);
     dbg_pr("\n");
 
     fuzz_insertion(btmap, buf, unique_end, size);
@@ -113,7 +113,7 @@ static void fuzz_insertion(void *map, uint32_t const *data, size_t ue, size_t si
     for(unsigned i = 0u; i < ue; ++i) {
         fuzz_assert(
             scc_btmap_insert(&btmap, data[i], data[i] << 1u),
-            "Could not insert (%" PRIu32 ", %" PRIu32 ") in the map",
+            "Could not insert (%#08" PRIx32 ", %#08" PRIx32 ") in the map",
             data[i], data[i] << 1u
         );
 
@@ -125,16 +125,16 @@ static void fuzz_insertion(void *map, uint32_t const *data, size_t ue, size_t si
         mask = scc_btmap_inspect_invariants(btmap);
         fuzz_assert(
             !mask,
-            "Properties violated upon insertion of %" PRIu32 ", mask %#" PRIx32,
+            "Properties violated upon insertion of %#08" PRIx32 ", mask %#" PRIx32,
             data[i], (uint32_t)mask
         );
 
         for(unsigned j = 0u; j < i; ++j) {
             val = scc_btmap_find(btmap, data[j]);
-            fuzz_assert(val, "Key %" PRIu32 " not found in map", data[j]);
+            fuzz_assert(val, "Key %#08" PRIx32 " not found in map", data[j]);
             fuzz_assert(
                 *val == data[j] << 1u,
-                "Key %" PRIu32 " maps to unexpected value %" PRIu32, data[j], *val
+                "Key %#08" PRIx32 " maps to unexpected value %#08" PRIx32, data[j], *val
             );
         }
     }
@@ -143,7 +143,7 @@ static void fuzz_insertion(void *map, uint32_t const *data, size_t ue, size_t si
     for(unsigned i = ue; i < size; ++i) {
         fuzz_assert(
             scc_btmap_insert(&btmap, data[i], 0u),
-            "Could not overwrite value for key %" PRIu32, data[i]
+            "Could not overwrite value for key %#08" PRIx32, data[i]
         );
 
         fuzz_assert(
@@ -153,8 +153,8 @@ static void fuzz_insertion(void *map, uint32_t const *data, size_t ue, size_t si
 
         for(unsigned j = ue; j < i; ++j) {
             val = scc_btmap_find(btmap, data[j]);
-            fuzz_assert(val, "Key %" PRIu32 " not found in map", data[j]);
-            fuzz_assert(!*val, "Value mapping to key %" PRIu32 " not cleared", data[j]);
+            fuzz_assert(val, "Key %#08" PRIx32 " not found in map", data[j]);
+            fuzz_assert(!*val, "Value mapping to key %#08" PRIx32 " not cleared", data[j]);
         }
     }
 
@@ -168,8 +168,8 @@ static void fuzz_find(void *map, uint32_t const *data, size_t ue) {
     uint32_t *val;
     for(unsigned i = 0u; i < ue; ++i) {
         val = scc_btmap_find(btmap, data[i]);
-        fuzz_assert(val, "Could not find key %" PRIu32, data[i]);
-        fuzz_assert(*val == data[i] << 1u, "Value mismatch for key %" PRIu32, data[i]);
+        fuzz_assert(val, "Could not find key %#08" PRIx32, data[i]);
+        fuzz_assert(*val == data[i] << 1u, "Value mismatch for key %#08" PRIx32, data[i]);
     }
 }
 
@@ -181,22 +181,22 @@ static void fuzz_removal(void *map, uint32_t const *data, size_t ue) {
         fuzz_assert(scc_btmap_size(btmap) == ue - i, "Size mismatch");
         fuzz_assert(
             scc_btmap_remove(btmap, data[i]),
-            "Error removing %" PRIu32, data[i]
+            "Error removing %#08" PRIx32, data[i]
         );
 
         mask = scc_btmap_inspect_invariants(btmap);
         fuzz_assert(
             !mask,
-            "Properties violated upon insertion of %" PRIu32 ", mask %#" PRIx32,
+            "Properties violated upon removal of %#08" PRIx32 ", mask %#" PRIx32,
             data[i], (uint32_t)mask
         );
 
         for(unsigned j = i + 1u; j < ue; ++j) {
             val = scc_btmap_find(btmap, data[j]);
-            fuzz_assert(val, "Key %" PRIu32 " not found in map", data[j]);
+            fuzz_assert(val, "Key %#08" PRIx32 " not found in map", data[j]);
             fuzz_assert(
                 *val == data[j] << 1u,
-                "Key %" PRIu32 " maps to unexpected value %" PRIu32, data[j], *val
+                "Key %#08" PRIx32 " maps to unexpected value %#08" PRIx32, data[j], *val
             );
         }
     }
