@@ -62,7 +62,12 @@ scc_inspect_mask scc_btree_impl_inspect_invariants(void const *btree, size_t ele
         }
         else {
             if(!(ctx->node->bt_flags & SCC_BTREE_FLAG_LEAF)) {
-                if(ctx->node != base->bt_root && (ctx->min || ctx->max) && ctx->node->bt_nkeys < ((base->bt_order >> 1u) - 1u)) {
+                if(ctx->node == base->bt_root) {
+                    if(ctx->node->bt_nkeys < 1u) {
+                        mask |= SCC_BTREE_ERR_ROOT;
+                    }
+                }
+                else if(ctx->node->bt_nkeys < (base->bt_order >> 1u) - scc_bits_is_even(base->bt_order)) {
                     mask |= SCC_BTREE_ERR_CHILDREN;
                 }
             }

@@ -13,6 +13,7 @@ typedef unsigned scc_inspect_mask;
 #define SCC_BTREE_ERR_RIGHT     0x02
 #define SCC_BTREE_ERR_CHILDREN  0x04
 #define SCC_BTREE_ERR_LEAFDEPTH 0x08
+#define SCC_BTREE_ERR_ROOT      0x10
 
 scc_inspect_mask scc_btree_impl_inspect_invariants(void const *btree, size_t elemsize);
 
