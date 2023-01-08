@@ -1007,7 +1007,7 @@ static inline void scc_btnode_remove_leaf(
 
 //? .. c:function:: void scc_btnode_overwrite(\
 //?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict curr, \
-//?     struct scc_btnode_base *restrict found, size_t fbound, size_t elemsize, _Bool swap_pred)
+//?     struct scc_btnode_base *restrict found, size_t fbound, size_t elemsize, _Bool predecessor)
 //?
 //?     Swap the in-order predecessor or successor with the element at index fbound in
 //?     the found node
@@ -1226,10 +1226,7 @@ static void scc_btree_balance_non_preemptive(
 //?     :returns: :code:`true` if the value was removed, :code:`false` if the value
 //?               wasn't found
 static _Bool scc_btree_remove_non_preemptive(struct scc_btree_base *restrict base, void *restrict btree, size_t elemsize) {
-    size_t const borrow_lim = (base->bt_order >> 1u) + 1u;
     size_t const origsz = base->bt_size;
-
-    _Bool swap_pred = true;
 
     scc_stack(struct scc_btnode_base *) nodes = scc_stack_new(struct scc_btnode_base *);
     scc_stack(size_t) bounds = scc_stack_new(size_t);
@@ -1254,7 +1251,7 @@ static _Bool scc_btree_remove_non_preemptive(struct scc_btree_base *restrict bas
             bound = scc_btnode_lower_bound(base, curr, btree, elemsize);
         }
         else {
-            bound = swap_pred * curr->bt_nkeys;
+            bound = curr->bt_nkeys;
         }
 
         next = scc_btnode_child(base, curr, bound);
@@ -1265,15 +1262,6 @@ static _Bool scc_btree_remove_non_preemptive(struct scc_btree_base *restrict bas
 
             if(scc_btnode_is_leaf(curr)) {
                 break;
-            }
-
-            if(next->bt_nkeys < borrow_lim && bound < curr->bt_nkeys) {
-                struct scc_btnode_base *right = scc_btnode_child(base, curr, bound + 1u);
-                if(right->bt_nkeys >= borrow_lim) {
-                    ++bound;
-                    next = right;
-                    swap_pred = false;
-                }
             }
         }
 
@@ -1295,7 +1283,7 @@ static _Bool scc_btree_remove_non_preemptive(struct scc_btree_base *restrict bas
         scc_btnode_remove_leaf(base, found, fbound, elemsize);
     }
     else {
-        scc_btnode_overwrite(base, curr, found, fbound, elemsize, swap_pred);
+        scc_btnode_overwrite(base, curr, found, fbound, elemsize, true);
     }
     --base->bt_size;
 
