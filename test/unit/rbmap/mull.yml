@@ -1,3 +1,7 @@
 excludePaths:
   - submodules/*
   - test/*
+  - scc/rbtree.h
+  - src/arena.c
+  - src/rbtree.c
+  - src/svec.c
