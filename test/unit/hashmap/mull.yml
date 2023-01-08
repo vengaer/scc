@@ -1,3 +1,4 @@
 excludePaths:
   - submodules/*
   - test/*
+  - src/canary.c

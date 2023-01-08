@@ -313,6 +313,9 @@ static bool scc_hashmap_rehash(
 }
 
 void *scc_hashmap_impl_new(struct scc_hashmap_base *base, size_t coff, size_t valoff, size_t keysize) {
+    scc_static_assert(sizeof(scc_hashmap_metatype) == 1u);
+    scc_canary_init((unsigned char *)base + base->hm_mdoff + base->hm_capacity + SCC_HASHMAP_GUARDSZ, SCC_HASHMAP_CANARYSZ);
+
     size_t const valpad = valoff - keysize;
     assert(valpad <= UCHAR_MAX);
     base->hm_valpad = valpad;

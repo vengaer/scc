@@ -3,6 +3,7 @@
 
 #include "bits.h"
 #include "bug.h"
+#include "canary.h"
 #include "config.h"
 #include "mem.h"
 
@@ -41,6 +42,16 @@
 //?
 //?         Internal use only
 #define SCC_HASHMAP_GUARDSZ ((unsigned)SCC_VECSIZE - 1u)
+
+//? .. c:macro:: SCC_HASHMAP_CANARYSZ
+//?
+//?     Size of the stack canary placed after the
+//?     metadata guard
+//?
+//?     .. note::
+//?
+//?         Internal use only
+#define SCC_HASHMAP_CANARYSZ 32u
 
 //? .. c:macro:: SCC_HASHMAP_DUPLICATE
 //?
@@ -386,6 +397,7 @@ struct scc_hashmap_base {
         valuetype hm_vals[SCC_HASHMAP_STACKCAP];                                            \
         scc_hashmap_metatype hm_meta[SCC_HASHMAP_STACKCAP];                                 \
         scc_hashmap_metatype hm_guard[SCC_HASHMAP_GUARDSZ];                                 \
+        SCC_CANARY_INJECT(SCC_HASHMAP_CANARYSZ)                                             \
     }
 
 //? .. c:function:: void *scc_hashmap_impl_new(\
