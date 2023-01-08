@@ -4,13 +4,17 @@
 
 #include <unity.h>
 
+#ifdef SCC_MUTATION_TEST
+enum { TEST_SIZE = 64 };
+#else
+enum { TEST_SIZE = 4096 };
+#endif
+
 static int compare(void const *left, void const *right) {
     return *(int const *)left - *(int const *)right;
 }
 
 void test_scc_rbmap_insert(void) {
-    enum { TEST_SIZE = 2400 };
-
     scc_inspect_mask mask;
     scc_rbmap(int, int) rbmap = scc_rbmap_new(int, int, compare);
     for(int i = 0; i < TEST_SIZE; i++) {
@@ -23,7 +27,6 @@ void test_scc_rbmap_insert(void) {
 }
 
 void test_scc_rbmap_find(void) {
-    enum { TEST_SIZE = 1200 };
     scc_rbmap(int, int) rbmap = scc_rbmap_new(int, int, compare);
 
     scc_inspect_mask mask;
@@ -46,7 +49,6 @@ void test_scc_rbmap_find(void) {
 }
 
 void test_scc_rbmap_remove(void) {
-    enum { TEST_SIZE = 5000 };
     scc_rbmap(int, int) rbmap = scc_rbmap_new(int, int, compare);
     for(int i = 0; i < TEST_SIZE; i++) {
         TEST_ASSERT_TRUE(scc_rbmap_insert(&rbmap, i, 0));
@@ -63,7 +65,6 @@ void test_scc_rbmap_remove(void) {
 }
 
 void test_scc_rbmap_foreach(void) {
-    enum { TEST_SIZE = 500 };
     scc_rbmap(int, int) rbmap = scc_rbmap_new(int, int, compare);
 
     for(int i = 0; i < TEST_SIZE; ++i) {
@@ -89,7 +90,6 @@ void test_scc_rbmap_foreach(void) {
 }
 
 void test_scc_rbmap_foreach_reversed(void) {
-    enum { TEST_SIZE = 600 };
     scc_rbmap(int, int) rbmap = scc_rbmap_new(int, int, compare);
 
     for(int i = 0; i < TEST_SIZE; ++i) {
