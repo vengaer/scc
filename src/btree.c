@@ -47,6 +47,22 @@ static inline void scc_btree_root_init(struct scc_btree_base *base, void *root) 
     base->bt_root->bt_flags |= SCC_BTREE_FLAG_LEAF;
 }
 
+//? .. c:function:: void scc_btnode_full(struct scc_btree_base const *base, struct scc_btnode_base const *node)
+//?
+//?     Determine whether the given node is full or not
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Base address of the btree
+//?     :param node: The node to check
+//?     :returns: :code:`true` if the node is full, otherwise :code:`false`
+static inline _Bool scc_btnode_full(struct scc_btree_base const *base, struct scc_btnode_base const *node) {
+    assert(node->bt_nkeys < base->bt_order);
+    return node->bt_nkeys == base->bt_order - 1u;
+}
+
 //? .. c:function:: _Bool scc_btnode_is_leaf(struct scc_btnode_base const *node)
 //?
 //?     Determine if the given node is a leaf
@@ -519,7 +535,7 @@ static _Bool scc_btree_insert_preemptive(struct scc_btree_base *base, void *btre
     size_t bound;
     while(true) {
         bound = scc_btnode_lower_bound(base, curr, *(void **)btreeaddr, elemsize);
-        if(curr->bt_nkeys == base->bt_order - 1u) {
+        if(scc_btnode_full(base, curr)) {
             right = scc_btnode_split_preemptive(base, curr, p, elemsize);
             if(!right) {
                 return false;
@@ -566,12 +582,12 @@ static _Bool scc_btree_insert_non_preemptive(struct scc_btree_base *base, void *
     }
 
     /* Splitting root requires new root */
-    size_t req_allocs = base->bt_root->bt_nkeys == base->bt_order - 1u;
+    size_t req_allocs = scc_btnode_full(base, base->bt_root);
 
     size_t bound;
     struct scc_btnode_base *curr = base->bt_root;
     while(1) {
-        if(curr->bt_nkeys == base->bt_order - 1u) {
+        if(scc_btnode_full(base, curr)) {
             ++req_allocs;
         }
         else {
@@ -590,7 +606,7 @@ static _Bool scc_btree_insert_non_preemptive(struct scc_btree_base *base, void *
         curr = scc_btnode_child(base, curr, bound);
     }
 
-    if(curr->bt_nkeys < base->bt_order - 1u) {
+    if(!scc_btnode_full(base, curr)) {
         scc_btnode_emplace_leaf(base, curr, *(void **)btreeaddr, elemsize);
         ++base->bt_size;
         goto epilogue;
@@ -615,7 +631,7 @@ static _Bool scc_btree_insert_non_preemptive(struct scc_btree_base *base, void *
         value = scc_btnode_value(base, right, right->bt_nkeys, elemsize);
 
         curr = p;
-        if(!curr || curr->bt_nkeys < base->bt_order - 1u) {
+        if(!curr || !scc_btnode_full(base, curr)) {
             break;
         }
 
