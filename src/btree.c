@@ -441,19 +441,12 @@ static struct scc_btnode_base *scc_btnode_split_non_preemptive(
     struct scc_btnode_base **llinks = scc_btnode_links(base, node);
 
     void *nval = scc_btnode_value(base, right, right->bt_nkeys, elemsize);
-    if(bound == node->bt_nkeys) {
-        scc_memcpy(nval, value, elemsize);
-        scc_memcpy(rdata, scc_btnode_value(base, node, node->bt_nkeys, elemsize), right->bt_nkeys * elemsize);
-        if(!scc_btnode_is_leaf(node)) {
-            *rlinks = child;
-            scc_memcpy(rlinks + 1u, llinks + node->bt_nkeys + 1u, right->bt_nkeys * sizeof(*rlinks));
-        }
-    }
-    else if(bound < node->bt_nkeys) {
+    if(bound < node->bt_nkeys) {
         scc_memcpy(nval, scc_btnode_value(base, node, node->bt_nkeys - 1u, elemsize), elemsize);
         size_t nmov = node->bt_nkeys - bound - 1u;
         unsigned char *from = scc_btnode_value(base, node, bound, elemsize);
         if(nmov) {
+            assert(nmov < base->bt_order);
             scc_memmove(from + elemsize, from, nmov * elemsize);
         }
         scc_memcpy(from, value, elemsize);
@@ -464,6 +457,14 @@ static struct scc_btnode_base *scc_btnode_split_non_preemptive(
                 scc_memmove(llinks + bound + 2u, llinks + bound + 1u, (node->bt_nkeys - bound) * sizeof(*llinks));
             }
             llinks[bound + 1u] = child;
+        }
+    }
+    else if(bound == node->bt_nkeys) {
+        scc_memcpy(nval, value, elemsize);
+        scc_memcpy(rdata, scc_btnode_value(base, node, node->bt_nkeys, elemsize), right->bt_nkeys * elemsize);
+        if(!scc_btnode_is_leaf(node)) {
+            *rlinks = child;
+            scc_memcpy(rlinks + 1u, llinks + node->bt_nkeys + 1u, right->bt_nkeys * sizeof(*rlinks));
         }
     }
     else {
