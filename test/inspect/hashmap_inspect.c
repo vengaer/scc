@@ -13,3 +13,11 @@ struct scc_hashmap_base *scc_hashmap_inspect_base(void *map) {
     );
     return base;
 }
+
+#ifdef SCC_CANARY_ENABLED
+unsigned char const *scc_hashmap_inspect_canary(void *map) {
+    struct scc_hashmap_base *base = scc_hashmap_inspect_base(map);
+    return (unsigned char *)scc_hashmap_inspect_metadata(map) +
+            (base->hm_capacity + SCC_HASHMAP_GUARDSZ) * sizeof(scc_hashmap_metatype);
+}
+#endif

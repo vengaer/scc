@@ -300,3 +300,13 @@ void test_scc_hashmap_metadata_scrubbing_on_clear(void) {
     TEST_ASSERT_FALSE(!!scc_hashmap_find(map, (int)scc_hashmap_capacity(map) - 1));
     scc_hashmap_free(map);
 }
+
+void test_scc_hashmap_metadata_mirroring_no_overflow(void) {
+    scc_hashmap(int, int) map = scc_hashmap_with_hash(int, int, eq, ident);
+    unsigned char const *canary = scc_hashmap_inspect_canary(map);
+    TEST_ASSERT_TRUE(scc_canary_intact(canary, SCC_HASHMAP_CANARYSZ));
+    TEST_ASSERT_TRUE(scc_hashmap_insert(&map, SCC_HASHMAP_GUARDSZ, 0));
+    TEST_ASSERT_TRUE(scc_canary_intact(canary, SCC_HASHMAP_CANARYSZ));
+    scc_hashmap_free(map);
+}
+
