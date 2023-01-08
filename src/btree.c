@@ -1019,7 +1019,7 @@ static inline void scc_btnode_overwrite(
     unsigned char *value = scc_btnode_value(base, leaf, idx, elemsize);
     scc_memcpy(scc_btnode_value(base, found, fbound, elemsize), value, elemsize);
     --leaf->bt_nkeys;
-    if(!predecessor) {
+    if(leaf->bt_nkeys) {
         scc_memmove(value, value + elemsize, leaf->bt_nkeys * elemsize);
     }
 }
