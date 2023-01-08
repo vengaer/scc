@@ -32,7 +32,7 @@ def read_and_dump(file, outfile, skip, group):
             for i, chunk in enumerate(iter(read_chunk, b'')):
                 val = int.from_bytes(chunk, sys.byteorder)
                 handle.write(fmt.format(val))
-                if i < sz // int(group) - 1:
+                if i < sz // int(group):
                     handle.write(',')
                 handle.write(' ')
                 if not (i + 1) % _LINE_LIM:
