@@ -98,7 +98,7 @@ $(call push,LDFLAGS)
 
 CC                 := clang
 LD                 := clang
-CFLAGS             += $(fuzzflags)
+CFLAGS             += $(fuzzflags) -DSCC_INTERCEPT_NULLSIZE_COPIES
 CPPFLAGS           := -I$(testdir) $(filter-out -DNDEBUG,$(CPPFLAGS)) -I$(__node_path)
 LDFLAGS            += $(fuzzflags)
 
