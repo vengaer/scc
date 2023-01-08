@@ -816,8 +816,10 @@ static void scc_btmnode_rotate_right(
     unsigned char *skeyslot = scc_btmnode_key(base, sibling, sibling->btm_nkeys - 1u);
     unsigned char *svalslot = scc_btmnode_value(base, sibling, sibling->btm_nkeys - 1u);
 
-    scc_memmove(nkeys + base->btm_keysize, nkeys, node->btm_nkeys * base->btm_keysize);
-    scc_memmove(nvals + base->btm_valsize, nvals, node->btm_nkeys * base->btm_valsize);
+    if(node->btm_nkeys) {
+        scc_memmove(nkeys + base->btm_keysize, nkeys, node->btm_nkeys * base->btm_keysize);
+        scc_memmove(nvals + base->btm_valsize, nvals, node->btm_nkeys * base->btm_valsize);
+    }
 
     scc_memcpy(nkeys, pkeyslot, base->btm_keysize);
     scc_memcpy(nvals, pvalslot, base->btm_valsize);
@@ -957,9 +959,11 @@ static size_t scc_btmnode_merge(
     scc_memcpy(skeyslot, pkeyslot, base->btm_keysize);
     scc_memcpy(svalslot, pvalslot, base->btm_valsize);
 
-    /* Keys and values from node to left sibling */
-    scc_memcpy(skeyslot + base->btm_keysize, nkeys, node->btm_nkeys * base->btm_keysize);
-    scc_memcpy(svalslot + base->btm_valsize, nvals, node->btm_nkeys * base->btm_valsize);
+    if(node->btm_nkeys) {
+        /* Keys and values from node to left sibling */
+        scc_memcpy(skeyslot + base->btm_keysize, nkeys, node->btm_nkeys * base->btm_keysize);
+        scc_memcpy(svalslot + base->btm_valsize, nvals, node->btm_nkeys * base->btm_valsize);
+    }
 
     struct scc_btmnode_base **nlinks = scc_btmnode_links(base, node);
     struct scc_btmnode_base **slinks = scc_btmnode_links(base, sibling);
