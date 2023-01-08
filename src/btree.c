@@ -324,6 +324,7 @@ static inline size_t scc_btnode_find_linkindex(
         }
     }
 
+    assert(false);
     return base->bt_order;
 }
 
