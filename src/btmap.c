@@ -830,7 +830,8 @@ static void scc_btmnode_rotate_right(
     struct scc_btmnode_base **nlinks = scc_btmnode_links(base, node);
     struct scc_btmnode_base *subtree = scc_btmnode_child(base, sibling, sibling->btm_nkeys--);
 
-    scc_memmove(nlinks + 1u, nlinks, ++node->btm_nkeys * sizeof(*nlinks));
+    ++node->btm_nkeys;
+    scc_memmove(nlinks + 1u, nlinks, node->btm_nkeys * sizeof(*nlinks));
     nlinks[0] = subtree;
 }
 
