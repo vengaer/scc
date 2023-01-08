@@ -225,11 +225,12 @@ static struct scc_hashmap_base *scc_hashmap_realloc(
     mdoff = scc_align(mdoff, scc_alignof(scc_hashmap_metatype));
     assert((mdoff & ~(scc_alignof(scc_hashmap_metatype) - 1u)) == mdoff);
 
-    size_t const size = mdoff + (cap + SCC_HASHMAP_GUARDSZ) * sizeof(scc_hashmap_metatype);
+    scc_static_assert(sizeof(scc_hashmap_metatype) == 1u);
+    size_t const size = mdoff + (cap + SCC_HASHMAP_GUARDSZ);
 
     /* Allocate new map, ignore clang tidy being scared by scc_hashmap_base being
      * larger than unsigned char */
-    struct scc_hashmap_base *newbase = calloc(size, sizeof(unsigned char )); /* NOLINT */
+    struct scc_hashmap_base *newbase = calloc(size, sizeof(unsigned char)); /* NOLINT */
     if(!newbase) {
         return 0;
     }
@@ -402,6 +403,7 @@ bool scc_hashmap_impl_remove(void *map, size_t keysize) {
 void scc_hashmap_clear(void *map) {
     struct scc_hashmap_base *base = scc_hashmap_impl_base(map);
     scc_hashmap_metatype *md = scc_hashmap_metadata(base);
-    memset(md, 0, (base->hm_capacity + SCC_HASHMAP_GUARDSZ) * sizeof(*md));
+    scc_static_assert(sizeof(*md) == 1u);
+    memset(md, 0, (base->hm_capacity + SCC_HASHMAP_GUARDSZ));
     base->hm_size = 0u;
 }
