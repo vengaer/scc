@@ -43,6 +43,10 @@ $(eval
     $(eval __runners   := $(patsubst $(__node_path)/%.$(cext),$(__node_builddir)/%_$(runnersuffix),$(__unitsrc)))
     $(eval __unitobj   := $(call __unit-obj))
 
+    $(foreach __o,$(__unitobj),
+        $(if $(findstring $(testsccbuilddir),$(__o)),
+            $(eval __all_obj += $(__o))))
+
     # Prevent make from removing generated runners
     .SECONDARY: $(addsuffix .$(cext),$(__runners))
 
