@@ -68,6 +68,7 @@ static struct scc_ringdeque_base *scc_ringdeque_alloc(size_t capacity, size_t si
     if(!base) {
         return 0;
     }
+    assert((unsigned char *)base + nbytes == &base->rd_buffer[npad] + capacity * elemsize);
     base->rd_size = size;
     base->rd_capacity = capacity;
     base->rd_buffer[npad - 2u] = npad - 2 * sizeof(unsigned char);
