@@ -141,3 +141,12 @@ void test_scc_ringdeque_reserve_no_reallocation(void) {
     TEST_ASSERT_EQUAL_PTR(before, deque);
     scc_ringdeque_free(deque);
 }
+
+void test_scc_ringdeque_dynalloc_marker(void) {
+    scc_ringdeque(unsigned) deque = scc_ringdeque_new(unsigned);
+
+    TEST_ASSERT_TRUE(scc_ringdeque_reserve(&deque, scc_ringdeque_capacity(deque) + 1u));
+    TEST_ASSERT_EQUAL_UINT8(1u, ((unsigned char *)deque)[-1]);
+
+    scc_ringdeque_free(deque);
+}
