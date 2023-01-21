@@ -136,7 +136,7 @@ void test_scc_ringdeque_reserve_no_reallocation(void) {
 
     size_t const cap = scc_ringdeque_capacity(deque);
     void const *before = deque;
-    TEST_ASSERT_TRUE(scc_ringdeque_reserve(&deque, cap - 1u));
+    TEST_ASSERT_TRUE(scc_ringdeque_reserve(&deque, cap));
     TEST_ASSERT_EQUAL_UINT64(cap, scc_ringdeque_capacity(deque));
     TEST_ASSERT_EQUAL_PTR(before, deque);
     scc_ringdeque_free(deque);
