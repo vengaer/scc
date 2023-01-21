@@ -48,7 +48,7 @@ all:
 
 include $(wildcard $(mkscripts)/*.mk)
 
-ASFLAGS      := -c -x assembler -MD -MP $(__debug_info)
+ASFLAGS      := -c -MD -MP $(__debug_info)
 CFLAGS       := -std=c99 -c -MD -MP -Wall -Wextra -Wpedantic -Waggregate-return      \
                 -Wbad-function-cast -Wcast-qual -Wfloat-equal -Wmissing-include-dirs \
                 -Wnested-externs -Wpointer-arith -Wshadow -Wunknown-pragmas -Wswitch \
