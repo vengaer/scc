@@ -110,6 +110,10 @@ static bool scc_ringdeque_grow(void **dequeaddr, size_t newcap, size_t elemsize)
     base->rd_begin = 0;
     base->rd_end = base->rd_size;
 
+    if(scc_ringdeque_is_allocd(*dequeaddr)) {
+        free(prev);
+    }
+
     *dequeaddr = data;
     return true;
 }
