@@ -150,3 +150,12 @@ void test_scc_ringdeque_dynalloc_marker(void) {
 
     scc_ringdeque_free(deque);
 }
+
+void test_scc_ringdeque_power_of_2_rounding(void) {
+    scc_ringdeque(unsigned) deque = scc_ringdeque_new(unsigned);
+
+    TEST_ASSERT_TRUE(scc_ringdeque_reserve(&deque, 3084u));
+    TEST_ASSERT_EQUAL_UINT64(4096u, scc_ringdeque_capacity(deque));
+
+    scc_ringdeque_free(deque);
+}

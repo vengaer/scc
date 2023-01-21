@@ -147,11 +147,9 @@ bool scc_ringdeque_impl_reserve(void *dequeaddr, size_t capacity, size_t elemsiz
         return true;
     }
     if(!scc_bits_is_power_of_2(capacity)) {
-        size_t newcap = base->rd_capacity << 1u;
-        while(newcap < capacity) {
-            newcap <<= 1u;
-        }
-        capacity = newcap;
+        unsigned shifts;
+        for(shifts = 0u; capacity; capacity >>= 1u, ++shifts);
+        capacity = 1u << shifts;
     }
 
     assert(scc_bits_is_power_of_2(capacity));
