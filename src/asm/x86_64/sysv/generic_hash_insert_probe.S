@@ -1,4 +1,4 @@
-#include "isomssb.S"
+#include "isolssb.S"
 
 #if SCC_VECSIZE != 32
 #error AVX2 vectors are 32 bytes
@@ -177,7 +177,7 @@
     testl   %r9d, %r9d                      # Check for probe end
     jz      8f
 
-    isomssbl    %r9d, %r8d                  # Isolate rigthmost 1 bit
+    isolssbl    %r9d, %r8d                  # Isolate rigthmost 1 bit
 
     vpmovmskb   %ymm2, %r8d                 # Extract bitmask
 
@@ -308,7 +308,7 @@
     testl   %r8d, %r8d                      # Check for probe end
     jz      3f
 
-    isomssbl    %r8d, %ecx                  # Isolate rigthmost 1 bit
+    isolssbl    %r8d, %ecx                  # Isolate rigthmost 1 bit
     subl    $1, %r8d                        # Create mask
     andl    %r8d, %r15d                     # Mask out matches beyond probe end
     jz      4f
