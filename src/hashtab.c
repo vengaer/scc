@@ -393,3 +393,21 @@ void scc_hashtab_clear(void *tab) {
     memset(md, 0, base->ht_capacity + SCC_HASHTAB_GUARDSZ);
     base->ht_size = 0u;
 }
+
+void *scc_hashtab_clone(void const *tab) {
+    struct scc_hashtab_base const *obase = scc_hashtab_impl_base_qual(tab, const);
+    scc_static_assert(sizeof(scc_hashtab_metatype) == 1);
+    size_t sz = obase->ht_mdoff + obase->ht_capacity + SCC_HASHTAB_GUARDSZ;
+    /* Kill mutant */
+    assert(sz > obase->ht_mdoff + obase->ht_capacity);
+#ifdef SCC_CANARY_ENABLED
+    sz += SCC_HASHTAB_CANARYSZ;
+#endif
+    struct scc_hashtab_base *nbase = malloc(sz);
+    if(!nbase) {
+        return 0;
+    }
+    scc_memcpy(nbase, obase, sz);
+    nbase->ht_dynalloc = 1;
+    return (unsigned char *)nbase + offsetof(struct scc_hashtab_base, ht_fwoff) + nbase->ht_fwoff + sizeof(nbase->ht_fwoff);
+}

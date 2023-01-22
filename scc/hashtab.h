@@ -696,4 +696,14 @@ _Bool scc_hashtab_impl_remove(void *tab, size_t elemsize);
 //!     :param tab: Handle identifying the hash table
 void scc_hashtab_clear(void *tab);
 
+//! .. c:function:: void *scc_hashtab_clone(void const *tab)
+//!
+//!     Clone the given hashtab and return a new instance containing
+//!     the same values. The new instance is allocated on the heap
+//!
+//!     :param tab: The ``hashtab`` to clone
+//!     :returns: Handle to a new ``hashtab`` containing the same values as
+//!               the given one, or ``NULL`` on failure
+void *scc_hashtab_clone(void const *tab);
+
 #endif /* SCC_HASHTAB_H */
