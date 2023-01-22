@@ -142,6 +142,11 @@ struct scc_btnode_base {
 //?
 //?         Node allocator
 //?
+//?     .. _unsigned_char_bt_dynalloc:
+//?     .. c:var:: unsigned char bt_dynalloc
+//?
+//?         Set to 1 if the tree way dynamically allocated, otherwise 0
+//?
 //?     .. _unsigned_char_bt_fwoff:
 //?     .. c:var:: unsigned char bt_fwoff
 //?
@@ -159,6 +164,7 @@ struct scc_btree_base {
     struct scc_btnode_base *bt_root;
     scc_bcompare bt_compare;
     struct scc_arena bt_arena;
+    unsigned char bt_dynalloc;
     unsigned char bt_fwoff;
     unsigned char bt_data[];
 };
@@ -251,6 +257,10 @@ struct scc_btree_base {
 //?
 //?         See :ref:`bt_fwoff <unsigned_char_bt_fwoff>`
 //?
+//?     .. c:var:: unsigned char bt_dynalloc
+//?
+//?         See :ref:`bt_dynalloc <unsigned_char_bt_dynalloc>`
+//?
 //?     .. _unsigned_char_bt_bkoff:
 //?     .. c:var:: unsigned char bt_bkoff
 //?
@@ -279,6 +289,7 @@ struct scc_btree_base {
         struct scc_btnode_base *bt_root;                                                            \
         scc_bcompare bt_compare;                                                                    \
         struct scc_arena bt_arena;                                                                  \
+        unsigned char bt_dynalloc;                                                                  \
         unsigned char bt_fwoff;                                                                     \
         unsigned char bt_bkoff;                                                                     \
         type bt_curr;                                                                               \
@@ -574,5 +585,59 @@ _Bool scc_btree_impl_remove(void *btree, size_t elemsize);
 //!               copies of the specified value were found
 #define scc_btree_remove(btree, value)                                                                  \
     scc_btree_impl_remove(((*(btree) = (value)), (btree)), sizeof(*(btree)))
+
+//? .. c:function:: void *scc_btree_impl_clone(void const *btree, size_t elemsize)
+//?
+//?     Internal clone function. See :ref:`scc_btree_clone <scc_btree_clone>`
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param btree: The ``btree`` to clone
+//?     :param elemsize: Size of the elements in the tree
+//?     :returns: A ``btree`` instance containing the same values as the
+//?               given :code:`btree` parameter, or ``NULL`` on failure
+void *scc_btree_impl_clone(void const *btree, size_t elemsize);
+
+//! .. c:function:: void *scc_btree_clone(void const *btree)
+//!
+//!     Clone the given ``btree``, yielding a new copy with the same size and elements.
+//!     The new copy is allocated on the heap
+//!
+//!     :param btree: The ``btree`` to clone
+//!     :returns: A ``btree`` instance containing the same values as the
+//!               given :code:`btree` parameter, or ``NULL`` on failure
+//!
+//!     .. code-block:: C
+//!         :caption: Clone a ``btree``
+//!
+//!         extern int compare(void const *l, void const *r);
+//!
+//!         scc_btree(int) btree = scc_btree_new(int, compare);
+//!
+//!         for(int i = 0; i < 12; ++i) {
+//!             assert(scc_btree_insert(&btree, i));
+//!         }
+//!
+//!         /* Create an exact copy of the btree */
+//!         scc_btree(int) copy = scc_btree_clone(btree);
+//!
+//!         assert(scc_btree_size(btree) == scc_btree_size(copy));
+//!
+//!         /* Copy contains the same values */
+//!         int const *old, *new;
+//!         for(int i = 0; i < (int)scc_btree_size(btree); ++i) {
+//!             old = scc_btree_find(btree, i);
+//!             new = scc_btgree_find(copy, i);
+//!             assert(old && new);
+//!             assert(*old == *new);
+//!         }
+//!
+//!         scc_btree_free(btree);
+//!         /* The copy must be freed too */
+//!         scc_btree_free(copy);
+#define scc_btree_clone(btree)                                                                              \
+    scc_btree_impl_clone(btree, sizeof(*(btree)))
 
 #endif /* SCC_BTREE_H */

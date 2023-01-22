@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <limits.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <string.h>
 
 void *scc_btree_impl_with_order(void *base, size_t coff, size_t rootoff);
@@ -1300,6 +1301,22 @@ epilogue:
     return success;
 }
 
+//? .. c:function:: scc_btree_impl_free(struct scc_btree_base *base)
+//?
+//?     Free any memory allocated for the given ``btree`` base
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Base address of the ``btree`` to free
+static inline void scc_btree_impl_free(struct scc_btree_base *base) {
+    scc_arena_release(&base->bt_arena);
+    if(base->bt_dynalloc) {
+        free(base);
+    }
+}
+
 void *scc_btree_impl_new(void *base, size_t coff, size_t rootoff) {
 #define base ((struct scc_btree_base *)base)
     size_t fwoff = coff - offsetof(struct scc_btree_base, bt_fwoff) - sizeof(base->bt_fwoff);
@@ -1314,7 +1331,7 @@ void *scc_btree_impl_new(void *base, size_t coff, size_t rootoff) {
 
 void scc_btree_free(void *btree) {
     struct scc_btree_base *base = scc_btree_impl_base(btree);
-    scc_arena_release(&base->bt_arena);
+    scc_btree_impl_free(base);
 }
 
 _Bool scc_btree_impl_insert(void *btreeaddr, size_t elemsize) {
@@ -1358,4 +1375,78 @@ _Bool scc_btree_impl_remove(void *btree, size_t elemsize) {
         return scc_btree_remove_preemptive(base, btree, elemsize);
     }
     return scc_btree_remove_non_preemptive(base, btree, elemsize);
+}
+
+void *scc_btree_impl_clone(void const *btree, size_t elemsize) {
+    struct scc_btree_base const *obase = scc_btree_impl_base_qual(btree, const);
+    size_t basesz = (unsigned char const *)btree - (unsigned char const *)obase;
+
+    size_t bytesz = basesz + elemsize;
+
+    struct scc_btree_base *nbase = malloc(bytesz);
+    if(!nbase) {
+        return 0;
+    }
+    scc_memcpy(nbase, obase, basesz);
+    nbase->bt_arena = scc_arena_clone(&obase->bt_arena);
+    if(!scc_arena_reserve(&nbase->bt_arena, obase->bt_size)) {
+        free(nbase);
+        return 0;
+    }
+    nbase->bt_dynalloc = 1;
+
+    struct stage {
+        unsigned index;
+        struct scc_btnode_base *old;
+        struct scc_btnode_base **new;
+    };
+
+    void *nbtree = 0;
+
+    scc_stack(struct stage) stack = scc_stack_new(struct stage);
+    if(!scc_stack_push(&stack, (struct stage){ .old = obase->bt_root, .new = &nbase->bt_root  })) {
+        goto epilogue;
+    }
+
+    while(!scc_stack_empty(stack)) {
+        struct stage *s = &scc_stack_top(stack);
+
+        if(s->index == s->old->bt_nkeys + 1u) {
+            scc_stack_pop(stack);
+            continue;
+        }
+
+        if(!s->index) {
+            assert(s->new);
+            *s->new = scc_arena_alloc(&nbase->bt_arena);
+            assert(*s->new);
+            assert(s->old);
+            /* Copy everything up to the link array */
+            scc_memcpy(*s->new, s->old, nbase->bt_linkoff);
+        }
+
+        if(!scc_btnode_is_leaf(s->old)) {
+            struct scc_btnode_base **olinks = scc_btnode_links(obase, s->old);
+            assert(s->new);
+            assert(*s->new);
+            struct scc_btnode_base **nlinks = scc_btnode_links(nbase, *s->new);
+            if(!scc_stack_push(&stack, (struct stage){ .old = olinks[s->index], .new = &nlinks[s->index] })) {
+                goto epilogue;
+            }
+        }
+        else {
+            scc_stack_pop(stack);
+        }
+
+        ++s->index;
+    }
+
+    nbtree = (unsigned char *)nbase + offsetof(struct scc_btree_base, bt_fwoff) + nbase->bt_fwoff + sizeof(nbase->bt_fwoff);
+epilogue:
+    scc_stack_free(stack);
+    if(!nbtree) {
+        scc_btree_impl_free(nbase);
+    }
+
+    return nbtree;
 }
