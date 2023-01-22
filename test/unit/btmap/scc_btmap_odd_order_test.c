@@ -138,3 +138,33 @@ void test_scc_btmap_remove_non_existent(void) {
     TEST_ASSERT_FALSE(scc_btmap_remove(btmap, 38));
     scc_btmap_free(btmap);
 }
+
+void test_scc_btmap_clone(void) {
+    scc_btmap(int, int) btmap = scc_btmap_with_order(int, int, ocompare, 33);
+
+    for(int i = 0; i < 321; ++i) {
+        TEST_ASSERT_TRUE(scc_btmap_insert(&btmap, i, 2 * i));
+    }
+
+    TEST_ASSERT_EQUAL_UINT32(0u, scc_btmap_inspect_invariants(btmap));
+    scc_btmap(int, int) nbtmap = scc_btmap_clone(btmap);
+
+    TEST_ASSERT_TRUE(!!nbtmap);
+
+    TEST_ASSERT_EQUAL_UINT32(0u, scc_btmap_inspect_invariants(nbtmap));
+
+    int *old;
+    int *new;
+    for(int i = 0; i < (int)scc_btmap_size(btmap); ++i) {
+        old = scc_btmap_find(btmap, i);
+        TEST_ASSERT_TRUE(!!old);
+        new = scc_btmap_find(nbtmap, i);
+        TEST_ASSERT_TRUE(!!new);
+        TEST_ASSERT_EQUAL_INT32(*old, *new);
+        TEST_ASSERT_FALSE(old == new);
+    }
+    TEST_ASSERT_EQUAL_UINT64(scc_btmap_size(btmap), scc_btmap_size(nbtmap));
+
+    scc_btmap_free(btmap);
+    scc_btmap_free(nbtmap);
+}
