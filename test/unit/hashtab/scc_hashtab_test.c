@@ -372,3 +372,29 @@ void test_scc_hashtab_metadata_scrubbing_on_clear(void) {
     TEST_ASSERT_FALSE(!!scc_hashtab_find(tab, (int)scc_hashtab_capacity(tab) - 1));
     scc_hashtab_free(tab);
 }
+
+void test_scc_hashtab_clone(void) {
+    scc_hashtab(int) tab = scc_hashtab_new(int, eq);
+    for(int i = 0; i < 321; ++i) {
+        TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, i));
+    }
+
+    scc_hashtab(int) copy = scc_hashtab_clone(tab);
+
+    TEST_ASSERT_EQUAL_UINT64(scc_hashtab_capacity(tab), scc_hashtab_capacity(copy));
+    TEST_ASSERT_EQUAL_UINT64(scc_hashtab_size(tab), scc_hashtab_size(copy));
+
+    int const *old;
+    int const *new;
+    for(int i = 0; i < 321; ++i) {
+        old = scc_hashtab_find(tab, i);
+        new = scc_hashtab_find(copy, i);
+        TEST_ASSERT_TRUE(!!old);
+        TEST_ASSERT_TRUE(!!new);
+        TEST_ASSERT_EQUAL_INT32(i, *old);
+        TEST_ASSERT_EQUAL_INT32(i, *new);
+    }
+
+    scc_hashtab_free(tab);
+    scc_hashtab_free(copy);
+}
