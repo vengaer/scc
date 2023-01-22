@@ -231,7 +231,10 @@ static struct scc_hashmap_base *scc_hashmap_realloc(
     assert((mdoff & ~(scc_alignof(scc_hashmap_metatype) - 1u)) == mdoff);
 
     scc_static_assert(sizeof(scc_hashmap_metatype) == 1u);
-    size_t const size = mdoff + (cap + SCC_HASHMAP_GUARDSZ);
+    size_t size = mdoff + (cap + SCC_HASHMAP_GUARDSZ);
+#ifdef SCC_CANARY_ENABLED
+    size += SCC_HASHMAP_CANARYSZ;
+#endif
 
     /* Allocate new map, ignore clang tidy being scared by scc_hashmap_base being
      * larger than unsigned char */
