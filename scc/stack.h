@@ -55,7 +55,7 @@
 //!     :retval true: :c:texpr:`value` was successfully pushed to :c:texpr:`*(void **)stackaddr`. :c:texpr:`*(void **)stackaddr`
 //!                   may have been reallocated
 //!     :retval false: :c:texpr:`value` could not be added to the underlying container
-#define scc_stack_push(stackaddr, value) scc_pp_cat_expand(SCC_STACK_CONTAINER,_push)(stackaddr, value)
+#define scc_stack_push(stackaddr, ...) scc_pp_cat_expand(SCC_STACK_CONTAINER,_push)(stackaddr, (__VA_ARGS__))
 
 #define scc_stack_pop(stack) scc_pp_cat_expand(SCC_STACK_CONTAINER,_pop)(stack)
 #define scc_stack_top(stack) stack[scc_pp_cat_expand(SCC_STACK_CONTAINER,_size)(stack) - 1]

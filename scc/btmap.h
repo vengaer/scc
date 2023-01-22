@@ -147,11 +147,16 @@ struct scc_btmnode_base {
 //?
 //?         Node allocator
 //?
-//?     .. _unsigned_short_btm_kvoff:
-//?     .. c:var:: unsigned short const btm_kvoff
+//?     .. _unsigned_char_btm_kvoff:
+//?     .. c:var:: unsigned char const btm_kvoff
 //?
 //?         Offset of the value in the
 //?         :ref:`key-value pair <scc_btmap_impl_pair>`
+//?
+//?     .. _unsigned_char_btm_dynalloc:
+//?     .. c:var:: unsigned char btm_dynalloc
+//?
+//?         Set to 1 of the struct was dynamically allocated
 //?
 //?     .. _unsigned_char_btm_fwoff:
 //?     .. c:var:: unsigned char btm_fwoff
@@ -173,7 +178,8 @@ struct scc_btmap_base {
     struct scc_btmnode_base *btm_root;
     scc_bcompare btm_compare;
     struct scc_arena btm_arena;
-    unsigned short const btm_kvoff;
+    unsigned char const btm_kvoff;
+    unsigned char btm_dynalloc;
     unsigned char btm_fwoff;
     unsigned char btm_data[];
 };
@@ -284,9 +290,13 @@ struct scc_btmap_base {
 //?
 //?         See :ref:`btm_arena <struct_scc_arena_btm_arena>`
 //?
-//?     .. c:var:: unsigned short const btm_kvoff
+//?     .. c:var:: unsigned char const btm_kvoff
 //?
-//?         See :ref:`btm_kvoff <unsigned_short_btm_kvoff>`
+//?         See :ref:`btm_kvoff <unsigned_char_btm_kvoff>`
+//?
+//?     .. c:var:: unsigned char btm_dynalloc
+//?
+//?         See :ref:`btm_dynalloc <unsigned_char_btm_dynalloc>`
 //?
 //?     .. c:var:: unsigned char btm_fwoff
 //?
@@ -323,7 +333,8 @@ struct scc_btmap_base {
         struct scc_btmnode_base *btm_root;                                                                              \
         scc_bcompare btm_compare;                                                                                       \
         struct scc_arena btm_arena;                                                                                     \
-        unsigned short const btm_kvoff;                                                                                 \
+        unsigned char const btm_kvoff;                                                                                  \
+        unsigned char btm_dynalloc;                                                                                     \
         unsigned char btm_fwoff;                                                                                        \
         unsigned char btm_bkoff;                                                                                        \
         scc_btmap_impl_pair(keytype, valuetype) btm_curr;                                                               \
@@ -649,5 +660,43 @@ _Bool scc_btmap_impl_remove(void *btmap);
         )                                                                                               \
     )
 
+//! .. c:function:: void *scc_btmap_clone(void const *btmap)
+//!
+//!     Clone the given ``btmap``, yielding a new copy with the same size and elements.
+//!     The new copy is allocated on the heap
+//!
+//!     :param btmap: The ``btmap`` instance to clone
+//!     :returns: A new ``btmap`` instance containing the same key-value pairs as the
+//!               supplied parameter, or ``NULL`` on failure
+//!
+//!     .. code-block:: C
+//!         :caption: Clone a ``btmap``
+//!
+//!         extern int compare(void const *l, void const *r);
+//!
+//!         scc_btmap(int, int) btmap = scc_btmap_new(int, int, compare);
+//!
+//!         for(int i = 0; i < 12; ++i) {
+//!             assert(scc_btmap_insert(&btmap, i, 2 * i));
+//!         }
+//!
+//!         /* Create an exact copy of the btmap */
+//!         scc_btmap(int, int) copy = scc_btmap_clone(btmap);
+//!
+//!         assert(scc_btmap_size(btmap) == scc_btmap_size(copy));
+//!
+//!         /* Copy contains the same key-value pairs */
+//!         int *old, *new;
+//!         for(int i = 0; i < (int)scc_btmap_size(btmap); ++i) {
+//!             old = scc_btmap_find(btmap, i);
+//!             new = scc_btgmap_find(copy, i);
+//!             assert(old && new);
+//!             assert(*old == *new);
+//!         }
+//!
+//!         scc_btmap_free(btmap);
+//!         /* The copy must be freed too */
+//!         scc_btmap_free(copy);
+void *scc_btmap_clone(void const *btmap);
 
 #endif /* SCC_BTMAP_H */

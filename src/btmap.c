@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <limits.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <string.h>
 
 size_t scc_btmap_order(void const *btmap);
@@ -1457,6 +1458,23 @@ epilogue:
     return base->btm_size < origsz;
 }
 
+//? .. c:function:: void scc_btmap_impl_free(struct scc_btmap_base *base)
+//?
+//?     Free memory allocated for the given ``btmap`` base
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Base address of the ``btmap``
+static inline void scc_btmap_impl_free(struct scc_btmap_base *base) {
+    scc_arena_release(&base->btm_arena);
+    if(base->btm_dynalloc) {
+        free(base);
+    }
+}
+
+
 void *scc_btmap_impl_new(void *base, size_t coff, size_t rootoff) {
 #define base ((struct scc_btmap_base *)base)
     size_t fwoff = coff - offsetof(struct scc_btmap_base, btm_fwoff) - sizeof(base->btm_fwoff);
@@ -1470,8 +1488,7 @@ void *scc_btmap_impl_new(void *base, size_t coff, size_t rootoff) {
 }
 
 void scc_btmap_free(void *btmap) {
-    struct scc_btmap_base *base = scc_btmap_impl_base(btmap);
-    scc_arena_release(&base->btm_arena);
+    scc_btmap_impl_free(scc_btmap_impl_base(btmap));
 }
 
 _Bool scc_btmap_impl_insert(void *btmapaddr) {
@@ -1510,4 +1527,83 @@ _Bool scc_btmap_impl_remove(void *btmap) {
         return scc_btmap_remove_preemptive(base, btmap);
     }
     return scc_btmap_remove_non_preemptive(base, btmap);
+}
+
+void *scc_btmap_clone(void const *btmap) {
+    struct scc_btmap_base const *obase = scc_btmap_impl_base_qual(btmap, const);
+    size_t basesz = (unsigned char const *)btmap - (unsigned char const *)obase;
+
+    size_t kvsz = obase->btm_valsize + obase->btm_kvoff;
+    assert(kvsz >= obase->btm_keysize + obase->btm_valsize);
+
+    size_t bytesz = basesz + kvsz;
+    /* Kill Mull mutant */
+    assert(bytesz > basesz);
+
+    struct scc_btmap_base *nbase = malloc(bytesz);
+    if(!nbase) {
+        return 0;
+    }
+    scc_memcpy(nbase, obase, basesz);
+    nbase->btm_arena = scc_arena_clone(&obase->btm_arena);
+    if(!scc_arena_reserve(&nbase->btm_arena, obase->btm_size)) {
+        free(nbase);
+        return 0;
+    }
+    nbase->btm_dynalloc = 1;
+
+    struct stage {
+        unsigned index;
+        struct scc_btmnode_base *old;
+        struct scc_btmnode_base **new;
+    };
+
+    void *nbtmap = 0;
+
+    scc_stack(struct stage) stack = scc_stack_new(struct stage);
+    if(!scc_stack_push(&stack, (struct stage){ .old = obase->btm_root, .new = &nbase->btm_root  })) {
+        goto epilogue;
+    }
+
+    while(!scc_stack_empty(stack)) {
+        struct stage *s = &scc_stack_top(stack);
+
+        if(s->index == s->old->btm_nkeys + 1u) {
+            scc_stack_pop(stack);
+            continue;
+        }
+
+        if(!s->index) {
+            assert(s->new);
+            *s->new = scc_arena_alloc(&nbase->btm_arena);
+            assert(*s->new);
+            assert(s->old);
+            /* Copy everything up to the link array */
+            scc_memcpy(*s->new, s->old, nbase->btm_linkoff);
+        }
+
+        if(!scc_btmnode_is_leaf(s->old)) {
+            struct scc_btmnode_base **olinks = scc_btmnode_links(obase, s->old);
+            assert(s->new);
+            assert(*s->new);
+            struct scc_btmnode_base **nlinks = scc_btmnode_links(nbase, *s->new);
+            if(!scc_stack_push(&stack, (struct stage){ .old = olinks[s->index], .new = &nlinks[s->index] })) {
+                goto epilogue;
+            }
+        }
+        else {
+            scc_stack_pop(stack);
+        }
+
+        ++s->index;
+    }
+
+    nbtmap = (unsigned char *)nbase + offsetof(struct scc_btmap_base, btm_fwoff) + nbase->btm_fwoff + sizeof(nbase->btm_fwoff);
+epilogue:
+    scc_stack_free(stack);
+    if(!nbtmap) {
+        scc_btmap_impl_free(nbase);
+    }
+
+    return nbtmap;
 }

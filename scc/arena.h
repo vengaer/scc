@@ -42,10 +42,17 @@ struct scc_chunk {
     offsetof(scc_chunk_impl_layout(type), ch_buffer)
 
 #define scc_arena_new(type)                                         \
-    (struct scc_arena){                                             \
+    (struct scc_arena) {                                            \
         .ar_baseoff = scc_arena_impl_baseoff(type),                 \
         .ar_elemsize = sizeof(type),                                \
         .ar_chunksize = SCC_ARENA_CHUNKSIZE                         \
+    }
+
+#define scc_arena_clone(arena)                                      \
+    (struct scc_arena) {                                            \
+        .ar_baseoff = (arena)->ar_baseoff,                          \
+        .ar_elemsize = (arena)->ar_elemsize,                        \
+        .ar_chunksize = (arena)->ar_chunksize                       \
     }
 
 void scc_arena_release(struct scc_arena *arena);
