@@ -105,3 +105,34 @@ void test_scc_btree_remove_odd_order(void) {
 
     scc_btree_free(btree);
 }
+
+void test_scc_btree_clone(void) {
+    scc_btree(int) btree = scc_btree_with_order(int, ocompare, 27);
+
+    for(int i = 0; i < 371; ++i) {
+        TEST_ASSERT_TRUE(scc_btree_insert(&btree, i));
+    }
+
+    TEST_ASSERT_EQUAL_UINT32(0u, scc_btree_inspect_invariants(btree));
+    scc_btree(int) nbtree = scc_btree_clone(btree);
+
+    TEST_ASSERT_TRUE(!!nbtree);
+
+    TEST_ASSERT_EQUAL_UINT32(0u, scc_btree_inspect_invariants(nbtree));
+
+    int const *old;
+    int const *new;
+    for(int i = 0; i < (int)scc_btree_size(btree); ++i) {
+        old = scc_btree_find(btree, i);
+        TEST_ASSERT_TRUE(!!old);
+        new = scc_btree_find(nbtree, i);
+        TEST_ASSERT_TRUE(!!new);
+        TEST_ASSERT_EQUAL_INT32(*old, *new);
+        TEST_ASSERT_FALSE(old == new);
+    }
+    TEST_ASSERT_EQUAL_UINT64(scc_btree_size(btree), scc_btree_size(nbtree));
+
+    scc_btree_free(btree);
+    scc_btree_free(nbtree);
+
+}
