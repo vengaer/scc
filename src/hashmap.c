@@ -1,6 +1,4 @@
 #include <scc/hashmap.h>
-#include <scc/perf.h>
-
 #include "asm/asm_generic.h"
 
 #include <assert.h>
@@ -418,4 +416,22 @@ void scc_hashmap_clear(void *map) {
     scc_static_assert(sizeof(*md) == 1u);
     memset(md, 0, (base->hm_capacity + SCC_HASHMAP_GUARDSZ));
     base->hm_size = 0u;
+}
+
+void *scc_hashmap_clone(void const *map) {
+    struct scc_hashmap_base const *obase = scc_hashmap_impl_base_qual(map, const);
+    scc_static_assert(sizeof(scc_hashmap_metatype) == 1);
+    size_t sz = obase->hm_mdoff + obase->hm_capacity + SCC_HASHMAP_GUARDSZ;
+    /* Kill mutant */
+    assert(sz > obase->hm_mdoff + obase->hm_capacity);
+#ifdef SCC_CANARY_ENABLED
+    sz += SCC_HASHMAP_CANARYSZ;
+#endif
+    struct scc_hashmap_base *nbase = malloc(sz);
+    if(!nbase) {
+        return 0;
+    }
+    scc_memcpy(nbase, obase, sz);
+    nbase->hm_dynalloc = 1;
+    return (unsigned char *)nbase + offsetof(struct scc_hashmap_base, hm_fwoff) + nbase->hm_fwoff + sizeof(nbase->hm_fwoff);
 }

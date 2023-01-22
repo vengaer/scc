@@ -6,6 +6,7 @@
 #include "canary.h"
 #include "config.h"
 #include "mem.h"
+#include "perf.h"
 
 #include <stddef.h>
 
@@ -786,5 +787,15 @@ _Bool scc_hashmap_impl_remove(void *map, size_t keysize);
 //!
 //!     :param map: Handle for identifying the hash map
 void scc_hashmap_clear(void *map);
+
+//! .. c:function:: void *scc_hashmap_clone(void const *map)
+//!
+//!     Clone the given hashmap, returning a new instance containing
+//!     the same key-value pairs. The new instance is allocated on the
+//!     heap
+//!
+//!     :param map: The ``hashmap`` to clone
+//!     :returns: Handle to a new ``hashmap``, or ``NULL`` on failure
+void *scc_hashmap_clone(void const *map);
 
 #endif /* SCC_HASHMAP_H */
