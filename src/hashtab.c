@@ -200,7 +200,10 @@ static struct scc_hashtab_base *scc_hashtab_realloc(
 
 
     scc_static_assert(sizeof(scc_hashtab_metatype) == 1u);
-    size_t const size = mdoff + cap + SCC_HASHTAB_GUARDSZ;
+    size_t size = mdoff + cap + SCC_HASHTAB_GUARDSZ;
+#ifdef SCC_CANARY_ENABLED
+    size += SCC_HASHTAB_CANARYSZ;
+#endif
 
     /* Allocate new hash table
      * Ignore clang tidy complaining about struct scc_hashtab_base being
