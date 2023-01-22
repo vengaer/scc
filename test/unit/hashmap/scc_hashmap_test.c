@@ -310,3 +310,28 @@ void test_scc_hashmap_metadata_mirroring_no_overflow(void) {
     scc_hashmap_free(map);
 }
 
+void test_scc_hashmap_clone(void) {
+    scc_hashmap(int, int) map = scc_hashmap_new(int, int, eq);
+    for(int i = 0; i < 321; ++i) {
+        TEST_ASSERT_TRUE(scc_hashmap_insert(&map, i, i + 1));
+    }
+
+    scc_hashmap(int, int) copy = scc_hashmap_clone(map);
+
+    TEST_ASSERT_EQUAL_UINT64(scc_hashmap_capacity(map), scc_hashmap_capacity(copy));
+    TEST_ASSERT_EQUAL_UINT64(scc_hashmap_size(map), scc_hashmap_size(copy));
+
+    int *old;
+    int *new;
+    for(int i = 0; i < 321; ++i) {
+        old = scc_hashmap_find(map, i);
+        new = scc_hashmap_find(copy, i);
+        TEST_ASSERT_TRUE(!!old);
+        TEST_ASSERT_TRUE(!!new);
+        TEST_ASSERT_EQUAL_INT32(i + 1, *old);
+        TEST_ASSERT_EQUAL_INT32(i + 1, *new);
+    }
+
+    scc_hashmap_free(map);
+    scc_hashmap_free(copy);
+}
