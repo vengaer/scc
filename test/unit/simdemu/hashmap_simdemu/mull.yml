@@ -1,0 +1,5 @@
+excludePaths:
+  - submodules/*
+  - test/*
+  - src/canary.c
+  - src/hashmap.c

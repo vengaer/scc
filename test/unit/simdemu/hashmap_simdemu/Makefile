@@ -1,6 +1,7 @@
 ifdef __node
 
 $(call decl-unit)
+$(call decl-mutate)
 
 $(__node_builddir)/%.$(oext): $(srcdir)/simdemu/%.$(cext) | $(__node_builddir)
 	$(call echo-cc,$(notdir $@))
