@@ -33,6 +33,7 @@ scc_static_assert(CHAR_BIT >= 8, "Non-conformant implementation");
 //?     :param i: The index of the byte to read
 //?     :returns: The ith byte of the given vector
 inline unsigned char scc_swvec_read_byte(scc_vectype vec, unsigned i) {
+    assert(i < sizeof(vec));
     return (vec >> i * CHAR_BIT) & UCHAR_MAX;
 }
 
