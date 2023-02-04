@@ -16,18 +16,19 @@ LDLIBS          += -lunity -lm
 
 define __unit-obj
 $(strip
-    $(patsubst $(srcdir)/%.$(cext),$(testsccbuilddir)/%.$(oext),
-        $(wildcard $(patsubst %,$(srcdir)/%*.$(cext),$(__node) $($(__node)_deps))))
-    $(patsubst $(inspectdir)/%.$(cext),$(inspectbuilddir)/%.$(oext),
-        $(wildcard $(inspectdir)/$(__node)*.$(cext)))
-    $(if $(__simd_enable),
-        $(patsubst $(asdir)/%.$(asext),$(asbuilddir)/%.$(oext),
-            $(wildcard $(patsubst %,$(asdir)/%*.$(asext),$(__node) $($(__node)_deps)))),
-      $(patsubst $(simdemudir)/%.$(cext),$(simdemubuilddir)/%.$(oext),
-          $(wildcard $(patsubst %,$(simdemudir)/%*.$(cext),$(__node) $($(__node)_deps) swvec))))
-    $(if $($(__node)_deps),
+    $(let node,$(firstword $(subst _, ,$(__node))),
+        $(patsubst $(srcdir)/%.$(cext),$(testsccbuilddir)/%.$(oext),
+            $(wildcard $(patsubst %,$(srcdir)/%*.$(cext),$(node) $($(node)_deps))))
         $(patsubst $(inspectdir)/%.$(cext),$(inspectbuilddir)/%.$(oext),
-            $(wildcard $(addprefix $(inspectdir)/*,$(addsuffix *.$(cext),$($(__node)_deps)))))))
+            $(wildcard $(inspectdir)/$(node)*.$(cext)))
+        $(if $(__simd_enable),
+            $(patsubst $(asdir)/%.$(asext),$(asbuilddir)/%.$(oext),
+                $(wildcard $(patsubst %,$(asdir)/%*.$(asext),$(node) $($(node)_deps)))),
+          $(patsubst $(simdemudir)/%.$(cext),$(simdemubuilddir)/%.$(oext),
+              $(wildcard $(patsubst %,$(simdemudir)/%*.$(cext),$(node) $($(node)_deps) swvec))))
+        $(if $($(node)_deps),
+            $(patsubst $(inspectdir)/%.$(cext),$(inspectbuilddir)/%.$(oext),
+                $(wildcard $(addprefix $(inspectdir)/*,$(addsuffix *.$(cext),$($(node)_deps))))))))
 endef
 
 __mutate-obj = $(addprefix $(__mut_builddir)/,$(notdir $(call __unit-obj)))
@@ -175,10 +176,10 @@ $(call include-node,ringdeque)
 $(call include-node,stack)
 $(call include-node,svec)
 $(call include-node,vec)
+$(call include-node,simdemu)
 
 $(call include-node-if,$(__simd_enable),avx2)
 
-$(call include-node-if-not,$(__simd_enable),simdemu)
 
 $(call pop,LDLIBS)
 $(call pop,LDFLAGS)
