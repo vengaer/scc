@@ -8,7 +8,7 @@ hashtab_deps         := canary
 rbmap_deps           := arena rbtree
 rbtree_deps          := arena
 stack_deps           := svec
-hashmap_simdemu_deps := canary hashmap
-hashtab_simdemu_deps := canary hashtab
+hashmap_simdemu_deps := canary hashmap swvec
+hashtab_simdemu_deps := canary hashtab swvec
 
 endif # __Deps_mk

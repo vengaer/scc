@@ -201,6 +201,8 @@ static struct scc_hashtab_base *scc_hashtab_realloc(
 
     scc_static_assert(sizeof(scc_hashtab_metatype) == 1u);
     size_t size = mdoff + cap + SCC_HASHTAB_GUARDSZ;
+    /* Kill mutant */
+    assert(size > mdoff + cap);
 #ifdef SCC_CANARY_ENABLED
     size += SCC_HASHTAB_CANARYSZ;
 #endif

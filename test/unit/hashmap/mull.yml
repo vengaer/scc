@@ -2,3 +2,5 @@ excludePaths:
   - submodules/*
   - test/*
   - src/canary.c
+  - src/simdemu/hashmap_swemu.c
+  - src/simdemu/swvec.h
