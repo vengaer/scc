@@ -159,3 +159,27 @@ void test_scc_ringdeque_power_of_2_rounding(void) {
 
     scc_ringdeque_free(deque);
 }
+
+void test_scc_ringdeque_clone(void) {
+    scc_ringdeque(unsigned) deque = scc_ringdeque_new(unsigned);
+
+    for(unsigned i = 0u; i < 320; ++i) {
+        TEST_ASSERT_TRUE(scc_ringdeque_push_back(&deque, i));
+    }
+
+    scc_ringdeque(unsigned) copy = scc_ringdeque_clone(deque);
+    TEST_ASSERT_TRUE(copy);
+
+    TEST_ASSERT_EQUAL_UINT64(320ull, scc_ringdeque_size(deque));
+
+    while(scc_ringdeque_size(deque)) {
+        TEST_ASSERT_EQUAL_UINT64(scc_ringdeque_size(deque), scc_ringdeque_size(copy));
+        TEST_ASSERT_EQUAL_UINT32(scc_ringdeque_front(deque), scc_ringdeque_front(copy));
+        TEST_ASSERT_EQUAL_UINT32(scc_ringdeque_back(deque), scc_ringdeque_back(copy));
+        scc_ringdeque_pop_front(deque);
+        scc_ringdeque_pop_front(copy);
+    }
+
+    scc_ringdeque_free(deque);
+    scc_ringdeque_free(copy);
+}
