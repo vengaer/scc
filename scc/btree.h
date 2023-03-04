@@ -600,6 +600,7 @@ _Bool scc_btree_impl_remove(void *btree, size_t elemsize);
 //?               given :code:`btree` parameter, or ``NULL`` on failure
 void *scc_btree_impl_clone(void const *btree, size_t elemsize);
 
+//! .. _scc_btree_clone:
 //! .. c:function:: void *scc_btree_clone(void const *btree)
 //!
 //!     Clone the given ``btree``, yielding a new copy with the same size and elements.
