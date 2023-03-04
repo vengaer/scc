@@ -126,6 +126,10 @@
 //?
 //?         See :ref:`rb_sentinel <struct_scc_rbsentinel_rb_sentinel>`.
 //?
+//?     .. c:var:: unsigned char rm_dynalloc
+//?
+//?         See :ref:`rb_dynalloc <unsigned_char_rb_dynalloc>`.
+//?
 //?     .. _unsigned_char_rm_fwoff:
 //?     .. c:var:: unsigned char rm_fwoff
 //?
@@ -389,6 +393,47 @@ void *scc_rbmap_impl_predecessor(void *iter);
 inline void const *scc_rbmap_impl_iterstop(void const *map) {
     return scc_rbtree_impl_iterstop(map);
 }
+
+//! .. _scc_rbmap_clone:
+//! .. c:function:: void *scc_rbmap_clone(void const *rbmap)
+//!
+//!     Clone the given ``rbmap``, yielding a new copy with the same size and elements.
+//!     The new copy is allocated on the heap
+//!
+//!     :param rbmap: The ``rbmap`` instance to clone
+//!     :returns: A new ``rbmap`` instance containing the same key-value pairs as the
+//!               supplied parameter, or ``NULL`` on failure
+//!
+//!     .. code-block:: C
+//!         :caption: Clone an ``rbmap``
+//!
+//!         extern int compare(void const *l, void const *r);
+//!
+//!         scc_rbmap(int, int) rbmap = scc_rbmap_new(int, int, compare);
+//!
+//!         for(int i = 0; i < 12; ++i) {
+//!             assert(scc_rbmap_insert(&rbmap, i, 2 * i));
+//!         }
+//!
+//!         /* Create an exact copy of the rbmap */
+//!         scc_rbmap(int, int) copy = scc_rbmap_clone(rbmap);
+//!
+//!         assert(scc_rbmap_size(rbmap) == scc_rbmap_size(copy));
+//!
+//!         /* Copy contains the same key-value pairs */
+//!         int *old, *new;
+//!         for(int i = 0; i < (int)scc_rbmap_size(rbmap); ++i) {
+//!             old = scc_rbmap_find(rbmap, i);
+//!             new = scc_rbmap_find(copy, i);
+//!             assert(old && new);
+//!             assert(*old == *new);
+//!         }
+//!
+//!         scc_rbmap_free(rbmap);
+//!         /* Free the copy */
+//!         scc_rbmap_free(copy);
+#define scc_rbmap_clone(rbmap)                                                              \
+    scc_rbtree_impl_clone(rbmap, sizeof(*(rbmap)))
 
 //! .. _scc_rbmap_foreach:
 //! .. c:macro:: scc_rbmap_foreach(iter, map)
