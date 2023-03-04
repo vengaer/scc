@@ -3,6 +3,7 @@
 
 #include <scc/bug.h>
 
+#include <assert.h>
 #include <limits.h>
 #include <string.h>
 
@@ -51,6 +52,7 @@ inline scc_vectype scc_swvec_bcast(unsigned char byte) {
     /* Cannot assume sizeof(scc_vectype) */
     scc_vectype mask = 0u;
     for(unsigned i = 0u; i < sizeof(mask); ++i) {
+        scc_when_mutating(assert(i < sizeof(mask)));
         mask = (mask << CHAR_BIT) | 0x01u;
     }
 

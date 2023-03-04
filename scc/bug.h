@@ -53,4 +53,13 @@
 #define scc_static_assert_cond_only_0(cond, msg)    \
     scc_static_assert_cond_only_1(cond)
 
+#ifdef SCC_MUTATION_TEST
+#define scc_when_mutating(...)                      \
+    do {                                            \
+        __VA_ARGS__;                                \
+    } while(0)
+#else
+#define scc_when_mutating(...) (void)0
+#endif
+
 #endif /* SCC_BUG_H */
