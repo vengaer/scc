@@ -151,3 +151,41 @@ void test_scc_rbtree_properties_insertion_removal(void) {
     }
     scc_rbtree_free(handle);
 }
+
+void test_scc_rbtree_clone(void) {
+    scc_rbtree(int) orig = scc_rbtree_new(int, compare);
+
+    for(int i = 0; i < 312; ++i) {
+        TEST_ASSERT_TRUE(scc_rbtree_insert(&orig, i));
+    }
+
+    scc_rbtree(int) new = scc_rbtree_clone(orig);
+    TEST_ASSERT_TRUE(!!new);
+
+    TEST_ASSERT_EQUAL_UINT64(scc_rbtree_size(orig), scc_rbtree_size(new));
+    unsigned long long status = scc_rbtree_inspect_properties(new);
+    TEST_ASSERT_EQUAL_UINT64(0ull, status & SCC_RBTREE_ERR_MASK);
+
+    int const *iter;
+    int const *p;
+    scc_rbtree_foreach(iter, orig) {
+        p = scc_rbtree_find(new, *iter);
+        TEST_ASSERT_TRUE(!!p);
+        TEST_ASSERT_EQUAL_INT32(*iter, *p);
+    }
+
+    scc_rbtree_foreach(iter, new) {
+        p = scc_rbtree_find(orig, *iter);
+        TEST_ASSERT_TRUE(!!p);
+        TEST_ASSERT_EQUAL_INT32(*iter, *p);
+    }
+
+    scc_rbtree_foreach_reversed(iter, new) {
+        p = scc_rbtree_find(orig, *iter);
+        TEST_ASSERT_TRUE(!!p);
+        TEST_ASSERT_EQUAL_INT32(*iter, *p);
+    }
+
+    scc_rbtree_free(orig);
+    scc_rbtree_free(new);
+}
