@@ -67,7 +67,7 @@ int LLVMFuzzerTestOneInput(uint8_t const *data, size_t size) {
 
     uint16_t *vit;
     dbg_pr("Values:\n");
-    dbg_pr_n(vit, vals, size, "%#04" PRIx32 " ", *vit);
+    dbg_pr_n(vit, vals, size, "%#04" PRIx16 " ", *vit);
     dbg_pr("\n");
 
     for(unsigned i = 0u; i < end; ++i) {
