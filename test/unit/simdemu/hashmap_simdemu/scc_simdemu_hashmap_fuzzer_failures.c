@@ -8,12 +8,12 @@
 
 #include <unity.h>
 
-static bool eq(void const *left, void const *right) {
+static bool ueq(void const *left, void const *right) {
     return *(uint32_t const *)left == *(uint32_t const *)right;
 }
 
 static void run_fuzzer_test(uint32_t const *restrict keys, uint16_t const *restrict vals, size_t n) {
-    scc_hashmap(uint32_t, uint16_t) map = scc_hashmap_new(uint32_t, uint16_t, eq);
+    scc_hashmap(uint32_t, uint16_t) map = scc_hashmap_new(uint32_t, uint16_t, ueq);
     uint16_t *elem;
     for(unsigned i = 0u; i < n; ++i) {
         TEST_ASSERT_TRUE(scc_hashmap_insert(&map, keys[i], vals[i]));
@@ -60,6 +60,33 @@ void test_scc_simdemu_hashmap_fuzzer_failure0(void) {
         0xffff, 0xe05f, 0x0200, 0xc40d,
         0xffff, 0x19ff, 0x0000, 0x0000,
         0x0100, 0x8008, 0x0000
+    };
+
+    scc_static_assert(scc_arrsize(keys) == scc_arrsize(vals));
+    run_fuzzer_test(keys, vals, scc_arrsize(keys));
+}
+
+void test_scc_simdemu_hashmap_fuzzer_mutkill0(void) {
+    uint32_t keys[] = {
+        0x00ff7c87, 0xff250000, 0xc7c7f006, 0x45b1c7c7,
+        0x03402d45, 0x007a0000, 0x00000000, 0x6b00002f,
+        0x2f2f2f2f, 0x00002f2f, 0xadadad00, 0xadadadad,
+        0xadadad2e, 0x0000adad, 0x7cadadad, 0x000000ff,
+        0xf006ff25, 0xc7c7c7c7, 0x2d4545b1, 0x00000340,
+        0x0000007a, 0x002f0000, 0x2f2f6b00, 0xad000000,
+        0xad2eadad, 0xadad0000, 0x2eadadad, 0x2dadadad,
+        0xad27adad, 0x000000ad
+    };
+
+    uint16_t vals[] = {
+        0x7c87, 0x00ff, 0x0000, 0xff25,
+        0xf006, 0xc7c7, 0xc7c7, 0x45b1,
+        0x2d45, 0x0340, 0x0000, 0x007a,
+        0x0000, 0x0000, 0x002f, 0x6b00,
+        0x2f2f, 0x2f2f, 0x2f2f, 0x0000,
+        0xad00, 0xadad, 0xadad, 0xadad,
+        0xad2e, 0xadad, 0xadad, 0x0000,
+        0xadad, 0x7cad
     };
 
     scc_static_assert(scc_arrsize(keys) == scc_arrsize(vals));
