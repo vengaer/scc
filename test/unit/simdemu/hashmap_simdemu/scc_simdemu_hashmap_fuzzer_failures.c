@@ -162,3 +162,16 @@ void test_scc_simdemu_hashmap_fuzzer_mutkill3(void) {
     scc_static_assert(scc_arrsize(keys) == scc_arrsize(vals));
     run_fuzzer_test(keys, vals, scc_arrsize(keys) - 1u, scc_arrsize(keys));
 }
+
+void test_scc_simdemu_hashmap_fuzzer_mutkill4(void) {
+    uint32_t keys[] = {
+        0x8202d100, 0x8202d100
+    };
+
+    uint16_t vals[] = {
+        0xd100, 0x8202
+    };
+
+    scc_static_assert(scc_arrsize(keys) == scc_arrsize(vals));
+    run_fuzzer_test(keys, vals, scc_arrsize(keys) - 1u, scc_arrsize(keys));
+}
