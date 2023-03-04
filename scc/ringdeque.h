@@ -323,9 +323,9 @@ inline size_t scc_ringdeque_impl_push_back_index(void *deque) {
 //!     :returns: A :code:`_Bool` indicating whether the push was successful
 //!     :retval true: The push succeeded
 //!     :retval false: Memory allocation failure
-#define scc_ringdeque_push_back(dequeaddr, value)                               \
+#define scc_ringdeque_push_back(dequeaddr, ...)                                 \
     (scc_ringdeque_impl_prepare_push(dequeaddr, sizeof(**(dequeaddr))) &&       \
-    ((*(dequeaddr))[scc_ringdeque_impl_push_back_index(*(dequeaddr))] = value),1)
+    (((*(dequeaddr))[scc_ringdeque_impl_push_back_index(*(dequeaddr))] = __VA_ARGS__),1))
 
 //? .. c:function:: size_t scc_ringdeque_impl_push_front_index(void *deque)
 //?
