@@ -251,6 +251,11 @@ struct scc_rbsentinel {
 //?         Sentinel node. rb_sentinel.rs_left holds the
 //?         address refers to the tree root
 //?
+//?     .. _unsigned_char_rb_dynalloc
+//?     .. c:var:: unsigned char rb_dynalloc
+//?
+//?         1 if the base is dynamically allocated, otherwise 0
+//?
 //?     .. _unsigned_char_rb_fwoff:
 //?     .. c:var:: unsigned char rb_fwoff
 //?
@@ -267,6 +272,7 @@ struct scc_rbtree_base {
     scc_rbcompare rb_compare;
     struct scc_arena rb_arena;
     struct scc_rbsentinel rb_sentinel;
+    unsigned char rb_dynalloc;
     unsigned char rb_fwoff;
     unsigned char rb_data[];
 };
@@ -351,6 +357,10 @@ struct scc_rbtree_base {
 //?
 //?         See :ref:`rb_sentinel <struct_scc_rbsentinel_rb_sentinel>`.
 //?
+//?     .. c:var:: unsigned char rb_dynalloc
+//?
+//?         See :ref:`rb_dynalloc <unsigned_char_rb_dynalloc>`.
+//?
 //?     .. c:var:: unsigned char rb_fwoff
 //?
 //?         See :ref:`rb_fwoff <unsigned_char_rb_fwoff>`.
@@ -374,6 +384,7 @@ struct scc_rbtree_base {
         scc_rbcompare rb_compare;                                                           \
         struct scc_arena rb_arena;                                                          \
         struct scc_rbsentinel rb_sentinel;                                                  \
+        unsigned char rb_dynalloc;                                                          \
         unsigned char rb_fwoff;                                                             \
         unsigned char rb_bkoff;                                                             \
         type rb_curr;                                                                       \
@@ -780,6 +791,61 @@ inline void const *scc_rbtree_impl_iterstop(void const *rbtree) {
     struct scc_rbtree_base const *base = scc_rbtree_impl_base_qual(rbtree, const);
     return (unsigned char const *)&base->rb_sentinel + base->rb_dataoff;
 }
+
+//? .. c:function:: void *scc_rbtree_impl_clone(void const *rbtree, size_t elemsize)
+//?
+//?     Internal clone function. See :ref:`scc_rbtree_clone <scc_rbtree_clone>`
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param rbtree: The ``rbtree`` to clone
+//?     :param elemsize: Size of the elements in the tree
+//?     :returns: A ``rbtree`` instance containing the same values as the
+//?               given :code:`rbtree` parameter, or ``NULL`` on failure
+void *scc_rbtree_impl_clone(void const *rbtree, size_t elemsize);
+
+//! .. _scc_rbtree_clone:
+//! .. c:function:: void *scc_rbtree_clone(void const *rbtree)
+//!
+//!     Clone the given ``rbtree``, yielding a new copy with the same size and elements.
+//!     The new copy is allocated on the heap
+//!
+//!     :param rbtree: The ``rbtree`` instance to clone
+//!     :returns: A new ``rbtree`` instance containing the same key-value pairs as the
+//!               supplied parameter, or ``NULL`` on failure
+//!
+//!     .. code-block:: C
+//!         :caption: Clone an ``rbtree``
+//!
+//!         extern int compare(void const *l, void const *r);
+//!
+//!         scc_rbtree(int) rbtree = scc_rbtree_new(int, compare);
+//!
+//!         for(int i = 0; i < 12; ++i) {
+//!             assert(scc_rbtree_insert(&rbtree, i));
+//!         }
+//!
+//!         /* Create an exact copy of the rbtree */
+//!         scc_rbtree(int, int) copy = scc_rbtree_clone(rbtree);
+//!
+//!         assert(scc_rbtree_size(rbtree) == scc_rbtree_size(copy));
+//!
+//!         /* Copy contains the same key-value pairs */
+//!         int const *old, *new;
+//!         for(int i = 0; i < (int)scc_rbtree_size(rbtree); ++i) {
+//!             old = scc_rbtree_find(rbtree, i);
+//!             new = scc_rbtree_find(copy, i);
+//!             assert(old && new);
+//!             assert(*old == *new);
+//!         }
+//!
+//!         scc_rbtree_free(rbtree);
+//!         /* Free the copy */
+//!         scc_rbtree_free(copy);
+#define scc_rbtree_clone(rbtree)                                                            \
+    scc_rbtree_impl_clone(rbtree, sizeof(*(rbtree)))
 
 //! .. _scc_rbtree_foreach:
 //! .. c:macro:: scc_rbtree_foreach(iter, rbtree)

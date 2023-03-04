@@ -1,9 +1,11 @@
 #include <scc/mem.h>
 #include <scc/rbtree.h>
+#include <scc/ringdeque.h>
 
 #include <assert.h>
 #include <limits.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define rb_root rb_sentinel.rs_left
@@ -587,6 +589,35 @@ static void *scc_rbtree_insert_nonempty(struct scc_rbtree_base *restrict base, v
     return handle;
 }
 
+//? .. c:function:: struct scc_rbtree_base *scc_rbtree_clone_base(\
+//?     struct scc_rbtree_base const *obase, size_t elemsize, size_t basesz)
+//?
+//?     Allocate a new ``rbtree`` base structure based on the given ``obase`` and
+//?     return it.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param obase: Base of the original ``rbtree``
+//?     :param elemsize: Size of the elements in the tree
+//?     :param basesz: Offset of the :ref:`rb_curr <type_rb_curr>` field in the
+//?                    base structure
+//?     :returns: Address of a newly allocate ``struct scc_rbnode_base``, or ``NULL``
+//?               on failure
+static inline struct scc_rbtree_base *scc_rbtree_clone_base(struct scc_rbtree_base const *obase, size_t elemsize, size_t basesz) {
+    size_t bytesz = basesz + elemsize;
+
+    struct scc_rbtree_base *nbase = malloc(bytesz);
+    if(!nbase) {
+        return 0;
+    }
+    scc_memcpy(nbase, obase, basesz);
+    nbase->rb_arena = scc_arena_clone(&obase->rb_arena);
+    nbase->rb_dynalloc = 1;
+    return nbase;
+}
+
 void *scc_rbtree_impl_new(void *base, size_t coff) {
 #define base ((struct scc_rbtree_base *)base)
     base->rb_size = 0u;
@@ -608,6 +639,9 @@ void *scc_rbtree_impl_new(void *base, size_t coff) {
 void scc_rbtree_free(void *rbtree) {
     struct scc_rbtree_base *base = scc_rbtree_impl_base(rbtree);
     scc_arena_release(&base->rb_arena);
+    if(base->rb_dynalloc) {
+        free(base);
+    }
 }
 
 void *scc_rbtree_impl_generic_insert(void *rbtreeaddr, size_t elemsize) {
@@ -726,4 +760,94 @@ void const *scc_rbtree_impl_predecessor(void const *iter) {
     }
 
     return (unsigned char const *)node + offset;
+}
+
+void *scc_rbtree_impl_clone(void const *rbtree, size_t elemsize) {
+    struct scc_rbtree_base const *obase = scc_rbtree_impl_base_qual(rbtree, const);
+    size_t basesz = (unsigned char const *)rbtree - (unsigned char const *)obase;
+    struct scc_rbtree_base *nbase = scc_rbtree_clone_base(obase, elemsize, basesz);
+    if(!nbase) {
+        return 0;
+    }
+    if(!obase->rb_size) {
+        return (unsigned char *)nbase + basesz;
+    }
+
+    /* Know how many nodes are needed */
+    if(!scc_arena_reserve(&nbase->rb_arena, obase->rb_size)) {
+        free(nbase);
+        return 0;
+    }
+
+    void *ntree = 0;
+
+    size_t nodesz = nbase->rb_dataoff + elemsize;
+    nbase->rb_root = scc_arena_alloc(&nbase->rb_arena);
+    scc_memcpy(nbase->rb_root, obase->rb_root, nodesz);
+    /* Links updated recursively */
+    nbase->rb_root->rn_left = (void *)&nbase->rb_sentinel;
+    nbase->rb_root->rn_right = (void *)&nbase->rb_sentinel;
+
+    struct stage {
+        struct scc_rbnode_base *old;
+        struct scc_rbnode_base **new;
+        struct scc_rbnode_base *parent;
+        enum scc_rbdir dir;
+    };
+
+    scc_ringdeque(struct stage) deque = scc_ringdeque_new(struct stage);
+    if(!scc_ringdeque_reserve(&deque, nbase->rb_size)) {
+        goto epilogue;
+    }
+
+#define push_stage(o, p, d)                             \
+    scc_ringdeque_push_back(&deque, (struct stage) {    \
+        .old = scc_rbnode_link(o, d),                   \
+        .new = &scc_rbnode_link(p, d),                  \
+        .parent = p,                                    \
+        .dir = d                                        \
+    })
+
+    for(int i = 0; i <= scc_rbdir_right; ++i) {
+        if(scc_rbnode_thread(obase->rb_root, i)) {
+            continue;
+        }
+        if(!push_stage(obase->rb_root, nbase->rb_root, i)) {
+            goto epilogue;
+        }
+    }
+
+    struct scc_rbnode_base *n;
+    while(!scc_ringdeque_empty(deque)) {
+        struct stage *s = &scc_ringdeque_front(deque);
+
+        n = scc_arena_alloc(&nbase->rb_arena);
+        assert(n);
+        assert(s->old);
+        scc_memcpy(n, s->old, nodesz);
+        scc_rbnode_link(n, s->dir) = *s->new;
+        scc_rbnode_link(n, !s->dir) = s->parent;
+        *s->new = n;
+
+        if(!scc_rbnode_thread(s->old, scc_rbdir_left)) {
+            if(!push_stage(s->old, *s->new, scc_rbdir_left)) {
+                goto epilogue;
+            }
+        }
+        if(!scc_rbnode_thread(s->old, scc_rbdir_right)) {
+            if(!push_stage(s->old, *s->new, scc_rbdir_right)) {
+                goto epilogue;
+            }
+        }
+        scc_ringdeque_pop_front(deque);
+    }
+
+    ntree = (unsigned char *)nbase + basesz;
+
+epilogue:
+    scc_ringdeque_free(deque);
+    if(!ntree) {
+        free(nbase);
+    }
+    return ntree;
 }

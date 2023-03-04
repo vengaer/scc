@@ -3,3 +3,5 @@ excludePaths:
   - test/*
   - src/svec.c
   - src/arena.c
+  - src/ringdeque.c
+  - scc/ringdeque.h

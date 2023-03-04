@@ -5,3 +5,5 @@ excludePaths:
   - src/arena.c
   - src/rbtree.c
   - src/svec.c
+  - src/ringdeque.c
+  - scc/ringdeque.h
