@@ -828,7 +828,7 @@ void *scc_rbtree_impl_clone(void const *rbtree, size_t elemsize);
 //!         }
 //!
 //!         /* Create an exact copy of the rbtree */
-//!         scc_rbtree(int, int) copy = scc_rbtree_clone(rbtree);
+//!         scc_rbtree(int) copy = scc_rbtree_clone(rbtree);
 //!
 //!         assert(scc_rbtree_size(rbtree) == scc_rbtree_size(copy));
 //!
