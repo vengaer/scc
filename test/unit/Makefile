@@ -16,19 +16,19 @@ LDLIBS          += -lunity -lm
 
 define __unit-obj
 $(strip
-    $(let node,$(firstword $(subst _, ,$(__node))),
-        $(patsubst $(srcdir)/%.$(cext),$(testsccbuilddir)/%.$(oext),
-            $(wildcard $(patsubst %,$(srcdir)/%*.$(cext),$(node) $($(__node)_deps))))
+    $(eval __snode := $(firstword $(subst _, ,$(__node))))
+    $(patsubst $(srcdir)/%.$(cext),$(testsccbuilddir)/%.$(oext),
+        $(wildcard $(patsubst %,$(srcdir)/%*.$(cext),$(__snode) $($(__node)_deps))))
+    $(patsubst $(inspectdir)/%.$(cext),$(inspectbuilddir)/%.$(oext),
+        $(wildcard $(inspectdir)/$(__snode)*.$(cext)))
+    $(if $(__simd_enable),
+        $(patsubst $(asdir)/%.$(asext),$(asbuilddir)/%.$(oext),
+            $(wildcard $(patsubst %,$(asdir)/%*.$(asext),$(__snode) $($(__node)_deps)))),
+      $(patsubst $(simdemudir)/%.$(cext),$(simdemubuilddir)/%.$(oext),
+          $(wildcard $(patsubst %,$(simdemudir)/%*.$(cext),$(__snode) $($(__node)_deps)))))
+    $(if $($(__snode)_deps),
         $(patsubst $(inspectdir)/%.$(cext),$(inspectbuilddir)/%.$(oext),
-            $(wildcard $(inspectdir)/$(node)*.$(cext)))
-        $(if $(__simd_enable),
-            $(patsubst $(asdir)/%.$(asext),$(asbuilddir)/%.$(oext),
-                $(wildcard $(patsubst %,$(asdir)/%*.$(asext),$(node) $($(__node)_deps)))),
-          $(patsubst $(simdemudir)/%.$(cext),$(simdemubuilddir)/%.$(oext),
-              $(wildcard $(patsubst %,$(simdemudir)/%*.$(cext),$(node) $($(__node)_deps)))))
-        $(if $($(node)_deps),
-            $(patsubst $(inspectdir)/%.$(cext),$(inspectbuilddir)/%.$(oext),
-                $(wildcard $(addprefix $(inspectdir)/*,$(addsuffix *.$(cext),$($(__node)_deps))))))))
+            $(wildcard $(addprefix $(inspectdir)/*,$(addsuffix *.$(cext),$($(__node)_deps)))))))
 endef
 
 __mutate-obj = $(addprefix $(__mut_builddir)/,$(notdir $(call __unit-obj)))
