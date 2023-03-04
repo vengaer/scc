@@ -516,4 +516,48 @@ _Bool scc_ringdeque_impl_reserve(void *dequeaddr, size_t capacity, size_t elemsi
 #define scc_ringdeque_reserve(dequeaddr, capacity)                              \
     scc_ringdeque_impl_reserve(dequeaddr, capacity, sizeof(**(dequeaddr)))
 
+//? .. c:function:: void *scc_ringdeque_impl_clone(void const *deque, size_t elemsize)
+//?
+//?     Internal clone function
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param deque: ``ringdeque`` handle
+//?     :param elemsize: Size of the elements in the deque
+//?     :return: Heap address of a newly allocated ``ringdeque``
+void *scc_ringdeque_impl_clone(void const *deque, size_t elemsize);
+
+//! .. c:function:: void *scc_ringdeque_clone(void const *deque)
+//!
+//!     Clone the given ``ringdeque``, yielding a new instance with the same size and elements.
+//!     The new deque is allocated on the heap
+//!
+//!     :param deque: The ``ringdeque`` instance to clone
+//!     :returns: A new ``ringdeque`` instance containing the same values as the
+//!               supplied parameter, or ``NULL`` on failure
+//!
+//!     .. code-block:: C
+//!         :caption: Clone a ``ringdeque``
+//!
+//!         scc_ringdeque(int) deque = scc_ringdeque_new(int);
+//!
+//!         for(int i = 0; i < 32; ++i) {
+//!             assert(scc_ringdeque_push_back(&deque, i));
+//!         }
+//!
+//!         /* Create an exact copy of the rbtree */
+//!         scc_ringdeque(int) copy = scc_ringdeque_clone(deque);
+//!
+//!         assert(scc_ringdeque_size(deque) == scc_ringdeque_size(copy));
+//!
+//!         /* Use instances... */
+//!
+//!         scc_ringdeque_free(deque);
+//!         /* Free the copy */
+//!         scc_ringdeque_free(copy);
+#define scc_ringdeque_clone(deque)                                              \
+    scc_ringdeque_impl_clone(deque, sizeof(*(deque)))
+
 #endif /* SCC_RINGDEQUE_H */

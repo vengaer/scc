@@ -16,7 +16,7 @@ size_t scc_ringdeque_impl_pop_front_index(void *deque);
 size_t scc_ringdeque_impl_back_index(void const *deque);
 void scc_ringdeque_clear(void *deque);
 
-//? .. c:function:: bool scc_ringdeque_is_allocd(void const *deque)
+//? .. c:function:: bool scc_ringdeque_get_dynalloc(void const *deque)
 //?
 //?     Read the :ref:`rd_dynalloc <unsigned_char_rd_dynalloc>` field
 //?
@@ -26,8 +26,21 @@ void scc_ringdeque_clear(void *deque);
 //?
 //?     :param deque: Handle to the ringdeque in question
 //?     :returns: Value of the :code:`rd_dynalloc` field
-static inline bool scc_ringdeque_is_allocd(void const *deque) {
+static inline bool scc_ringdeque_get_dynalloc(void const *deque) {
     return ((unsigned char const *)deque)[-1];
+}
+
+//? .. c:function:: void scc_ringdeque_set_dynalloc(void *deque)
+//?
+//?     Set the :ref:`rd_dynalloc <unsigned_char_rd_dynalloc>` field to 1
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param deque: Handle to the ringdeque
+static inline void scc_ringdeque_set_dynalloc(void *deque) {
+    ((unsigned char *)deque)[-1] = 1;
 }
 
 //? .. c:function:: size_t scc_ringdeque_bytesize(size_t capacity, size_t elemsize, size_t npad)
@@ -72,7 +85,7 @@ static struct scc_ringdeque_base *scc_ringdeque_alloc(size_t capacity, size_t si
     base->rd_size = size;
     base->rd_capacity = capacity;
     base->rd_buffer[npad - 2u] = npad - 2 * sizeof(unsigned char);
-    base->rd_buffer[npad - 1u] = 1;
+    scc_ringdeque_set_dynalloc(&base->rd_buffer[npad]);
     return base;
 }
 
@@ -111,7 +124,7 @@ static bool scc_ringdeque_grow(void **dequeaddr, size_t newcap, size_t elemsize)
     base->rd_begin = 0;
     base->rd_end = base->rd_size;
 
-    if(scc_ringdeque_is_allocd(*dequeaddr)) {
+    if(scc_ringdeque_get_dynalloc(*dequeaddr)) {
         free(prev);
     }
 
@@ -128,7 +141,7 @@ void *scc_ringdeque_impl_new(void *deque, size_t offset, size_t capacity) {
 }
 
 void scc_ringdeque_free(void *deque) {
-    if(scc_ringdeque_is_allocd(deque)) {
+    if(scc_ringdeque_get_dynalloc(deque)) {
         free(scc_ringdeque_impl_base(deque));
     }
 }
@@ -155,4 +168,20 @@ bool scc_ringdeque_impl_reserve(void *dequeaddr, size_t capacity, size_t elemsiz
 
     assert(scc_bits_is_power_of_2(capacity));
     return scc_ringdeque_grow(dequeaddr, capacity, elemsize);
+}
+
+void *scc_ringdeque_impl_clone(void const *deque, size_t elemsize) {
+    struct scc_ringdeque_base const *obase = scc_ringdeque_impl_base_qual(deque, const);
+    size_t const basesz = (unsigned char const *)deque - (unsigned char const *)obase;
+    size_t const bytesz = obase->rd_capacity * elemsize + basesz;
+    struct scc_ringdeque_base *nbase = malloc(bytesz);
+    if(!nbase) {
+        return 0;
+    }
+
+    scc_memcpy(nbase, obase, bytesz);
+
+    unsigned char *ndeque = (unsigned char *)nbase + basesz;
+    scc_ringdeque_set_dynalloc(ndeque);
+    return ndeque;
 }
