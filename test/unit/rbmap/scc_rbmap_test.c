@@ -129,3 +129,39 @@ void test_scc_rbmap_update_existing(void) {
 
     scc_rbmap_free(rbmap);
 }
+
+void test_scc_rbmap_clone(void) {
+    scc_rbmap(int, int) orig = scc_rbmap_new(int, int, compare);
+
+    for(int i = 222; i; --i) {
+        TEST_ASSERT_TRUE(scc_rbmap_insert(&orig, i, -1));
+    }
+    scc_rbmap(int, int) new = scc_rbmap_clone(orig);
+    TEST_ASSERT_TRUE(!!new);
+
+    scc_inspect_mask mask = scc_rbtree_inspect_properties(new);
+    TEST_ASSERT_EQUAL_UINT64(mask & SCC_RBTREE_ERR_MASK, 0ull);
+
+    scc_rbmap_iter(int, int) iter;
+    int const *p;
+    scc_rbmap_foreach(iter, orig) {
+        p = scc_rbmap_find(new, iter->key);
+        TEST_ASSERT_TRUE(!!p);
+        TEST_ASSERT_EQUAL_INT32(iter->value, *p);
+    }
+
+    scc_rbmap_foreach(iter, new) {
+        p = scc_rbmap_find(orig, iter->key);
+        TEST_ASSERT_TRUE(!!p);
+        TEST_ASSERT_EQUAL_INT32(iter->value, *p);
+    }
+
+    scc_rbmap_foreach_reversed(iter, new) {
+        p = scc_rbmap_find(orig, iter->key);
+        TEST_ASSERT_TRUE(!!p);
+        TEST_ASSERT_EQUAL_INT32(iter->value, *p);
+    }
+
+    scc_rbmap_free(orig);
+    scc_rbmap_free(new);
+}
