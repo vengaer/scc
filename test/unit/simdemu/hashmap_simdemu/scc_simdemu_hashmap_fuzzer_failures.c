@@ -26,11 +26,22 @@ static void run_fuzzer_test(uint32_t const *restrict keys, uint16_t const *restr
         }
     }
 
-    uint16_t *v;
+    uint16_t val;
+    uint16_t *vp;
+    uint16_t *vpp;
+    size_t cap;
     for(unsigned i = n; i < totsize; ++i) {
-        v = scc_hashmap_find(map, keys[i]);
-        TEST_ASSERT_TRUE(scc_hashmap_insert(&map, keys[i], *v));
+        vp = scc_hashmap_find(map, keys[i]);
+        cap = scc_hashmap_capacity(map);
+        TEST_ASSERT_TRUE(!!vp);
+        val = *vp;
+        TEST_ASSERT_TRUE(scc_hashmap_insert(&map, keys[i], vals[i]));
         TEST_ASSERT_EQUAL_UINT64(n, scc_hashmap_size(map));
+        vpp = scc_hashmap_find(map, keys[i]);
+        TEST_ASSERT_TRUE(!!vpp);
+        TEST_ASSERT_EQUAL_UINT16(vals[i], *vpp);
+        TEST_ASSERT_TRUE(cap != scc_hashmap_capacity(map) || vp == vpp);
+        TEST_ASSERT_TRUE(scc_hashmap_insert(&map, keys[i], val));
     }
 
     for(unsigned i = 0u; i < n; ++i) {
@@ -174,4 +185,32 @@ void test_scc_simdemu_hashmap_fuzzer_mutkill4(void) {
 
     scc_static_assert(scc_arrsize(keys) == scc_arrsize(vals));
     run_fuzzer_test(keys, vals, scc_arrsize(keys) - 1u, scc_arrsize(keys));
+}
+
+void test_scc_simdemu_hashmap_fuzzer_mutkill5(void) {
+    uint32_t keys[] = {
+        0xff7c87,   0x49250000, 0x00000000, 0x45000000,
+        0x3402d45,  0x7a0000,   0x6b00002f, 0x2f2f2f2f,
+        0x002f2f,   0xadadad00, 0xadadadad, 0xadadad2e,
+        0x00adad,   0x7cadadad, 0x0000ff,   0xf006ff25,
+        0xc7c7c7c7, 0x2d4545b1, 0x000340,   0x00007a,
+        0x2f0000,   0x2f2f6b00, 0xad000000, 0xad2eadad,
+        0xadad0000, 0x2eadadad, 0x2dadadad, 0xad27adad,
+        0xadad0000, 0xadadadad, 0x2eadadad, 0x2dadadad,
+        0xad27adad
+    };
+    uint16_t vals[] = {
+        0x7c87, 0x00ff, 0x0000, 0x4925,
+        0x0000, 0x0000, 0x0000, 0x4500,
+        0x2d45, 0x340,  0x0000, 0x7a,
+        0x0000, 0x0000, 0x2f,   0x6b00,
+        0x2f2f, 0x2f2f, 0x2f2f, 0x0000,
+        0xad00, 0xadad, 0xadad, 0xadad,
+        0xad2e, 0xadad, 0xadad, 0x0000,
+        0xadad, 0x7cad, 0x00ff, 0x0000,
+        0xff25
+    };
+
+    scc_static_assert(scc_arrsize(keys) == scc_arrsize(vals));
+    run_fuzzer_test(keys, vals, scc_arrsize(keys) - 5u, scc_arrsize(keys));
 }
