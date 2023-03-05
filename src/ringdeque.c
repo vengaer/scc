@@ -174,6 +174,7 @@ void *scc_ringdeque_impl_clone(void const *deque, size_t elemsize) {
     struct scc_ringdeque_base const *obase = scc_ringdeque_impl_base_qual(deque, const);
     size_t const basesz = (unsigned char const *)deque - (unsigned char const *)obase;
     size_t const bytesz = obase->rd_capacity * elemsize + basesz;
+    scc_when_mutating(assert(bytesz > obase->rd_capacity * elemsize));
     struct scc_ringdeque_base *nbase = malloc(bytesz);
     if(!nbase) {
         return 0;
