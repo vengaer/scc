@@ -88,10 +88,17 @@ main:
     exit    $0x01
 
     .section .data
+#ifdef ISA_FORMAT_MAKE
     isa_avx2:           .ascii "simd_isa := AVX2\n"
     isa_avx2_len =      . - isa_avx2
     isa_unsup:          .ascii "simd_isa := UNSUPPORTED\n"
     isa_unsup_len =     . - isa_unsup
+#elif defined ISA_FORMAT_CMAKE
+    isa_avx2:           .ascii "set (simd_isa AVX2)\n"
+    isa_avx2_len =      . - isa_avx2
+    isa_unsup:          .ascii "set (simd_isa UNSUPPORTED)\n"
+    isa_unsup_len =     . - isa_unsup
+#endif
     open_fail:          .ascii "Open syscall failed\n"
     open_fail_len =     . - open_fail
     write_fail:         .ascii "Write syscall failed\n"
