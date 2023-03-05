@@ -24,7 +24,7 @@ PYLINT       := pylint
 root         := $(abspath $(CURDIR))
 builddir     := $(root)/build
 dirs         += $(builddir)
-srcdir       := $(root)/src
+srcdir       := $(root)/lib
 
 scripts      := $(root)/scripts
 mkscripts    := $(scripts)/mk
@@ -72,8 +72,8 @@ alib         := $(builddir)/lib$(scc).$(aext)
 all: $(alib) $(solink)
 
 $(call include-node,arch)
-$(call include-node,scc,inc)
-$(call include-node,src,scc)
+$(call include-node,scc)
+$(call include-node,lib)
 $(call include-node,submodules)
 $(call include-node,test)
 $(call include-node,docs)
