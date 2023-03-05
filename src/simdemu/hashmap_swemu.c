@@ -1,6 +1,6 @@
-#include "hashmap_swemu.h"
 #include "swvec.h"
 
+#include <scc/arch.h>
 #include <scc/bug.h>
 #include <scc/hashmap.h>
 

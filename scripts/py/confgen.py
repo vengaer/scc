@@ -6,7 +6,7 @@ import re
 
 from wrhandle import FileWrHandle, StdoutWrHandle
 
-def load_configs(configs):
+def load_configs(configs, enable_simd):
     ''' Load and parse configrations (.mk format) '''
     data = {}
     pat = re.compile(r'^\s*([^ ]+)\s*:?=\s*([^ ]+)\s*$')
@@ -19,6 +19,9 @@ def load_configs(configs):
                 continue
 
             data[match.group(1)] = match.group(2)
+
+    if not enable_simd:
+        data['simd_isa'] = 'unknown'
 
     return data
 
@@ -68,7 +71,7 @@ def write(data, semver, outfile, enable_simd):
 
 def main(configs, semver, outfile, enable_simd):
     ''' Main '''
-    data = load_configs(configs)
+    data = load_configs(configs, enable_simd)
     write(data, semver, outfile, enable_simd)
 
 if __name__ == '__main__':

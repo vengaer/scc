@@ -1,5 +1,5 @@
+#include <scc/arch.h>
 #include <scc/hashmap.h>
-#include "asm/asm_generic.h"
 
 #include <assert.h>
 #include <limits.h>

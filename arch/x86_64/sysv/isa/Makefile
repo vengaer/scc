@@ -12,7 +12,7 @@ $(__node_builddir)/%.$(oext): $(__node_path)/%.$(asext) | $(__node_builddir)
 	$(call echo-as,$(notdir $@))
 	$(AS) -o $@ $< $(ASFLAGS) $(CPPFLAGS)
 
-$(simdinfo): $(x64_simd_isa)
+$(isainfo): $(x64_simd_isa)
 	$(call echo-gen,$(notdir $@))
 	$< $@
 

@@ -21,6 +21,6 @@ def main(isa, outfile):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generate processor information given SIMD ISA')
-    parser.add_argument('isa', metavar='ISA', type=str, help='SIMD instruction set architecture')
+    parser.add_argument('isa', metavar='ISA', type=str, help='SIMD instruction set architecture', default=None)
     parser.add_argument('-o', '--outfile', type=str, default=None, help='Desired output file')
     main(**vars(parser.parse_args()))

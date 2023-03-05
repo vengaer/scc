@@ -1,8 +1,8 @@
+#include <scc/arch.h>
 #include <scc/bug.h>
 #include <scc/hashtab.h>
 #include <scc/mem.h>
 #include <scc/perf.h>
-#include "asm/asm_generic.h"
 
 #include <assert.h>
 #include <limits.h>

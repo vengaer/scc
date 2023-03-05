@@ -6,7 +6,7 @@ vecscript   := $(pyscripts)/isavec.$(pyext)
 # General platform information
 archinfo    := $(__node_builddir)/archinfo.$(mkext)
 # SIMD ISA information
-simdinfo    := $(__node_builddir)/isa.$(mkext)
+isainfo     := $(__node_builddir)/isa.$(mkext)
 # Vector information
 vecinfo     := $(__node_builddir)/vecinfo.$(mkext)
 
@@ -18,12 +18,12 @@ $(archinfo): $(archscript) | $(__node_builddir)
 
 ifneq ($(call not,$(__skip_arch)),)
   -include $(archinfo)
-  -include $(simdinfo)
+  -include $(isainfo)
   -include $(vecinfo)
 endif
 
 ifneq ($(arch_lower),)
-  ifneq ($(wildcard $(__node_path)/$(arch_lower)),)
+  ifneq ($(and $(__simd_enable),$(wildcard $(__node_path)/$(arch_lower))),)
     $(call include-node,$(arch_lower))
   else
     # TODO any
@@ -31,9 +31,13 @@ ifneq ($(arch_lower),)
 endif
 
 ifneq ($(simd_isa),)
-  $(vecinfo): $(vecscript) $(simdinfo) $(call reeval,simd_isa,$(vecinfo)) | $(__node_builddir)
+  $(vecinfo): $(vecscript) $(isainfo) $(call reeval,simd_isa,$(vecinfo)) | $(__node_builddir)
 	  $(call echo-gen,$(notdir $@))
 	  $(PYTHON) $< -o $@ $(simd_isa)
+else ifneq ($(call not,$(__simd_enable)),)
+  $(vecinfo): $(vecscript) | $(__node_builddir)
+	  $(call echo-gen,$(notdir $@))
+	  $(PYTHON) $< -o $@ unkonwn
 endif
 
 CPPFLAGS += -DSCC_$(bitarch)BIT -DSCC_SIMD_ISA_$(simd_isa) -DSCC_HOST_OS_$(hostos)

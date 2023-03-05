@@ -5,7 +5,7 @@ __config_header  := $(__node_path)/config.h
 __scc_incdir     := $(__node_path)
 __public_headers := $(addsuffix .h,btmap btree hashmap hashtab rbmap rbtree ringdeque stack svec vec)
 
-$(__config_header): $(pyscripts)/confgen.$(pyext) $(archinfo) $(simdinfo) $(vecinfo) $(config_stamp)
+$(__config_header): $(pyscripts)/confgen.$(pyext) $(archinfo) $(if $(__simd_enable),$(isainfo)) $(vecinfo) $(config_stamp)
 	$(call echo-gen,$(notdir $@))
 	$(PYTHON) $< $(sover) $(filter-out $<,$^) -o $@ $(if $(__simd_enable),--enable-simd)
 	touch $@

@@ -1,6 +1,7 @@
 #include <inspect/hashtab_inspect.h>
+
+#include <scc/arch.h>
 #include <scc/hashtab.h>
-#include <simdemu/simd_swemu.h>
 
 #include <stdbool.h>
 

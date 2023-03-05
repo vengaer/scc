@@ -1,6 +1,7 @@
 ifdef __node
 
 $(call include-node,isa)
+$(call include-node,lib)
 
 else
 
