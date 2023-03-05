@@ -47,7 +47,10 @@ $(eval
 
     # Back up node-local objects
     $(call stack-push,__obj_stack,$(__node_obj))
-    $(eval __node_obj :=))
+    $(eval __node_obj :=)
+
+    # Turn on automatic gathering of objects
+    $(eval __node_autogather := _))
 endef
 
 define __exit-node
@@ -56,9 +59,10 @@ $(eval
 
     $(call decl-lint)
 
-    $(eval __all_obj        += $(__node_obj))
-    $(eval __all_obj        += $(filter-out $(__node_obj),$(call wildcard-obj,$(__node_path),$(cext))))
-    $(eval __all_obj        += $(filter-out $(__node_obj),$(call wildcard-obj,$(__node_path),$(asext))))
+    $(if $(__node_autogather),
+        $(eval __all_obj        += $(__node_obj))
+        $(eval __all_obj        += $(filter-out $(__node_obj),$(call wildcard-obj,$(__node_path),$(cext))))
+        $(eval __all_obj        += $(filter-out $(__node_obj),$(call wildcard-obj,$(__node_path),$(asext)))))
 
     $(eval __all_rstsrc     += $(wildcard $(__node_path)/*.$(rstext)))
 
