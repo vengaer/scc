@@ -10,8 +10,6 @@ __node_obj   := $(call wildcard-obj,$(__node_path),$(cext))
 __scc_srcdir := $(__node_path)
 sccbuilddir  := $(__node_builddir)
 
-$(call include-node,simdemu)
-
 $(solink): $(solinkcompat) | $(builddir)
 	$(call echo-ln,$(notdir $@))
 	$(LN) $(LNFLAGS) $< $@

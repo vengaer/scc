@@ -1,5 +1,7 @@
 ifdef __node
 
+__arch_isa_supported := y
+
 asdir      := $(__node_path)
 asbuilddir := $(__node_builddir)
 

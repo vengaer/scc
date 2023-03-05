@@ -1,5 +1,5 @@
-#include <asm/asm_generic.h>
 #include <inspect/hashtab_inspect.h>
+#include <scc/arch.h>
 #include <scc/hashtab.h>
 
 #include <stdbool.h>

@@ -4,11 +4,14 @@ simdemudir      := $(__node_path)
 simdemubuilddir := $(__node_builddir)
 
 __node_obj := $(call wildcard-obj,$(__node_path),$(cext))
-$(solib) $(alib): $(if $(call not,$(__simd_enable)),$(__node_obj))
 
 $(__node_builddir)/%.$(oext): $(__node_path)/%.$(cext) | $(__node_builddir)
 	$(call echo-cc,$(notdir $@))
 	$(CC) -o $@ $< $(CFLAGS) $(CPPFLAGS)
+
+ifeq ($(__arch_isa_supported),)
+  $(solib) $(alib): $(__node_obj)
+endif
 
 else
 # Recurse to top level
