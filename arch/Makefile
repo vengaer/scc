@@ -16,36 +16,30 @@ $(archinfo): $(archscript) | $(__node_builddir)
 	$(call echo-gen,$(notdir $@))
 	$(PYTHON) $< -o $@
 
-$(if $(call not,$(__skip_arch)),                \
-    $(call __include-barrier-rel,$(archinfo))   \
-    $(call __include-barrier-rel,$(vecinfo)))
+ifneq ($(call not,$(__skip_arch)),)
+  -include $(archinfo)
+  -include $(simdinfo)
+  -include $(vecinfo)
+endif
 
-query_srcdir  := $(__node_path)/$(arch_lower)/$(abi_lower)
-__query_obj   := $(call wildcard-obj,$(query_srcdir),$(asext))
+ifneq ($(arch_lower),)
+  ifneq ($(wildcard $(__node_path)/$(arch_lower)),)
+    $(call include-node,$(arch_lower))
+  else
+    # TODO any
+  endif
+endif
 
-$(simdinfo): $(isa_query)
-	$(call echo-gen,$(notdir $@))
-	$< $@
+ifneq ($(simd_isa),)
+  $(vecinfo): $(vecscript) $(simdinfo) $(call reeval,simd_isa,$(vecinfo)) | $(__node_builddir)
+	  $(call echo-gen,$(notdir $@))
+	  $(PYTHON) $< -o $@ $(simd_isa)
+endif
 
-$(call __include-barrier-acq,$(archinfo),$(isa_query)): $(__query_obj) | $(archinfo) $(__node_builddir)
-	$(call echo-ld,$(notdir $@))
-	$(LD) -o $@ $^ $(LDFLAGS) $(LDLIBS)
+CPPFLAGS += -DSCC_$(bitarch)BIT -DSCC_SIMD_ISA_$(simd_isa) -DSCC_HOST_OS_$(hostos)
+CPPFLAGS += -DSCC_ARCH_$(arch) -DSCC_VECSIZE=$(if $(__simd_enable),$(vecsize),$(ullsize))
+CPPFLAGS += $(if $(__simd_enable),-DSCC_SIMD_ENABLED)
 
-$(__node_builddir)/%.$(oext): $(query_srcdir)/%.$(asext) | $(__node_builddir)
-	$(call echo-as,$(notdir $@))
-	$(AS) -o $@ $< $(ASFLAGS) $(CPPFLAGS)
-
-$(if $(and $(call not,$(__skip_arch)),$(wildcard $(query_srcdir)/*.$(asext))), \
-    $(call __include-barrier-rel,$(simdinfo)))
-
-$(call __include-barrier-acq,$(simdinfo),$(vecinfo)): $(vecscript) $(simdinfo) $(call reeval,simd_isa,$(vecinfo))| $(__node_builddir)
-	$(call echo-gen,$(notdir $@))
-	$(PYTHON) $< -o $@ $(simd_isa)
-
-simd_isa ?= UNSUPPORTED
-CPPFLAGS += -DSCC_$(bitarch)BIT -DSCC_SIMD_ISA_$(simd_isa) -DSCC_HOST_OS_$(hostos)        \
-            -DSCC_ARCH_$(arch) -DSCC_VECSIZE=$(if $(__simd_enable),$(vecsize),$(ullsize)) \
-            $(if $(__simd_enable),-DSCC_SIMD_ENABLED)
 else
 
 # Recurse to top level
