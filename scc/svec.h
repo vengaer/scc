@@ -596,6 +596,31 @@ inline _Bool scc_svec_is_allocd(void const *svec) {
     return ((unsigned char const*)svec)[-1];
 }
 
+//? .. c:function:: void *scc_svec_impl_clone(void const *svec, size_t elemsize)
+//?
+//?     Internal clone function
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param svec: ``svec`` handle
+//?     :param elemsize: Size of the elements in the vector
+//?     :returns: A handle to a new ``svec``, or ``NULL`` on allocation
+//?               failure
+void *scc_svec_impl_clone(void const *svec, size_t elemsize);
+
+//! .. c:function:: void *scc_svec_clone(void const *svec)
+//!
+//!     Clone the given ``svec`` and return a handle to the heap-allocated
+//!     copy.
+//!
+//!     :param svec: ``svec`` handle
+//!     :returns: A handle to a new ``svec``, or ``NULL`` on allocation
+//!               failure
+#define scc_svec_clone(svec)                                            \
+    scc_svec_impl_clone(svec, sizeof(*(svec)))
+
 //! .. _scc_svec_foreach:
 //! .. c:macro:: scc_svec_foreach(iter, svec)
 //!

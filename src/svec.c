@@ -212,3 +212,16 @@ void scc_svec_free(void *svec) {
         free(scc_svec_impl_base(svec));
     }
 }
+
+void *scc_svec_impl_clone(void const *svec, size_t elemsize) {
+    struct scc_svec_base const *obase = scc_svec_impl_base_qual(svec, const);
+    size_t basesz = (unsigned char const *)svec - (unsigned char const *)obase;
+    size_t bytesz = basesz + obase->sv_capacity * elemsize;
+    struct scc_svec_base *nbase = malloc(bytesz);
+    if(!nbase) {
+        return 0;
+    }
+
+    scc_memcpy(nbase, obase, bytesz);
+    return (unsigned char *)nbase + basesz;
+}
