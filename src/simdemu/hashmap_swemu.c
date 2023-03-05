@@ -188,6 +188,7 @@ unsigned long long scc_hashmap_probe_insert(
         occ_match = curr ^ metamask;
         probe_end = curr ^ 0u;
         for(unsigned i = 0u; i < slot_adj; ++i) {
+            scc_when_mutating(assert(i < slot_adj));
             if(empty_slot == ~0ull) {
                 if(!scc_swvec_read_byte(occ_match, i) && base->hm_eq(keys + (slot + i) * keysize, handle)) {
                     return (slot + i) | SCC_HASHMAP_DUPLICATE;
