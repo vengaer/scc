@@ -462,3 +462,23 @@ void test_scc_svec_sizeup_limit(void) {
     TEST_ASSERT_EQUAL_UINT64((4096u << 1u) + 1ull, scc_svec_capacity(svec));
     scc_svec_free(svec);
 }
+
+void test_scc_svec_clone(void) {
+    scc_svec(int) svec = scc_svec_new(int);
+
+    for(int i = 0; i < 3200; ++i) {
+        TEST_ASSERT_TRUE(scc_svec_push(&svec, i));
+    }
+
+    scc_svec(int) clone = scc_svec_clone(svec);
+    TEST_ASSERT_TRUE(!!clone);
+    TEST_ASSERT_EQUAL_UINT64(scc_svec_size(svec), scc_svec_size(clone));
+    TEST_ASSERT_EQUAL_UINT64(scc_svec_capacity(svec), scc_svec_capacity(clone));
+
+    for(unsigned i = 0u; i < scc_svec_capacity(svec); ++i) {
+        TEST_ASSERT_EQUAL_INT32(clone[i], svec[i]);
+    }
+
+    scc_svec_free(svec);
+    scc_svec_free(clone);
+}
