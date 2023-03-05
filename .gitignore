@@ -1,6 +1,7 @@
 TODO
 tags
 build
+build.cmake
 libscc.*
 *.pyc
 .config

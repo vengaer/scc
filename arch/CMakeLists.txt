@@ -1,0 +1,3 @@
+if (EXISTS ${CMAKE_CURRENT_LIST_DIR}/${CMAKE_SYSTEM_PROCESSOR})
+  add_subdirectory (${CMAKE_SYSTEM_PROCESSOR})
+endif()
