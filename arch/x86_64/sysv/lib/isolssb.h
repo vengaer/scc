@@ -1,3 +1,6 @@
+#ifndef ISOLSSB_H
+#define ISOLSSB_H
+
 # Isolate rightmost 1-bit in non-zero 32-bit
 # register \r0. \r1 is used as scratch
 #
@@ -15,3 +18,5 @@
     andl    \r1, \r0
 .endm
 
+
+#endif /* ISOLSSB_H */

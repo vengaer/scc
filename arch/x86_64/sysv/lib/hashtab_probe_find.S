@@ -1,4 +1,4 @@
-#include "generic_hash_find_probe.S"
+#include "hash_find_probe.h"
 
 # Probe for value in hash table
 #

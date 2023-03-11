@@ -1,4 +1,7 @@
-#include "isolssb.S"
+#ifndef HASH_INSERT_PROBE_H
+#define HASH_INSERT_PROBE_H
+
+#include "isolssb.h"
 
 #if SCC_VECSIZE != 32
 #error AVX2 vectors are 32 bytes
@@ -507,3 +510,5 @@
     vzeroupper
     ret
 .endm
+
+#endif /* HASH_INSERT_PROBE_H */

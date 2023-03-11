@@ -1,4 +1,4 @@
-#include "generic_hash_insert_probe.S"
+#include "hash_insert_probe.h"
 
 # Probe for empty slot to insert in. The hash table is
 # assumed to have at least two vacant slots.
