@@ -17,7 +17,7 @@ scc_hashmap_probe_insert:
 .equ    cap,     0x28                       # Offset of hm_capacity relative base address
 .equ    pairsz,  0x30                       # Offset of hm_pairsize relative base address
 .equ    framesz, 0x58                       # Size of stack frame
-.equ    vecsize, SCC_VECSIZE
+.equ    vecsize, 0x20
 #ifdef SCC_PERFEVTS
 .equ    neqs,    0x40                       # Offset of ev_n_eqs in perf member, relative base
 #endif

@@ -3,10 +3,6 @@
 
 #include "isolssb.h"
 
-#if SCC_VECSIZE != 32
-#error AVX2 vectors are 32 bytes
-#endif
-
 # Wrap index of slot computation
 #
 # Sets ZF if result is 0

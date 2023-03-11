@@ -2,7 +2,6 @@
 #define SCC_ARENA_H
 
 #include "bug.h"
-#include "config.h"
 #include "mem.h"
 
 #include <stddef.h>

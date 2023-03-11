@@ -1,7 +1,15 @@
 #ifndef ARCH_H
 #define ARCH_H
 
+#include "config.h"
+
 #include <stddef.h>
+
+#ifdef SCC_SIMD_ENABLED
+#define SCC_VECSIZE SCC_HWVEC_SIZE
+#else
+#define SCC_VECSIZE sizeof(unsigned long long)
+#endif
 
 struct scc_hashmap_base;
 struct scc_hashtab_base;

@@ -3,4 +3,5 @@
 disable=
     missing-docstring,
     duplicate-code,
-    import-error
+    import-error,
+    too-many-arguments

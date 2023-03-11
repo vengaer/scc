@@ -40,7 +40,7 @@ else ifneq ($(call not,$(__simd_enable)),)
 endif
 
 CPPFLAGS += -DSCC_$(bitarch)BIT -DSCC_SIMD_ISA_$(simd_isa) -DSCC_HOST_OS_$(hostos)
-CPPFLAGS += -DSCC_ARCH_$(arch) -DSCC_VECSIZE=$(if $(__simd_enable),$(vecsize),$(ullsize))
+CPPFLAGS += -DSCC_ARCH_$(arch)
 CPPFLAGS += $(if $(__simd_enable),-DSCC_SIMD_ENABLED)
 
 else
