@@ -52,11 +52,11 @@ ASFLAGS      := -c -MD -MP $(__debug_info)
 CFLAGS       := -std=c99 -c -MD -MP -Wall -Wextra -Wpedantic -Waggregate-return      \
                 -Wbad-function-cast -Wcast-qual -Wfloat-equal -Wmissing-include-dirs \
                 -Wnested-externs -Wpointer-arith -Wshadow -Wunknown-pragmas -Wswitch \
-                -Wundef -Wunused -Wwrite-strings $(__debug_info)
+                -Wundef -Wunused -Wwrite-strings -fPIC $(__debug_info)
 CXXFLAGS     := -std=c++17 -c -MD -MP -Wall -Wextra -Wpedantic $(__debug_info)
 CPPFLAGS     += -I$(root) -DNDEBUG
 
-LDFLAGS      :=
+LDFLAGS      := -fPIC
 LDLIBS       :=
 ARFLAGS      := -rcs
 
