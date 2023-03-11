@@ -67,9 +67,7 @@ class Config:
 
         value = f" {value}" if value is not None else ""
 
-        self._lines.append(f"#ifndef {option}")
         self._lines.append(f"#define {option}{value}")
-        self._lines.append(f"#endif  /* ifndef {option} */")
         self._lines.append("")
 
     def commit(self) -> None:
