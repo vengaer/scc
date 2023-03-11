@@ -5,20 +5,22 @@ include $(mkscripts)/expr.mk
 include $(mkscripts)/ext.mk
 include $(mkscripts)/refl.mk
 
-CONFTOOL          := conftool
-CONFIG            := $(root)/.config
-confbuilddir      := $(builddir)/config
-dirs              += $(confbuilddir)
-md5script         := $(pyscripts)/md5sum.py
-__config_md5mk    := $(confbuilddir)/md5.$(mkext)
+CONFTOOL             := conftool
+CONFIG               := $(root)/.config
+confbuilddir         := $(builddir)/config
+dirs                 += $(confbuilddir)
+md5script            := $(pyscripts)/md5sum.py
+__config_md5mk       := $(confbuilddir)/md5.$(mkext)
+
+__config_header_init := $(builddir)/.config.init.stamp
 
 -include $(__config_md5mk)
 -include $(CONFIG)
 
-config_stamp      := $(confbuilddir)/_$(config_md5)
+config_stamp         := $(confbuilddir)/_$(config_md5)
 
-__conftool_spec   := $(root)/.conftool.$(jsonext)
-__validate_config := $(builddir)/.config.valid.stamp
+__conftool_spec      := $(root)/.conftool.$(jsonext)
+__validate_config    := $(builddir)/.config.valid.stamp
 
 # Deliberate omit $(__conftool_spec) dependency here to avoid
 # overwriting .config

@@ -5,7 +5,6 @@ __config_cache       := $(builddir)/.scconfig.cache
 __scconfig           := $(pyscripts)/scconfig.py
 __config_opts        := -g SCC_CONFIG_H -c $(__config_cache) -l $(builddir)/.scconfig.lock
 
-__config_header_init := $(__node_builddir)/.config.init.stamp
 __config_header_ver  := $(__node_builddir)/.config.ver.stamp
 
 __scc_incdir         := $(__node_path)
