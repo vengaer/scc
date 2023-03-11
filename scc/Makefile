@@ -11,16 +11,15 @@ __config_header_ver  := $(__node_builddir)/.config.ver.stamp
 __scc_incdir         := $(__node_path)
 __public_headers     := $(addsuffix .h,btmap btree hashmap hashtab rbmap rbtree ringdeque stack svec vec)
 
-$(__config_header_init): $(wildcard $(__config_module)/*.$(pyext)) | $(__node_builddir)
+$(__config_header_init): $(wildcard $(__config_module)/*.$(pyext)) $(__all_mkfiles) | $(__node_builddir)
 	$(call echo-gen,$(notdir $(config_header)))
 	$(PYTHON) $(__scconfig) $(__config_opts) -o $(config_header) init
 	$(TOUCH) $@
 
 $(__config_header_ver): $(__config_header_init)
-	$(PYTHON) $(__scconfig) $(__config_opts) add SCC_VERSION_MAJOR $(VER_MAJOR)
-	$(PYTHON) $(__scconfig) $(__config_opts) add SCC_VERSION_MINOR $(VER_MINOR)
-	$(PYTHON) $(__scconfig) $(__config_opts) add SCC_VERSION_PATCH $(VER_PATCH)
-	$(PYTHON) $(__scconfig) $(__config_opts) add SCC_VERSION "(((SCC_VERSION_MAJOR & 0xff) << 24) | ((SCC_VERSION_MINOR & 0xff) << 16) | SCC_VERSION_PATCH & 0xffff)"
+	$(PYTHON) $(__scconfig) $(__config_opts) add SCC_VERSION_MAJOR $(VER_MAJOR) -C "Library major version"
+	$(PYTHON) $(__scconfig) $(__config_opts) add SCC_VERSION_MINOR $(VER_MINOR) -C "Library minor version"
+	$(PYTHON) $(__scconfig) $(__config_opts) add SCC_VERSION_PATCH $(VER_PATCH) -C "Library patch version"
 	$(TOUCH) $@
 
 $(config_header): $(__config_header_init) $(__config_header_ver) $(config_header_entries)

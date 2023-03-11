@@ -13,7 +13,7 @@ $(__node_builddir)/%.$(oext): $(__node_path)/%.$(cext) | $(__node_builddir)
 	$(CC) -o $@ $< $(CFLAGS) $(CPPFLAGS)
 
 $(__swvec_entry): $(__config_header_init) | $(__node_builddir)
-	$(PYTHON) $(__scconfig) $(__config_opts) add SCC_SWVEC_SIZE "sizeof(unsigned long long)"
+	$(PYTHON) $(__scconfig) $(__config_opts) add SCC_SWVEC_SIZE "sizeof(unsigned long long)" -C "Size of vectors used when emulating SIMD in software"
 	$(TOUCH) $@
 
 $(solib) $(alib): $(__node_obj)
