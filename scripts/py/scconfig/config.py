@@ -59,7 +59,12 @@ class Config:
 
         self._cache["stage"] = Stage.IN_PROGRESS
 
-    def add(self, option: Optional[str], value: Optional[Union[int, str]]) -> None:
+    def add(
+        self,
+        option: Optional[str],
+        value: Optional[Union[int, str]],
+        comment: Optional[str],
+    ) -> None:
         if option is None:
             raise ValueError("Option must be provided for action add")
 
@@ -67,6 +72,8 @@ class Config:
 
         value = f" {value}" if value is not None else ""
 
+        if comment is not None:
+            self._lines.append(f"/* {comment} */")
         self._lines.append(f"#define {option}{value}")
         self._lines.append("")
 

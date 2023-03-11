@@ -18,6 +18,7 @@ def _dispatch(
     action: Union[Action, str],
     option: Optional[str],
     value: Optional[str],
+    comment: Optional[str],
 ) -> None:
     if isinstance(action, str):
         try:
@@ -32,7 +33,9 @@ def _dispatch(
         with Config(ccache, guard) as cfg:
             attr = getattr(cfg, action.lname)  # type: ignore[union-attr]
             if action == Action.ADD:
-                attr = functools.partial(attr, option=option, value=value)
+                attr = functools.partial(
+                    attr, option=option, value=value, comment=comment
+                )
 
             attr()
 
@@ -45,6 +48,12 @@ def main() -> None:
     )
     parser.add_argument(
         "-c", "--cache", help="Override cache directory", default=".scconfig.cache"
+    )
+    parser.add_argument(
+        "-C",
+        "--comment",
+        help="Comment to associate with option, applies only to action 'add'",
+        default=None,
     )
     parser.add_argument(
         "-o",
@@ -78,5 +87,11 @@ def main() -> None:
     args = parser.parse_args()
     with fasteners.InterProcessLock(args.lockfile):
         _dispatch(
-            args.guard, args.cache, args.config, args.action, args.option, args.value
+            args.guard,
+            args.cache,
+            args.config,
+            args.action,
+            args.option,
+            args.value,
+            args.comment,
         )
