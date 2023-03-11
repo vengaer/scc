@@ -14,7 +14,20 @@ static bool ueq(void const *left, void const *right) {
     return *(uint32_t const *)left == *(uint32_t const *)right;
 }
 
+extern int scc_simd_support;
+static int simd_backup;
+
+static void disable_simd(void) {
+    simd_backup = scc_simd_support;
+    scc_simd_support = 0;
+}
+
+static void restore_simd(void) {
+    scc_simd_support = simd_backup;
+}
+
 static void run_fuzzer_test(uint32_t const *restrict keys, uint16_t const *restrict vals, size_t n, size_t totsize) {
+    disable_simd();
     scc_hashmap(uint32_t, uint16_t) map = scc_hashmap_new(uint32_t, uint16_t, ueq);
     uint16_t *elem;
     for(unsigned i = 0u; i < n; ++i) {
@@ -58,6 +71,7 @@ static void run_fuzzer_test(uint32_t const *restrict keys, uint16_t const *restr
     }
 
     scc_hashmap_free(map);
+    restore_simd();
 }
 
 void test_scc_simdemu_hashmap_fuzzer_failure0(void) {
@@ -218,6 +232,7 @@ void test_scc_simdemu_hashmap_fuzzer_mutkill5(void) {
 }
 
 void test_scc_simdemu_hashmap_fuzzer_mutkill6(void) {
+    disable_simd();
     scc_hashmap(uint32_t, unsigned short) map = scc_hashmap_new(uint32_t, unsigned short, ueq);
     scc_hashmap_metatype *md = scc_hashmap_inspect_metadata(map);
 
@@ -241,4 +256,5 @@ void test_scc_simdemu_hashmap_fuzzer_mutkill6(void) {
     TEST_ASSERT_TRUE(scc_hashmap_insert(&map, 1, 1));
 
     scc_hashmap_free(map);
+    restore_simd();
 }

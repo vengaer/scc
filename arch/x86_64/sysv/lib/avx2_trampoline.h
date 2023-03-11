@@ -11,7 +11,7 @@
 # Return:
 #   Whatever \supp or \unsupp return
 .macro avx2_trampoline supp, nosupp
-    movq    scc_avx2_support@GOTPCREL(%rip), %rax
+    movq    scc_simd_support@GOTPCREL(%rip), %rax
     movl    (%rax), %eax
     subl    $0x01, %eax
     jz      \supp

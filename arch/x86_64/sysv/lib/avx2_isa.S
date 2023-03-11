@@ -1,8 +1,8 @@
     .section .data
 
-.globl scc_avx2_support
+.globl scc_simd_support
     .align 4
-scc_avx2_support:                                               # Used to cache AVX2 support
+scc_simd_support:                                               # Used to cache AVX2 support
     .long 2                                                     #  - 0 -> not supported
                                                                 #  - 1 -> supported
                                                                 #  - 2 -> unknown, call scc_impl_have_avx2 to set
@@ -35,18 +35,18 @@ scc_impl_have_avx2:
     testl   $0xc000000, %ecx                                    # osxsave and avx feature flags
 
     movl    $0x00, %ecx                                         # Prepare for XCR read, preserve ZF
-    jz      1f                                                  # Unsupported scc_avx2_support -> 0
+    jz      1f                                                  # Unsupported scc_simd_support -> 0
 
     xgetbv                                                      # Read XCR[%ecx]
 
     testl   $0x03, %eax                                         # xmm and ymm state support
 
-    jz      1f                                                  # Unsupported, scc_avx2_support -> 0
+    jz      1f                                                  # Unsupported, scc_simd_support -> 0
 
-    movl    $0x01, %ecx                                         # Supported, scc_avx2_support -> 1
+    movl    $0x01, %ecx                                         # Supported, scc_simd_support -> 1
 1:
-    movl    $0x02, %eax                                         # Had to check, expecting scc_avx2_support == 2
-    movq    scc_avx2_support@GOTPCREL(%rip), %rbx
+    movl    $0x02, %eax                                         # Had to check, expecting scc_simd_support == 2
+    movq    scc_simd_support@GOTPCREL(%rip), %rbx
     lock
     cmpxchg %ecx, (%rbx)                                        # Atomic CAS, fails only if another thread already
                                                                 # set the correct value

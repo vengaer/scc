@@ -12,6 +12,10 @@ static bool eq(void const *left, void const *right) {
 }
 
 static void run_fuzzer_test(uint32_t const *data, size_t n) {
+    extern int scc_simd_support;
+    int simdbak = scc_simd_support;
+    scc_simd_support = 0;
+
     scc_hashtab(uint32_t) tab = scc_hashtab_new(uint32_t, eq);
 
     for(unsigned i = 0u; i < n; ++i) {
@@ -43,6 +47,7 @@ static void run_fuzzer_test(uint32_t const *data, size_t n) {
 
     TEST_ASSERT_EQUAL_UINT64(0ull, scc_hashtab_size(tab));
     scc_hashtab_free(tab);
+    scc_simd_support = simdbak;
 }
 
 void test_scc_simdemu_hashtab_fuzzer_failure0(void) {
