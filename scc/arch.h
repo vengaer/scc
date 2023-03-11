@@ -111,17 +111,17 @@ inline long long scc_hashmap_impl_probe_find(
 }
 
 //? .. c:function:: long long scc_hashtab_probe_insert(struct scc_hashtab_base const *base, \
-//?     void const *handle, size_t elemsize, unsigned long long hash)
+//?     void const *tab, size_t elemsize, unsigned long long hash)
 //?
 //?     Architecture-specific insert probing, computing the slot to insert the element
-//?     at ``handle`` in.
+//?     at ``tab`` in.
 //?
 //?     .. note::
 //?
 //?         Internal use only
 //?
 //?     :param base: Base address of the hash table
-//?     :param handle: Hash tab tab
+//?     :param tab: Hash tab handle
 //?     :param elemsize: Size of the elements in the hash table
 //?     :param hash: Hash of the element to be inserted
 //?     :returns: Index of the slot to insert the element in, or -1
@@ -136,16 +136,16 @@ inline long long scc_hashtab_impl_probe_insert(
 }
 
 //? .. c:function:: long long scc_hashtab_probe_find(struct scc_hashtab_base const *base, \
-//?     void const *handle, size_t elemsize, unsigned long long hash)
+//?     void const *tab, size_t elemsize, unsigned long long hash)
 //?
-//?     Architecture-specific find probing, looking for the element at ``handle``.
+//?     Architecture-specific find probing, looking for the element at ``tab``.
 //?
 //?     .. note::
 //?
 //?         Internal use only
 //?
 //?     :param base: Base address of the hash table
-//?     :param handle: Hash tab tab
+//?     :param tab: Hash tab handle
 //?     :param elemsize: Size of the element in the hash table
 //?     :param hash: Hash of the element to be found
 //?     :returns: Index of the slot containing the matching value,
