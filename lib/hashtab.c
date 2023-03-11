@@ -133,7 +133,7 @@ static inline scc_hashtab_metatype *scc_hashtab_metadata(struct scc_hashtab_base
 //?     :retval false: The hash table already contains the element in question
 static bool scc_hashtab_emplace(void *tab, struct scc_hashtab_base *base, size_t elemsize) {
     unsigned long long const hash = base->ht_hash(tab, elemsize);
-    long long index = scc_hashtab_probe_insert(base, tab, elemsize, hash);
+    long long index = scc_hashtab_impl_probe_insert(base, tab, elemsize, hash);
 
     SCC_ON_PERFTRACK(++base->ht_perf.ev_n_hash);
 
@@ -300,7 +300,7 @@ void const *scc_hashtab_impl_find(void const *tab, size_t elemsize) {
         return 0;
     }
     unsigned long long const hash = base->ht_hash(tab, elemsize);
-    long long const index = scc_hashtab_probe_find(base, tab, elemsize, hash);
+    long long const index = scc_hashtab_impl_probe_find(base, tab, elemsize, hash);
     if(index == -1ll) {
         return 0;
     }
@@ -374,7 +374,7 @@ bool scc_hashtab_impl_remove(void *tab, size_t elemsize) {
 
     unsigned long long const hash = base->ht_hash(tab, elemsize);
 
-    long long const index = scc_hashtab_probe_find(base, tab, elemsize, hash);
+    long long const index = scc_hashtab_impl_probe_find(base, tab, elemsize, hash);
     if(index == -1ll) {
         return false;
     }

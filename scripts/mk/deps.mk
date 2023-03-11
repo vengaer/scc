@@ -3,8 +3,8 @@ __Deps_mk := _
 
 btmap_deps           := algorithm arena svec
 btree_deps           := algorithm arena svec vec
-hashmap_deps         := canary
-hashtab_deps         := canary
+hashmap_deps         := arch canary
+hashtab_deps         := arch canary
 rbmap_deps           := arena rbtree ringdeque
 rbtree_deps          := arena ringdeque
 stack_deps           := svec

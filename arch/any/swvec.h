@@ -16,8 +16,6 @@
 //?     Vector type used in simd emulation
 typedef unsigned long long scc_vectype;
 
-scc_static_assert(sizeof(scc_vectype) == SCC_VECSIZE, "Unexpected vector size");
-
 /* Standard mandates that UCHAR_MAX >= 255 meaning a byte must be
  * at least 8 bits */
 scc_static_assert(CHAR_BIT >= 8, "Non-conformant implementation");

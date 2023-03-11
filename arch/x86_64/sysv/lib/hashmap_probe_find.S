@@ -10,8 +10,8 @@
 #
 # Return:
 #   %rax: Index of slot, or -1 if not found
-.globl scc_hashmap_probe_find
-scc_hashmap_probe_find:
+.globl scc_avx2_hashmap_impl_probe_find
+scc_hashmap_impl_probe_find_avx2:
 .equ    mdoff,   0x18                       # Offset of hm_mdoff relative base address
 .equ    cap,     0x28                       # Offset of hm_capacity relative base address
 .equ    pairsz,  0x30                       # Offset of hm_pairsize relative base address

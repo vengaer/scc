@@ -1,6 +1,7 @@
 #ifndef SCC_HASHTAB_H
 #define SCC_HASHTAB_H
 
+#include "arch.h"
 #include "bits.h"
 #include "bug.h"
 #include "canary.h"

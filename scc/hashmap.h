@@ -1,6 +1,7 @@
 #ifndef SCC_HASHMAP_H
 #define SCC_HASHMAP_H
 
+#include "arch.h"
 #include "bits.h"
 #include "bug.h"
 #include "canary.h"

@@ -11,8 +11,8 @@
 # Return:
 #   %rax: Index of slot, or -1 if element
 #         is not found
-.globl scc_hashtab_probe_find
-scc_hashtab_probe_find:
+.globl scc_hashtab_impl_probe_find_avx2
+scc_hashtab_impl_probe_find_avx2:
 .equ    mdoff,   0x10                       # Offset of ht_mdoff relative base address
 .equ    cap,     0x20                       # Offset of ht_capacity relative base address
 .equ    framesz, 0x58                       # Size of stack frame

@@ -11,8 +11,8 @@
 #
 # Return:
 #   %rax: Index of slot
-.globl scc_hashmap_probe_insert
-scc_hashmap_probe_insert:
+.globl scc_hashmap_impl_probe_insert_avx2
+scc_hashmap_impl_probe_insert_avx2:
 .equ    mdoff,   0x18                       # Offset of hm_mdoff relative base address
 .equ    cap,     0x28                       # Offset of hm_capacity relative base address
 .equ    pairsz,  0x30                       # Offset of hm_pairsize relative base address
