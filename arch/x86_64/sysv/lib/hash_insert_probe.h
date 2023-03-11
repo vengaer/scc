@@ -141,7 +141,7 @@
 # Return:
 #   %rax: Index of slot, or -1 if element
 #         is already present
-.macro generic_hash_insert_probe pwr2, map
+.macro hash_insert_probe pwr2, map
 .if \pwr2
     tzcntq  %rdx, %rdx                      # Element size power of 2, use bit index for efficient mult
 .endif

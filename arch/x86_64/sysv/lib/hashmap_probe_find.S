@@ -24,9 +24,9 @@ avx2_hashmap_probe_find:
     popcntq %rdx, %rax                      # Check if element is a power of 2
     cmpq    $1, %rax
     je      .Lpwr2
-    generic_hash_find_probe 0, 1
+    hash_find_probe 0, 1
 .Lpwr2:
-    generic_hash_find_probe 1, 1
+    hash_find_probe 1, 1
 
 .globl scc_hashmap_impl_probe_find_avx2_trampoline
 scc_hashmap_impl_probe_find_avx2_trampoline:

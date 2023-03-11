@@ -25,9 +25,9 @@ avx2_hashtab_probe_insert:
     popcntq %rdx, %rax                      # Check if element size is power of 2
     cmpq    $1, %rax
     je      .Lpwr2
-    generic_hash_insert_probe 0, 0
+    hash_insert_probe 0, 0
 .Lpwr2:
-    generic_hash_insert_probe 1, 0
+    hash_insert_probe 1, 0
 
 .globl scc_hashtab_impl_probe_insert_avx2_trampoline
 scc_hashtab_impl_probe_insert_avx2_trampoline:
