@@ -6,15 +6,25 @@
 
 #include <stddef.h>
 
-#ifdef SCC_SIMD_ENABLED
+
+#ifdef SCC_HWVEC_SIZE
 #define SCC_VECSIZE SCC_HWVEC_SIZE
 #else
-#define SCC_VECSIZE sizeof(unsigned long long)
+#define SCC_VECSIZE SCC_SWVEC_SIZE
 #endif
 
 #ifdef SCC_SIMD_ISA
-#define scc_arch_select(func)   \
-    scc_pp_cat_expand(scc_pp_cat_expand(func,_),SCC_SIMD_ISA)
+#define scc_arch_select(func)       \
+    scc_pp_cat_expand(              \
+        scc_pp_cat_expand(          \
+            scc_pp_cat_expand(      \
+                scc_pp_cat_expand(  \
+                    func,_          \
+                ),SCC_SIMD_ISA      \
+            ),_                     \
+        ),trampoline                \
+    )
+
 #else
 #define scc_arch_select(func)   \
     scc_pp_cat_expand(scc_pp_cat_expand(func,_),sw)
@@ -97,7 +107,7 @@ inline long long scc_hashmap_impl_probe_find(
     size_t keysize,
     unsigned long long hash
 ) {
-    return scc_arch_select(scc_hashmap_impl_probe_insert)(base, map, keysize, hash);
+    return scc_arch_select(scc_hashmap_impl_probe_find)(base, map, keysize, hash);
 }
 
 //? .. c:function:: long long scc_hashtab_probe_insert(struct scc_hashtab_base const *base, \

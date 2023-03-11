@@ -1,3 +1,4 @@
+#include "avx2_trampoline.h"
 #include "hash_insert_probe.h"
 
 # Probe for empty slot to insert in. The hash map is
@@ -11,8 +12,7 @@
 #
 # Return:
 #   %rax: Index of slot
-.globl scc_hashmap_impl_probe_insert_avx2
-scc_hashmap_impl_probe_insert_avx2:
+avx2_hashmap_probe_insert:
 .equ    mdoff,   0x18                       # Offset of hm_mdoff relative base address
 .equ    cap,     0x28                       # Offset of hm_capacity relative base address
 .equ    pairsz,  0x30                       # Offset of hm_pairsize relative base address
@@ -28,3 +28,7 @@ scc_hashmap_impl_probe_insert_avx2:
     generic_hash_insert_probe 0, 1
 .Lpwr2:
     generic_hash_insert_probe 1, 1
+
+.globl scc_hashmap_impl_probe_insert_avx2_trampoline
+scc_hashmap_impl_probe_insert_avx2_trampoline:
+    avx2_trampoline avx2_hashmap_probe_insert, scc_hashmap_impl_probe_insert_sw

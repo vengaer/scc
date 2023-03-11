@@ -1,3 +1,4 @@
+#include "avx2_trampoline.h"
 #include "hash_find_probe.h"
 
 # Probe for value in hash map
@@ -10,8 +11,7 @@
 #
 # Return:
 #   %rax: Index of slot, or -1 if not found
-.globl scc_avx2_hashmap_impl_probe_find
-scc_hashmap_impl_probe_find_avx2:
+avx2_hashmap_probe_find:
 .equ    mdoff,   0x18                       # Offset of hm_mdoff relative base address
 .equ    cap,     0x28                       # Offset of hm_capacity relative base address
 .equ    pairsz,  0x30                       # Offset of hm_pairsize relative base address
@@ -27,3 +27,7 @@ scc_hashmap_impl_probe_find_avx2:
     generic_hash_find_probe 0, 1
 .Lpwr2:
     generic_hash_find_probe 1, 1
+
+.globl scc_hashmap_impl_probe_find_avx2_trampoline
+scc_hashmap_impl_probe_find_avx2_trampoline:
+    avx2_trampoline avx2_hashmap_probe_find, scc_hashmap_impl_probe_find_sw

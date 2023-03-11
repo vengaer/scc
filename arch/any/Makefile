@@ -1,10 +1,10 @@
 ifdef __node
 
-__swvec_entry   := $(__node_builddir)/.swvec.stamp
-config_header_entries += $(__avx2_isa_entry)
+__swvec_entry         := $(__node_builddir)/.swvec.stamp
+config_header_entries += $(__swvec_entry)
 
-simdemudir      := $(__node_path)
-simdemubuilddir := $(__node_builddir)
+simdemudir            := $(__node_path)
+simdemubuilddir       := $(__node_builddir)
 
 __node_obj := $(call wildcard-obj,$(__node_path),$(cext))
 
@@ -12,8 +12,8 @@ $(__node_builddir)/%.$(oext): $(__node_path)/%.$(cext) | $(__node_builddir)
 	$(call echo-cc,$(notdir $@))
 	$(CC) -o $@ $< $(CFLAGS) $(CPPFLAGS)
 
-$(__swvec_entry): $(__config_header_init)
-	$(PYTHON) $(__scconfig) $(__config_opts) add SCC_SWVEC_SIZE sizeof(unsigned long long)
+$(__swvec_entry): $(__config_header_init) | $(__node_builddir)
+	$(PYTHON) $(__scconfig) $(__config_opts) add SCC_SWVEC_SIZE "sizeof(unsigned long long)"
 	$(TOUCH) $@
 
 $(solib) $(alib): $(__node_obj)

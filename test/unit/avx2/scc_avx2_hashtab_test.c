@@ -7,8 +7,6 @@
 
 #include <unity.h>
 
-#ifdef SCC_SIMD_ISA_AVX2
-
 static bool eq(void const *l, void const *r) {
     return *(int const *)l == *(int const *)r;
 }
@@ -37,7 +35,7 @@ void test_insertion_probe_detects_duplicate(void) {
     data[index] = TESTVAL;
     *tab = TESTVAL;
 
-    TEST_ASSERT_EQUAL_UINT64(-1ll, scc_hashtab_probe_insert(base, tab, sizeof(int), hash));
+    TEST_ASSERT_EQUAL_UINT64(-1ll, scc_hashtab_impl_probe_insert_avx2_trampoline(base, tab, sizeof(int), hash));
     scc_hashtab_free(tab);
 }
 
@@ -57,7 +55,7 @@ void test_insertion_probe_functional_up_to_full_capacity(void) {
     for(unsigned i = 0u; i < scc_hashtab_capacity(tab); ++i) {
         hash = scc_hashtab_fnv1a(&(int){ i }, sizeof(int));
         *tab = i;
-        index = scc_hashtab_probe_insert(base, tab, sizeof(int), hash);
+        index = scc_hashtab_impl_probe_insert_avx2_trampoline(base, tab, sizeof(int), hash);
         TEST_ASSERT_NOT_EQUAL_INT64(-1ll, index);
         TEST_ASSERT_FALSE(md[index] & 0x80);
         ent = (scc_hashtab_metatype)((hash >> 57) | 0x80);
@@ -99,7 +97,7 @@ void test_insertion_probe_finds_single_vacant(void) {
         }
     }
     *tab = 32;
-    TEST_ASSERT_EQUAL_INT64((long long)insert_slot, scc_hashtab_probe_insert(base, tab, sizeof(int), hash));
+    TEST_ASSERT_EQUAL_INT64((long long)insert_slot, scc_hashtab_impl_probe_insert_avx2_trampoline(base, tab, sizeof(int), hash));
 
     scc_hashtab_free(tab);
 }
@@ -131,7 +129,7 @@ void test_insertion_probe_until_stop(void) {
         md[slot + scc_hashtab_capacity(tab)] = 0x80;
     }
 
-    long long index = scc_hashtab_probe_insert(base, tab, sizeof(int), hash);
+    long long index = scc_hashtab_impl_probe_insert_avx2_trampoline(base, tab, sizeof(int), hash);
     TEST_ASSERT_EQUAL_INT64((slot + 1ll) & (scc_hashtab_capacity(tab) - 1ll), index);
 
     md[index] = (scc_hashtab_metatype)((hash >> 57) | 0x80);
@@ -142,7 +140,7 @@ void test_insertion_probe_until_stop(void) {
     int *data = scc_hashtab_inspect_data(tab);
     data[index] = TESTVAL;
     /* Probing should detect present value */
-    index = scc_hashtab_probe_insert(base, tab, sizeof(int), hash);
+    index = scc_hashtab_impl_probe_insert_avx2_trampoline(base, tab, sizeof(int), hash);
     TEST_ASSERT_EQUAL_INT64(-1ll, index);
 
     /* Vacate primary slot */
@@ -152,7 +150,7 @@ void test_insertion_probe_until_stop(void) {
     }
 
     /* Probing should still detect present value */
-    index = scc_hashtab_probe_insert(base, tab, sizeof(int), hash);
+    index = scc_hashtab_impl_probe_insert_avx2_trampoline(base, tab, sizeof(int), hash);
     TEST_ASSERT_EQUAL_INT64(-1ll, index);
 
     scc_hashtab_free(tab);
@@ -199,7 +197,7 @@ void test_insertion_probe_no_end_in_vector(void) {
         data[slot] = ~elem;
     }
 
-    TEST_ASSERT_EQUAL_INT64(index + SCC_VECSIZE + 0ll, scc_hashtab_probe_insert(base, tab, sizeof(int), hash));
+    TEST_ASSERT_EQUAL_INT64(index + SCC_VECSIZE + 0ll, scc_hashtab_impl_probe_insert_avx2_trampoline(base, tab, sizeof(int), hash));
 
     scc_hashtab_free(tab);
 }
@@ -213,7 +211,7 @@ void test_find_probe_empty(void) {
     struct scc_hashtab_base *base = scc_hashtab_inspect_base(tab);
     *tab = 32;
     unsigned long long hash = scc_hashtab_fnv1a(tab, sizeof(*tab));
-    TEST_ASSERT_EQUAL_INT64(-1ll, scc_hashtab_probe_find(base, tab, sizeof(int), hash));
+    TEST_ASSERT_EQUAL_INT64(-1ll, scc_hashtab_impl_probe_find_avx2_trampoline(base, tab, sizeof(int), hash));
     scc_hashtab_free(tab);
 }
 
@@ -243,7 +241,7 @@ void test_find_probe_no_match(void) {
     }
     *tab = SIZE;
     hash = scc_hashtab_fnv1a(tab, sizeof(*tab));
-    TEST_ASSERT_EQUAL_INT64(-1ll, scc_hashtab_probe_find(base, tab, sizeof(int), hash));
+    TEST_ASSERT_EQUAL_INT64(-1ll, scc_hashtab_impl_probe_find_avx2_trampoline(base, tab, sizeof(int), hash));
 
     scc_hashtab_free(tab);
 }
@@ -269,9 +267,7 @@ void test_find_probe_single_value(void) {
     }
     data[index] = VAL;
 
-    TEST_ASSERT_EQUAL_INT64((long long)index, scc_hashtab_probe_find(base, tab, sizeof(int), hash));
+    TEST_ASSERT_EQUAL_INT64((long long)index, scc_hashtab_impl_probe_find_avx2_trampoline(base, tab, sizeof(int), hash));
 
     scc_hashtab_free(tab);
 }
-
-#endif

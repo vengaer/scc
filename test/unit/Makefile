@@ -21,11 +21,10 @@ $(strip
         $(wildcard $(patsubst %,$(srcdir)/%*.$(cext),$(__snode) $($(__node)_deps))))
     $(patsubst $(inspectdir)/%.$(cext),$(inspectbuilddir)/%.$(oext),
         $(wildcard $(inspectdir)/$(__snode)*.$(cext)))
-    $(if $(__simd_enable),
-        $(patsubst $(asdir)/%.$(asext),$(asbuilddir)/%.$(oext),
-            $(wildcard $(patsubst %,$(asdir)/%*.$(asext),$(__snode) $($(__node)_deps)))),
-      $(patsubst $(simdemudir)/%.$(cext),$(simdemubuilddir)/%.$(oext),
-          $(wildcard $(patsubst %,$(simdemudir)/%*.$(cext),$(__snode) $($(__node)_deps)))))
+    $(patsubst $(asdir)/%.$(asext),$(asbuilddir)/%.$(oext),
+        $(wildcard $(patsubst %,$(asdir)/%*.$(asext),$(__snode) $($(__node)_deps) $(simd_isa)_isa)))
+    $(patsubst $(simdemudir)/%.$(cext),$(simdemubuilddir)/%.$(oext),
+        $(wildcard $(patsubst %,$(simdemudir)/%*.$(cext),$(__snode) $($(__node)_deps))))
     $(if $($(__snode)_deps),
         $(patsubst $(inspectdir)/%.$(cext),$(inspectbuilddir)/%.$(oext),
             $(wildcard $(addprefix $(inspectdir)/*,$(addsuffix *.$(cext),$($(__node)_deps)))))))
@@ -182,8 +181,9 @@ $(call include-node,svec)
 $(call include-node,vec)
 $(call include-node,simdemu)
 
-$(call include-node-if,$(__simd_enable),avx2)
-
+ifneq ($(wildcard $(__node_path)/$(simd_isa)),)
+  $(call include-node,$(simd_isa))
+endif
 
 $(call pop,LDLIBS)
 $(call pop,LDFLAGS)

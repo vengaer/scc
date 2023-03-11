@@ -24,7 +24,7 @@ static inline scc_vectype scc_hashmap_gen_metamask(unsigned long long hash) {
     return scc_swvec_bcast(0x80u | (hash >> (sizeof(scc_vectype) * CHAR_BIT - (CHAR_BIT - 1u))));
 }
 
-long long scc_hashmap_probe_find_sw(
+long long scc_hashmap_impl_probe_find_sw(
     struct scc_hashmap_base const *base,
     void const *handle,
     size_t keysize,
@@ -103,7 +103,7 @@ long long scc_hashmap_probe_find_sw(
     return -1ll;
 }
 
-unsigned long long scc_hashmap_probe_insert_sw(
+unsigned long long scc_hashmap_impl_probe_insert_sw(
     struct scc_hashmap_base const *base,
     void const *handle,
     size_t keysize,
