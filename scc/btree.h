@@ -314,6 +314,26 @@ struct scc_btree_base {
 //?     :returns: Address of a handle suitable for referring to the given B-tree
 void *scc_btree_impl_new(void *base, size_t coff, size_t rootoff);
 
+//? .. _scc_btree_impl_new_dyn
+//? .. c:function:: void *scc_btree_impl_new_dyn(void *sbase, size_t basesz, size_t coff, size_t rootoff)
+//?
+//?     Allocate a new ``btree`` on the heap and initialize it. Return the address of its
+//?     :ref:`btm_curr <kvpair_btm_curr>` member
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param sbase: Address of a :ref:`struct scc_btree_base <scc_btree_base>` containing
+//?                   values to be set in the new ``btree`` base struct.
+//?     :param basesz: Size of the ``btree`` for a particular choice of key and value type
+//?     :param coff: Base-relative offset of the :ref:`bt_curr <type_bt_curr>` member
+//?                  in the ``base`` struct
+//?     :param rootoff: Base-relative offset of the memory allocated for the root node
+//?     :returns: Address of a handle suitable for referring to the given ``btree``, or
+//?               ``NULL`` on allocation failure
+void *scc_btree_impl_new_dyn(void *sbase, size_t basesz, size_t coff, size_t rootoff);
+
 //? .. c:function:: void *scc_btree_impl_with_order(void *base, size_t coff, size_t rootoff)
 //?
 //?     Like :ref:`scc_btree_impl_new <scc_btree_impl_new>` but verifies the order
@@ -335,6 +355,29 @@ inline void *scc_btree_impl_with_order(void *base, size_t coff, size_t rootoff) 
         return 0;
     }
     return scc_btree_impl_new(base, coff, rootoff);
+}
+
+//? .. c:function:: void *scc_btree_impl_with_order_dyn(void *sbase, size_t coff, size_t rootoff)
+//?
+//?     Like :ref:`scc_btree_impl_new_dyn <scc_btree_impl_new_dyn>` but verifies the order
+//?     in the base structure. Should it prove invalid, the function returns NULL
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: Base address of the ``btree``
+//?     :param coff: Base-relative offset of the :ref:`bt_curr <type_bt_curr>` member
+//?                  in the base struct
+//?     :param rootoff: Base-relative offset of the memory allocated for the root node
+//?     :returns: Address of a handle suitable for referring to the given ``btree``,
+//?               or :code:`NULL` if the order field is invalid
+inline void *scc_btree_impl_with_order_dyn(void *sbase, size_t basesz, size_t coff, size_t rootoff) {
+    unsigned order = ((struct scc_btree_base *)sbase)->bt_order;
+    if(order < 3u) {
+        return 0;
+    }
+    return scc_btree_impl_new_dyn(sbase, basesz, coff, rootoff);
 }
 
 //! .. _scc_btree_with_order:
@@ -375,7 +418,12 @@ inline void *scc_btree_impl_with_order(void *base, size_t coff, size_t rootoff) 
 //!     :code:`SCC_BTREE_DEFAULT_ORDER`. See :ref:`scc_btree_with_order <scc_btree_with_order>`
 //!     for more information.
 //!
-//!     The call cannot fail.
+//!     The call cannot fail. The ``btree`` is constructed on the caller's stack.
+//!
+//!     .. seealso:
+//!
+//!         :ref:`scc_bttree_new_dyn <scc_bttree_new_dyn>` for constructing a ``btree``
+//!         with default order on the heap.
 //!
 //!     :param type: The type to be stored in the B-tree
 //!     :param compare: Pointer to the comparison function to use
@@ -386,8 +434,60 @@ inline void *scc_btree_impl_with_order(void *base, size_t coff, size_t rootoff) 
             .bt_dataoff = offsetof(scc_btnode_impl_layout(type, SCC_BTREE_DEFAULT_ORDER), bt_data), \
             .bt_linkoff = offsetof(scc_btnode_impl_layout(type, SCC_BTREE_DEFAULT_ORDER), bt_links),\
             .bt_arena = scc_arena_new(scc_btnode_impl_layout(type, SCC_BTREE_DEFAULT_ORDER)),       \
-            .bt_compare = compare                                                                   \
+            .bt_compare = (compare)                                                                 \
         },                                                                                          \
+        offsetof(scc_btree_impl_layout(type, SCC_BTREE_DEFAULT_ORDER), bt_curr),                    \
+        offsetof(scc_btree_impl_layout(type, SCC_BTREE_DEFAULT_ORDER), bt_rootmem)                  \
+    )
+
+//! .. _scc_btree_with_order_dyn:
+//! .. c:function:: void *scc_btree_with_order_dyn(type, scc_bcompare compare, unsigned order)
+//!
+//!     Like :ref:`scc_btree_with_order <scc_btree_with_order>` except for the ``btree``
+//!     being allocated on the heap rather than on the caller's stack
+//!
+//!     :param type: The type to be stored in the B-tree
+//!     :param compare: Pointer to the comparison function to use
+//!     :param order: The :ref:`order <btree_order>` of the B-tree. Must be a value
+//!                   greater than 2
+//!     :returns: An opaque pointer to a ``btree`` allocated in the frame of the calling function,
+//!               or ``NULL`` if either the order is invalid or if memory allocation failed
+#define scc_btree_with_order_dyn(type, compare, order)                                              \
+    scc_btree_impl_with_order_dyn(&(scc_btree_impl_layout(type, order)) {                           \
+            .bt_order = (order),                                                                    \
+            .bt_dataoff = offsetof(scc_btnode_impl_layout(type, (order)), bt_data),                 \
+            .bt_linkoff = offsetof(scc_btnode_impl_layout(type, (order)), bt_links),                \
+            .bt_arena = scc_arena_new(scc_btnode_impl_layout(type, (order))),                       \
+            .bt_compare = (compare)                                                                 \
+        },                                                                                          \
+        sizeof(scc_btree_impl_layout(type, order)),                                                 \
+        offsetof(scc_btree_impl_layout(type, order), bt_curr),                                      \
+        offsetof(scc_btree_impl_layout(type, order), bt_rootmem)                                    \
+    )
+
+//! .. _scc_btree_new_dyn
+//! .. c:function:: void *scc_btree_new_dyn(type, scc_bcompare compare)
+//!
+//!     Like :ref:`scc_btree_new <scc_btree_new>` except for the fact that the ``btree`` is allocated
+//!     entirely on the heap.
+//!
+//!     .. note::
+//!
+//!         Unlike ``scc_btree_new``, a call to ``scc_btree_new_dyn`` may fail. The returned
+//!         pointer should always be checked for ``NULL``.
+//!
+//!     :param type: The type to be stored in the B-tree
+//!     :param compare: Pointer to the comparison function to use
+//!     :returns: An opaque pointer to a ``btree`` allocated on the heap, or ``NULL`` on allocation failure
+#define scc_btree_new_dyn(type, compare)                                                            \
+    scc_btree_impl_new_dyn(&(scc_btree_impl_layout(type, SCC_BTREE_DEFAULT_ORDER)) {                \
+            .bt_order = SCC_BTREE_DEFAULT_ORDER,                                                    \
+            .bt_dataoff = offsetof(scc_btnode_impl_layout(type, SCC_BTREE_DEFAULT_ORDER), bt_data), \
+            .bt_linkoff = offsetof(scc_btnode_impl_layout(type, SCC_BTREE_DEFAULT_ORDER), bt_links),\
+            .bt_arena = scc_arena_new(scc_btnode_impl_layout(type, SCC_BTREE_DEFAULT_ORDER)),       \
+            .bt_compare = (compare)                                                                 \
+        },                                                                                          \
+        sizeof(scc_btree_impl_layout(type, SCC_BTREE_DEFAULT_ORDER)),                               \
         offsetof(scc_btree_impl_layout(type, SCC_BTREE_DEFAULT_ORDER), bt_curr),                    \
         offsetof(scc_btree_impl_layout(type, SCC_BTREE_DEFAULT_ORDER), bt_rootmem)                  \
     )

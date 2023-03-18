@@ -512,7 +512,7 @@ void *scc_btmap_impl_new(void *base, size_t coff, size_t rootoff);
 //?     :param coff: Base-relative offset of the :ref:`btm_curr <kvpair_btm_curr>` member
 //?                  in the ``base`` struct
 //?     :param rootoff: Base-relative offset of the memory allocated for the root node
-//?     :returns: Address of a handle suitable for referring to the given ``btmap``, on
+//?     :returns: Address of a handle suitable for referring to the given ``btmap``, or
 //?               ``NULL`` on allocation failure
 void *scc_btmap_impl_new_dyn(void *sbase, size_t basesz, size_t coff, size_t rootoff);
 
@@ -526,7 +526,7 @@ void *scc_btmap_impl_new_dyn(void *sbase, size_t basesz, size_t coff, size_t roo
 //?         Internal use only
 //?
 //?     :param base: Base address of the ``btmap``
-//?     :param coff: Base-relative offset of the :ref:`bt_curr <type_bt_curr>` member
+//?     :param coff: Base-relative offset of the :ref:`btm_curr <kvpair_btm_curr>` member
 //?                  in the base struct
 //?     :param rootoff: Base-relative offset of the memory allocated for the root node
 //?     :returns: Address of a handle suitable for referring to the given ``btmap``,
@@ -549,7 +549,7 @@ inline void *scc_btmap_impl_with_order(void *base, size_t coff, size_t rootoff) 
 //?         Internal use only
 //?
 //?     :param base: Base address of the ``btmap``
-//?     :param coff: Base-relative offset of the :ref:`bt_curr <type_bt_curr>` member
+//?     :param coff: Base-relative offset of the :ref:`btm_curr <kvpair_btm_curr>` member
 //?                  in the base struct
 //?     :param rootoff: Base-relative offset of the memory allocated for the root node
 //?     :returns: Address of a handle suitable for referring to the given ``btmap``,

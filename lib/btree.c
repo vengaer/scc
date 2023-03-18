@@ -10,6 +10,7 @@
 #include <string.h>
 
 void *scc_btree_impl_with_order(void *base, size_t coff, size_t rootoff);
+void *scc_btree_impl_with_order_dyn(void *sbase, size_t basesz, size_t coff, size_t rootoff);
 size_t scc_btree_impl_npad(void const *btree);
 size_t scc_btree_order(void const *btree);
 size_t scc_btree_size(void const *btree);
@@ -1327,6 +1328,18 @@ void *scc_btree_impl_new(void *base, size_t coff, size_t rootoff) {
     scc_btree_set_bkoff(btree, fwoff);
     return btree;
 #undef base
+}
+
+void *scc_btree_impl_new_dyn(void *sbase, size_t basesz, size_t coff, size_t rootoff) {
+    struct scc_btree_base *base = malloc(basesz);
+    if(!base) {
+        return 0;
+    }
+
+    scc_memcpy(base, sbase, basesz);
+    void *btree = scc_btree_impl_new(base, coff, rootoff);
+    base->bt_dynalloc = 1;
+    return btree;
 }
 
 void scc_btree_free(void *btree) {
