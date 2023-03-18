@@ -2,7 +2,7 @@ excludePaths:
   - submodules/*
   - test/*
   - scc/vec.h
-  - src/algorithm.c
-  - src/arena.c
-  - src/svec.c
-  - src/vec.c
+  - lib/algorithm.c
+  - lib/arena.c
+  - lib/svec.c
+  - lib/vec.c

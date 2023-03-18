@@ -1,6 +1,6 @@
 excludePaths:
   - submodules/*
   - test/*
-  - src/canary.c
-  - src/simdemu/hashtab_swemu.c
-  - src/simdemu/swvec.h
+  - lib/canary.c
+  - lib/simdemu/hashtab_swemu.c
+  - lib/simdemu/swvec.h

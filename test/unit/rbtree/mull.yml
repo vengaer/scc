@@ -1,7 +1,7 @@
 excludePaths:
   - submodules/*
   - test/*
-  - src/svec.c
-  - src/arena.c
-  - src/ringdeque.c
-  - scc/ringdeque.h
+  - lib/svec.c
+  - lib/arena.c
+  - lib/ringdeque.c
+  - lib/ringdeque.h
