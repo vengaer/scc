@@ -4,4 +4,4 @@ excludePaths:
   - lib/svec.c
   - lib/arena.c
   - lib/ringdeque.c
-  - lib/ringdeque.h
+  - scc/ringdeque.h

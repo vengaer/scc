@@ -1,9 +1,9 @@
 excludePaths:
   - submodules/*
   - test/*
-  - lib/rbtree.h
   - lib/arena.c
   - lib/rbtree.c
   - lib/svec.c
   - lib/ringdeque.c
-  - lib/ringdeque.h
+  - scc/rbtree.h
+  - scc/ringdeque.h
