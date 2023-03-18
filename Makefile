@@ -73,10 +73,11 @@ all: $(alib) $(solink)
 
 $(call include-node,arch)
 $(call include-node,scc)
-$(call include-node,lib)
 $(call include-node,submodules)
+$(call include-node,lib)
 $(call include-node,test)
 $(call include-node,docs)
+$(call include-node,benchmark)
 
 $(dirs):
 	$(MKDIR) $(MKDIRFLAGS) $@

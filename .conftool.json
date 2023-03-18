@@ -39,7 +39,7 @@
             "name": "CONFIG_BENCHMARK_TARGET",
             "depends": ["CONFIG_BENCHMARK"],
             "entrytype": "string",
-            "choices": ["hashtab"],
+            "choices": ["btree"],
             "default": "",
             "help": "The container to benchmark"
         },
