@@ -39,6 +39,14 @@ static bool contains(int *tab, int value) {
     return false;
 }
 
+void test_scc_hashtab_new_dyn(void) {
+    scc_hashtab(int) hashtab = scc_hashtab_new_dyn(int, eq);
+    TEST_ASSERT_TRUE(!!hashtab);
+    struct scc_hashtab_base *base = scc_hashtab_inspect_base(hashtab);
+    TEST_ASSERT_TRUE(base->ht_dynalloc);
+    scc_hashtab_free(hashtab);
+}
+
 /* test_scc_hashtab_bkoff
  *
  * Verify that the ht_bkoff field has been set correctly
