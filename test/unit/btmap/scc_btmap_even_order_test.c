@@ -19,6 +19,8 @@ int ecompare(void const *l, void const *r) {
 
 void test_scc_btmap_new(void) {
     scc_btmap(int, int) btmap = scc_btmap_new(int, int, ecompare);
+    struct scc_btmap_base *base = scc_btmap_impl_base(btmap);
+    TEST_ASSERT_FALSE(base->btm_dynalloc);
     scc_btmap_free(btmap);
 }
 
@@ -28,6 +30,23 @@ void test_scc_btmap_with_order(void) {
     scc_btmap_free(btmap);
 
     btmap = scc_btmap_with_order(int, int, ecompare, 32);
+    TEST_ASSERT_EQUAL_UINT64(32ull, scc_btmap_order(btmap));
+    scc_btmap_free(btmap);
+}
+
+void test_scc_btmap_new_dyn(void) {
+    scc_btmap(int, int) btmap = scc_btmap_new_dyn(int, int, ecompare);
+    TEST_ASSERT_TRUE(!!btmap);
+    struct scc_btmap_base *base = scc_btmap_impl_base(btmap);
+    TEST_ASSERT_TRUE(base->btm_dynalloc);
+    scc_btmap_free(btmap);
+}
+
+void test_scc_btmap_with_order_dyn(void) {
+    scc_btmap(int, int) btmap = scc_btmap_with_order_dyn(int, int, ecompare, 32);
+    TEST_ASSERT_TRUE(!!btmap);
+    struct scc_btmap_base *base = scc_btmap_impl_base(btmap);
+    TEST_ASSERT_TRUE(base->btm_dynalloc);
     TEST_ASSERT_EQUAL_UINT64(32ull, scc_btmap_order(btmap));
     scc_btmap_free(btmap);
 }
