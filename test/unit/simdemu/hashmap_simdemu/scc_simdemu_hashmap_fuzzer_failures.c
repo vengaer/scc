@@ -14,6 +14,7 @@ static bool ueq(void const *left, void const *right) {
     return *(uint32_t const *)left == *(uint32_t const *)right;
 }
 
+#ifdef SCC_SIMD_ISA
 extern int scc_simd_support;
 static int simd_backup;
 
@@ -25,6 +26,10 @@ static void disable_simd(void) {
 static void restore_simd(void) {
     scc_simd_support = simd_backup;
 }
+#else
+#define disable_simd() (void)0
+#define restore_simd() (void)0
+#endif
 
 static void run_fuzzer_test(uint32_t const *restrict keys, uint16_t const *restrict vals, size_t n, size_t totsize) {
     disable_simd();

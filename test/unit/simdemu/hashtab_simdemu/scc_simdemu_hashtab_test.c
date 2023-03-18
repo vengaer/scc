@@ -11,6 +11,7 @@ static bool eq(void const *left, void const *right) {
     return *(int const *)left == *(int const *)right;
 }
 
+#ifdef SCC_SIMD_ISA
 extern int scc_simd_support;
 static int simd_backup;
 
@@ -22,6 +23,10 @@ static void disable_simd(void) {
 static void restore_simd(void) {
     scc_simd_support = simd_backup;
 }
+#else
+#define disable_simd() (void)0
+#define restore_simd() (void)0
+#endif
 
 static unsigned long long ident(void const *data, size_t len) {
     (void)len;
