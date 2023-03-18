@@ -17,7 +17,9 @@ scc_simd_support:                                               # Used to cache 
 # assumptions made are that
 #
 # * No registers but r10 and r11 are scrach
-# * Uses the ZF instead of eax to return
+# * Uses the ZF instead of eax for "return value"
+# * rip must be aligned to an 8-byte boundary, 16-byte is
+#   optional
 #
 # Params:
 #
