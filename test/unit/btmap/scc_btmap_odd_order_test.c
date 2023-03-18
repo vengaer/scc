@@ -14,6 +14,12 @@ int ocompare(void const *l, void const *r) {
     return *(int const *)l - *(int const *)r;
 }
 
+void test_scc_btmap_with_order_3_dyn(void) {
+    scc_btmap(int, int) btmap = scc_btmap_with_order_dyn(int, int, ocompare, 3);
+    TEST_ASSERT_TRUE(!!btmap);
+    scc_btmap_free(btmap);
+}
+
 void test_scc_btmap_insert_odd_order(void) {
     scc_btmap(int, int) btmap = scc_btmap_with_order(int, int, ocompare, 5);
 
