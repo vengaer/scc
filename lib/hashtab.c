@@ -325,6 +325,20 @@ void *scc_hashtab_impl_new(struct scc_hashtab_base *base, size_t coff, size_t md
     return tab;
 }
 
+void *scc_hashtab_impl_new_dyn(scc_hashtab_eq eq, scc_hashtab_hash hash, size_t cap, size_t tabsz, size_t coff, size_t mdoff) {
+    struct scc_hashtab_base *base = malloc(tabsz);
+    if(!base) {
+        return 0;
+    }
+
+    base->ht_eq = eq;
+    base->ht_hash = hash;
+    base->ht_capacity = cap;
+    void *tab = scc_hashtab_impl_new(base, coff, mdoff);
+    base->ht_dynalloc = 1;
+    return tab;
+}
+
 unsigned long long scc_hashtab_fnv1a(void const *data, size_t size) {
 #define SCC_FNV_OFFSET_BASIS 0xcbf29ce484222325ull
 #define SCC_FNV_PRIME 0x100000001b3ull

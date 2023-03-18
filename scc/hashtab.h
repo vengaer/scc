@@ -306,6 +306,7 @@ struct scc_hashtab_base {
         SCC_CANARY_INJECT(SCC_HASHTAB_CANARYSZ)                             \
     }
 
+//? .. _scc_hashtab_impl_new:
 //? .. c:function:: void *scc_hashtab_impl_new(struct scc_hashtab_base *base, size_t coff, size_t mdoff)
 //?
 //?     Initialize the given hash table and return a handle to it.
@@ -320,6 +321,24 @@ struct scc_hashtab_base {
 //?     :param mdoff: Offset of :code:`ht_meta` relative the address of :c:expr`*base`
 void *scc_hashtab_impl_new(struct scc_hashtab_base *base, size_t coff, size_t mdoff);
 
+//? .. c:function:: void *scc_hashtab_impl_new_dyn(scc_hashtab_eq eq, scc_hashtab_hash hash, \
+//?     size_t tabsz, size_t coff, size_t mdoff)
+//?
+//?     Like :ref:`scc_hashtab_impl_new <scc_hashtab_impl_new>` except for the
+//?     hash table is allocated on the heap.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param eq: Equality comparison function
+//?     :param hash: Hash function
+//?     :param cap: Table capacity
+//?     :param tabsz: Size of the hash table
+//?     :param coff: Base-relative offset of ``ht_curr``
+//?     :param mdoff: Base-relative offset of ``ht_meta``
+void *scc_hashtab_impl_new_dyn(scc_hashtab_eq eq, scc_hashtab_hash hash, size_t cap, size_t tabsz, size_t coff, size_t mdoff);
+
 //! .. _scc_hashtab_with_hash:
 //! .. c:function:: void *scc_hashtab_with_hash(type, scc_hashtab_eq eq, scc_hashtab_hash hash)
 //!
@@ -328,7 +347,11 @@ void *scc_hashtab_impl_new(struct scc_hashtab_base *base, size_t coff, size_t md
 //!     :ref:`Scope and Lifetimes <scope_and_lifetimes>` for an in-depth explanation of how to
 //!     safely manage the handle.
 //!
-//!     The call cannot fail.
+//!     The call cannot fail. The hash table is constructed on the caller's stack
+//!
+//!     .. seealso::
+//!
+//!         :ref:`scc_hashtab_with_hash_dyn` for a dynamically allocated hash table
 //!
 //!     The returned pointer must be passed to :ref:`scc_hashtab_free <scc_hashtab_free>` to ensure
 //!     allocated memory is reclaimed.
@@ -354,11 +377,37 @@ void *scc_hashtab_impl_new(struct scc_hashtab_base *base, size_t coff, size_t md
 //!         /* tab is no longer valid */
 #define scc_hashtab_with_hash(type, eq, hash)                               \
     scc_hashtab_impl_new(                                                   \
-        (void *)&(scc_hashtab_impl_layout(type)){                           \
+        (void *)&(scc_hashtab_impl_layout(type)) {                          \
             .ht_eq = eq,                                                    \
             .ht_hash = hash,                                                \
             .ht_capacity = SCC_HASHTAB_STACKCAP                             \
         },                                                                  \
+        offsetof(scc_hashtab_impl_layout(type), ht_curr),                   \
+        offsetof(scc_hashtab_impl_layout(type), ht_meta)                    \
+    )
+
+//! .. _scc_hashtab_with_hash_dyn
+//! .. c:function:: void *scc_hashtab_with_hash_dyn(type, scc_hashtab_eq eq, scc_hashtab_hash hash)
+//!
+//!     Like :ref:`scc_hashtab_with_hash <scc_hashtab_with_hash>` except for
+//!     the table being allocated on the heap rather than on the stack.
+//!
+//!     .. note::
+//!
+//!         Unlike :ref:`scc_hashtab_with_hash`, calls to ``scc_hashtab_with_hash_dyn`` may fail.
+//!         The returned pointer should always be ``NULL`` checked.
+//!
+//!     :param type: Type of the elements to be stored in the table
+//!     :param eq: Pointer to function to be used for equality comparison
+//!     :param hash: Pointer to function to be used for key hashing
+//!     :returns: Handle to a newly created hash table, or ``NULL`` on
+//!               allocation failure
+#define scc_hashtab_with_hash_dyn(type, eq, hash)                           \
+    scc_hashtab_impl_new_dyn(                                               \
+        eq,                                                                 \
+        hash,                                                               \
+        SCC_HASHTAB_STACKCAP,                                               \
+        sizeof(scc_hashtab_impl_layout(type)),                              \
         offsetof(scc_hashtab_impl_layout(type), ht_curr),                   \
         offsetof(scc_hashtab_impl_layout(type), ht_meta)                    \
     )
@@ -372,7 +421,12 @@ void *scc_hashtab_impl_new(struct scc_hashtab_base *base, size_t coff, size_t md
 //!     :ref:`its documentation <scc_hashtab_with_hash>` for restrictions and common
 //!     pitfalls.
 //!
-//!     The call cannot fail.
+//!     The call cannot fail. The hash table is constructed on the caller's stack.
+//!
+//!     .. seealso::
+//!
+//!         :ref:`scc_hashtab_new_dyn <scc_hashtab_new_dyn>` for a heap-allocated
+//!         hash table with default hash function
 //!
 //!     The returned pointer must be passed to :ref:`scc_hashtab_free <scc_hashtab_free>` to ensure
 //!     allocated memory is reclaimed.
@@ -388,6 +442,23 @@ void *scc_hashtab_impl_new(struct scc_hashtab_base *base, size_t coff, size_t md
 //!         :ref:`scc_hashtab_with_hash <scc_hashtab_with_hash>`
 #define scc_hashtab_new(type, eq)                                           \
     scc_hashtab_with_hash(type, eq, scc_hashtab_fnv1a)
+
+//! .. _scc_hashtab_new_dyn
+//! .. c:function:: void *scc_hashtab_new_dyn(type, scc_hashtab_eq eq)
+//!
+//!     Like :ref:`scc_hashtab_new <scc_hashtab_new>` except for the hash
+//!     table being allocated on the heap rather than on the stack.
+//!
+//!     .. note::
+//!
+//!         Unlike :ref:`scc_hashtab_new <scc_hashtab_new>`, calls to ``scc_hashtab_new_dyn``
+//!         may fail. The returned pointer should always be ``NULL``-checked.
+//!
+//!     :param type: Type of the elements to be stored in the table
+//!     :param eq: Pointer to function to be used for equality comparison
+//!     :returns: Handle to a newly created hash table, or ``NULL`` on allocation failure
+#define scc_hashtab_new_dyn(type, eq)                                       \
+    scc_hashtab_with_hash_dyn(type, eq, scc_hashtab_fnv1a)
 
 //? .. c:function:: size_t scc_hashtab_impl_bkpad(void const *tab)
 //?
