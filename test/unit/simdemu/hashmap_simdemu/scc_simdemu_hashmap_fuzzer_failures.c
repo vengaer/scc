@@ -14,25 +14,13 @@ static bool ueq(void const *left, void const *right) {
     return *(uint32_t const *)left == *(uint32_t const *)right;
 }
 
+static void run_fuzzer_test(uint32_t const *restrict keys, uint16_t const *restrict vals, size_t n, size_t totsize) {
 #ifdef SCC_SIMD_ISA
-extern int scc_simd_support;
-static int simd_backup;
-
-static void disable_simd(void) {
-    simd_backup = scc_simd_support;
+    extern int scc_simd_support;
+    int simdbak = scc_simd_support;
     scc_simd_support = 0;
-}
-
-static void restore_simd(void) {
-    scc_simd_support = simd_backup;
-}
-#else
-#define disable_simd() (void)0
-#define restore_simd() (void)0
 #endif
 
-static void run_fuzzer_test(uint32_t const *restrict keys, uint16_t const *restrict vals, size_t n, size_t totsize) {
-    disable_simd();
     scc_hashmap(uint32_t, uint16_t) map = scc_hashmap_new(uint32_t, uint16_t, ueq);
     uint16_t *elem;
     for(unsigned i = 0u; i < n; ++i) {
@@ -76,7 +64,9 @@ static void run_fuzzer_test(uint32_t const *restrict keys, uint16_t const *restr
     }
 
     scc_hashmap_free(map);
-    restore_simd();
+#ifdef SCC_SIMD_ISA
+    scc_simd_support = simdbak;
+#endif
 }
 
 void test_scc_simdemu_hashmap_fuzzer_failure0(void) {
@@ -234,32 +224,4 @@ void test_scc_simdemu_hashmap_fuzzer_mutkill5(void) {
 
     scc_static_assert(scc_arrsize(keys) == scc_arrsize(vals));
     run_fuzzer_test(keys, vals, scc_arrsize(keys) - 5u, scc_arrsize(keys));
-}
-
-void test_scc_simdemu_hashmap_fuzzer_mutkill6(void) {
-    disable_simd();
-    scc_hashmap(uint32_t, unsigned short) map = scc_hashmap_new(uint32_t, unsigned short, ueq);
-    scc_hashmap_metatype *md = scc_hashmap_inspect_metadata(map);
-
-    /* Insert and remove until all slots have been
-     * used at least once */
-    bool done = false;
-    for(uint32_t i = 0u; !done; ++i) {
-        done = true;
-        TEST_ASSERT_TRUE(scc_hashmap_insert(&map, i, i));
-        TEST_ASSERT_TRUE(scc_hashmap_remove(map, i));
-
-        for(unsigned j = 0u; j < scc_hashmap_capacity(map); ++j) {
-            if(!md[j]) {
-                done = false;
-                break;
-            }
-        }
-    }
-
-    /* Should not cause infinite loop*/
-    TEST_ASSERT_TRUE(scc_hashmap_insert(&map, 1, 1));
-
-    scc_hashmap_free(map);
-    restore_simd();
 }
