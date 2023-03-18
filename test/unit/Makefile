@@ -23,8 +23,6 @@ $(strip
         $(wildcard $(inspectdir)/$(__snode)*.$(cext)))
     $(patsubst $(asdir)/%.$(asext),$(asbuilddir)/%.$(oext),
         $(wildcard $(patsubst %,$(asdir)/%*.$(asext),$(__snode) $($(__node)_deps) $(simd_isa)_isa)))
-    $(patsubst $(simdemudir)/%.$(cext),$(simdemubuilddir)/%.$(oext),
-        $(wildcard $(patsubst %,$(simdemudir)/%*.$(cext),$(__snode) $($(__node)_deps))))
     $(if $($(__snode)_deps),
         $(patsubst $(inspectdir)/%.$(cext),$(inspectbuilddir)/%.$(oext),
             $(wildcard $(addprefix $(inspectdir)/*,$(addsuffix *.$(cext),$($(__node)_deps)))))))
