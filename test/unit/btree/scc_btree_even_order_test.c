@@ -16,6 +16,8 @@ int ecompare(void const *l, void const *r) {
 
 void test_scc_btree_new(void) {
     scc_btree(int) btree = scc_btree_new(int, ecompare);
+    struct scc_btree_base *base = scc_btree_impl_base(btree);
+    TEST_ASSERT_FALSE(base->bt_dynalloc);
     scc_btree_free(btree);
 }
 
@@ -26,6 +28,23 @@ void test_scc_btree_with_order(void) {
 
     btree = scc_btree_with_order(int, ecompare, 32);
     TEST_ASSERT_EQUAL_UINT64(32ull, scc_btree_order(btree));
+    scc_btree_free(btree);
+}
+
+void test_scc_btree_new_dyn(void) {
+    scc_btree(int) btree = scc_btree_new_dyn(int, ecompare);
+    TEST_ASSERT_TRUE(!!btree);
+    struct scc_btree_base *base = scc_btree_impl_base(btree);
+    TEST_ASSERT_TRUE(base->bt_dynalloc);
+    scc_btree_free(btree);
+}
+
+void test_scc_btree_with_order_dyn(void) {
+    scc_btree(int) btree = scc_btree_with_order_dyn(int, ecompare, 22u);
+    TEST_ASSERT_TRUE(!!btree);
+    struct scc_btree_base *base = scc_btree_impl_base(btree);
+    TEST_ASSERT_TRUE(base->bt_dynalloc);
+    TEST_ASSERT_EQUAL_UINT64(22ull, scc_btree_order(btree));
     scc_btree_free(btree);
 }
 
