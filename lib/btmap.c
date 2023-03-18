@@ -11,6 +11,7 @@
 
 size_t scc_btmap_order(void const *btmap);
 void *scc_btmap_impl_with_order(void *base, size_t coff, size_t rootoff);
+void *scc_btmap_impl_with_order_dyn(void *sbase, size_t basesz, size_t coff, size_t rootoff);
 size_t scc_btmap_impl_npad(void const *btmap);
 size_t scc_btmap_size(void const *btmap);
 
@@ -1474,7 +1475,6 @@ static inline void scc_btmap_impl_free(struct scc_btmap_base *base) {
     }
 }
 
-
 void *scc_btmap_impl_new(void *base, size_t coff, size_t rootoff) {
 #define base ((struct scc_btmap_base *)base)
     size_t fwoff = coff - offsetof(struct scc_btmap_base, btm_fwoff) - sizeof(base->btm_fwoff);
@@ -1485,6 +1485,18 @@ void *scc_btmap_impl_new(void *base, size_t coff, size_t rootoff) {
     scc_btmap_set_bkoff(btmap, fwoff);
     return btmap;
 #undef base
+}
+
+void *scc_btmap_impl_new_dyn(void *sbase, size_t basesz, size_t coff, size_t rootoff) {
+    struct scc_btmap_base *base = malloc(basesz);
+    if(!base) {
+        return 0;
+    }
+
+    scc_memcpy(base, sbase, basesz);
+    void *btmap = scc_btmap_impl_new(base, coff, rootoff);
+    base->btm_dynalloc = 1;
+    return btmap;
 }
 
 void scc_btmap_free(void *btmap) {
