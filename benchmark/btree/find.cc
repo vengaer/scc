@@ -2,33 +2,35 @@
 #include <instrumentation/types.h>
 
 #include "btree_compat.h"
-#include "insert.hpp"
+#include "find.hpp"
 
-#include <cstddef>
-#include <cstdlib>
-
-extern "C" bool scc_btree_impl_insert(void *addr, size_t size);
+extern "C" void const *scc_btree_impl_find(void const *btree, size_t elemsize);
+extern "C" bool scc_btree_impl_insert(void *btree, size_t elemsize);
 
 static bm_type *tree;
 static std::vector<bm_type> data;
 
-void btree_insert_setup(benchmark::State const& state) noexcept {
+void btree_find_setup(benchmark::State const& state) {
     tree = static_cast<bm_type *>(btree_new());
     if(!tree) {
         std::abort();
     }
     data = rng::shuffled_iota(state);
+    for(auto const v : data) {
+        *tree = v;
+        scc_btree_impl_insert(&tree, sizeof(*tree));
+    }
 }
 
-void btree_insert_teardown(benchmark::State const&) noexcept {
+void btree_find_teardown(benchmark::State const&) noexcept {
     btree_free(tree);
 }
 
-void btree_insert(benchmark::State& state) {
+void btree_find(benchmark::State& state) {
     for(auto _ : state) {
         for(auto const v : data) {
             *tree = v;
-            scc_btree_impl_insert(&tree, sizeof(*tree));
+            scc_btree_impl_find(tree, sizeof(*tree));
         }
     }
     state.SetBytesProcessed(static_cast<long long>(state.iterations()) *
