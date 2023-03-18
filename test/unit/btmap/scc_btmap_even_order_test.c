@@ -51,6 +51,11 @@ void test_scc_btmap_with_order_dyn(void) {
     scc_btmap_free(btmap);
 }
 
+void test_scc_btmap_with_invalid_order_dyn(void) {
+    scc_btmap(int, int) btmap = scc_btmap_with_order_dyn(int, int, ecompare, 2);
+    TEST_ASSERT_EQUAL_PTR(0, btmap);
+}
+
 void test_scc_btmap_insert_replace(void) {
     scc_btmap(int, int) btmap = scc_btmap_new(int, int, ecompare);
     TEST_ASSERT_TRUE(scc_btmap_insert(&btmap, 1, 1));
