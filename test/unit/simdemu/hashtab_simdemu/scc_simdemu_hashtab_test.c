@@ -106,3 +106,16 @@ void test_scc_simdemu_hashtab_kill_find_mutants(void) {
     scc_hashtab_free(tab);
     restore_simd();
 }
+
+void test_scc_simdemu_hashtab_insert_residual(void) {
+    disable_simd();
+    scc_hashtab(int) tab = scc_hashtab_new(int, eq);
+    scc_hashtab_metatype *md = scc_hashtab_inspect_metadata(tab);
+    memset(md + 1, ~(((unsigned char)~0) >> 1u), scc_hashtab_capacity(tab) + SCC_HASHTAB_GUARDSZ - 1u);
+
+    /* Should not cause infinite loop */
+    TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, 1));
+
+    scc_hashtab_free(tab);
+    restore_simd();
+}
