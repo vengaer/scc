@@ -148,5 +148,27 @@ void test_scc_simdemu_hashtab_insert_first(void) {
 
     TEST_ASSERT_FALSE(scc_hashtab_insert(&tab, 20));
 
+    scc_hashtab_free(tab);
+    restore_simd();
+}
+
+void test_scc_simdemu_hashtab_insert_failure_bulk(void) {
+    disable_simd();
+    scc_hashtab(int) tab = scc_hashtab_with_hash(int, eq, seventeen);
+    struct scc_hashtab_base *base = scc_hashtab_impl_base(tab);
+
+    scc_hashtab_metatype *md = scc_hashtab_inspect_metadata(tab);
+    unsigned char const msb = ~(((unsigned char)~0) >> 1u);
+    memset(md, msb | 0x01, scc_hashtab_capacity(tab) + SCC_HASHTAB_GUARDSZ - 1u);
+
+    md[28] = msb;
+
+    int *data = scc_hashtab_inspect_data(tab);
+    data[28] = 32;
+    base->ht_size = 1u;
+
+    TEST_ASSERT_FALSE(scc_hashtab_insert(&tab, 32));
+
+    scc_hashtab_free(tab);
     restore_simd();
 }
