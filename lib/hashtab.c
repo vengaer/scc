@@ -201,8 +201,7 @@ static struct scc_hashtab_base *scc_hashtab_realloc(
 
     scc_static_assert(sizeof(scc_hashtab_metatype) == 1u);
     size_t size = mdoff + cap + SCC_HASHTAB_GUARDSZ;
-    /* Kill mutant */
-    assert(size > mdoff + cap);
+    scc_when_mutating(assert(size > mdoff + cap));
 #ifdef SCC_CANARY_ENABLED
     size += SCC_HASHTAB_CANARYSZ;
 #endif
@@ -414,8 +413,7 @@ void *scc_hashtab_clone(void const *tab) {
     struct scc_hashtab_base const *obase = scc_hashtab_impl_base_qual(tab, const);
     scc_static_assert(sizeof(scc_hashtab_metatype) == 1);
     size_t sz = obase->ht_mdoff + obase->ht_capacity + SCC_HASHTAB_GUARDSZ;
-    /* Kill mutant */
-    assert(sz > obase->ht_mdoff + obase->ht_capacity);
+    scc_when_mutating(assert(sz > obase->ht_mdoff + obase->ht_capacity));
 #ifdef SCC_CANARY_ENABLED
     sz += SCC_HASHTAB_CANARYSZ;
 #endif
