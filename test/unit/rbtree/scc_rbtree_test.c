@@ -16,6 +16,15 @@ int compare(void const *left, void const *right) {
 
 void test_scc_rbtree_new(void) {
     scc_rbtree(int) tree = scc_rbtree_new(int, compare);
+    struct scc_rbtree_base *base = scc_rbtree_impl_base(tree);
+    TEST_ASSERT_FALSE(base->rb_dynalloc);
+    scc_rbtree_free(tree);
+}
+
+void test_scc_rbtree_new_dyn(void) {
+    scc_rbtree(int) tree = scc_rbtree_new_dyn(int, compare);
+    struct scc_rbtree_base *base = scc_rbtree_impl_base(tree);
+    TEST_ASSERT_TRUE(base->rb_dynalloc);
     scc_rbtree_free(tree);
 }
 
