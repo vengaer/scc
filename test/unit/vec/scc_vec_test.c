@@ -510,3 +510,16 @@ void test_scc_vec_from_dyn_over_cap(void) {
     TEST_ASSERT_EQUAL_INT32(1, vec[SCC_VEC_STATIC_CAPACITY]);
     scc_vec_free(vec);
 }
+
+void test_scc_vec_from_dyn_no_overalloc(void) {
+    TEST_ASSERT_EQUAL_UINT32(32u, SCC_VEC_STATIC_CAPACITY);
+    scc_vec(int) vec = scc_vec_from_dyn(int,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0
+    );
+    TEST_ASSERT_EQUAL_UINT64(SCC_VEC_STATIC_CAPACITY, scc_vec_capacity(vec));
+    TEST_ASSERT_EQUAL_UINT64(SCC_VEC_STATIC_CAPACITY - 1u, scc_vec_size(vec));
+    scc_vec_free(vec);
+}
