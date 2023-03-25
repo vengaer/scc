@@ -14,6 +14,13 @@ static int compare(void const *left, void const *right) {
     return *(int const *)left - *(int const *)right;
 }
 
+void test_scc_rbmap_new_dyn(void) {
+    scc_rbmap(int, int) rbmap = scc_rbmap_new_dyn(int, int, compare);
+    struct scc_rbtree_base *base = scc_rbtree_impl_base(rbmap);
+    TEST_ASSERT_TRUE(base->rb_dynalloc);
+    scc_rbmap_free(rbmap);
+}
+
 void test_scc_rbmap_insert(void) {
     scc_inspect_mask mask;
     scc_rbmap(int, int) rbmap = scc_rbmap_new(int, int, compare);
