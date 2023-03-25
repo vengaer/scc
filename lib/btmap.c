@@ -1549,8 +1549,7 @@ void *scc_btmap_clone(void const *btmap) {
     assert(kvsz >= obase->btm_keysize + obase->btm_valsize);
 
     size_t bytesz = basesz + kvsz;
-    /* Kill Mull mutant */
-    assert(bytesz > basesz);
+    scc_when_mutating(assert(bytesz > basesz));
 
     struct scc_btmap_base *nbase = malloc(bytesz);
     if(!nbase) {
