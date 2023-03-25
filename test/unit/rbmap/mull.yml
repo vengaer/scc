@@ -3,7 +3,7 @@ excludePaths:
   - test/*
   - lib/arena.c
   - lib/rbtree.c
-  - lib/svec.c
+  - lib/vec.c
   - lib/ringdeque.c
   - scc/rbtree.h
   - scc/ringdeque.h

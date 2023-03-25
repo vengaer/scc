@@ -175,7 +175,6 @@ $(call include-node,rbmap)
 $(call include-node,rbtree)
 $(call include-node,ringdeque)
 $(call include-node,stack)
-$(call include-node,svec)
 $(call include-node,vec)
 $(call include-node,simdemu)
 

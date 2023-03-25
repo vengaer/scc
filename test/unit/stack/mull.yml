@@ -1,5 +1,4 @@
 excludePaths:
   - submodules/*
   - test/*
-  - lib/svec.c
   - lib/vec.c

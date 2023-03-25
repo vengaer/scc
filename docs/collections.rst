@@ -17,7 +17,6 @@ Array-Like Collections
 .. toctree::
 
     ringdeque/index
-    svec/index
     vec/index
 
 Trees

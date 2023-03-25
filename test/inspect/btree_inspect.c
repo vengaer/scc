@@ -2,7 +2,6 @@
 
 #include <scc/btree.h>
 #include <scc/stack.h>
-#include <scc/svec.h>
 #include <scc/vec.h>
 
 #include <assert.h>
@@ -104,8 +103,8 @@ void scc_btree_impl_inspect_dump(void const *restrict btree, size_t elemsize, FI
         scc_vec(unsigned char) bytes;
     };
 
-    scc_svec(struct lvlent) lvls = scc_svec_new(struct lvlent);
-    assert(scc_svec_reserve(&lvls, scc_btree_size(btree)));
+    scc_vec(struct lvlent) lvls = scc_vec_new(struct lvlent);
+    assert(scc_vec_reserve(&lvls, scc_btree_size(btree)));
 
     unsigned lvl = 0u;
     unsigned max_lvl = 0u;
@@ -132,12 +131,12 @@ void scc_btree_impl_inspect_dump(void const *restrict btree, size_t elemsize, FI
         else if(++ctx->idx >= ctx->node->bt_nkeys) {
                 struct lvlent ent = {
                     .lvl = lvl--,
-                    .bytes = scc_vec_new(unsigned char)
+                    .bytes = scc_vec_new_dyn(unsigned char)
                 };
 
-                scc_vec_resize(ent.bytes, ctx->node->bt_nkeys * elemsize);
+                scc_vec_resize(&ent.bytes, ctx->node->bt_nkeys * elemsize);
                 memcpy(&ent.bytes[0], (unsigned char *)ctx->node + base->bt_dataoff, scc_vec_size(ent.bytes));
-                scc_svec_push(&lvls, ent);
+                scc_vec_push(&lvls, ent);
 
                 scc_stack_pop(stack);
         }
@@ -147,7 +146,7 @@ void scc_btree_impl_inspect_dump(void const *restrict btree, size_t elemsize, FI
     struct lvlent *iter;
     for(unsigned i = 0u; i <= max_lvl; ++i) {
         (void)fprintf(fp, "%u: ", i);
-        scc_svec_foreach(iter, lvls) {
+        scc_vec_foreach(iter, lvls) {
             if(iter->lvl == i) {
                 for(unsigned j = 0u; j < scc_vec_size(iter->bytes); ++j) {
                     if(!(j % elemsize)) {
@@ -166,12 +165,12 @@ void scc_btree_impl_inspect_dump(void const *restrict btree, size_t elemsize, FI
     (void)fprintf(fp, "Total elements: %u\n", total);
     (void)fputs("--  end  --\n", fp);
 
-    scc_svec_foreach(iter, lvls) {
+    scc_vec_foreach(iter, lvls) {
         scc_vec_free(iter->bytes);
     }
 
     scc_stack_free(stack);
-    scc_svec_free(lvls);
+    scc_vec_free(lvls);
 }
 
 size_t scc_btree_inspect_size(void const *btree) {

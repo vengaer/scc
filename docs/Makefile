@@ -23,7 +23,6 @@ $(call include-node,hashtab)
 $(call include-node,rbmap)
 $(call include-node,rbtree)
 $(call include-node,stack)
-$(call include-node,svec)
 $(call include-node,vec)
 
 $(__docs)&: $(__node_src) $(__all_rstsrc) $(__docgen) $(__conf) | $(__node_builddir)

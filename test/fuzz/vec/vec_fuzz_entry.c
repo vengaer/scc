@@ -1,8 +1,8 @@
-#include "svec_fuzz_erase.h"
-#include "svec_fuzz_push_pop.h"
-#include "svec_fuzz_traversal.h"
+#include "vec_fuzz_erase.h"
+#include "vec_fuzz_push_pop.h"
+#include "vec_fuzz_traversal.h"
 
-#include <scc/svec.h>
+#include <scc/vec.h>
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -24,15 +24,15 @@ int LLVMFuzzerTestOneInput(uint8_t const *data, size_t size) {
 
     memcpy(buf, data, size * sizeof(*buf));
 
-    if(!svec_fuzz_push_pop(buf, size)) {
+    if(!vec_fuzz_push_pop(buf, size)) {
         goto epilogue;
     }
 
-    if(!svec_fuzz_erase(buf, size)) {
+    if(!vec_fuzz_erase(buf, size)) {
         goto epilogue;
     }
 
-    if(!svec_fuzz_traversal(buf, size)) {
+    if(!vec_fuzz_traversal(buf, size)) {
         goto epilogue;
     }
 

@@ -1,98 +1,113 @@
 #include <scc/vec.h>
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
 enum { SCC_VEC_MAX_CAPACITY_INCREASE = 4096 };
 
-size_t scc_vec_impl_npad(void const*vec);
+size_t scc_vec_impl_npad(void const *vec);
 size_t scc_vec_size(void const *vec);
 size_t scc_vec_capacity(void const *vec);
 bool scc_vec_empty(void const *vec);
 void scc_vec_pop(void *vec);
 void scc_vec_clear(void *vec);
+bool scc_vec_is_allocd(void const *vec);
 
-/* scc_vec_bytesize
- *
- * Return the size a vector with the given capacity, element size
- * and number of padding bytes would have in bytes
- *
- * size_t capacity
- *      The would-be capacity of the vector
- *
- * size_t elemsize
- *      The would-be size of each element in the vector
- *
- * size_t npad
- *      The would-be number of paddign bytes between sv_dynalloc and sv_buffer
- */
+//? .. c:function:: size_t scc_vec_bytesize(size_t capacity, size_t elemsize, size_t npad)
+//?
+//?     Compute the size in bytes that an vec with the given capacity, element size
+//?     and number of padding bytes would have.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param capacity: The capacity of the hypothetical vec
+//?     :param elemsize: The size of the elements in the hypothetical vec
+//?     :param npad: The number of padding bytes between
+//?                  :ref:`sv_dynalloc <unsigned_char_sv_dynalloc>` and
+//?                  :ref:`sv_buffer <type_sv_buffer>` in the hypothetical vec
+//?     :returns: The size of the hypothetical vec, in bytes
 static inline size_t scc_vec_bytesize(size_t capacity, size_t elemsize, size_t npad) {
     return capacity * elemsize + sizeof(struct scc_vec_base) + npad;
 }
 
-/* scc_vec_calc_new_capacity
- *
- * Calculate capacity to be allocated for upcoming resize
- *
- * size_t current
- *      Current capacity of the vector
- */
+//? .. size_t scc_vec_calc_new_capacity(size_t current)
+//?
+//?     Calculate capacity after next size increase of an vec
+//?     with the given capacity.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param current: Current capacity of the vec
+//?     :returns: The size the vec would have after the next sizeup
 static inline size_t scc_vec_calc_new_capacity(size_t current) {
-    return current + (current < SCC_VEC_MAX_CAPACITY_INCREASE ?
-                                (current | 1) : SCC_VEC_MAX_CAPACITY_INCREASE);
+    if(current > SCC_VEC_MAX_CAPACITY_INCREASE) {
+        return current + SCC_VEC_MAX_CAPACITY_INCREASE;
+    }
+    return current << 1u | 1u;
 }
 
-/* scc_vec_alloc
- *
- * Allocate and initialize an vec to be filled in later
- *
- * size_t nbytes
- *      Number of bytes to allocate
- *
- * size_t nelemes
- *      Number of elements that are to inserted (done separately)
- *
- * size_t npad
- *      Number of padding bytes between sv_dynalloc and sv_buffer
- */
+//? .. c:function:: struct scc_vec_base *scc_vec_alloc(\
+//?        size_t nbytes, size_t nelems, size_t npad)
+//?
+//?     Allocate and initialize an vec base struct
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param nbytes: Number of bytes to allocate
+//?     :param nelems: Number of elements that are to be inserted
+//?                    by calling function
+//?     :param npad: Number of padding bytes between the
+//?                  :ref:`sv_dynalloc <unsigned_char_sv_dynalloc>`
+//?                  and :ref:`sv_buffer <type_sv_buffer>` fields
+//?                  in the vec.
+//?     :returns: Pointer to a newly allocated vec
 static struct scc_vec_base *scc_vec_alloc(size_t nbytes, size_t nelems, size_t npad) {
     struct scc_vec_base *v = malloc(nbytes);
     if(!v) {
         return 0;
     }
     v->sv_size = nelems;
-    v->sv_buffer[npad - 1u] = npad - sizeof(unsigned char);
+    v->sv_buffer[npad - 2u] = npad - 2 * sizeof(unsigned char);
+    v->sv_buffer[npad - 1u] = 1u;
     return v;
 }
 
-/* scc_vec_grow
- *
- * Reallocate the vector. Return true on success
- *
- * void *restrict *vec
- *      Pointer to the vec instance to be reallocated
- *
- * size_t capacity
- *      The new capacity of the vector
- *
- * size_t elemsize
- *      Size of each element in the vector
- */
-static bool scc_vec_grow(void **vec, size_t capacity, size_t elemsize) {
+//? .. c:function:: _Bool scc_vec_grow(void *restrict *vec, size_t capacity, size_t elemsize)
+//?
+//?     Reallocate the vec with increased capacity
+//?
+//?     :param vec: Address of the handle to the vec to be reallocated
+//?     :param cpacity: Desired capacity of the vec
+//?     :param elemsize: Size of the elements in the vec
+//?     :returns: A :code:`_Bool` indicating whether the capacity of the vec was
+//?               successfully increased
+//?     :retval true: The vec was successfully reallocated
+//?     :retval false: Memory allocation failure
+static bool scc_vec_grow(void *restrict *vec, size_t capacity, size_t elemsize) {
     struct scc_vec_base *v;
     size_t const npad = scc_vec_impl_npad(*vec);
     size_t const nbytes = scc_vec_bytesize(capacity, elemsize, npad);
 
-    if(!scc_vec_capacity(*vec)) {
-        v = scc_vec_alloc(nbytes, 0u, npad);
+    if(!scc_vec_is_allocd(*vec)) {
+        v = scc_vec_alloc(nbytes, scc_vec_size(*vec), npad);
+        if(!v) {
+            return false;
+        }
+        memcpy(v->sv_buffer + npad, *vec, scc_vec_size(*vec) * elemsize);
     }
     else {
         v = realloc(scc_vec_impl_base(*vec), nbytes);
-    }
-
-    if(!v) {
-        return false;
+        if(!v) {
+            return false;
+        }
     }
 
     v->sv_capacity = capacity;
@@ -100,45 +115,70 @@ static bool scc_vec_grow(void **vec, size_t capacity, size_t elemsize) {
     return true;
 }
 
-void *scc_vec_impl_new(void *nullvec, size_t offset) {
-    unsigned char *vec = (unsigned char *)nullvec + offset;
-    vec[-1] = offset - sizeof(struct scc_vec_base) - sizeof(*vec);
+void *scc_vec_impl_new(struct scc_vec_base *base, size_t offset, size_t capacity) {
+    base->sv_capacity = capacity;
+    unsigned char *vec = (unsigned char *)base + offset;
+    vec[-2] = offset - sizeof(*base) - 2 * sizeof(*vec);
     return vec;
 }
 
-void *scc_vec_impl_from(size_t offset, void const *data, size_t size, size_t elemsize) {
-    size_t const npad = offset - sizeof(struct scc_vec_base);
-    size_t const nbytes = scc_vec_bytesize(size, elemsize, npad);
-    struct scc_vec_base *v = scc_vec_alloc(nbytes, size, npad);
-    if(!v) {
+void *scc_vec_impl_new_dyn(size_t vecsz, size_t offset, size_t capacity) {
+    struct scc_vec_base *base = calloc(vecsz, sizeof(unsigned char));
+    if(!base) {
         return 0;
     }
-    v->sv_capacity = size;
-    void *buffer = v->sv_buffer + npad;
-    memcpy(buffer, data, size * elemsize);
-    return buffer;
+
+    unsigned char *vec = scc_vec_impl_new(base, offset, capacity);
+    vec[-1] = 1;
+    return vec;
 }
 
-bool scc_vec_impl_resize(void *vec, size_t size, size_t elemsize) {
-    size_t const currsize = scc_vec_size(*(void **)vec);
+void *scc_vec_impl_from(void *restrict vec, void const *restrict data, size_t size, size_t elemsize) {
+    if(size > scc_vec_capacity(vec) && !scc_vec_grow(&vec, size, elemsize)) {
+        return 0;
+    }
+    memcpy(vec, data, size * elemsize);
+    scc_vec_impl_base(vec)->sv_size = size;
+    return vec;
+}
 
-    if(!size || currsize == size) {
+void *scc_vec_impl_from_dyn(size_t vecsz, size_t basecap, size_t offset, void const *data, size_t size, size_t elemsize) {
+    if(basecap < size) {
+        vecsz += (size - basecap) * elemsize;
+        basecap = size;
+    }
+    unsigned char *vec = scc_vec_impl_new_dyn(vecsz, offset, basecap);
+    if(!vec) {
+        return 0;
+    }
+
+    vec[-1] = 1;
+    scc_memcpy(vec, data, size * elemsize);
+    scc_vec_impl_base(vec)->sv_size = size;
+    return vec;
+}
+
+bool scc_vec_impl_resize(void *vecaddr, size_t size, size_t elemsize) {
+    size_t const currsize = scc_vec_size(*(void **)vecaddr);
+
+    if(!size) {
         return true;
     }
-    if(currsize > size) {
-        scc_vec_impl_base(*(void **)vec)->sv_size = size;
+    if(currsize >= size) {
+        scc_vec_impl_base(*(void **)vecaddr)->sv_size = size;
         return true;
     }
 
-    if(!scc_vec_impl_reserve(vec, size, elemsize)) {
+    if(!scc_vec_impl_reserve(vecaddr, size, elemsize)) {
         return false;
     }
 
-    unsigned char *baseaddr = *(void **)vec;
+    unsigned char *baseaddr = *(void **)vecaddr;
     size_t zsize = (size - currsize) * elemsize;
+    assert(zsize);
 
     memset(baseaddr + currsize * elemsize, 0, zsize);
-    scc_vec_impl_base(*(void **)vec)->sv_size = size;
+    scc_vec_impl_base(*(void **)vecaddr)->sv_size = size;
     return true;
 }
 
@@ -148,7 +188,7 @@ void scc_vec_impl_erase(void *vec, size_t index, size_t elemsize) {
         /* Last element */
         return;
     }
-    size_t nbytes = (scc_vec_size(vec) - index) * elemsize;
+    size_t const nbytes = (scc_vec_size(vec) - index) * elemsize;
     unsigned char *dstaddr = (unsigned char *)vec + index * elemsize;
     memmove(dstaddr, dstaddr + elemsize, nbytes);
 }
@@ -159,6 +199,8 @@ void scc_vec_impl_erase_range(void *vec, size_t first, size_t end, size_t elemsi
     }
 
     size_t const nelems = end - first;
+    assert(nelems);
+
     scc_vec_impl_base(vec)->sv_size -= nelems;
 
     if(first == scc_vec_size(vec)) {
@@ -172,7 +214,7 @@ void scc_vec_impl_erase_range(void *vec, size_t first, size_t end, size_t elemsi
 }
 
 bool scc_vec_impl_push_ensure_capacity(void *vec, size_t elemsize) {
-    size_t capacity = scc_vec_capacity(*(void **)vec);
+    size_t const capacity = scc_vec_capacity(*(void **)vec);
     if(scc_vec_size(*(void **)vec) < capacity) {
         return true;
     }
@@ -187,7 +229,20 @@ bool scc_vec_impl_reserve(void *vec, size_t capacity, size_t elemsize) {
 }
 
 void scc_vec_free(void *vec) {
-    if(scc_vec_capacity(vec)) {
+    if(scc_vec_is_allocd(vec)) {
         free(scc_vec_impl_base(vec));
     }
+}
+
+void *scc_vec_impl_clone(void const *vec, size_t elemsize) {
+    struct scc_vec_base const *obase = scc_vec_impl_base_qual(vec, const);
+    size_t basesz = (unsigned char const *)vec - (unsigned char const *)obase;
+    size_t bytesz = basesz + obase->sv_capacity * elemsize;
+    struct scc_vec_base *nbase = malloc(bytesz);
+    if(!nbase) {
+        return 0;
+    }
+
+    scc_memcpy(nbase, obase, bytesz);
+    return (unsigned char *)nbase + basesz;
 }

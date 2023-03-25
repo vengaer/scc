@@ -2,7 +2,7 @@
 #define SCC_STACK_H
 
 #include "pp_token.h"
-#include "svec.h"
+#include "vec.h"
 
 #ifndef SCC_STACK_CONTAINER
 //! .. c:macro:: SCC_STACK_CONTAINER
@@ -14,8 +14,8 @@
 //!     ..
 //!       _TODO - custome container interface
 //!
-//!     Unless overridden, the underlying type is an :ref:`scc_svec <scc_svec>`.
-#define SCC_STACK_CONTAINER scc_svec
+//!     Unless overridden, the underlying type is an :ref:`scc_vec <scc_vec>`.
+#define SCC_STACK_CONTAINER scc_vec
 #endif
 
 //! .. c:macro:: scc_stack(type)

@@ -8,7 +8,7 @@ __config_opts        := -g SCC_CONFIG_H -c $(__config_cache) -l $(builddir)/.scc
 __config_header_ver  := $(__node_builddir)/.config.ver.stamp
 
 __scc_incdir         := $(__node_path)
-__public_headers     := $(addsuffix .h,btmap btree hashmap hashtab rbmap rbtree ringdeque stack svec vec)
+__public_headers     := $(addsuffix .h,btmap btree hashmap hashtab rbmap rbtree ringdeque stack vec)
 
 $(__config_header_init): $(wildcard $(__config_module)/*.$(pyext)) $(__all_mkfiles) | $(__node_builddir)
 	$(call echo-gen,$(notdir $(config_header)))

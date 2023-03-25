@@ -4,5 +4,4 @@ excludePaths:
   - scc/vec.h
   - lib/algorithm.c
   - lib/arena.c
-  - lib/svec.c
   - lib/vec.c

@@ -1,7 +1,7 @@
 ifdef __node
 
 $(call push,rbtree_deps)
-rbtree_deps += svec
+rbtree_deps += vec
 
 $(call decl-fuzz)
 
