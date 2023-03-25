@@ -116,35 +116,6 @@ struct scc_svec_base {
         type sv_buffer[SCC_SVEC_STATIC_CAPACITY];                       \
     }
 
-//? .. c:macro:: scc_svec_impl_initsize(type)
-//?
-//?     Expands to the total number of bytes an svec instantiated for
-//?     the given type occupies on the stack.
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param type: The type for which the vector is to be instantiated
-#define scc_svec_impl_initsize(type)                                    \
-    sizeof(scc_svec_impl_layout(type))
-
-//? .. c:macro:: scc_svec_impl_initvec(type)
-//?
-//?     Expands to a buffer with automatic storage
-//?     duration used for the short vector optimization.
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param type: The type for which the vector is to be instantiated
-#define scc_svec_impl_initvec(type)                                     \
-    (union {                                                            \
-        struct scc_svec_base sv_svec;                                   \
-        unsigned char sv_buffer[scc_svec_impl_initsize(type)];          \
-    }){ 0 }.sv_svec
-
 //? .. _scc_svec_impl_base_qual:
 //? .. c:macro:: scc_svec_impl_base_qual(svec, qual)
 //?
@@ -204,7 +175,7 @@ struct scc_svec_base {
 #define scc_svec_impl_offset(type)                                      \
     offsetof(scc_svec_impl_layout(type), sv_buffer)
 
-//? .. c:function:: void *scc_svec_impl_new(void *initvec, size_t offset, size_t capacity)
+//? .. c:function:: void *scc_svec_impl_new(struct scc_svec_base *base, size_t offset, size_t capacity)
 //?
 //?     Initialize the raw svec at address :c:texpr:`initvec` and return a
 //?     pointer to its :ref:`sv_buffer <type_sv_buffer>` member.
@@ -213,14 +184,14 @@ struct scc_svec_base {
 //?
 //?         Internal use only
 //?
-//?     :param initvec: Addres of the automatically allocated, uninitialized
+//?     :param base:  Base addres of the automatically allocated, uninitialized
 //?                     svec
 //?     :param offset: Base-relative offset of the
 //?                    :ref:`sv_buffer <type_sv_buffer>` field in the
 //?                    given vector
 //?     :param capacity: Capacity of the stack-allocated buffer
 //?     :returns: A fat pointer for referring to the newly initialized svec
-void *scc_svec_impl_new(void *initvec, size_t offset, size_t capacity);
+void *scc_svec_impl_new(struct scc_svec_base *base, size_t offset, size_t capacity);
 
 //! .. _scc_svec_new:
 //! .. c:function:: void *scc_svec_new(type)
@@ -238,7 +209,7 @@ void *scc_svec_impl_new(void *initvec, size_t offset, size_t capacity);
 //!     :returns: A handle to the new svec
 #define scc_svec_new(type)                                              \
     scc_svec_impl_new(                                                  \
-        &scc_svec_impl_initvec(type),                                   \
+        (void *)&(scc_svec_impl_layout(type)){ 0 },                     \
         scc_svec_impl_offset(type),                                     \
         SCC_SVEC_STATIC_CAPACITY                                        \
     )
