@@ -14,6 +14,14 @@ int ocompare(void const *l, void const *r) {
     return *(int const *)l - *(int const *)r;
 }
 
+void test_scc_btree_with_order_3_dyn(void) {
+    scc_btree(int) btree = scc_btree_with_order_dyn(int, ocompare, 3);
+    TEST_ASSERT_TRUE(!!btree);
+    struct scc_btree_base *base = scc_btree_impl_base(btree);
+    TEST_ASSERT_TRUE(base->bt_dynalloc);
+    scc_btree_free(btree);
+}
+
 void test_scc_btree_insert_odd_order(void) {
     scc_btree(int) btree = scc_btree_with_order(int, ocompare, 5);
 
