@@ -27,6 +27,22 @@ static unsigned long long ident(void const *data, size_t size) {
 void test_scc_hashmap_new(void) {
     scc_hashmap(int, unsigned) map = scc_hashmap_new(int, unsigned, eq);
     TEST_ASSERT_EQUAL_UINT64(0ull, scc_hashmap_size(map));
+    struct scc_hashmap_base *base = scc_hashmap_inspect_base(map);
+    TEST_ASSERT_FALSE(base->hm_dynalloc);
+    scc_hashmap_free(map);
+}
+
+void test_scc_hashmap_new_dyn(void) {
+    scc_hashmap(int, unsigned) map = scc_hashmap_new_dyn(int, unsigned, eq);
+    struct scc_hashmap_base *base = scc_hashmap_inspect_base(map);
+    TEST_ASSERT_TRUE(base->hm_dynalloc);
+    scc_hashmap_free(map);
+}
+
+void test_scc_hashmap_with_hash_dyn(void) {
+    scc_hashmap(int, unsigned) map = scc_hashmap_with_hash_dyn(int, unsigned, eq, ident);
+    struct scc_hashmap_base *base = scc_hashmap_inspect_base(map);
+    TEST_ASSERT_TRUE(base->hm_dynalloc);
     scc_hashmap_free(map);
 }
 
