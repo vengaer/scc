@@ -79,7 +79,8 @@ int main(void) {
     /* The mapped value may be modified through the returned pointer */
     *value = 32;
 
-    printf("Updated value associated with \"first key\" is %d\n", *(int *)scc_hashmap_find(map, (str64){ "first key" }));
+    value = scc_hashmap_find(map, (str64){ "first key" });
+    printf("Updated value associated with \"first key\" is %d\n", *value);
 
     /* If the key proved for is not in the table,
      * find returns NULL */
@@ -92,6 +93,21 @@ int main(void) {
     value = scc_hashmap_find(map, (str64){ "first key" });
     printf("\"first key\" is %sin map\n", !!value ? "" : "no longer ");
 
+    /* Inserting with a key that is already in the table
+     * effectively replaces its associated value */
+    inserted = scc_hashmap_insert(&map, (str64){ "second key" }, 42);
+
+    if(!inserted) {
+        fputs("Could not insert { \"second key\", 42 }\n", stderr);
+        exit(EXIT_FAILURE);
+    }
+
+    value = scc_hashmap_find(map, (str64){ "second key" });
+    printf("\"second key\" now maps to %d\n", *value);
+
+    /* The inserted key-value pair replaces the existing one */
+    printf("Map size is still %zu\n", scc_hashmap_size(map));
+
     /* The map must be freed */
     scc_hashmap_free(map);
 }
@@ -102,6 +118,8 @@ int main(void) {
 // STDOUT:Updated value associated with "first key" is 32
 // STDOUT:"third key" is not in map
 // STDOUT:"first key" is no longer in map
+// STDOUT:"second key" now maps to 42
+// STDOUT:Map size is still 1
 /* ==================================== */
 
 // RUN: %cc -I %root %s %libscc_a -g -o %litbuild/hash_dict
