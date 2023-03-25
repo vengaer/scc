@@ -2,13 +2,21 @@
 
 #include <scc/arch.h>
 #include <scc/hashtab.h>
+#include <scc/swvec.h>
 
 #include <stdbool.h>
+#include <string.h>
 
 #include <unity.h>
 
 static bool eq(void const *left, void const *right) {
     return *(int const *)left == *(int const *)right;
+}
+
+static unsigned long long two(void const *data, size_t len) {
+    (void)data;
+    (void)len;
+    return 2u;
 }
 
 #ifdef SCC_SIMD_ISA
@@ -73,6 +81,28 @@ void test_simdemu_hashtab_probe_on_rehash(void) {
             TEST_ASSERT_EQUAL_INT32(j, *p);
         }
     }
+    scc_hashtab_free(tab);
+    restore_simd();
+}
+
+void test_scc_simdemu_hashtab_kill_find_mutants(void) {
+    disable_simd();
+    scc_hashtab(int) tab = scc_hashtab_with_hash(int, eq, two);
+    struct scc_hashtab_base *base = scc_hashtab_impl_base(tab);
+    scc_hashtab_metatype *md = scc_hashtab_inspect_metadata(tab);
+
+    base->ht_size = 1;
+    memset(md, ~(((unsigned char)~0) >> 1u), scc_hashtab_capacity(tab) + SCC_HASHTAB_GUARDSZ);
+
+    TEST_ASSERT_FALSE(!!scc_hashtab_find(tab, 32));
+
+    int *data = scc_hashtab_inspect_data(tab);
+    data[1] = 32;
+
+    int const *p = scc_hashtab_find(tab, 32);
+    TEST_ASSERT_TRUE(!!p);
+    TEST_ASSERT_EQUAL_PTR(data + 1u, p);
+
     scc_hashtab_free(tab);
     restore_simd();
 }
