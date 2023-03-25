@@ -4,6 +4,13 @@
 
 void test_scc_ringdeque_new(void) {
     scc_ringdeque(int) deque = scc_ringdeque_new(int);
+    TEST_ASSERT_FALSE(((unsigned char *)deque)[-1]);
+    scc_ringdeque_free(deque);
+}
+
+void test_scc_ringdeque_new_dyn(void) {
+    scc_ringdeque(int) deque = scc_ringdeque_new_dyn(int);
+    TEST_ASSERT_TRUE(((unsigned char *)deque)[-1]);
     scc_ringdeque_free(deque);
 }
 
