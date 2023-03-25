@@ -8,6 +8,7 @@
 
 size_t scc_rbmap_size(void const *map);
 _Bool scc_rbmap_empty(void const *map);
+void scc_rbmap_clear(void *map);
 void scc_rbmap_free(void *map);
 void const *scc_rbmap_impl_iterstop(void const *map);
 

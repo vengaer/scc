@@ -230,6 +230,15 @@ inline _Bool scc_rbmap_empty(void const *map) {
     return !scc_rbmap_size(map);
 }
 
+//! .. c:function:: void scc_rbmap_clear(void *map)
+//!
+//!     Remove all key-value pairs in the given map
+//!
+//!     :param rbtree: The map to clear
+inline void scc_rbmap_clear(void *map) {
+    scc_rbtree_clear(map);
+}
+
 //! .. c:function:: void scc_rbmap_free(void *map)
 //!
 //!     Reclaim memory allocated for :c:expr:`map`. The parameter must
