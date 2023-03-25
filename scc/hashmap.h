@@ -363,11 +363,11 @@ struct scc_hashmap_base {
 //?             arrays.
 //?
 //?             A slot is unused if the value of its metadata entry is 0. If the byte has
-//?             a non-zero value with the MSG unset, the slot was previously
+//?             a non-zero value with the MSB unset, the slot was previously
 //?             occupied but has since been vacated. Such slots are reused during insertion
 //?             but must not serve as probing stops.
 //?
-//?             An entry with the MSG set signifies that the slot is occupied. In this case,
+//?             An entry with the MSB set signifies that the slot is occupied. In this case,
 //?             the remaining bites are the :c:texpr:`CHAR_BIT - 1` most significant bits
 //?             of the hash computed for the value in the corresponding slot in the key array.
 //?             This is used for optimizing away unnecessary calls to
