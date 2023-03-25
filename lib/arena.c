@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+void scc_arena_reset(struct scc_arena *arena);
+
 static struct scc_chunk *scc_chunk_new(size_t chunksize, size_t elemsize, size_t baseoff) {
     size_t const size = chunksize * elemsize + baseoff;
     struct scc_chunk *chunk = malloc(size);

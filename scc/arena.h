@@ -86,6 +86,12 @@ _Bool scc_arena_reserve(struct scc_arena *arena, size_t nelems);
 //?               otherwise :code:`false`
 _Bool scc_arena_try_free(struct scc_arena *restrict arena, void const *restrict addr);
 
+inline void scc_arena_reset(struct scc_arena *arena) {
+    scc_arena_release(arena);
+    arena->ar_first = 0;
+    arena->ar_current = 0;
+}
+
 void scc_arena_free(struct scc_arena *restrict arena, void const *restrict addr);
 
 #endif /* SCC_ARENA_H */
