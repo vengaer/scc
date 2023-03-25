@@ -279,7 +279,7 @@ void *scc_vec_impl_new_dyn(size_t vecsz, size_t offset, size_t capacity);
 //?     :returns: Handle to the vector
 void *scc_vec_impl_from(void *restrict vec, void const *restrict data, size_t size, size_t elemsize);
 
-//? .. c:function:: void *scc_vec_impl_from_dyn(size_t vecsz, size_t offset, void const *data, size_t size, size_t elemsize)
+//? .. c:function:: void *scc_vec_impl_from_dyn(size_t basecap, size_t offset, void const *data, size_t size, size_t elemsize)
 //?
 //?     Lite :ref:`scc_vec_impl_from <scc_vec_impl_from>` except for the vector being allocated
 //?     on the stack.
@@ -288,13 +288,13 @@ void *scc_vec_impl_from(void *restrict vec, void const *restrict data, size_t si
 //?
 //?         Internal use only
 //?
-//?     :param vecsz: Size of the vector
+//?     :param basecap: Base capacity
 //?     :param offset: Base-relative offset of the :ref:`sv_buffer <type_sv_buffer>` field
 //?     :param data: Ponter to an array of data to write to the vector
 //?     :param size: Number of entries in the data array
 //?     :param elemsize: Size of each element in the vector
 //?     :returns: Handle to the vector, or ``NULL`` on allocation failure
-void *scc_vec_impl_from_dyn(size_t vecsz, size_t offset, void const *data, size_t size, size_t elemsize);
+void *scc_vec_impl_from_dyn(size_t basecap, size_t offset, void const *data, size_t size, size_t elemsize);
 
 //! .. _scc_vec_from:
 //! .. c:function:: void *scc_vec_from(type, ...)
@@ -347,7 +347,7 @@ void *scc_vec_impl_from_dyn(size_t vecsz, size_t offset, void const *data, size_
 //!               ``NULL`` on allocation failure
 #define scc_vec_from_dyn(type, ...)                                         \
     scc_vec_impl_from_dyn(                                                  \
-        sizeof(scc_vec_impl_layout(type)),                                  \
+        SCC_VEC_STATIC_CAPACITY,                                            \
         scc_vec_impl_offset(type),                                          \
         (type[]){ __VA_ARGS__ },                                            \
         scc_arrsize(((type[]){ __VA_ARGS__ })),                             \
