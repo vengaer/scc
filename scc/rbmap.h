@@ -172,7 +172,8 @@
 //!     :param compare: Pointer to the comparison function to use
 //!     :returns: An opaque pointer to a rbmap allocated in the frame of the calling function
 #define scc_rbmap_new(keytype, valuetype, compare)                                          \
-    scc_rbtree_impl_new(&(scc_rbmap_impl_layout(keytype, valuetype)) {                      \
+    scc_rbtree_impl_new(                                                                    \
+        (void *)&(scc_rbmap_impl_layout(keytype, valuetype)) {                      \
             .rm_dataoff = offsetof(scc_rbmnode_impl_layout(keytype, valuetype), rn_pair),   \
             .rm_compare = compare,                                                          \
             .rm_arena = scc_arena_new(scc_rbmnode_impl_layout(keytype, valuetype)),         \

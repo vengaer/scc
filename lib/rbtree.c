@@ -618,8 +618,7 @@ static inline struct scc_rbtree_base *scc_rbtree_clone_base(struct scc_rbtree_ba
     return nbase;
 }
 
-void *scc_rbtree_impl_new(void *base, size_t coff) {
-#define base ((struct scc_rbtree_base *)base)
+void *scc_rbtree_impl_new(struct scc_rbtree_base *base, size_t coff) {
     base->rb_size = 0u;
     base->rb_root = (void *)&base->rb_sentinel;
 
@@ -633,7 +632,20 @@ void *scc_rbtree_impl_new(void *base, size_t coff) {
     unsigned char *rbtree = (unsigned char *)base + coff;
     scc_rbtree_set_bkoff(rbtree, fwoff);
     return rbtree;
-#undef base
+}
+
+void *scc_rbtree_impl_new_dyn(size_t treesz, struct scc_arena *arena, scc_rbcompare compare, size_t coff, size_t dataoff) {
+    struct scc_rbtree_base *base = calloc(treesz, sizeof(unsigned char));
+    if(!base) {
+        return 0;
+    }
+
+    base->rb_arena = *arena;
+    base->rb_compare = compare;
+    base->rb_dataoff = dataoff;
+    void *tree = scc_rbtree_impl_new(base, coff);
+    base->rb_dynalloc = 1;
+    return tree;
 }
 
 void scc_rbtree_free(void *rbtree) {

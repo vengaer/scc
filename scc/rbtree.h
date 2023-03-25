@@ -225,8 +225,8 @@ struct scc_rbsentinel {
 //?
 //?         Internal use only
 //?
-//?     .. _unsigned_short_const_rb_dataoff:
-//?     .. c:var:: unsigned short const rb_dataoff
+//?     .. _unsigned_short_rb_dataoff:
+//?     .. c:var:: unsigned short rb_dataoff
 //?
 //?         Offset of each node's data relative its base address
 //?
@@ -267,7 +267,7 @@ struct scc_rbsentinel {
 //?         FAM hiding type-specific details. See :ref:`scc_rbtree_impl_layout <scc_rbtree_impl_layout>`
 //?         for more information.
 struct scc_rbtree_base {
-    unsigned short const rb_dataoff;
+    unsigned short rb_dataoff;
     size_t rb_size;
     scc_rbcompare rb_compare;
     struct scc_arena rb_arena;
@@ -337,9 +337,9 @@ struct scc_rbtree_base {
 //?
 //?     :param type: The type of the elements to be stored in the node
 //?
-//?     .. c:var:: unsigned short const rb_dataoff
+//?     .. c:var:: unsigned short rb_dataoff
 //?
-//?         See :ref:`rb_dataoff <unsigned_short_const_rb_dataoff>`.
+//?         See :ref:`rb_dataoff <unsigned_short_rb_dataoff>`.
 //?
 //?     .. c:var:: size_t rb_size
 //?
@@ -379,7 +379,7 @@ struct scc_rbtree_base {
 //?         stored here
 #define scc_rbtree_impl_layout(type)                                                        \
     struct {                                                                                \
-        unsigned short const rb_dataoff;                                                    \
+        unsigned short rb_dataoff;                                                          \
         size_t rb_size;                                                                     \
         scc_rbcompare rb_compare;                                                           \
         struct scc_arena rb_arena;                                                          \
@@ -390,6 +390,7 @@ struct scc_rbtree_base {
         type rb_curr;                                                                       \
     }
 
+//? .. _scc_rbtree_impl_new:
 //? .. c:function:: void *scc_rbtree_impl_new(struct scc_rbtree_base *base, size_t coff)
 //?
 //?     Initialize the given rbtree base struct and return the address of the
@@ -404,7 +405,26 @@ struct scc_rbtree_base {
 //?     :param coff:    Base-relative offset of the :ref:`rb_curr <type_rb_curr>` field in
 //?                     the base structure
 //?     :returns:       Address of a handle suitable for referring to the given rbtree
-void *scc_rbtree_impl_new(void *base, size_t coff);
+void *scc_rbtree_impl_new(struct scc_rbtree_base *base, size_t coff);
+
+//? .. c:function:: void *scc_rbtree_impl_new(struct scc_rbtree_base *base, size_t coff)
+//?
+//?     Like :ref:``scc_rbtree_impl_new <scc_rbtree_impl_new>`` except for the
+//?     tree being allocated on the heap.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param treesz: Size of the tree
+//?     :param arena: Arena allocator to use
+//?     :param compare: Comparison function
+//?     :param coff:    Base-relative offset of the :ref:`rb_curr <type_rb_curr>` field in
+//?                     the base structure
+//?     :param dataoff: Offset of the ``rn_value`` field in each ``struct scc_rbnode``
+//?     :returns:       Address of a handle suitable for referring to the given rbtree, or
+//?                     ``NULL`` on allocation failure
+void *scc_rbtree_impl_new_dyn(size_t treesz, struct scc_arena *arena, scc_rbcompare compare, size_t coff, size_t dataoff);
 
 //! .. _scc_rbtree_new:
 //! .. c:function:: void *scc_rbtree_new(type, scc_rbcompare compare)
@@ -414,17 +434,46 @@ void *scc_rbtree_impl_new(void *base, size_t coff);
 //!
 //!     The call cannot fail.
 //!
+//!     .. seealso::
+//!
+//!         :ref:`scc_rbtree_new_dyn <scc_rbtree_new_dyn>` for a dynamically
+//!         allocated tree
+//!
 //!     :param type: The type to be stored in the rbtree
 //!     :param compare: Pointer to the comparison function to use
 //!     :returns: An opaque pointer to a rbtree allocated in the frame of the calling function
 #define scc_rbtree_new(type, compare)                                                       \
-    scc_rbtree_impl_new(&(scc_rbtree_impl_layout(type)) {                                   \
+    scc_rbtree_impl_new(                                                                    \
+        (void *)&(scc_rbtree_impl_layout(type)) {                                           \
             .rb_dataoff = offsetof(scc_rbnode_impl_layout(type), rn_value),                 \
             .rb_compare = compare,                                                          \
             .rb_arena = scc_arena_new(scc_rbnode_impl_layout(type)),                        \
         },                                                                                  \
         offsetof(scc_rbtree_impl_layout(type), rb_curr)                                     \
    )
+
+//! .. _scc_rbtree_new_dyn:
+//! .. c:function:: void *scc_rbtree_new_dyn(type, scc_rbcompare compare)
+//!
+//!     Like :ref:`scc_rbtree_new` but the tree is allocated on the heap
+//!     rater than the stack.
+//!
+//!     .. note::
+//!
+//!         Unlike ``scc_rbtree_new``, ``scc_rbtree_new_dyn`` may fail. The
+//!         returned pointer should always be checked against ``NULL``
+//!
+//!     :param type: The type to be stored in the rbtree
+//!     :param compare: Pointer to the comparison function to use
+//!     :returns: An opaque pointer to a rbtree allocated in the frame of the calling function
+#define scc_rbtree_new_dyn(type, compare)                                                   \
+    scc_rbtree_impl_new_dyn(                                                                \
+        sizeof(scc_rbtree_impl_layout(type)),                                               \
+        &scc_arena_new(scc_rbnode_impl_layout(type)),                                       \
+        compare,                                                                            \
+        offsetof(scc_rbtree_impl_layout(type), rb_curr),                                    \
+        offsetof(scc_rbnode_impl_layout(type), rn_value)                                    \
+    )
 
 //? .. c:function:: size_t scc_rbtree_impl_npad(void const *rbtree)
 //?
