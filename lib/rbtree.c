@@ -648,6 +648,12 @@ void *scc_rbtree_impl_new_dyn(size_t treesz, struct scc_arena *arena, scc_rbcomp
     return tree;
 }
 
+void scc_rbtree_clear(void *rbtree) {
+    struct scc_rbtree_base *base = scc_rbtree_impl_base(rbtree);
+    scc_arena_reset(&base->rb_arena);
+    base->rb_size = 0u;
+}
+
 void scc_rbtree_free(void *rbtree) {
     struct scc_rbtree_base *base = scc_rbtree_impl_base(rbtree);
     scc_arena_release(&base->rb_arena);

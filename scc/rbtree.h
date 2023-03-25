@@ -633,6 +633,13 @@ inline _Bool scc_rbtree_empty(void const *rbtree) {
     return !scc_rbtree_size(rbtree);
 }
 
+//! .. c:function:: void scc_rbtree_clear(void *rbtree)
+//!
+//!     Remove all elements in the given tree
+//!
+//!     :param rbtree: The tree to clear
+void scc_rbtree_clear(void *rbtree);
+
 //! .. c:function:: void scc_rbtree_free(void *rbtree)
 //!
 //!     Reclaim memory allocated for :c:expr:`rbtree`. The parameter must
