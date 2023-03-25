@@ -9,6 +9,12 @@ void test_scc_stack_new(void) {
     scc_stack_free(stack);
 }
 
+void test_scc_stack_new_dyn(void) {
+    scc_stack(int) stack = scc_stack_new_dyn(int);
+    TEST_ASSERT_EQUAL_UINT64(0ull, scc_stack_size(stack));
+    scc_stack_free(stack);
+}
+
 void test_scc_stack_push(void) {
     enum { TEST_SIZE = 100 };
     scc_stack(int) stack = scc_stack_new(int);
