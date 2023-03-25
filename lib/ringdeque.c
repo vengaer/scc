@@ -132,8 +132,7 @@ static bool scc_ringdeque_grow(void **dequeaddr, size_t newcap, size_t elemsize)
     return true;
 }
 
-void *scc_ringdeque_impl_new(void *deque, size_t offset, size_t capacity) {
-    struct scc_ringdeque_base *base = deque;
+void *scc_ringdeque_impl_new(struct scc_ringdeque_base *base, size_t offset, size_t capacity) {
     base->rd_capacity = capacity;
     unsigned char *handle = (unsigned char *)base + offset;
     handle[-2] = offset - sizeof(*base) - 2 * sizeof(*handle);

@@ -179,10 +179,10 @@ struct scc_ringdeque_base {
 //?
 //?         Internal use only
 //?
-//?     :param deque: Address of the ringdeque to be initialized
+//?     :param base: Base address of the ringdeque to be initialized
 //?     :param offset: Offset of the :ref:`rd_data <type_rd_data>` member relative :c:texpr:`deque`
 //?     :param capacity: The capacity with which the ringdeque at :c:texpr:`deque` was allocated
-void *scc_ringdeque_impl_new(void *deque, size_t offset, size_t capacity);
+void *scc_ringdeque_impl_new(struct scc_ringdeque_base *basek, size_t offset, size_t capacity);
 
 //! .. _scc_ringdeque_new:
 //! .. c:function:: void *scc_ringdeque_new(type)
@@ -197,10 +197,7 @@ void *scc_ringdeque_impl_new(void *deque, size_t offset, size_t capacity);
 //!     :returns: A handle used for referring to the instantiated ringdeque
 #define scc_ringdeque_new(type)                                                 \
     scc_ringdeque_impl_new(                                                     \
-        &(union {                                                               \
-            struct scc_ringdeque_base rd_base;                                  \
-            unsigned char rd_buffer[sizeof(scc_ringdeque_impl_layout(type))];   \
-        }){ 0 }.rd_base,                                                        \
+        (void *)&(scc_ringdeque_impl_layout(type)) { 0 },                       \
         offsetof(scc_ringdeque_impl_layout(type), rd_data),                     \
         SCC_RINGDEQUE_STATIC_CAPACITY                                           \
     )
