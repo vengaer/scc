@@ -326,7 +326,7 @@ void *scc_hashtab_impl_new(struct scc_hashtab_base *base, size_t coff, size_t md
 }
 
 void *scc_hashtab_impl_new_dyn(scc_hashtab_eq eq, scc_hashtab_hash hash, size_t cap, size_t tabsz, size_t coff, size_t mdoff) {
-    struct scc_hashtab_base *base = malloc(tabsz);
+    struct scc_hashtab_base *base = calloc(tabsz, sizeof(unsigned char));
     if(!base) {
         return 0;
     }
