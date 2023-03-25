@@ -25,6 +25,12 @@ static unsigned long long seventeen(void const *data, size_t len) {
     return 17u;
 }
 
+static unsigned long long nineteen(void const *data, size_t len) {
+    (void)data;
+    (void)len;
+    return 19u;
+}
+
 #ifdef SCC_SIMD_ISA
 extern int scc_simd_support;
 static int simd_backup;
@@ -165,6 +171,27 @@ void test_scc_simdemu_hashtab_insert_failure_bulk(void) {
 
     int *data = scc_hashtab_inspect_data(tab);
     data[28] = 32;
+    base->ht_size = 1u;
+
+    TEST_ASSERT_FALSE(scc_hashtab_insert(&tab, 32));
+
+    scc_hashtab_free(tab);
+    restore_simd();
+}
+
+void test_scc_simdemu_hashtab_insert_failure_residual(void) {
+    disable_simd();
+    scc_hashtab(int) tab = scc_hashtab_with_hash(int, eq, nineteen);
+    struct scc_hashtab_base *base = scc_hashtab_impl_base(tab);
+
+    scc_hashtab_metatype *md = scc_hashtab_inspect_metadata(tab);
+    unsigned char const msb = ~(((unsigned char)~0) >> 1u);
+    memset(md, msb | 0x01, scc_hashtab_capacity(tab) + SCC_HASHTAB_GUARDSZ - 1u);
+
+    md[18] = msb;
+
+    int *data = scc_hashtab_inspect_data(tab);
+    data[18] = 32;
     base->ht_size = 1u;
 
     TEST_ASSERT_FALSE(scc_hashtab_insert(&tab, 32));
