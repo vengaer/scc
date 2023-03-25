@@ -167,19 +167,48 @@
 //!
 //!     The call cannot fail.
 //!
+//!     .. seealso::
+//!
+//!         :ref:`scc_rbmap_new_dyn` for a dynamically allocated ``rbmap``
+//!
 //!     :param keytype: The type of the keys to be stored in the map
 //!     :param valuetype: The type of the values to be stored in the map
 //!     :param compare: Pointer to the comparison function to use
 //!     :returns: An opaque pointer to a rbmap allocated in the frame of the calling function
 #define scc_rbmap_new(keytype, valuetype, compare)                                          \
     scc_rbtree_impl_new(                                                                    \
-        (void *)&(scc_rbmap_impl_layout(keytype, valuetype)) {                      \
+        (void *)&(scc_rbmap_impl_layout(keytype, valuetype)) {                              \
             .rm_dataoff = offsetof(scc_rbmnode_impl_layout(keytype, valuetype), rn_pair),   \
             .rm_compare = compare,                                                          \
             .rm_arena = scc_arena_new(scc_rbmnode_impl_layout(keytype, valuetype)),         \
         },                                                                                  \
         offsetof(scc_rbmap_impl_layout(keytype, valuetype), rm_curr)                        \
    )
+
+//! .. _scc_rbmap_new_dyn:
+//! .. c:function:: void *scc_rbmap_new_dyn(keytype, valuetype, scc_rbcompare compare)
+//!
+//!     Like :ref:`scc_rbmap_new <scc_rbmap_new>` except for the map being allocated
+//!     on the heap rather than the stack
+//!
+//!     .. note::
+//!
+//!         Unlike ``scc_rbmap_new``, ``scc_rbmap_new_dyn`` may fail. The returned pointer
+//!         should always be checked against ``NULL``
+//!
+//!     :param keytype: The type of the keys to be stored in the map
+//!     :param valuetype: The type of the values to be stored in the map
+//!     :param compare: Pointer to the comparison function to use
+//!     :returns: An opaque pointer to a rbmap allocated in the frame of the calling function,
+//!               or ``NULL`` on failure
+#define scc_rbmap_new_dyn(keytype, valuetype, compare)                                      \
+    scc_rbtree_impl_new_dyn(                                                                \
+        sizeof(scc_rbmap_impl_layout(keytype, valuetype)),                                  \
+        &scc_arena_new(scc_rbmnode_impl_layout(keytype, valuetype)),                        \
+        compare,                                                                            \
+        offsetof(scc_rbmap_impl_layout(keytype, valuetype), rm_curr),                       \
+        offsetof(scc_rbmnode_impl_layout(keytype, valuetype), rn_pair)                      \
+    )
 
 //! .. c:function:: size_t scc_rbmap_size(void const *map)
 //!
