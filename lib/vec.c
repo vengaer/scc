@@ -142,10 +142,13 @@ void *scc_vec_impl_from(void *restrict vec, void const *restrict data, size_t si
     return vec;
 }
 
-void *scc_vec_impl_from_dyn(size_t vecsz, size_t basecap, size_t offset, void const *data, size_t size, size_t elemsize) {
+void *scc_vec_impl_from_dyn(size_t vecsz, size_t offset, void const *data, size_t size, size_t elemsize) {
+    size_t basecap = (vecsz - offset) / elemsize;
+    assert(basecap * elemsize + offset == vecsz);
     if(basecap < size) {
         vecsz += (size - basecap) * elemsize;
         basecap = size;
+        assert(vecsz >= offset + size * elemsize);
     }
     unsigned char *vec = scc_vec_impl_new_dyn(vecsz, offset, basecap);
     if(!vec) {
