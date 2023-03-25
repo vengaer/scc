@@ -7,7 +7,7 @@
 
 #include <unity.h>
 
-static bool eq(void const *left, void const *right) {
+static bool ueq(void const *left, void const *right) {
     return *(uint32_t const *)left == *(uint32_t const *)right;
 }
 
@@ -18,7 +18,7 @@ static void run_fuzzer_test(uint32_t const *data, size_t n) {
     scc_simd_support = 0;
 #endif
 
-    scc_hashtab(uint32_t) tab = scc_hashtab_new(uint32_t, eq);
+    scc_hashtab(uint32_t) tab = scc_hashtab_new(uint32_t, ueq);
 
     for(unsigned i = 0u; i < n; ++i) {
         TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, data[i]));

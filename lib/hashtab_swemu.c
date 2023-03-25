@@ -90,6 +90,7 @@ long long scc_hashtab_impl_probe_find_sw(
         occ_match = curr ^ metamask;
         probe_end = curr ^ 0u;
         for(unsigned i = 0u; i < slot_adj; ++i) {
+            scc_when_mutating(assert(i < slot_adj));
             if(!scc_swvec_read_byte(probe_end, i)) {
                 return -1ll;
             }
