@@ -298,7 +298,7 @@ _Bool scc_rbmap_impl_insert(void *rbmapaddr, size_t elemsize, size_t valoff);
             (*(mapaddr))->rm_value = (value),                                               \
             (mapaddr)                                                                       \
         ),                                                                                  \
-        sizeof(*(mapaddr)),                                                                 \
+        sizeof(**(mapaddr)),                                                                \
         ((unsigned char const *)&(*(mapaddr))->rm_value -                                   \
             (unsigned char const *)&(*(mapaddr))->rm_key)                                   \
     )
