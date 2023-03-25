@@ -75,14 +75,14 @@ void test_scc_rbmap_foreach(void) {
     scc_rbmap(int, int) rbmap = scc_rbmap_new(int, int, compare);
 
     for(int i = 0; i < TEST_SIZE; ++i) {
-        TEST_ASSERT_TRUE(scc_rbmap_insert(&rbmap, i, i));
+        TEST_ASSERT_TRUE(scc_rbmap_insert(&rbmap, i, i + 12));
     }
 
     scc_rbmap_iter(int, int) iter;
     int i = 0;
     scc_rbmap_foreach(iter, rbmap) {
         TEST_ASSERT_EQUAL_INT32(iter->key, i);
-        TEST_ASSERT_EQUAL_INT32(iter->value, i);
+        TEST_ASSERT_EQUAL_INT32(iter->value, i + 12);
         iter->value += iter->value;
         ++i;
     }
@@ -90,7 +90,7 @@ void test_scc_rbmap_foreach(void) {
     i = 0;
     scc_rbmap_foreach(iter, rbmap) {
         TEST_ASSERT_EQUAL_INT32(iter->key, i);
-        TEST_ASSERT_EQUAL_INT32(iter->value, i + i);
+        TEST_ASSERT_EQUAL_INT32(iter->value, 2 * (i + 12));
         ++i;
     }
     scc_rbmap_free(rbmap);
