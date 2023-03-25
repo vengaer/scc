@@ -139,6 +139,17 @@ void *scc_ringdeque_impl_new(struct scc_ringdeque_base *base, size_t offset, siz
     return handle;
 }
 
+void *scc_ringdeque_impl_new_dyn(size_t dequesz, size_t offset, size_t capacity) {
+    struct scc_ringdeque_base *base = calloc(dequesz, sizeof(unsigned char));
+    if(!base) {
+        return 0;
+    }
+
+    void *deque = scc_ringdeque_impl_new(base, offset, capacity);
+    scc_ringdeque_set_dynalloc(deque);
+    return deque;
+}
+
 void scc_ringdeque_free(void *deque) {
     if(scc_ringdeque_get_dynalloc(deque)) {
         free(scc_ringdeque_impl_base(deque));

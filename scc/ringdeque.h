@@ -170,7 +170,9 @@ struct scc_ringdeque_base {
 #define scc_ringdeque_impl_base(deque)                                          \
     scc_ringdeque_impl_base_qual(deque,)
 
-//? .. c:function:: void *scc_ringdeque_impl_new(void *deque, size_t offset, size_t capacity)
+//? .. _scc_ringdeque_impl_new:
+//? .. c:function:: void *scc_ringdeque_impl_new(struct scc_ringdeque_base *base, \
+//?     size_t offset, size_t capacity)
 //?
 //?     Initialize a raw ringdeque at the given address and return a
 //?     fat pointer to it.
@@ -182,7 +184,24 @@ struct scc_ringdeque_base {
 //?     :param base: Base address of the ringdeque to be initialized
 //?     :param offset: Offset of the :ref:`rd_data <type_rd_data>` member relative :c:texpr:`deque`
 //?     :param capacity: The capacity with which the ringdeque at :c:texpr:`deque` was allocated
-void *scc_ringdeque_impl_new(struct scc_ringdeque_base *basek, size_t offset, size_t capacity);
+//?     :returns: Opaque handle suitable for referring to the initialized ``ringdeque``
+void *scc_ringdeque_impl_new(struct scc_ringdeque_base *base, size_t offset, size_t capacity);
+
+//? .. c:function:: void *scc_ringdeque_impl_new_dyn(size_t offset, size_t capacity)
+//?
+//?     Like :ref:`scc_ringdeque_impl_new <scc_ringdeque_impl_new>` except for the
+//?     deque being allocated on the heap
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param dequesz: Size of the deque
+//?     :param offset: Offset of the :ref:`rd_data <type_rd_data>` member relative :c:texpr:`deque`
+//?     :param capacity: The capacity with which the ringdeque at :c:texpr:`deque` was allocated
+//?     :returns: Opaque handle suitable for referring to the initialized ``ringdeque``,
+//?               or ``NULL`` on allocation failure
+void *scc_ringdeque_impl_new_dyn(size_t dequesz, size_t offset, size_t capacity);
 
 //! .. _scc_ringdeque_new:
 //! .. c:function:: void *scc_ringdeque_new(type)
@@ -198,6 +217,26 @@ void *scc_ringdeque_impl_new(struct scc_ringdeque_base *basek, size_t offset, si
 #define scc_ringdeque_new(type)                                                 \
     scc_ringdeque_impl_new(                                                     \
         (void *)&(scc_ringdeque_impl_layout(type)) { 0 },                       \
+        offsetof(scc_ringdeque_impl_layout(type), rd_data),                     \
+        SCC_RINGDEQUE_STATIC_CAPACITY                                           \
+    )
+
+//! .. c:function:: void *scc_ringdeque_new_dyn(type)
+//!
+//!     Lite :ref:`scc_ringdeque_new <scc_ringdeque_new>` except for the
+//!     ringdeque being allocated on the heap
+//!
+//!     .. note::
+//!
+//!         Unlinke ``scc_ringdeque_new``, ``scc_ringdeque_new_dyn`` may fail. The
+//!         returned pointer should always be checked against ``NULL``
+//!
+//!     :param type: The type to be stored in the ringdeque
+//!     :returns: A handle used for referring to the instantiated ringdeque, or
+//!               ``NULL`` on allocation failure
+#define scc_ringdeque_new_dyn(type)                                             \
+    scc_ringdeque_impl_new_dyn(                                                 \
+        sizeof(scc_ringdeque_impl_layout(type)),                                \
         offsetof(scc_ringdeque_impl_layout(type), rd_data),                     \
         SCC_RINGDEQUE_STATIC_CAPACITY                                           \
     )
