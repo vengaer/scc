@@ -26,14 +26,36 @@
 //!     :param type: The type to store in the stack
 #define scc_stack(type) scc_pp_expand(SCC_STACK_CONTAINER)(type)
 
+//! .. _scc_stack_new:
 //! .. c:function:: void *scc_stack_new(type)
 //!
 //!     Initializes a stack holding instances of the given :c:texpr:`type`.
 //!     The lifetime of the stack is determined by the underlying container.
 //!
+//!     .. seealso::
+//!
+//!         :ref:`scc_stack_new_dyn <scc_stack_new_dyn>` for a dynamically
+//!         allocated stack
+//!
 //!     :param type: The type to be stored in the stack
 //!     :returns: A handle to the underlying container
 #define scc_stack_new(type) scc_pp_cat_expand(SCC_STACK_CONTAINER,_new)(type)
+
+//! .. _scc_stack_new_dyn:
+//! .. c:function:: void *scc_stack_new_dyn(type)
+//!
+//!     Like :ref:`scc_stack_new <scc_stack_new>` except for the container
+//!     being allocated on the heap
+//!
+//!     .. note::
+//!
+//!         Unlike ``scc_stack_new``, ``scc_stack_new_dyn`` may fail. The returned
+//!         pointer should always be checked against ``NULL``
+//!
+//!     :param type: The type to be stored in the stack
+//!     :returns: A handle to the underlying container, or ``NULL`` on allocation
+//!               failure
+#define scc_stack_new_dyn(type) scc_pp_cat_expand(SCC_STACK_CONTAINER,_new)(type)
 
 //! .. c:function:: void scc_stack_free(void *stack)
 //!
