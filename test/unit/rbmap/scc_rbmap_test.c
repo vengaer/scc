@@ -172,3 +172,21 @@ void test_scc_rbmap_clone(void) {
     scc_rbmap_free(orig);
     scc_rbmap_free(new);
 }
+
+void test_scc_rbmap_clear(void) {
+    scc_rbmap(int, int) map = scc_rbmap_new(int, int, compare);
+
+    for(int i = 0; i < 32; ++i) {
+        TEST_ASSERT_TRUE(scc_rbmap_insert(&map, i, i));
+    }
+
+    TEST_ASSERT_FALSE(scc_rbmap_empty(map));
+    TEST_ASSERT_NOT_EQUAL_UINT64(0ull, scc_rbmap_size(map));
+
+    scc_rbmap_clear(map);
+
+    TEST_ASSERT_TRUE(scc_rbmap_empty(map));
+    TEST_ASSERT_EQUAL_UINT64(0ull, scc_rbmap_size(map));
+
+    scc_rbmap_free(map);
+}
