@@ -175,6 +175,7 @@ struct scc_svec_base {
 #define scc_svec_impl_offset(type)                                      \
     offsetof(scc_svec_impl_layout(type), sv_buffer)
 
+//? .. _scc_svec_impl_new:
 //? .. c:function:: void *scc_svec_impl_new(struct scc_svec_base *base, size_t offset, size_t capacity)
 //?
 //?     Initialize the raw svec at address :c:texpr:`initvec` and return a
@@ -193,6 +194,22 @@ struct scc_svec_base {
 //?     :returns: A fat pointer for referring to the newly initialized svec
 void *scc_svec_impl_new(struct scc_svec_base *base, size_t offset, size_t capacity);
 
+//? .. c:function:: void *scc_svec_impl_new_dyn(size_t vecsz, size_t offset, size_t capacity)
+//?
+//?     Like :ref:`scc_svec_impl_new <scc_svec_impl_new>` except for the
+//?     vector being allocated on the heap.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param vecsz: Size of the vector
+//?     :param offset: Base-relative offset of the :ref:`sv_buffer <type_sv_buffer>` field
+//?     :param capacity: Capacity of the initial vector
+//?     :returns: A fat pointer for referring to the newly initialized svec, or
+//?               ``NULL`` on allocation failure
+void *scc_svec_impl_new_dyn(size_t vecsz, size_t offset, size_t capacity);
+
 //! .. _scc_svec_new:
 //! .. c:function:: void *scc_svec_new(type)
 //!
@@ -205,6 +222,11 @@ void *scc_svec_impl_new(struct scc_svec_base *base, size_t offset, size_t capaci
 //!     Regardless of size, the returned pointer should be passed to
 //!     :ref:`scc_svec_free <scc_svec_free>` for memory reclamation.
 //!
+//!     .. seealso::
+//!
+//!         :ref:`scc_svec_new_dyn <scc_svec_new_dyn>` for a dynamically
+//!         allocated vector
+//!
 //!     :param type: The type for which to instantiate the vector
 //!     :returns: A handle to the new svec
 #define scc_svec_new(type)                                              \
@@ -214,6 +236,27 @@ void *scc_svec_impl_new(struct scc_svec_base *base, size_t offset, size_t capaci
         SCC_SVEC_STATIC_CAPACITY                                        \
     )
 
+//! .. _scc_svec_new_dyn:
+//! .. c:function:: void *scc_svec_new_dyn(type)
+//!
+//!     Like :ref:`scc_svec_new <scc_svec_new>` except for the vector
+//!     being allocated on the heap
+//!
+//!     .. note::
+//!
+//!         Unlike ``scc_svec_new``, ``scc_svec_new_dyn`` may fail. The
+//!         returned pointer should always be checked against ``NULL``
+//!
+//!     :param type: The type for which to instantiate the vector
+//!     :returns: A handle to the new svec
+#define scc_svec_new_dyn(type)                                          \
+    scc_svec_impl_new_dyn(                                              \
+        sizeof(scc_svec_impl_layout(type)),                             \
+        scc_svec_impl_offset(type),                                     \
+        SCC_SVEC_STATIC_CAPACITY                                        \
+    )
+
+//? .. _scc_svec_impl_from:
 //? .. c:function:: void *scc_svec_impl_from(\
 //?        void *restrict vec, void const *restrict data, \
 //?        size_t size, size_t elemsize)
@@ -234,13 +277,27 @@ void *scc_svec_impl_new(struct scc_svec_base *base, size_t offset, size_t capaci
 //?     :param size: Number of entries in the data array
 //?     :param elemsize: Size of each element in the vector
 //?     :returns: Handle to the vector
-void *scc_svec_impl_from(
-        void *restrict vec,
-        void const *restrict data,
-        size_t size,
-        size_t elemsize
-    );
+void *scc_svec_impl_from(void *restrict vec, void const *restrict data, size_t size, size_t elemsize);
 
+//? .. c:function:: void *scc_svec_impl_from_dyn(size_t vecsz, void const *data, size_t size, size_t elemsize)
+//?
+//?     Lite :ref:`scc_svec_impl_from <scc_svec_impl_from>` except for the vector being allocated
+//?     on the stack.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param vecsz: Size of the vector
+//?     :param basecap: Initial capacity
+//?     :param offset: Base-relative offset of the :ref:`sv_buffer <type_sv_buffer>` field
+//?     :param data: Ponter to an array of data to write to the vector
+//?     :param size: Number of entries in the data array
+//?     :param elemsize: Size of each element in the vector
+//?     :returns: Handle to the vector, or ``NULL`` on allocation failure
+void *scc_svec_impl_from_dyn(size_t vecsz, size_t basecap, size_t offset, void const *data, size_t size, size_t elemsize);
+
+//! .. _scc_svec_from:
 //! .. c:function:: void *scc_svec_from(type, ...)
 //!
 //!     Instantiate a vector holding the given values, each
@@ -261,6 +318,8 @@ void *scc_svec_impl_from(
 //!                 The max number of supported parameters is bounded by the
 //!                 compiler. A standard-compliant one should allow at least
 //!                 126 separate values.
+//!     :returns: An opaque pointer suitable for referring to the vector, or
+//!               ``NULL`` on allocation failure
 //!
 //!     .. code-block:: C
 //!         :caption: Initializing an svec with integers 1, 2, 28
@@ -273,6 +332,25 @@ void *scc_svec_impl_from(
 #define scc_svec_from(type, ...)                                        \
     scc_svec_impl_from(                                                 \
         scc_svec_new(type),                                             \
+        (type[]){ __VA_ARGS__ },                                        \
+        scc_arrsize(((type[]){ __VA_ARGS__ })),                         \
+        sizeof(type)                                                    \
+    )
+
+//! .. c:function:: void *scc_svec_from_dyn(type, ...)
+//!
+//!     Like :ref:`scc_svec_from` except the vector is guaranteed
+//!     to be allocated on the heap
+//!
+//!     :param type: The type for which the vector is to be instantiated
+//!     :param ...: Variable number of values used to initialize the vector
+//!     :returns: Opaque pointer suitable for referring to the vector, or
+//!               ``NULL`` on allocation failure
+#define scc_svec_from_dyn(type, ...)                                    \
+    scc_svec_impl_from_dyn(                                             \
+        sizeof(scc_svec_impl_layout(type)),                             \
+        SCC_SVEC_STATIC_CAPACITY,                                       \
+        scc_svec_impl_offset(type),                                     \
         (type[]){ __VA_ARGS__ },                                        \
         scc_arrsize(((type[]){ __VA_ARGS__ })),                         \
         sizeof(type)                                                    \

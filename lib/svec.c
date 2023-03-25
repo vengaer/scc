@@ -122,18 +122,40 @@ void *scc_svec_impl_new(struct scc_svec_base *base, size_t offset, size_t capaci
     return svec;
 }
 
-void *scc_svec_impl_from(
-    void *restrict vec,
-    void const *restrict data,
-    size_t size,
-    size_t elemsize
-) {
+void *scc_svec_impl_new_dyn(size_t vecsz, size_t offset, size_t capacity) {
+    struct scc_svec_base *base = calloc(vecsz, sizeof(unsigned char));
+    if(!base) {
+        return 0;
+    }
+
+    unsigned char *svec = scc_svec_impl_new(base, offset, capacity);
+    svec[-1] = 1;
+    return svec;
+}
+
+void *scc_svec_impl_from(void *restrict vec, void const *restrict data, size_t size, size_t elemsize) {
     if(size > scc_svec_capacity(vec) && !scc_svec_grow(&vec, size, elemsize)) {
         return 0;
     }
     memcpy(vec, data, size * elemsize);
     scc_svec_impl_base(vec)->sv_size = size;
     return vec;
+}
+
+void *scc_svec_impl_from_dyn(size_t vecsz, size_t basecap, size_t offset, void const *data, size_t size, size_t elemsize) {
+    if(basecap < size) {
+        vecsz += (size - basecap) * elemsize;
+        basecap = size;
+    }
+    unsigned char *svec = scc_svec_impl_new_dyn(vecsz, offset, basecap);
+    if(!svec) {
+        return 0;
+    }
+
+    svec[-1] = 1;
+    scc_memcpy(svec, data, size * elemsize);
+    scc_svec_impl_base(vec)->sv_size = size;
+    return svec;
 }
 
 bool scc_svec_impl_resize(void *svecaddr, size_t size, size_t elemsize) {
