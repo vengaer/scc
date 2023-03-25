@@ -17,3 +17,6 @@
 	path = submodules/mull
 	url = https://github.com/mull-project/mull
 	ignore = dirty
+[submodule "submodules/filecheck"]
+	path = submodules/filecheck
+	url = https://github.com/mull-project/FileCheck.py
