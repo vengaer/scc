@@ -230,8 +230,7 @@ static struct scc_hashmap_base *scc_hashmap_realloc(
 
     scc_static_assert(sizeof(scc_hashmap_metatype) == 1u);
     size_t size = mdoff + cap + SCC_HASHMAP_GUARDSZ;
-    /* Kill mutant */
-    assert(size > mdoff + cap);
+    scc_when_mutating(assert(size > mdoff + cap));
 #ifdef SCC_CANARY_ENABLED
     size += SCC_HASHMAP_CANARYSZ;
 #endif
@@ -437,8 +436,7 @@ void *scc_hashmap_clone(void const *map) {
     struct scc_hashmap_base const *obase = scc_hashmap_impl_base_qual(map, const);
     scc_static_assert(sizeof(scc_hashmap_metatype) == 1);
     size_t sz = obase->hm_mdoff + obase->hm_capacity + SCC_HASHMAP_GUARDSZ;
-    /* Kill mutant */
-    assert(sz > obase->hm_mdoff + obase->hm_capacity);
+    scc_when_mutating(assert(sz > obase->hm_mdoff + obase->hm_capacity));
 #ifdef SCC_CANARY_ENABLED
     sz += SCC_HASHMAP_CANARYSZ;
 #endif
