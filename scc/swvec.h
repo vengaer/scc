@@ -1,7 +1,7 @@
 #ifndef SWVEC_H
 #define SWVEC_H
 
-#include <scc/bug.h>
+#include "bug.h"
 
 #include <assert.h>
 #include <limits.h>

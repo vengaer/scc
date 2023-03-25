@@ -5,5 +5,5 @@ excludePaths:
   - lib/hashmap_swemu.c
   - lib/hashtab.c
   - lib/hashtab_swemu.c
-  - lib/swvec.h
   - scc/hashtab.h
+  - scc/swvec.h

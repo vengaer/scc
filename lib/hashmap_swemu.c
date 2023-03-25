@@ -1,8 +1,7 @@
-#include "swvec.h"
-
 #include <scc/arch.h>
 #include <scc/bug.h>
 #include <scc/hashmap.h>
+#include <scc/swvec.h>
 
 #include <assert.h>
 #include <limits.h>
