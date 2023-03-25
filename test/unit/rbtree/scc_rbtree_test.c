@@ -198,3 +198,21 @@ void test_scc_rbtree_clone(void) {
     scc_rbtree_free(orig);
     scc_rbtree_free(new);
 }
+
+void test_scc_rbtree_clear(void) {
+    scc_rbtree(int) tree = scc_rbtree_new(int, compare);
+
+    for(int i = 0; i < 32; ++i) {
+        TEST_ASSERT_TRUE(scc_rbtree_insert(&tree, i));
+    }
+
+    TEST_ASSERT_FALSE(scc_rbtree_empty(tree));
+    TEST_ASSERT_NOT_EQUAL_UINT64(0ull, scc_rbtree_size(tree));
+
+    scc_rbtree_clear(tree);
+
+    TEST_ASSERT_TRUE(scc_rbtree_empty(tree));
+    TEST_ASSERT_EQUAL_UINT64(0ull, scc_rbtree_size(tree));
+
+    scc_rbtree_free(tree);
+}
