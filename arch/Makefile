@@ -14,7 +14,7 @@ ifneq ($(call not,$(__skip_arch)),)
 endif
 
 ifneq ($(arch_lower),)
-  ifneq ($(and $(__simd_enable),$(wildcard $(__node_path)/$(arch_lower))),)
+  ifneq ($(wildcard $(__node_path)/$(arch_lower)),)
     $(call include-node,$(arch_lower))
   endif
 endif

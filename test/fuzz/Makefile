@@ -28,11 +28,11 @@ LLVM_COV_REPORT     = $(LLVM_COV) report $(LLVM_COVFLAGS)
 define __fuzz-obj
 $(strip
     $(patsubst $(srcdir)/%.$(cext),$(__node_builddir)/%.$(oext),
-        $(wildcard $(srcdir)/*$(__node).$(cext)))
+        $(wildcard $(patsubst %,$(srcdir)/%*.$(cext),$(__node) $($(__node)_deps))))
     $(patsubst $(srcdir)/%.$(cext),$(__node_builddir)/%.$(oext),
         $(wildcard $(addsuffix .$(cext),$(addprefix $(srcdir)/*,$($(__node)_deps)))))
     $(patsubst $(asdir)/%.$(asext),$(__node_builddir)/%.$(oext),
-        $(wildcard $(asdir)/*$(__node)*.$(asext)))
+        $(wildcard $(patsubst %,$(asdir)/%*.$(asext),$(__node) $($(__node)_deps) $(simd_isa)_isa)))
     $(patsubst $(inspectdir)/%.$(cext),$(__node_builddir)/%.$(oext),
         $(wildcard $(inspectdir)/*$(__node)*.$(cext)))
     $(if $($(__node)_deps),
