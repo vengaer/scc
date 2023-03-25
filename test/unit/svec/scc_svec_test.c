@@ -10,6 +10,14 @@ void test_scc_svec_new(void) {
     scc_svec_free(svec);
 }
 
+void test_scc_svec_new_dyn(void) {
+    scc_svec(int) svec = scc_svec_new_dyn(int);
+    TEST_ASSERT_EQUAL_UINT64(0ull, scc_svec_impl_base(svec)->sv_size);
+    TEST_ASSERT_EQUAL_UINT64(SCC_SVEC_STATIC_CAPACITY, scc_svec_impl_base(svec)->sv_capacity);
+    TEST_ASSERT_EQUAL_UINT8(((unsigned char *)svec)[-1], 1);
+    scc_svec_free(svec);
+}
+
 void test_scc_svec_size(void) {
     scc_svec(int) svec = scc_svec_new(int);
     TEST_ASSERT_EQUAL_UINT64(0ull, scc_svec_size(svec));
