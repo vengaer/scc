@@ -333,6 +333,19 @@ void *scc_hashmap_impl_new(struct scc_hashmap_base *base, size_t coff, size_t va
     return map;
 }
 
+void *scc_hashmap_impl_new_dyn(struct scc_hashmap_base const *sbase, size_t mapsize, size_t coff, size_t valoff, size_t keysize) {
+    struct scc_hashmap_base *base = calloc(mapsize, sizeof(unsigned char));
+    if(!base) {
+        return 0;
+    }
+
+    scc_memcpy(base, sbase, sizeof(*sbase));
+
+    void *map = scc_hashmap_impl_new(base, coff, valoff, keysize);
+    base->hm_dynalloc = 1;
+    return map;
+}
+
 unsigned long long scc_hashmap_fnv1a(void const *data, size_t size) {
 #define SCC_FNV_OFFSET_BASIS 0xcbf29ce484222325ull
 #define SCC_FNV_PRIME 0x100000001b3ull

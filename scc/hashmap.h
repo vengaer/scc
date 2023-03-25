@@ -420,6 +420,24 @@ struct scc_hashmap_base {
 //?     :returns: A handle to the initialized hash map
 void *scc_hashmap_impl_new(struct scc_hashmap_base *base, size_t coff, size_t valoff, size_t keysize);
 
+//? .. c:function:: void *scc_hashmap_impl_new_dyn(scc_hashmap_eq eq, scc_hashmap_hash hash, \
+//?     size_t mapsize, size_t coff, size_t valoff, size_t keysize)
+//?
+//?     Like :ref:`scc_hashmap_impl_new <scc_hashtmap_impl_new>` except for the
+//?     hash map being allocated on the heap.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param sbase: Address of a ``struct scc_hahsmap_base`` used for parameter passing
+//?     :param mapsize: Size of the map
+//?     :param coff: Base-relative offset of :code:`hm_curr`.
+//?     :param valoff: Internal offset of the value type in the key-value pair
+//?     :param keysize: Size of the key type
+//?     :returns: A handle to an initialized hash map allocated on the heap
+void *scc_hashmap_impl_new_dyn(struct scc_hashmap_base const *sbase, size_t mapsize, size_t coff, size_t valoff, size_t keysize);
+
 //! .. _scc_hashmap_with_hash:
 //! .. c:function:: void *scc_hashmap_with_hash(keytype, valuetype, scc_hashmap_eq eq, scc_hashmap_hash hash)
 //!
@@ -432,6 +450,11 @@ void *scc_hashmap_impl_new(struct scc_hashmap_base *base, size_t coff, size_t va
 //!
 //!     The returned pointer must be passed to :ref:`scc_hashmap_free <scc_hashmap_free>` to ensure
 //!     allocated memory is reclaimed.
+//!
+//!     .. seealso::
+//!
+//!         :ref:`scc_hashmap_with_hash_dyn <scc_hashmap_with_hash_dyn>` for a dynamically allocated
+//!         ``hashmap``.
 //!
 //!     :param keytype: Type of the keys to be stored in the map
 //!     :param valuetype: Type of the values to be stored in the map
@@ -470,6 +493,41 @@ void *scc_hashmap_impl_new(struct scc_hashmap_base *base, size_t coff, size_t va
         sizeof(keytype)                                                                     \
     )
 
+//! .. _scc_hashmap_with_hash_dyn
+//! .. c:function:: void *scc_hashmap_with_hash_dyn(keytype, valuetype, scc_hashmap_eq eq, scc_hashmap_hash hash)
+//!
+//!     Like :ref:`scc_hashmap_with_hash <scc_hashmap_with_hash>` except for
+//!     the table being allocated on the heap rather than on the stack.
+//!
+//!     .. note::
+//!
+//!         Unlike :ref:`scc_hashmap_with_hash`, calls to ``scc_hashmap_with_hash_dyn`` may fail.
+//!         The returned pointer should always be ``NULL`` checked.
+//!
+//!     :param keytype: Type of the keys to be stored in the map
+//!     :param valuetype: Type of the values to be stored in the map
+//!     :param eq: Pointer to function to be used for key comparison
+//!     :param hash: Pointer to function to be used for key hashing
+//!     :returns: Handle to a newly created hash map, or ``NULL`` on
+//!               allocation failure
+#define scc_hashmap_with_hash_dyn(keytype, valuetype, eq, hash)                             \
+    scc_hashmap_impl_new_dyn(                                                               \
+        (void *)&(struct scc_hashmap_base){                                                 \
+            .hm_eq = eq,                                                                    \
+            .hm_hash = hash,                                                                \
+            .hm_valoff = offsetof(scc_hashmap_impl_layout(keytype, valuetype), hm_vals),    \
+            .hm_mdoff = offsetof(scc_hashmap_impl_layout(keytype, valuetype), hm_meta),     \
+            .hm_capacity = SCC_HASHMAP_STACKCAP,                                            \
+            .hm_pairsize = sizeof(scc_hashmap_impl_pair(keytype, valuetype)),               \
+            .hm_keyalign = scc_alignof(keytype),                                            \
+            .hm_valalign = scc_alignof(valuetype)                                           \
+        },                                                                                  \
+        sizeof(scc_hashmap_impl_layout(keytype, valuetype)),                                \
+        offsetof(scc_hashmap_impl_layout(keytype, valuetype), hm_curr),                     \
+        offsetof(scc_hashmap_impl_pair(keytype, valuetype), hp_val),                        \
+        sizeof(keytype)                                                                     \
+    )
+
 //! .. _scc_hashmap_new:
 //! .. c:function:: void *scc_hashmap_new(keytype, valuetype, scc_hashmap_eq eq)
 //!
@@ -496,6 +554,24 @@ void *scc_hashmap_impl_new(struct scc_hashmap_base *base, size_t coff, size_t va
 //!         :ref:`scc_hashmap_with_hash <scc_hashmap_with_hash>`
 #define scc_hashmap_new(keytype, valuetype, eq)                                            \
     scc_hashmap_with_hash(keytype, valuetype, eq, scc_hashmap_fnv1a)
+
+//! .. _scc_hashmap_new_dyn
+//! .. c:function:: void *scc_hashmap_new_dyn(keytype, valuetype, scc_hashmap_eq eq)
+//!
+//!     Like :ref:`scc_hashmap_new <scc_hashmap_new>` except for the hash
+//!     map being allocated on the heap rather than on the stack.
+//!
+//!     .. note::
+//!
+//!         Unlike :ref:`scc_hashmap_new <scc_hashmap_new>`, calls to ``scc_hashmap_new_dyn``
+//!         may fail. The returned pointer should always be ``NULL``-checked.
+//!
+//!     :param keytype: Type of the keys to be stored in the table
+//!     :param valuetype: Type of the values to be stored in the table
+//!     :param eq: Pointer to function to be used for equality comparison
+//!     :returns: Handle to a newly created hash map, or ``NULL`` on allocation failure
+#define scc_hashmap_new_dyn(keytype, valuetype, eq)                                       \
+    scc_hashmap_with_hash_dyn(keytype, valuetype, eq, scc_hashmap_fnv1a)
 
 //? .. c:function:: size_t scc_hashmap_impl_bkpad(void const *map)
 //?
