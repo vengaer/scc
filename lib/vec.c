@@ -11,7 +11,6 @@ size_t scc_vec_impl_npad(void const *vec);
 size_t scc_vec_size(void const *vec);
 size_t scc_vec_capacity(void const *vec);
 bool scc_vec_empty(void const *vec);
-void scc_vec_pop(void *vec);
 void scc_vec_clear(void *vec);
 bool scc_vec_is_allocd(void const *vec);
 

@@ -608,15 +608,14 @@ inline _Bool scc_vec_empty(void const *vec) {
     return !scc_vec_size(vec);
 }
 
-//! .. c:function:: void scc_vec_pop(void *vec)
+//! .. c:function:: type scc_vec_pop(void *vec)
 //!
 //!     Pop the last value off the vec. No bounds checking
 //!     is performed.
 //!
 //!     :param vec: Handle to the vec in question
-inline void scc_vec_pop(void *vec) {
-    --scc_vec_impl_base(vec)->sv_size;
-}
+#define scc_vec_pop(vec)                                                    \
+    ((vec)[--scc_vec_impl_base(vec)->sv_size])
 
 //! .. c:function:: void scc_vec_clear(void *vec)
 //!
