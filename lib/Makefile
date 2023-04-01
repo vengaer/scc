@@ -1,7 +1,7 @@
 ifdef __node
 
-__swvec_entry         := $(__node_builddir)/.swvec.stamp
-config_header_entries += $(__swvec_entry)
+__swar_entry          := $(__node_builddir)/.swar.stamp
+config_header_entries += $(__swar_entry)
 
 $(call push,CFLAGS)
 $(call push,LDFLAGS)
@@ -35,8 +35,8 @@ $(__node_builddir)/%.$(oext): $(__node_path)/%.$(cext) | $(__node_builddir)
 	$(call echo-cc,$(notdir $@))
 	$(CC) -o $@ $< $(CFLAGS) $(CPPFLAGS)
 
-$(__swvec_entry): $(__config_header_init) | $(__node_builddir)
-	$(PYTHON) $(__scconfig) $(__config_opts) add SCC_SWVEC_SIZE "sizeof(unsigned long long)" -C "Size of vectors used when emulating SIMD in software"
+$(__swar_entry): $(__config_header_init) | $(__node_builddir)
+	$(PYTHON) $(__scconfig) $(__config_opts) add SCC_SWARVEC_SIZE "sizeof(unsigned long long)" -C "Size of SWAR vectors"
 	$(TOUCH) $@
 
 $(call pop,LDFLAGS)

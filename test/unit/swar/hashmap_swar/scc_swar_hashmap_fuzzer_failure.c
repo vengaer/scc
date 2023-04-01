@@ -69,7 +69,7 @@ static void run_fuzzer_test(uint32_t const *restrict keys, uint16_t const *restr
 #endif
 }
 
-void test_scc_simdemu_hashmap_fuzzer_failure0(void) {
+void test_scc_swar_hashmap_fuzzer_failure0(void) {
     static uint32_t const keys[] = {
         0x00000000, 0xa3a3a3a3, 0xe8e80053, 0xe8e8e8e8,
         0x000000e8, 0x01d2f75c, 0x5d7c3d2b, 0x0000003f,
@@ -96,7 +96,7 @@ void test_scc_simdemu_hashmap_fuzzer_failure0(void) {
     run_fuzzer_test(keys, vals, scc_arrsize(keys), scc_arrsize(keys));
 }
 
-void test_scc_simdemu_hashmap_fuzzer_mutkill0(void) {
+void test_scc_swar_hashmap_fuzzer_mutkill0(void) {
     uint32_t keys[] = {
         0x00ff7c87, 0xff250000, 0xc7c7f006, 0x45b1c7c7,
         0x03402d45, 0x007a0000, 0x00000000, 0x6b00002f,
@@ -124,7 +124,7 @@ void test_scc_simdemu_hashmap_fuzzer_mutkill0(void) {
 }
 
 
-void test_scc_simdemu_hashmap_fuzzer_mutkill1(void) {
+void test_scc_swar_hashmap_fuzzer_mutkill1(void) {
     uint32_t keys[] = {
         0xa3a3a3a3, 0xe8e80053, 0xe8e8e8e8, 0x000000e8,
         0x01d2f75c, 0x5d7c3d2b, 0x0000003f, 0x19ffffff,
@@ -153,7 +153,7 @@ void test_scc_simdemu_hashmap_fuzzer_mutkill1(void) {
     run_fuzzer_test(keys, vals, scc_arrsize(keys), scc_arrsize(keys));
 }
 
-void test_scc_simdemu_hashmap_fuzzer_mutkill2(void) {
+void test_scc_swar_hashmap_fuzzer_mutkill2(void) {
     uint32_t keys[] = {
         0x00400000, 0x00000000
     };
@@ -166,7 +166,7 @@ void test_scc_simdemu_hashmap_fuzzer_mutkill2(void) {
     run_fuzzer_test(keys, vals, scc_arrsize(keys), scc_arrsize(keys));
 }
 
-void test_scc_simdemu_hashmap_fuzzer_mutkill3(void) {
+void test_scc_swar_hashmap_fuzzer_mutkill3(void) {
     uint32_t keys[] = {
         0xa3a3a3a3, 0xffffffa3, 0x00a3ff, 0x00000000,
         0xc6f93f00, 0x6020000b, 0x6f0000, 0x1f650000,
@@ -185,7 +185,7 @@ void test_scc_simdemu_hashmap_fuzzer_mutkill3(void) {
     run_fuzzer_test(keys, vals, scc_arrsize(keys) - 1u, scc_arrsize(keys));
 }
 
-void test_scc_simdemu_hashmap_fuzzer_mutkill4(void) {
+void test_scc_swar_hashmap_fuzzer_mutkill4(void) {
     uint32_t keys[] = {
         0x8202d100, 0x8202d100
     };
@@ -198,7 +198,7 @@ void test_scc_simdemu_hashmap_fuzzer_mutkill4(void) {
     run_fuzzer_test(keys, vals, scc_arrsize(keys) - 1u, scc_arrsize(keys));
 }
 
-void test_scc_simdemu_hashmap_fuzzer_mutkill5(void) {
+void test_scc_swar_hashmap_fuzzer_mutkill5(void) {
     uint32_t keys[] = {
         0xff7c87,   0x49250000, 0x00000000, 0x45000000,
         0x3402d45,  0x7a0000,   0x6b00002f, 0x2f2f2f2f,

@@ -1,7 +1,7 @@
 #include <scc/arch.h>
 #include <scc/bug.h>
 #include <scc/hashtab.h>
-#include <scc/swvec.h>
+#include <scc/swar.h>
 
 #include <assert.h>
 #include <limits.h>
@@ -20,10 +20,10 @@ scc_static_assert(sizeof(scc_vectype) < SCC_HASHTAB_STACKCAP);
 //?     :param hash: The hash of the element
 //?     :returns: A vector where each byte contains 0x80 | <7 MSB of hash>
 static inline scc_vectype scc_hashtab_gen_metamask(unsigned long long hash) {
-    return scc_swvec_bcast(0x80u | (hash >> (sizeof(scc_vectype) * CHAR_BIT - (CHAR_BIT - 1u))));
+    return scc_swar_bcast(0x80u | (hash >> (sizeof(scc_vectype) * CHAR_BIT - (CHAR_BIT - 1u))));
 }
 
-long long scc_hashtab_impl_probe_find_sw(
+long long scc_hashtab_impl_probe_find_swar(
     struct scc_hashtab_base const *base,
     void const *handle,
     size_t elemsize,
@@ -38,7 +38,7 @@ long long scc_hashtab_impl_probe_find_sw(
 
     /* Start slot */
     size_t sslot = hash & (base->ht_capacity - 1u);
-    scc_vectype const *ldaddr = scc_swvec_align_load(meta + sslot);
+    scc_vectype const *ldaddr = scc_swar_align_load(meta + sslot);
 
     /* Aligned offset */
     size_t start = (unsigned char const *)ldaddr - meta;
@@ -54,10 +54,10 @@ long long scc_hashtab_impl_probe_find_sw(
     scc_vectype probe_end = curr ^ 0u;
 
     for(unsigned i = slot_adj; i < sizeof(curr); ++i) {
-        if(!scc_swvec_read_byte(probe_end, i)) {
+        if(!scc_swar_read_byte(probe_end, i)) {
             return -1ll;
         }
-        if(!scc_swvec_read_byte(occ_match, i) && base->ht_eq(vals + (start + i) * elemsize, handle)) {
+        if(!scc_swar_read_byte(occ_match, i) && base->ht_eq(vals + (start + i) * elemsize, handle)) {
             return (long long)(start + i);
         }
     }
@@ -73,10 +73,10 @@ long long scc_hashtab_impl_probe_find_sw(
 
         /* Check elements */
         for(unsigned i = 0u; i < sizeof(curr); ++i) {
-            if(!scc_swvec_read_byte(probe_end, i)) {
+            if(!scc_swar_read_byte(probe_end, i)) {
                 return -1ll;
             }
-            if(!scc_swvec_read_byte(occ_match, i) && base->ht_eq(vals + (slot + i) * elemsize, handle)) {
+            if(!scc_swar_read_byte(occ_match, i) && base->ht_eq(vals + (slot + i) * elemsize, handle)) {
                 return (long long)(slot + i);
             }
         }
@@ -91,10 +91,10 @@ long long scc_hashtab_impl_probe_find_sw(
         probe_end = curr ^ 0u;
         for(unsigned i = 0u; i < slot_adj; ++i) {
             scc_when_mutating(assert(i < slot_adj));
-            if(!scc_swvec_read_byte(probe_end, i)) {
+            if(!scc_swar_read_byte(probe_end, i)) {
                 return -1ll;
             }
-            if(!scc_swvec_read_byte(occ_match, i) && base->ht_eq(vals + (slot + i) * elemsize, handle)) {
+            if(!scc_swar_read_byte(occ_match, i) && base->ht_eq(vals + (slot + i) * elemsize, handle)) {
                 return (long long)(slot + i);
             }
         }
@@ -103,7 +103,7 @@ long long scc_hashtab_impl_probe_find_sw(
     return -1ll;
 }
 
-long long scc_hashtab_impl_probe_insert_sw(
+long long scc_hashtab_impl_probe_insert_swar(
     struct scc_hashtab_base const *base,
     void const *handle,
     size_t elemsize,
@@ -119,7 +119,7 @@ long long scc_hashtab_impl_probe_insert_sw(
 
     /* Start slot */
     size_t sslot = hash & (base->ht_capacity - 1u);
-    scc_vectype const *ldaddr = scc_swvec_align_load(meta + sslot);
+    scc_vectype const *ldaddr = scc_swar_align_load(meta + sslot);
 
     /* Aligned offset */
     size_t start = (unsigned char const *)ldaddr - meta;
@@ -138,14 +138,14 @@ long long scc_hashtab_impl_probe_insert_sw(
 
     long long empty_slot = -1ll;
     for(unsigned i = slot_adj; i < sizeof(curr); ++i) {
-        if(!scc_swvec_read_byte(occ_match, i) && base->ht_eq(vals + (i + start) * elemsize, handle)) {
+        if(!scc_swar_read_byte(occ_match, i) && base->ht_eq(vals + (i + start) * elemsize, handle)) {
             /* Already in table */
             return -1ll;
         }
-        if(empty_slot == -1ll && scc_swvec_read_byte(vacant, i) & 0x80u) {
+        if(empty_slot == -1ll && scc_swar_read_byte(vacant, i) & 0x80u) {
             empty_slot = (long long)(i + start);
         }
-        if(!scc_swvec_read_byte(probe_end, i)) {
+        if(!scc_swar_read_byte(probe_end, i)) {
             /* Found end, done probing */
             return empty_slot;
         }
@@ -162,13 +162,13 @@ long long scc_hashtab_impl_probe_insert_sw(
         probe_end = curr ^ 0u;
 
         for(unsigned i = 0u; i < sizeof(curr); ++i) {
-            if(!scc_swvec_read_byte(occ_match, i) && base->ht_eq(vals + (slot + i) * elemsize, handle)) {
+            if(!scc_swar_read_byte(occ_match, i) && base->ht_eq(vals + (slot + i) * elemsize, handle)) {
                 return -1ll;
             }
-            if(empty_slot == -1ll && scc_swvec_read_byte(vacant, i) & 0x80u) {
+            if(empty_slot == -1ll && scc_swar_read_byte(vacant, i) & 0x80u) {
                 empty_slot = (long long)(slot + i);
             }
-            if(!scc_swvec_read_byte(probe_end, i)) {
+            if(!scc_swar_read_byte(probe_end, i)) {
                 /* Found end, done probing */
                 return empty_slot;
             }
@@ -186,13 +186,13 @@ long long scc_hashtab_impl_probe_insert_sw(
         probe_end = curr ^ 0u;
         for(unsigned i = 0u; i < slot_adj; ++i) {
             scc_when_mutating(assert(i < slot_adj));
-            if(!scc_swvec_read_byte(occ_match, i) && base->ht_eq(vals + (slot + i) * elemsize, handle)) {
+            if(!scc_swar_read_byte(occ_match, i) && base->ht_eq(vals + (slot + i) * elemsize, handle)) {
                 return -1ll;
             }
-            if(empty_slot == -1ll && scc_swvec_read_byte(vacant, i) & 0x80u) {
+            if(empty_slot == -1ll && scc_swar_read_byte(vacant, i) & 0x80u) {
                 empty_slot = (long long)(slot + i);
             }
-            if(!scc_swvec_read_byte(probe_end, i)) {
+            if(!scc_swar_read_byte(probe_end, i)) {
                 /* Found end, done probing */
                 return empty_slot;
             }

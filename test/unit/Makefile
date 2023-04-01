@@ -148,10 +148,6 @@ $(eval
 	    $$(call echo-cc,mutate/$$(notdir $$@))
 	    $(__set_mullcfg) $(CC) -o $$@ $$< $(CFLAGS) $(CPPFLAGS)
 
-    $(__mut_builddir)/%.$(oext): $(simdemudir)/%.$(cext) | $(__mut_builddir)
-	    $$(call echo-cc,mutate/$$(notdir $$@))
-	    $(__set_mullcfg) $(CC) -o $$@ $$< $(CFLAGS) $(CPPFLAGS)
-
     $(__mut_builddir)/%.$(oext): $(asdir)/%.$(asext) | $(__mut_builddir)
 	    $$(call echo-as,mutate/$$(notdir $$@))
 	    $(AS) -o $$@ $$< $(ASFLAGS) $(CPPFLAGS)
@@ -176,7 +172,7 @@ $(call include-node,rbtree)
 $(call include-node,ringdeque)
 $(call include-node,stack)
 $(call include-node,vec)
-$(call include-node,simdemu)
+$(call include-node,swar)
 
 ifneq ($(wildcard $(__node_path)/$(simd_isa)),)
   $(call include-node,$(simd_isa))

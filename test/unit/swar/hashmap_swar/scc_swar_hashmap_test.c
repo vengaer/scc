@@ -37,7 +37,7 @@ static void restore_simd(void) {
 #define restore_simd() (void)0
 #endif
 
-void test_scc_simdemu_hashmap_kill_insert_mutant(void) {
+void test_scc_swar_hashmap_kill_insert_mutant(void) {
     disable_simd();
     scc_hashmap(uint32_t, unsigned short) map = scc_hashmap_new(uint32_t, unsigned short, eq);
     scc_hashmap_metatype *md = scc_hashmap_inspect_metadata(map);
@@ -65,7 +65,7 @@ void test_scc_simdemu_hashmap_kill_insert_mutant(void) {
     restore_simd();
 }
 
-void test_scc_simdemu_hashmap_kill_find_mutant(void) {
+void test_scc_swar_hashmap_kill_find_mutant(void) {
     disable_simd();
     scc_hashmap(uint32_t, unsigned short) map = scc_hashmap_with_hash(uint32_t, unsigned short, eq, one);
     struct scc_hashmap_base *base = scc_hashmap_impl_base(map);

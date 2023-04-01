@@ -2,8 +2,6 @@ ifdef __node
 
 $(call push,hashmap_deps)
 
-$(if $(call not,$(__simd_enabled)),$(eval hashmap_deps += swvec))
-
 $(call decl-unit)
 $(call decl-mutate)
 

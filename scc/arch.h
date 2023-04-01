@@ -10,7 +10,7 @@
 #ifdef SCC_HWVEC_SIZE
 #define SCC_VECSIZE SCC_HWVEC_SIZE
 #else
-#define SCC_VECSIZE SCC_SWVEC_SIZE
+#define SCC_VECSIZE SCC_SWARVEC_SIZE
 #endif
 
 #ifdef SCC_SIMD_ISA
@@ -27,7 +27,7 @@
 
 #else
 #define scc_arch_select(func)   \
-    scc_pp_cat_expand(scc_pp_cat_expand(func,_),sw)
+    scc_pp_cat_expand(scc_pp_cat_expand(func,_),swar)
 #endif
 
 struct scc_hashmap_base;

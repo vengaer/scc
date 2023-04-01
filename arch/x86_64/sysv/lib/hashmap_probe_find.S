@@ -30,4 +30,4 @@ avx2_hashmap_probe_find:
 
 .globl scc_hashmap_impl_probe_find_avx2_trampoline
 scc_hashmap_impl_probe_find_avx2_trampoline:
-    avx2_trampoline avx2_hashmap_probe_find, scc_hashmap_impl_probe_find_sw
+    avx2_trampoline avx2_hashmap_probe_find, scc_hashmap_impl_probe_find_swar

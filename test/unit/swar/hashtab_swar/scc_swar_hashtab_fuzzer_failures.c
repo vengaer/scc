@@ -54,7 +54,7 @@ static void run_fuzzer_test(uint32_t const *data, size_t n) {
 #endif
 }
 
-void test_scc_simdemu_hashtab_fuzzer_failure0(void) {
+void test_scc_swar_hashtab_fuzzer_failure0(void) {
     static uint32_t const vals[] = {
         0xafaffafa, 0xccafafaf, 0x8bcccccc, 0xd0afabcc,
         0x3afafad0, 0x2f0afafa, 0x29af0dca, 0x500007e7,

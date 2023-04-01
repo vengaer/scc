@@ -31,4 +31,4 @@ avx2_hashmap_probe_insert:
 
 .globl scc_hashmap_impl_probe_insert_avx2_trampoline
 scc_hashmap_impl_probe_insert_avx2_trampoline:
-    avx2_trampoline avx2_hashmap_probe_insert, scc_hashmap_impl_probe_insert_sw
+    avx2_trampoline avx2_hashmap_probe_insert, scc_hashmap_impl_probe_insert_swar

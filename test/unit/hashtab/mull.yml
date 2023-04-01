@@ -3,7 +3,7 @@ excludePaths:
   - test/*
   - lib/canary.c
   - lib/hashmap.c
-  - lib/hashmap_swemu.c
-  - lib/hashtab_swemu.c
+  - lib/hashmap_swar.c
+  - lib/hashtab_swar.c
   - scc/hashmap.h
-  - scc/swvec.h
+  - scc/swar.h

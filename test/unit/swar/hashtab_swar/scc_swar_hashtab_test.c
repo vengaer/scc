@@ -2,7 +2,7 @@
 
 #include <scc/arch.h>
 #include <scc/hashtab.h>
-#include <scc/swvec.h>
+#include <scc/swar.h>
 
 #include <stdbool.h>
 #include <string.h>
@@ -53,7 +53,7 @@ static unsigned long long ident(void const *data, size_t len) {
     return *(int const *)data;
 }
 
-void test_simdemu_hashtab_simple_find_insert_probe(void) {
+void test_swar_hashtab_simple_find_insert_probe(void) {
     disable_simd();
     static int const data[] = {
         1, 4, 8, 10, 14, 17, 21, 25
@@ -79,7 +79,7 @@ void test_simdemu_hashtab_simple_find_insert_probe(void) {
     restore_simd();
 }
 
-void test_simdemu_hashtab_probe_on_rehash(void) {
+void test_swar_hashtab_probe_on_rehash(void) {
     disable_simd();
     scc_hashtab(int) tab = scc_hashtab_new(int, eq);
     size_t const cap = scc_hashtab_capacity(tab);
@@ -97,7 +97,7 @@ void test_simdemu_hashtab_probe_on_rehash(void) {
     restore_simd();
 }
 
-void test_scc_simdemu_hashtab_kill_find_mutants(void) {
+void test_scc_swar_hashtab_kill_find_mutants(void) {
     disable_simd();
     scc_hashtab(int) tab = scc_hashtab_with_hash(int, eq, two);
     struct scc_hashtab_base *base = scc_hashtab_impl_base(tab);
@@ -119,7 +119,7 @@ void test_scc_simdemu_hashtab_kill_find_mutants(void) {
     restore_simd();
 }
 
-void test_scc_simdemu_hashtab_insert_residual(void) {
+void test_scc_swar_hashtab_insert_residual(void) {
     disable_simd();
     scc_hashtab(int) tab = scc_hashtab_new(int, eq);
     scc_hashtab_metatype *md = scc_hashtab_inspect_metadata(tab);
@@ -136,7 +136,7 @@ void test_scc_simdemu_hashtab_insert_residual(void) {
     restore_simd();
 }
 
-void test_scc_simdemu_hashtab_insert_first(void) {
+void test_scc_swar_hashtab_insert_first(void) {
     disable_simd();
     scc_hashtab(int) tab = scc_hashtab_with_hash(int, eq, seventeen);
     scc_hashtab_metatype *md = scc_hashtab_inspect_metadata(tab);
@@ -158,7 +158,7 @@ void test_scc_simdemu_hashtab_insert_first(void) {
     restore_simd();
 }
 
-void test_scc_simdemu_hashtab_insert_failure_bulk(void) {
+void test_scc_swar_hashtab_insert_failure_bulk(void) {
     disable_simd();
     scc_hashtab(int) tab = scc_hashtab_with_hash(int, eq, seventeen);
     struct scc_hashtab_base *base = scc_hashtab_impl_base(tab);
@@ -179,7 +179,7 @@ void test_scc_simdemu_hashtab_insert_failure_bulk(void) {
     restore_simd();
 }
 
-void test_scc_simdemu_hashtab_insert_failure_residual(void) {
+void test_scc_swar_hashtab_insert_failure_residual(void) {
     disable_simd();
     scc_hashtab(int) tab = scc_hashtab_with_hash(int, eq, nineteen);
     struct scc_hashtab_base *base = scc_hashtab_impl_base(tab);

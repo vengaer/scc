@@ -4,6 +4,6 @@ excludePaths:
   - lib/canary.c
   - lib/hash.c
   - lib/hashmap.c
-  - lib/hashmap_swemu.c
+  - lib/hashmap_swar.c
   - lib/hashtab.c
   - scc/hashmap.h

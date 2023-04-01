@@ -1,11 +1,7 @@
 ifdef __node
 
-$(call decl-unit)
-$(call decl-mutate)
-
-$(__node_builddir)/%.$(oext): $(srcdir)/simdemu/%.$(cext) | $(__node_builddir)
-	$(call echo-cc,$(notdir $@))
-	$(CC) -o $@ $< $(CFLAGS) $(CPPFLAGS)
+$(call include-node,hashmap_swar)
+$(call include-node,hashtab_swar)
 
 else
 # Recurse to top level

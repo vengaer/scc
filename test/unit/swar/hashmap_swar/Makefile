@@ -1,7 +1,7 @@
 ifdef __node
 
-$(call include-node,hashmap_simdemu)
-$(call include-node,hashtab_simdemu)
+$(call decl-unit)
+$(call decl-mutate)
 
 else
 # Recurse to top level

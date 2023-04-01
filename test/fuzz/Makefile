@@ -57,10 +57,6 @@ $(eval
 	    $$(call echo-cc,$(__node)/$$(notdir $$@))
 	    $$(CC) -o $$@ $$< $(CFLAGS) $(CPPFLAGS)
 
-    $(__node_builddir)/%.$(oext): $(simdemudir)/%.$(cext) | $(__node_builddir)
-	    $$(call echo-cc,$(__node)/$$(notdir $$@))
-	    $$(CC) -o $$@ $$< $(CFLAGS) $(CPPFLAGS)
-
     $(__node_builddir)/%.$(oext): $(asdir)/%.$(asext) | $(__node_builddir)
 	    $$(call echo-as,$(__node)/$$(notdir $$@))
 	    $$(AS) -o $$@ $$< $(ASFLAGS) $(CPPFLAGS)
