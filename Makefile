@@ -88,7 +88,7 @@ benchmark: CXXFLAGS += -O3
 
 .PHONY: check
 check: CPPFLAGS := $(filter-out -DNDEBUG,$(CPPFLAGS))
-check: $(alib)
+check: $(alib) $(solib)
 	lit -vv --config-prefix=.lit $(root) -o $(builddir)/lit.json
 
 .PHONY: fuzz

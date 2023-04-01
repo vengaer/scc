@@ -81,5 +81,8 @@ int main(void) {
 // STDOUT:3
 /* ==================================== */
 
-// RUN: %cc -I %root %s %libscc_a -g -o %litbuild/rs_vec_ex
-// RUN: %litbuild/rs_vec_ex | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STDOUT
+// RUN: %cc %s %dynamic -o %t
+// RUN: %t | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STDOUT
+
+// RUN: %cc %s %static -o %t
+// RUN: %t | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STDOUT

@@ -122,5 +122,8 @@ int main(void) {
 // STDOUT:Map size is still 1
 /* ==================================== */
 
-// RUN: %cc -I %root %s %libscc_a -g -o %litbuild/hash_dict
-// RUN: %litbuild/hash_dict | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STDOUT
+// RUN: %cc %s %dynamic -o %t
+// RUN: %t | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STDOUT
+
+// RUN: %cc %s %static -o %t
+// RUN: %t | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STDOUT

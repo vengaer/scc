@@ -188,5 +188,8 @@ int main(void) {
 // STDOUT:8) Map is empty: true
 /* ==================================== */
 
-// RUN: %cc -I %root %s %libscc_a -g -o %litbuild/cppreference_map_ex
-// RUN: %litbuild/cppreference_map_ex | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STDOUT
+// RUN: %cc %s %dynamic -o %t
+// RUN: %t | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STDOUT
+
+// RUN: %cc %s %static -o %t
+// RUN: %t | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STDOUT

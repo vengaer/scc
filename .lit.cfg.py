@@ -15,17 +15,23 @@ _config = inspect.getfile(inspect.currentframe())
 
 _root = pathlib.Path(_config).resolve().parent
 _builddir = _root / 'build'
-_filecheck = _root / 'submodules' / 'filecheck' / 'filecheck' / 'filecheck.py'
-_libscc_a = _builddir / 'libscc.a'
 _litbuild = _builddir / 'lit'
+_filecheck = _root / 'submodules' / 'filecheck' / 'filecheck' / 'filecheck.py'
+_cflags = '-g'
+_cppflags = f'-I{_root}'
+_ldlibs = '-lscc'
+_ldflags = f'-L{_builddir}'
+_libscc_a = _builddir / 'libscc.a'
+_ldlib_path = _builddir
 
 _litbuild.mkdir(parents=True, exist_ok=True)
 
 config.substitutions.append(('%cc', 'clang'))
 config.substitutions.append(('%filecheck', _filecheck))
-config.substitutions.append(('%root', _root))
-config.substitutions.append(('%libscc_a', _libscc_a))
-config.substitutions.append(('%litbuild', _litbuild))
+config.substitutions.append(('%dynamic', f'{_cflags} {_cppflags} {_ldflags} {_ldlibs}'))
+config.substitutions.append(('%static', f'{_cflags} {_cppflags} {_libscc_a}'))
+
+config.environment['LD_LIBRARY_PATH'] = _ldlib_path
 
 # Execute tests in build dir
 config.test_exec_root = _litbuild
