@@ -338,22 +338,6 @@ void *scc_hashtab_impl_new_dyn(scc_hashtab_eq eq, scc_hashtab_hash hash, size_t 
     return tab;
 }
 
-unsigned long long scc_hashtab_fnv1a(void const *data, size_t size) {
-#define SCC_FNV_OFFSET_BASIS 0xcbf29ce484222325ull
-#define SCC_FNV_PRIME 0x100000001b3ull
-
-    unsigned long long hash = SCC_FNV_OFFSET_BASIS;
-    unsigned char const *dptr = data;
-    for(size_t i = 0; i < size; ++i) {
-        hash ^= dptr[i];
-        hash *= SCC_FNV_PRIME;
-    }
-    return hash;
-
-#undef SCC_FNV_OFFSET_BASIS
-#undef SCC_FNV_PRIME
-}
-
 void scc_hashtab_free(void *tab) {
     struct scc_hashtab_base *base = scc_hashtab_impl_base(tab);
     if(base->ht_dynalloc) {

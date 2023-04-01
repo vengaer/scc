@@ -1,3 +1,4 @@
+#include <scc/hash.h>
 #include <scc/hashmap.h>
 
 #include <stdbool.h>
@@ -12,7 +13,7 @@ static bool streq(void const *l, void const *r) {
 
 static unsigned long long strhash(void const *data, size_t size) {
     (void)size;
-    return scc_hashmap_fnv1a(*(void *const *)data, strlen(*(void *const *)data));
+    return scc_hash_fnv1a(*(void *const *)data, strlen(*(void *const *)data));
 }
 
 void test_scc_hashmap_find_string(void) {

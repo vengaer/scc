@@ -1,5 +1,7 @@
 #include <inspect/hashtab_inspect.h>
+
 #include <scc/arch.h>
+#include <scc/hash.h>
 #include <scc/hashtab.h>
 
 #include <stdbool.h>
@@ -21,7 +23,7 @@ void test_insertion_probe_detects_duplicate(void) {
     enum { TESTVAL = 13 };
     scc_hashtab(int) tab = scc_hashtab_new(int, eq);
     struct scc_hashtab_base *base = scc_hashtab_inspect_base(tab);
-    unsigned long long hash = scc_hashtab_fnv1a(&(int){ TESTVAL }, sizeof(int));
+    unsigned long long hash = scc_hash_fnv1a(&(int){ TESTVAL }, sizeof(int));
     scc_hashtab_metatype *md = scc_hashtab_inspect_metadata(tab);
     size_t index = hash & (scc_hashtab_capacity(tab) - 1u);
     scc_hashtab_metatype ent = (scc_hashtab_metatype)((hash >> 57) | 0x80);
@@ -53,7 +55,7 @@ void test_insertion_probe_functional_up_to_full_capacity(void) {
     scc_hashtab_metatype *md = scc_hashtab_inspect_metadata(tab);
     int *data = scc_hashtab_inspect_data(tab);
     for(unsigned i = 0u; i < scc_hashtab_capacity(tab); ++i) {
-        hash = scc_hashtab_fnv1a(&(int){ i }, sizeof(int));
+        hash = scc_hash_fnv1a(&(int){ i }, sizeof(int));
         *tab = i;
         index = scc_hashtab_impl_probe_insert_avx2_trampoline(base, tab, sizeof(int), hash);
         TEST_ASSERT_NOT_EQUAL_INT64(-1ll, index);
@@ -81,7 +83,7 @@ void test_insertion_probe_functional_up_to_full_capacity(void) {
 void test_insertion_probe_finds_single_vacant(void) {
     scc_hashtab(int) tab = scc_hashtab_new(int, eq);
     struct scc_hashtab_base *base = scc_hashtab_inspect_base(tab);
-    unsigned long long hash = scc_hashtab_fnv1a(tab, sizeof(int));
+    unsigned long long hash = scc_hash_fnv1a(tab, sizeof(int));
     size_t slot = hash & (scc_hashtab_capacity(tab) - 1u);
     scc_hashtab_metatype *md = scc_hashtab_inspect_metadata(tab);
     /* Mark all slots as occupied */
@@ -119,7 +121,7 @@ void test_insertion_probe_until_stop(void) {
 
     *tab = TESTVAL;
 
-    unsigned long long hash = scc_hashtab_fnv1a(tab, sizeof(int));
+    unsigned long long hash = scc_hash_fnv1a(tab, sizeof(int));
     size_t slot = hash & (scc_hashtab_capacity(tab) - 1u);
 
     scc_hashtab_metatype *md = scc_hashtab_inspect_metadata(tab);
@@ -179,7 +181,7 @@ void test_insertion_probe_no_end_in_vector(void) {
     size_t index = SIZE_MAX;
     int elem;
     for(elem = 0; index >= SCC_VECSIZE; ++elem) {
-        hash = scc_hashtab_fnv1a(&elem, sizeof(elem));
+        hash = scc_hash_fnv1a(&elem, sizeof(elem));
         index = hash & (scc_hashtab_capacity(tab) - 1u);
     }
 
@@ -210,7 +212,7 @@ void test_find_probe_empty(void) {
     scc_hashtab(int) tab = scc_hashtab_new(int, eq);
     struct scc_hashtab_base *base = scc_hashtab_inspect_base(tab);
     *tab = 32;
-    unsigned long long hash = scc_hashtab_fnv1a(tab, sizeof(*tab));
+    unsigned long long hash = scc_hash_fnv1a(tab, sizeof(*tab));
     TEST_ASSERT_EQUAL_INT64(-1ll, scc_hashtab_impl_probe_find_avx2_trampoline(base, tab, sizeof(int), hash));
     scc_hashtab_free(tab);
 }
@@ -231,7 +233,7 @@ void test_find_probe_no_match(void) {
 
     for(int i = 0; i < SIZE; ++i) {
         *tab = i;
-        hash = scc_hashtab_fnv1a(tab, sizeof(*tab));
+        hash = scc_hash_fnv1a(tab, sizeof(*tab));
         index = hash & (scc_hashtab_capacity(tab) - 1u);
         md[index] = (scc_hashtab_metatype)((hash >> 57) | 0x80);
         if(index < SCC_HASHTAB_GUARDSZ) {
@@ -240,7 +242,7 @@ void test_find_probe_no_match(void) {
         data[index] = i;
     }
     *tab = SIZE;
-    hash = scc_hashtab_fnv1a(tab, sizeof(*tab));
+    hash = scc_hash_fnv1a(tab, sizeof(*tab));
     TEST_ASSERT_EQUAL_INT64(-1ll, scc_hashtab_impl_probe_find_avx2_trampoline(base, tab, sizeof(int), hash));
 
     scc_hashtab_free(tab);
@@ -259,7 +261,7 @@ void test_find_probe_single_value(void) {
     int *data = scc_hashtab_inspect_data(tab);
 
     *tab = VAL;
-    unsigned long long hash = scc_hashtab_fnv1a(tab, sizeof(*tab));
+    unsigned long long hash = scc_hash_fnv1a(tab, sizeof(*tab));
     size_t index = hash & (scc_hashtab_capacity(tab) - 1u);
     md[index] = (scc_hashtab_metatype)((hash >> 57) | 0x80);
     if(index < SCC_HASHTAB_GUARDSZ) {

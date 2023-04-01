@@ -1,5 +1,7 @@
 #include <inspect/hashtab_inspect.h>
+
 #include <scc/bug.h>
+#include <scc/hash.h>
 #include <scc/hashtab.h>
 #include <scc/mem.h>
 
@@ -345,7 +347,7 @@ void test_scc_hashtab_fnv1a64(void) {
     unsigned long long hash;
     scc_static_assert(scc_arrsize(strings) == scc_arrsize(hashes));
     for(unsigned i = 0u; i < scc_arrsize(hashes); ++i) {
-        hash = scc_hashtab_fnv1a(strings[i], strlen(strings[i]));
+        hash = scc_hash_fnv1a(strings[i], strlen(strings[i]));
         TEST_ASSERT_EQUAL_UINT64(hashes[i], hash);
     }
 }

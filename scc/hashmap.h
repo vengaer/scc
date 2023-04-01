@@ -6,6 +6,7 @@
 #include "bug.h"
 #include "canary.h"
 #include "config.h"
+#include "hash.h"
 #include "mem.h"
 #include "perf.h"
 
@@ -531,9 +532,9 @@ void *scc_hashmap_impl_new_dyn(struct scc_hashmap_base const *sbase, size_t maps
 //! .. _scc_hashmap_new:
 //! .. c:function:: void *scc_hashmap_new(keytype, valuetype, scc_hashmap_eq eq)
 //!
-//!     Initializes a hash map using the default :ref:`Fowler-Noll-Vo <scc_hashmap_fnv1a>`
+//!     Initializes a hash map using the default :ref:`Fowler-Noll-Vo <scc_hash_fnv1a>`
 //!     hash function. Exactly equivalent to calling
-//!     :code:`scc_hashmap_with_hash(keytype, valuetype, eq, scc_hashmap_fnv1a)`. See
+//!     :code:`scc_hashmap_with_hash(keytype, valuetype, eq, scc_hash_fnv1a)`. See
 //!     :ref:`its documentation <scc_hashmap_with_hash>` for restrictions and common
 //!     pitfalls.
 //!
@@ -553,7 +554,7 @@ void *scc_hashmap_impl_new_dyn(struct scc_hashmap_base const *sbase, size_t maps
 //!
 //!         :ref:`scc_hashmap_with_hash <scc_hashmap_with_hash>`
 #define scc_hashmap_new(keytype, valuetype, eq)                                            \
-    scc_hashmap_with_hash(keytype, valuetype, eq, scc_hashmap_fnv1a)
+    scc_hashmap_with_hash(keytype, valuetype, eq, scc_hash_fnv1a)
 
 //! .. _scc_hashmap_new_dyn
 //! .. c:function:: void *scc_hashmap_new_dyn(keytype, valuetype, scc_hashmap_eq eq)
@@ -571,7 +572,7 @@ void *scc_hashmap_impl_new_dyn(struct scc_hashmap_base const *sbase, size_t maps
 //!     :param eq: Pointer to function to be used for equality comparison
 //!     :returns: Handle to a newly created hash map, or ``NULL`` on allocation failure
 #define scc_hashmap_new_dyn(keytype, valuetype, eq)                                       \
-    scc_hashmap_with_hash_dyn(keytype, valuetype, eq, scc_hashmap_fnv1a)
+    scc_hashmap_with_hash_dyn(keytype, valuetype, eq, scc_hash_fnv1a)
 
 //? .. c:function:: size_t scc_hashmap_impl_bkpad(void const *map)
 //?
@@ -625,22 +626,6 @@ inline size_t scc_hashmap_impl_bkpad(void const *map) {
 //?     :returns: Unqualified pointer to the base struct of the given map
 #define scc_hashmap_impl_base(map)                                          \
     scc_hashmap_impl_base_qual(map,)
-
-//! .. _scc_hashmap_fnv1a:
-//! .. c:function:: unsigned long long scc_hashmap_fnv1a(void const *data, size_t size)
-//!
-//!     Simple `alternative Fowler-Noll-Vo hash
-//!     <https://en.wikipedia.org/wiki/Fowler-Noll-Vo_hash_function#FNV-1a_hash>`_
-//!     implementation. Used as the default hash function.
-//!
-//!     :param data: Address of the data to be hashed. The data
-//!                  is treated as a consecutive array of bytes.
-//!                  Potential padding in structs must therefore
-//!                  be explicitly initialized to avoid erratic
-//!                  hashing behavior.
-//!     :param size: The size of the data to be hashed, in bytes
-//!     :returns: The alternative Fowler-Noll-Vo hash of the given :c:texpr:`data`
-unsigned long long scc_hashmap_fnv1a(void const *data, size_t size);
 
 //! .. _scc_hashmap_free:
 //! .. c:function:: void scc_hashmap_free(void *map)

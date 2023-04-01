@@ -345,22 +345,6 @@ void *scc_hashmap_impl_new_dyn(struct scc_hashmap_base const *sbase, size_t maps
     return map;
 }
 
-unsigned long long scc_hashmap_fnv1a(void const *data, size_t size) {
-#define SCC_FNV_OFFSET_BASIS 0xcbf29ce484222325ull
-#define SCC_FNV_PRIME 0x100000001b3ull
-
-    unsigned long long hash = SCC_FNV_OFFSET_BASIS;
-    unsigned char const *dptr = data;
-    for(size_t i = 0; i < size; ++i) {
-        hash ^= dptr[i];
-        hash *= SCC_FNV_PRIME;
-    }
-    return hash;
-
-#undef SCC_FNV_OFFSET_BASIS
-#undef SCC_FNV_PRIME
-}
-
 void scc_hashmap_free(void *map) {
     struct scc_hashmap_base *base = scc_hashmap_impl_base(map);
     if(base->hm_dynalloc) {

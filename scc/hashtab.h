@@ -6,6 +6,7 @@
 #include "bug.h"
 #include "canary.h"
 #include "config.h"
+#include "hash.h"
 #include "mem.h"
 
 #include <stddef.h>
@@ -415,9 +416,9 @@ void *scc_hashtab_impl_new_dyn(scc_hashtab_eq eq, scc_hashtab_hash hash, size_t 
 //! .. _scc_hashtab_new:
 //! .. c:function:: void *scc_hashtab_new(type, scc_hashtab_eq eq)
 //!
-//!     Initializes a hash table using the default :ref:`Fowler-Noll-Vo <scc_hashtab_fnv1a>`
+//!     Initializes a hash table using the default :ref:`Fowler-Noll-Vo <scc_hash_fnv1a>`
 //!     hash function. Exactly equivalent to calling
-//!     :code:`scc_hashtab_with_hash(keytype, valuetype, eq, scc_hashtab_fnv1a)`. See
+//!     :code:`scc_hashtab_with_hash(keytype, valuetype, eq, scc_hash_fnv1a)`. See
 //!     :ref:`its documentation <scc_hashtab_with_hash>` for restrictions and common
 //!     pitfalls.
 //!
@@ -441,7 +442,7 @@ void *scc_hashtab_impl_new_dyn(scc_hashtab_eq eq, scc_hashtab_hash hash, size_t 
 //!
 //!         :ref:`scc_hashtab_with_hash <scc_hashtab_with_hash>`
 #define scc_hashtab_new(type, eq)                                           \
-    scc_hashtab_with_hash(type, eq, scc_hashtab_fnv1a)
+    scc_hashtab_with_hash(type, eq, scc_hash_fnv1a)
 
 //! .. _scc_hashtab_new_dyn
 //! .. c:function:: void *scc_hashtab_new_dyn(type, scc_hashtab_eq eq)
@@ -458,7 +459,7 @@ void *scc_hashtab_impl_new_dyn(scc_hashtab_eq eq, scc_hashtab_hash hash, size_t 
 //!     :param eq: Pointer to function to be used for equality comparison
 //!     :returns: Handle to a newly created hash table, or ``NULL`` on allocation failure
 #define scc_hashtab_new_dyn(type, eq)                                       \
-    scc_hashtab_with_hash_dyn(type, eq, scc_hashtab_fnv1a)
+    scc_hashtab_with_hash_dyn(type, eq, scc_hash_fnv1a)
 
 //? .. c:function:: size_t scc_hashtab_impl_bkpad(void const *tab)
 //?
@@ -513,22 +514,6 @@ inline size_t scc_hashtab_impl_bkpad(void const *tab) {
 //?               corresponding to the given :code:`tab`.
 #define scc_hashtab_impl_base(tab)                                          \
     scc_hashtab_impl_base_qual(tab,)
-
-//! .. _scc_hashtab_fnv1a:
-//! .. c:function:: unsigned long long scc_hashtab_fnv1a(void const *data, size_t size)
-//!
-//!     Simple `alternative Fowler-Noll-Vo hash
-//!     <https://en.wikipedia.org/wiki/Fowler-Noll-Vo_hash_function#FNV-1a_hash>`_
-//!     implementation. Used as the default hash function.
-//!
-//!     :param data: Address of the data to be hashed. The data
-//!                  is treated as a consecutive array of bytes.
-//!                  Potential padding in structs must therefore
-//!                  be explicitly initialized to avoid erratic
-//!                  hashing behavior.
-//!     :param size: The size of the data to be hashed, in bytes
-//!     :returns: The alternative Fowler-Noll-Vo hash of the given :c:texpr:`data`
-unsigned long long scc_hashtab_fnv1a(void const *data, size_t size);
 
 //! .. _scc_hashtab_free:
 //! .. c:function:: void scc_hashtab_free(void *tab)

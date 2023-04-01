@@ -2,6 +2,7 @@ excludePaths:
   - submodules/*
   - test/*
   - lib/canary.c
+  - lib/hash.c
   - lib/hashmap.c
   - lib/hashtab.c
   - lib/hashtab_swemu.c
