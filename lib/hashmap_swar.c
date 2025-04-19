@@ -53,7 +53,8 @@ long long scc_hashmap_impl_probe_find_swar(
     /* All zeroes for probe end */
     scc_vectype probe_end = curr ^ 0u;
 
-    for(unsigned i = slot_adj; i < sizeof(curr); ++i) {
+    unsigned i;
+    for(i = slot_adj; i < sizeof(curr) && start + i < base->hm_capacity; ++i) {
         if(!scc_swar_read_byte(probe_end, i)) {
             return -1ll;
         }
@@ -63,7 +64,7 @@ long long scc_hashmap_impl_probe_find_swar(
     }
 
     /* Advance and wrap */
-    size_t slot = (start + sizeof(scc_vectype)) & (base->hm_capacity - 1u);
+    size_t slot = (start + i) & (base->hm_capacity - 1u);
 
     /* Look through the bulk of the map */
     while(slot != start) {
@@ -72,7 +73,7 @@ long long scc_hashmap_impl_probe_find_swar(
         probe_end = curr ^ 0u;
 
         /* Check elements */
-        for(unsigned i = 0u; i < sizeof(curr); ++i) {
+        for(i = 0u; i < sizeof(curr); ++i) {
             if(!scc_swar_read_byte(probe_end, i)) {
                 return -1ll;
             }
@@ -81,7 +82,7 @@ long long scc_hashmap_impl_probe_find_swar(
             }
         }
         /* Advance */
-        slot = (slot + sizeof(scc_vectype)) & (base->hm_capacity - 1u);
+        slot = (slot + i) & (base->hm_capacity - 1u);
     }
 
     /* Residual */
@@ -89,7 +90,7 @@ long long scc_hashmap_impl_probe_find_swar(
         curr = *(scc_vectype const *)(meta + slot);
         occ_match = curr ^ metamask;
         probe_end = curr ^ 0u;
-        for(unsigned i = 0u; i < slot_adj; ++i) {
+        for(i = 0u; i < slot_adj; ++i) {
             scc_when_mutating(assert(i < slot_adj));
             if(!scc_swar_read_byte(probe_end, i)) {
                 return -1ll;
@@ -137,7 +138,8 @@ unsigned long long scc_hashmap_impl_probe_insert_swar(
     scc_vectype probe_end = curr ^ 0u;
 
     unsigned long long empty_slot = ~0ull;
-    for(unsigned i = slot_adj; i < sizeof(curr); ++i) {
+    unsigned i;
+    for(i = slot_adj; i < sizeof(curr) && start + i < base->hm_capacity; ++i) {
         if(empty_slot == ~0ull) {
             if(!scc_swar_read_byte(occ_match, i) && base->hm_eq(keys + (i + start) * keysize, handle)) {
                 empty_slot = (i + start) | SCC_HASHMAP_DUPLICATE;
@@ -153,7 +155,7 @@ unsigned long long scc_hashmap_impl_probe_insert_swar(
     }
 
     /* Advance and wrap */
-    size_t slot = (start + sizeof(scc_vectype)) & (base->hm_capacity - 1u);
+    size_t slot = (start + i) & (base->hm_capacity - 1u);
 
     /* Look through the bulk of the table */
     while(slot != start) {
@@ -162,7 +164,7 @@ unsigned long long scc_hashmap_impl_probe_insert_swar(
         occ_match = curr ^ metamask;
         probe_end = curr ^ 0u;
 
-        for(unsigned i = 0u; i < sizeof(curr); ++i) {
+        for(i = 0u; i < sizeof(curr) && slot + i < base->hm_capacity; ++i) {
             if(empty_slot == ~0ull) {
                 if(!scc_swar_read_byte(occ_match, i) && base->hm_eq(keys + (slot + i) * keysize, handle)) {
                     return (slot + i) | SCC_HASHMAP_DUPLICATE;
@@ -178,7 +180,7 @@ unsigned long long scc_hashmap_impl_probe_insert_swar(
         }
 
         /* Advance */
-        slot = (slot + sizeof(scc_vectype)) & (base->hm_capacity - 1u);
+        slot = (slot + i) & (base->hm_capacity - 1u);
     }
 
     /* Residual */
@@ -187,7 +189,7 @@ unsigned long long scc_hashmap_impl_probe_insert_swar(
         vacant = curr ^ ones;
         occ_match = curr ^ metamask;
         probe_end = curr ^ 0u;
-        for(unsigned i = 0u; i < slot_adj; ++i) {
+        for(i = 0u; i < slot_adj; ++i) {
             scc_when_mutating(assert(i < slot_adj));
             if(empty_slot == ~0ull) {
                 if(!scc_swar_read_byte(occ_match, i) && base->hm_eq(keys + (slot + i) * keysize, handle)) {

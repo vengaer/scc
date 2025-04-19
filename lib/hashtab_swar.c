@@ -53,7 +53,8 @@ long long scc_hashtab_impl_probe_find_swar(
     /* All zeroes for probe end */
     scc_vectype probe_end = curr ^ 0u;
 
-    for(unsigned i = slot_adj; i < sizeof(curr); ++i) {
+    unsigned i;
+    for(i = slot_adj; i < sizeof(curr) && start + i < base->ht_capacity; ++i) {
         if(!scc_swar_read_byte(probe_end, i)) {
             return -1ll;
         }
@@ -63,7 +64,7 @@ long long scc_hashtab_impl_probe_find_swar(
     }
 
     /* Advance and wrap */
-    size_t slot = (start + sizeof(scc_vectype)) & (base->ht_capacity - 1u);
+    size_t slot = (start + i) & (base->ht_capacity - 1u);
 
     /* Look through the bulk of the table */
     while(slot != start) {
@@ -72,7 +73,7 @@ long long scc_hashtab_impl_probe_find_swar(
         probe_end = curr ^ 0u;
 
         /* Check elements */
-        for(unsigned i = 0u; i < sizeof(curr); ++i) {
+        for(i = 0u; i < sizeof(curr); ++i) {
             if(!scc_swar_read_byte(probe_end, i)) {
                 return -1ll;
             }
@@ -81,7 +82,7 @@ long long scc_hashtab_impl_probe_find_swar(
             }
         }
         /* Advance */
-        slot = (slot + sizeof(scc_vectype)) & (base->ht_capacity - 1u);
+        slot = (slot + i) & (base->ht_capacity - 1u);
     }
 
     /* Residual */
@@ -89,7 +90,7 @@ long long scc_hashtab_impl_probe_find_swar(
         curr = *(scc_vectype const *)(meta + slot);
         occ_match = curr ^ metamask;
         probe_end = curr ^ 0u;
-        for(unsigned i = 0u; i < slot_adj; ++i) {
+        for(i = 0u; i < slot_adj; ++i) {
             scc_when_mutating(assert(i < slot_adj));
             if(!scc_swar_read_byte(probe_end, i)) {
                 return -1ll;
@@ -137,7 +138,8 @@ long long scc_hashtab_impl_probe_insert_swar(
     scc_vectype probe_end = curr ^ 0u;
 
     long long empty_slot = -1ll;
-    for(unsigned i = slot_adj; i < sizeof(curr); ++i) {
+    unsigned i;
+    for(i = slot_adj; i < sizeof(curr) && start + i < base->ht_capacity; ++i) {
         if(!scc_swar_read_byte(occ_match, i) && base->ht_eq(vals + (i + start) * elemsize, handle)) {
             /* Already in table */
             return -1ll;
@@ -152,7 +154,7 @@ long long scc_hashtab_impl_probe_insert_swar(
     }
 
     /* Advance and wrap */
-    size_t slot = (start + sizeof(scc_vectype)) & (base->ht_capacity - 1u);
+    size_t slot = (start + i) & (base->ht_capacity - 1u);
 
     /* Look through the bulk of the table */
     while(slot != start) {
@@ -161,7 +163,7 @@ long long scc_hashtab_impl_probe_insert_swar(
         occ_match = curr ^ metamask;
         probe_end = curr ^ 0u;
 
-        for(unsigned i = 0u; i < sizeof(curr); ++i) {
+        for(i = 0u; i < sizeof(curr); ++i) {
             if(!scc_swar_read_byte(occ_match, i) && base->ht_eq(vals + (slot + i) * elemsize, handle)) {
                 return -1ll;
             }
@@ -175,7 +177,7 @@ long long scc_hashtab_impl_probe_insert_swar(
         }
 
         /* Advance */
-        slot = (slot + sizeof(scc_vectype)) & (base->ht_capacity - 1u);
+        slot = (slot + i) & (base->ht_capacity - 1u);
     }
 
     /* Residual */
@@ -184,7 +186,7 @@ long long scc_hashtab_impl_probe_insert_swar(
         vacant = curr ^ ones;
         occ_match = curr ^ metamask;
         probe_end = curr ^ 0u;
-        for(unsigned i = 0u; i < slot_adj; ++i) {
+        for(i = 0u; i < slot_adj; ++i) {
             scc_when_mutating(assert(i < slot_adj));
             if(!scc_swar_read_byte(occ_match, i) && base->ht_eq(vals + (slot + i) * elemsize, handle)) {
                 return -1ll;
