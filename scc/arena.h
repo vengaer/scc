@@ -30,15 +30,17 @@ struct scc_chunk {
 
 #define scc_chunk_impl_layout(type)                                 \
     struct {                                                        \
-        unsigned ch_refcount;                                       \
-        unsigned ch_offset;                                         \
-        unsigned ch_end;                                            \
-        struct scc_chunk *ch_next;                                  \
+        struct {                                                    \
+            unsigned ch_refcount;                                   \
+            unsigned ch_offset;                                     \
+            unsigned ch_end;                                        \
+            struct scc_chunk *ch_next;                              \
+        } ar0;                                                      \
         type ch_buffer[];                                           \
     }
 
 #define scc_arena_impl_baseoff(type)                                \
-    offsetof(scc_chunk_impl_layout(type), ch_buffer)
+    sizeof(scc_chunk_impl_layout(type))
 
 #define scc_arena_new(type)                                         \
     (struct scc_arena) {                                            \
