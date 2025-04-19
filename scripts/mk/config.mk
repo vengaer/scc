@@ -39,7 +39,6 @@ $(config_stamp): | $(confbuilddir)
 	$(RM) $(RMFLAGS) $(wildcard $(dir $@)/_*)
 	$(TOUCH) $@
 
-__simd_enable    := $(call is-set,$(CONFIG_SIMD))
 __devel          := $(call is-set,$(CONFIG_DEVEL))
 __devel_docs     := $(call is-set,$(CONFIG_DEVEL_DOCS))
 
