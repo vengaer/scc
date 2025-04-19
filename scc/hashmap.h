@@ -88,10 +88,6 @@
 //!     including the header
 //!
 //!     Must be a power of 2 and >= 32
-//!
-//!     .. note::
-//!
-//!         Internal use only
 enum { SCC_HASHMAP_STACKCAP = 32 };
 #endif
 
