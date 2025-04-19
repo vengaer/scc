@@ -85,13 +85,40 @@
 //?         The key-value pair stored in the node
 #define scc_rbmnode_impl_layout(keytype, valuetype) \
     struct {                                                                                \
-        struct scc_rbnode_base *rn_left;                                                    \
-        struct scc_rbnode_base *rn_right;                                                   \
-        enum scc_rbcolor rn_color;                                                          \
-        unsigned char rn_flags;                                                             \
-        unsigned char rn_bkoff;                                                             \
+        struct {                                                                            \
+            struct scc_rbnode_base *rn_left;                                                \
+            struct scc_rbnode_base *rn_right;                                               \
+            enum scc_rbcolor rn_color;                                                      \
+            unsigned char rn_flags;                                                         \
+            unsigned char rn_bkoff;                                                         \
+        } rbmn0;                                                                            \
         scc_rbmap_impl_pair(keytype, valuetype) rn_pair;                                    \
     }
+
+//? .. c:macro:: scc_rbmnode_impl_pairoff(keytype, valuetype)
+//?
+//?     Compute offset of :ref:`rn_pair <rbm_kvpair_rn_pair>`
+//?     member.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param keytype: The type of the keys to be stored in the node
+//?     :param valuetype: The type of the values to be stored in the node
+#define scc_rbmnode_impl_pairoff(keytype, valuetype)                                        \
+    sizeof(                                                                                 \
+        struct {                                                                            \
+            struct {                                                                        \
+                struct scc_rbnode_base *rn_left;                                            \
+                struct scc_rbnode_base *rn_right;                                           \
+                enum scc_rbcolor rn_color;                                                  \
+                unsigned char rn_flags;                                                     \
+                unsigned char rn_bkoff;                                                     \
+            } rbmn0;                                                                        \
+            scc_rbmap_impl_pair(keytype, valuetype) rn_pair[];                              \
+        }                                                                                   \
+    )
 
 //? .. _scc_rbmap_impl_layout:
 //? .. c:macro:: scc_rbmap_impl_layout(keytype, valuetype)
@@ -149,15 +176,43 @@
 //?         stored here
 #define scc_rbmap_impl_layout(keytype, valuetype)                                           \
     struct {                                                                                \
-        unsigned short const rm_dataoff;                                                    \
-        size_t rm_size;                                                                     \
-        scc_rbcompare rm_compare;                                                           \
-        struct scc_arena rm_arena;                                                          \
-        struct scc_rbsentinel rm_sentinel;                                                  \
-        unsigned char rm_fwoff;                                                             \
-        unsigned char rm_bkoff;                                                             \
+        struct {                                                                            \
+            unsigned short const rm_dataoff;                                                \
+            size_t rm_size;                                                                 \
+            scc_rbcompare rm_compare;                                                       \
+            struct scc_arena rm_arena;                                                      \
+            struct scc_rbsentinel rm_sentinel;                                              \
+            unsigned char rm_fwoff;                                                         \
+            unsigned char rm_bkoff;                                                         \
+        } rbm0;                                                                             \
         scc_rbmap_impl_pair(keytype, valuetype) rm_curr;                                    \
     }
+
+//? .. c:macro:: scc_rbmap_impl_layout(keytype, valuetype)
+//?
+//?     Compute offset of :ref:`rm_curr <type_rm_curr>`
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param keytype: The type of the keys to be stored in the node
+//?     :param valuetype: The type of the values to be stored in the node
+#define scc_rbmap_impl_curroff(keytype, valuetype)                                          \
+    sizeof(                                                                                 \
+        struct {                                                                            \
+            struct {                                                                        \
+                unsigned short const rm_dataoff;                                            \
+                size_t rm_size;                                                             \
+                scc_rbcompare rm_compare;                                                   \
+                struct scc_arena rm_arena;                                                  \
+                struct scc_rbsentinel rm_sentinel;                                          \
+                unsigned char rm_fwoff;                                                     \
+                unsigned char rm_bkoff;                                                     \
+            } rbm0;                                                                         \
+            scc_rbmap_impl_pair(keytype, valuetype) rm_curr[];                              \
+        }                                                                                   \
+    )
 
 //! .. _scc_rbmap_new:
 //! .. c:function:: void *scc_rbmap_new(keytype, valuetype, scc_rbcompare compare)
@@ -178,11 +233,13 @@
 #define scc_rbmap_new(keytype, valuetype, compare)                                          \
     scc_rbtree_impl_new(                                                                    \
         (void *)&(scc_rbmap_impl_layout(keytype, valuetype)) {                              \
-            .rm_dataoff = offsetof(scc_rbmnode_impl_layout(keytype, valuetype), rn_pair),   \
-            .rm_compare = compare,                                                          \
-            .rm_arena = scc_arena_new(scc_rbmnode_impl_layout(keytype, valuetype)),         \
+            .rbm0 = {                                                                       \
+                .rm_dataoff = scc_rbmnode_impl_pairoff(keytype, valuetype),                 \
+                .rm_compare = compare,                                                      \
+                .rm_arena = scc_arena_new(scc_rbmnode_impl_layout(keytype, valuetype)),     \
+            },                                                                              \
         },                                                                                  \
-        offsetof(scc_rbmap_impl_layout(keytype, valuetype), rm_curr)                        \
+        scc_rbmap_impl_curroff(keytype, valuetype)                                          \
    )
 
 //! .. _scc_rbmap_new_dyn:
@@ -206,8 +263,8 @@
         sizeof(scc_rbmap_impl_layout(keytype, valuetype)),                                  \
         &scc_arena_new(scc_rbmnode_impl_layout(keytype, valuetype)),                        \
         compare,                                                                            \
-        offsetof(scc_rbmap_impl_layout(keytype, valuetype), rm_curr),                       \
-        offsetof(scc_rbmnode_impl_layout(keytype, valuetype), rn_pair)                      \
+        scc_rbmap_impl_curroff(keytype, valuetype),                                         \
+        scc_rbmnode_impl_pairoff(keytype, valuetype)                                        \
     )
 
 //! .. c:function:: size_t scc_rbmap_size(void const *map)
