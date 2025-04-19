@@ -114,7 +114,7 @@
 
     ieqcq   %rbp                            # Increment eq call counter
 
-    testl   %eax, %eax                      # Check return value
+    testb   %al, %al                        # Check return value
     jnz     \dupl
 
     leal    -1(%r15d), %r14d                # Clear rightmost set bit
