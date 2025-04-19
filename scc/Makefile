@@ -16,9 +16,9 @@ $(__config_header_init): $(wildcard $(__config_module)/*.$(pyext)) $(__all_mkfil
 	$(TOUCH) $@
 
 $(__config_header_ver): $(__config_header_init)
-	$(PYTHON) $(__scconfig) $(__config_opts) add SCC_VERSION_MAJOR $(VER_MAJOR) -C "Library major version"
-	$(PYTHON) $(__scconfig) $(__config_opts) add SCC_VERSION_MINOR $(VER_MINOR) -C "Library minor version"
-	$(PYTHON) $(__scconfig) $(__config_opts) add SCC_VERSION_PATCH $(VER_PATCH) -C "Library patch version"
+	$(PYTHON) $(__scconfig) $(__config_opts) add SCC_VERSION_MAJOR $(SCC_MAJOR) -C "Library major version"
+	$(PYTHON) $(__scconfig) $(__config_opts) add SCC_VERSION_MINOR $(SCC_MINOR) -C "Library minor version"
+	$(PYTHON) $(__scconfig) $(__config_opts) add SCC_VERSION_PATCH $(SCC_PATCH) -C "Library patch version"
 	$(TOUCH) $@
 
 $(config_header): $(__config_header_init) $(__config_header_ver) $(config_header_entries)
