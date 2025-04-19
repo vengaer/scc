@@ -134,6 +134,13 @@
             "entrytype": "switch",
             "default": "y",
             "help": "Set to enable debug information (i.e. pass -g to the compiler)"
+        },
+        {
+            "name": "CONFIG_WERROR",
+            "depends": [],
+            "entrytype": "switch",
+            "default": "n",
+            "help": "Set to enable -Werror"
         }
     ]
 }
