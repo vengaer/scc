@@ -35,9 +35,6 @@ $(strip
         $(wildcard $(patsubst %,$(asdir)/%*.$(asext),$(__node) $($(__node)_deps) $(simd_isa)_isa)))
     $(patsubst $(inspectdir)/%.$(cext),$(__node_builddir)/%.$(oext),
         $(wildcard $(inspectdir)/*$(__node)*.$(cext)))
-    $(if $($(__node)_deps),
-        $(patsubst $(inspectdir)/%.$(cext),$(inspectbuilddir)/%.$(oext),
-            $(wildcard $(addprefix $(inspectdir)/*,$(addsuffix *.$(cext),$($(__node)_deps))))))
     $(call wildcard-obj,$(__node_path),$(cext)))
 endef
 
