@@ -84,6 +84,8 @@ struct scc_ringdeque_base {
 //?
 //?         Internal use only
 //?
+//?     :param type: Type of the ringdeque
+//?
 //?     .. c:struct:: @layout
 //?
 //?         .. c:var:: size_t rd_size
@@ -122,14 +124,40 @@ struct scc_ringdeque_base {
 //?             the ringdeque is moved to the heap.
 #define scc_ringdeque_impl_layout(type)                                         \
     struct {                                                                    \
-        size_t rd_size;                                                         \
-        size_t rd_capacity;                                                     \
-        size_t rd_begin;                                                        \
-        size_t rd_end;                                                          \
-        unsigned char rd_npad;                                                  \
-        unsigned char rd_dynalloc;                                              \
+        struct {                                                                \
+            size_t rd_size;                                                     \
+            size_t rd_capacity;                                                 \
+            size_t rd_begin;                                                    \
+            size_t rd_end;                                                      \
+            unsigned char rd_npad;                                              \
+            unsigned char rd_dynalloc;                                          \
+        } rd0;                                                                  \
         type rd_data[SCC_RINGDEQUE_STATIC_CAPACITY];                            \
     }
+
+//? .. c:macro:: scc_ringdeque_impl_layout(type)
+//?
+//?     Compute offset of :ref:`rd_data <type_rd_data>`.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param type: Type of the ringdeque
+#define scc_ringdeque_impl_dataoff(type)                                        \
+    sizeof(                                                                     \
+        struct {                                                                \
+            struct {                                                            \
+                size_t rd_size;                                                 \
+                size_t rd_capacity;                                             \
+                size_t rd_begin;                                                \
+                size_t rd_end;                                                  \
+                unsigned char rd_npad;                                          \
+                unsigned char rd_dynalloc;                                      \
+            } rd0;                                                              \
+            type rd_data[];                                                     \
+        }                                                                       \
+    )
 
 //? .. c:macro:: scc_ringdeque_impl_base_qual(deque, qual)
 //?
@@ -217,7 +245,7 @@ void *scc_ringdeque_impl_new_dyn(size_t dequesz, size_t offset, size_t capacity)
 #define scc_ringdeque_new(type)                                                 \
     scc_ringdeque_impl_new(                                                     \
         (void *)&(scc_ringdeque_impl_layout(type)) { 0 },                       \
-        offsetof(scc_ringdeque_impl_layout(type), rd_data),                     \
+        scc_ringdeque_impl_dataoff(type),                                       \
         SCC_RINGDEQUE_STATIC_CAPACITY                                           \
     )
 
@@ -237,7 +265,7 @@ void *scc_ringdeque_impl_new_dyn(size_t dequesz, size_t offset, size_t capacity)
 #define scc_ringdeque_new_dyn(type)                                             \
     scc_ringdeque_impl_new_dyn(                                                 \
         sizeof(scc_ringdeque_impl_layout(type)),                                \
-        offsetof(scc_ringdeque_impl_layout(type), rd_data),                     \
+        scc_ringdeque_impl_dataoff(type),                                       \
         SCC_RINGDEQUE_STATIC_CAPACITY                                           \
     )
 
