@@ -317,13 +317,38 @@ struct scc_rbtree_base {
 //?         The value stored in the node
 #define scc_rbnode_impl_layout(type)                                                        \
     struct {                                                                                \
-        struct scc_rbnode_base *rn_left;                                                    \
-        struct scc_rbnode_base *rn_right;                                                   \
-        enum scc_rbcolor rn_color;                                                          \
-        unsigned char rn_flags;                                                             \
-        unsigned char rn_bkoff;                                                             \
+        struct {                                                                            \
+            struct scc_rbnode_base *rn_left;                                                \
+            struct scc_rbnode_base *rn_right;                                               \
+            enum scc_rbcolor rn_color;                                                      \
+            unsigned char rn_flags;                                                         \
+            unsigned char rn_bkoff;                                                         \
+        } rbn0;                                                                             \
         type rn_value;                                                                      \
     }
+
+//? .. c:macro:: scc_rbnode_impl_valoff(type)
+//?
+//?     Compute offset of :ref:`rn_value <type_rn_value>`.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param type: The type of the elements to be stored in the node
+#define scc_rbnode_impl_valoff(type)                                                        \
+    sizeof(                                                                                 \
+        struct {                                                                            \
+            struct {                                                                        \
+                struct scc_rbnode_base *rn_left;                                            \
+                struct scc_rbnode_base *rn_right;                                           \
+                enum scc_rbcolor rn_color;                                                  \
+                unsigned char rn_flags;                                                     \
+                unsigned char rn_bkoff;                                                     \
+            } rbn0;                                                                         \
+            type rn_value[];                                                                \
+        }                                                                                   \
+    )
 
 //? .. _scc_rbtree_impl_layout:
 //? .. c:macro:: scc_rbtree_impl_layout(type)
@@ -379,16 +404,44 @@ struct scc_rbtree_base {
 //?         stored here
 #define scc_rbtree_impl_layout(type)                                                        \
     struct {                                                                                \
-        unsigned short rb_dataoff;                                                          \
-        size_t rb_size;                                                                     \
-        scc_rbcompare rb_compare;                                                           \
-        struct scc_arena rb_arena;                                                          \
-        struct scc_rbsentinel rb_sentinel;                                                  \
-        unsigned char rb_dynalloc;                                                          \
-        unsigned char rb_fwoff;                                                             \
-        unsigned char rb_bkoff;                                                             \
+        struct {                                                                            \
+            unsigned short rb_dataoff;                                                      \
+            size_t rb_size;                                                                 \
+            scc_rbcompare rb_compare;                                                       \
+            struct scc_arena rb_arena;                                                      \
+            struct scc_rbsentinel rb_sentinel;                                              \
+            unsigned char rb_dynalloc;                                                      \
+            unsigned char rb_fwoff;                                                         \
+            unsigned char rb_bkoff;                                                         \
+        } rb0;                                                                              \
         type rb_curr;                                                                       \
     }
+
+//? .. c:macro:: scc_rbtree_impl_curroff(type)
+//?
+//?     Compute offset of :ref:`rb_curr <type_rb_curr>`.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param type: The type of the elements to be stored in the node
+#define scc_rbtree_impl_curroff(type)                                                       \
+    sizeof(                                                                                 \
+        struct {                                                                            \
+            struct {                                                                        \
+                unsigned short rb_dataoff;                                                  \
+                size_t rb_size;                                                             \
+                scc_rbcompare rb_compare;                                                   \
+                struct scc_arena rb_arena;                                                  \
+                struct scc_rbsentinel rb_sentinel;                                          \
+                unsigned char rb_dynalloc;                                                  \
+                unsigned char rb_fwoff;                                                     \
+                unsigned char rb_bkoff;                                                     \
+            } rb0;                                                                          \
+            type rb_curr[];                                                                 \
+        }                                                                                   \
+    )
 
 //? .. _scc_rbtree_impl_new:
 //? .. c:function:: void *scc_rbtree_impl_new(struct scc_rbtree_base *base, size_t coff)
@@ -445,11 +498,13 @@ void *scc_rbtree_impl_new_dyn(size_t treesz, struct scc_arena *arena, scc_rbcomp
 #define scc_rbtree_new(type, compare)                                                       \
     scc_rbtree_impl_new(                                                                    \
         (void *)&(scc_rbtree_impl_layout(type)) {                                           \
-            .rb_dataoff = offsetof(scc_rbnode_impl_layout(type), rn_value),                 \
-            .rb_compare = compare,                                                          \
-            .rb_arena = scc_arena_new(scc_rbnode_impl_layout(type)),                        \
+            .rb0 = {                                                                        \
+                .rb_dataoff = scc_rbnode_impl_valoff(type),                                 \
+                .rb_compare = compare,                                                      \
+                .rb_arena = scc_arena_new(scc_rbnode_impl_layout(type)),                    \
+            },                                                                              \
         },                                                                                  \
-        offsetof(scc_rbtree_impl_layout(type), rb_curr)                                     \
+        scc_rbtree_impl_curroff(type)                                                       \
    )
 
 //! .. _scc_rbtree_new_dyn:
@@ -471,8 +526,8 @@ void *scc_rbtree_impl_new_dyn(size_t treesz, struct scc_arena *arena, scc_rbcomp
         sizeof(scc_rbtree_impl_layout(type)),                                               \
         &scc_arena_new(scc_rbnode_impl_layout(type)),                                       \
         compare,                                                                            \
-        offsetof(scc_rbtree_impl_layout(type), rb_curr),                                    \
-        offsetof(scc_rbnode_impl_layout(type), rn_value)                                    \
+        scc_rbtree_impl_curroff(type),                                                      \
+        scc_rbnode_impl_valoff(type)                                                        \
     )
 
 //? .. c:function:: size_t scc_rbtree_impl_npad(void const *rbtree)
