@@ -205,6 +205,8 @@ struct scc_hashtab_base {
 //?
 //?         Internal use only
 //?
+//?     :param type: The type to be stored in the hash table
+//?
 //?     .. c:struct:: @layout
 //?
 //?         .. c:var:: scc_hashtab_eq ht_eq
@@ -291,21 +293,83 @@ struct scc_hashtab_base {
 //?             low bytes of :ref:`ht_meta <scc_hashtab_metatype_ht_meta>` are mirrored in the guard.
 #define scc_hashtab_impl_layout(type)                                       \
     struct {                                                                \
-        scc_hashtab_eq ht_eq;                                               \
-        scc_hashtab_hash ht_hash;                                           \
-        size_t ht_mdoff;                                                    \
-        size_t ht_size;                                                     \
-        size_t ht_capacity;                                                 \
-        SCC_HASHTAB_INJECT_PERFEVTS(ht_perf)                                \
-        unsigned char ht_dynalloc;                                          \
-        unsigned char ht_fwoff;                                             \
-        unsigned char ht_bkoff;                                             \
-        type ht_curr;                                                       \
-        type ht_data[SCC_HASHTAB_STACKCAP];                                 \
+        struct {                                                            \
+            struct {                                                        \
+                scc_hashtab_eq ht_eq;                                       \
+                scc_hashtab_hash ht_hash;                                   \
+                size_t ht_mdoff;                                            \
+                size_t ht_size;                                             \
+                size_t ht_capacity;                                         \
+                SCC_HASHTAB_INJECT_PERFEVTS(ht_perf)                        \
+                unsigned char ht_dynalloc;                                  \
+                unsigned char ht_fwoff;                                     \
+                unsigned char ht_bkoff;                                     \
+            } ht0;                                                          \
+            type ht_curr;                                                   \
+            type ht_data[SCC_HASHTAB_STACKCAP];                             \
+        } ht1;                                                              \
         scc_hashtab_metatype ht_meta[SCC_HASHTAB_STACKCAP];                 \
         scc_hashtab_metatype ht_guard[SCC_HASHTAB_GUARDSZ];                 \
         SCC_CANARY_INJECT(SCC_HASHTAB_CANARYSZ)                             \
     }
+
+//? .. c:macro:: scc_hashtab_impl_curroff(type)
+//?
+//?     Compute offset of :ref:`ht_curr <type_ht_curr>`.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param type: The type to be stored in the hash table
+#define scc_hashtab_impl_curroff(type)                                      \
+    sizeof(                                                                 \
+        struct {                                                            \
+            struct {                                                        \
+                scc_hashtab_eq ht_eq;                                       \
+                scc_hashtab_hash ht_hash;                                   \
+                size_t ht_mdoff;                                            \
+                size_t ht_size;                                             \
+                size_t ht_capacity;                                         \
+                SCC_HASHTAB_INJECT_PERFEVTS(ht_perf)                        \
+                unsigned char ht_dynalloc;                                  \
+                unsigned char ht_fwoff;                                     \
+                unsigned char ht_bkoff;                                     \
+            } ht0;                                                          \
+            type ht_curr[];                                                 \
+        }                                                                   \
+    )
+
+//? .. c:macro:: scc_hashtab_impl_metaoff(type)
+//?
+//?     Compute offset of :ref:`ht_meta <scc_hashtab_metatype_ht_meta>`.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param type: The type to be stored in the hash table
+#define scc_hashtab_impl_metaoff(type)                                      \
+    sizeof(                                                                 \
+        struct {                                                            \
+            struct {                                                        \
+                struct {                                                    \
+                    scc_hashtab_eq ht_eq;                                   \
+                    scc_hashtab_hash ht_hash;                               \
+                    size_t ht_mdoff;                                        \
+                    size_t ht_size;                                         \
+                    size_t ht_capacity;                                     \
+                    SCC_HASHTAB_INJECT_PERFEVTS(ht_perf)                    \
+                    unsigned char ht_dynalloc;                              \
+                    unsigned char ht_fwoff;                                 \
+                    unsigned char ht_bkoff;                                 \
+                } ht0;                                                      \
+                type ht_curr;                                               \
+                type ht_data[SCC_HASHTAB_STACKCAP];                         \
+            } ht1;                                                          \
+            scc_hashtab_metatype ht_meta[];                                 \
+        }                                                                   \
+    )
 
 //? .. _scc_hashtab_impl_new:
 //? .. c:function:: void *scc_hashtab_impl_new(struct scc_hashtab_base *base, size_t coff, size_t mdoff)
@@ -379,12 +443,16 @@ void *scc_hashtab_impl_new_dyn(scc_hashtab_eq eq, scc_hashtab_hash hash, size_t 
 #define scc_hashtab_with_hash(type, eq, hash)                               \
     scc_hashtab_impl_new(                                                   \
         (void *)&(scc_hashtab_impl_layout(type)) {                          \
-            .ht_eq = eq,                                                    \
-            .ht_hash = hash,                                                \
-            .ht_capacity = SCC_HASHTAB_STACKCAP                             \
+            .ht1 = {                                                        \
+                .ht0 = {                                                    \
+                    .ht_eq = eq,                                            \
+                    .ht_hash = hash,                                        \
+                    .ht_capacity = SCC_HASHTAB_STACKCAP                     \
+                },                                                          \
+            },                                                              \
         },                                                                  \
-        offsetof(scc_hashtab_impl_layout(type), ht_curr),                   \
-        offsetof(scc_hashtab_impl_layout(type), ht_meta)                    \
+        scc_hashtab_impl_curroff(type),                                     \
+        scc_hashtab_impl_metaoff(type)                                      \
     )
 
 //! .. _scc_hashtab_with_hash_dyn
@@ -409,8 +477,8 @@ void *scc_hashtab_impl_new_dyn(scc_hashtab_eq eq, scc_hashtab_hash hash, size_t 
         hash,                                                               \
         SCC_HASHTAB_STACKCAP,                                               \
         sizeof(scc_hashtab_impl_layout(type)),                              \
-        offsetof(scc_hashtab_impl_layout(type), ht_curr),                   \
-        offsetof(scc_hashtab_impl_layout(type), ht_meta)                    \
+        scc_hashtab_impl_curroff(type),                                     \
+        scc_hashtab_impl_metaoff(type)                                      \
     )
 
 //! .. _scc_hashtab_new:
