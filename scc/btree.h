@@ -204,11 +204,59 @@ struct scc_btree_base {
 //?         the :c:expr:`bt_nkeys + 1u` first nodes are used.
 #define scc_btnode_impl_layout(type, order)                                                     \
     struct {                                                                                    \
-        unsigned char bt_flags;                                                                 \
-        unsigned short bt_nkeys;                                                                \
-        type bt_data[(order) - 1u];                                                             \
+        struct {                                                                                \
+            struct {                                                                            \
+                unsigned char bt_flags;                                                         \
+                unsigned short bt_nkeys;                                                        \
+            } btn0;                                                                             \
+            type bt_data[(order) - 1u];                                                         \
+        } btn1;                                                                                 \
         struct scc_btnode_base *bt_links[order];                                                \
     }
+
+//? .. c:macro:: scc_btnode_impl_dataoff(type, order)
+//?
+//?     Compoute node-relative offset of data array
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param type: The type of the elements to be stored in the node
+#define scc_btnode_impl_dataoff(type)                                                           \
+    sizeof(                                                                                     \
+        struct {                                                                                \
+            struct {                                                                            \
+                unsigned char bt_flags;                                                         \
+                unsigned short bt_nkeys;                                                        \
+            } btn0;                                                                             \
+            type bt_data[];                                                                     \
+        }                                                                                       \
+    )
+
+//? .. c:macro:: scc_btnode_impl_linkoff(type, order)
+//?
+//?     Compoute node-relative offset of link array
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param type: The type of the elements to be stored in the node
+//?     :param order: The order to the B-tree
+#define scc_btnode_impl_linkoff(type, order)                                                    \
+    sizeof(                                                                                     \
+        struct {                                                                                \
+            struct {                                                                            \
+                struct {                                                                        \
+                    unsigned char bt_flags;                                                     \
+                    unsigned short bt_nkeys;                                                    \
+                } btn0;                                                                         \
+                type bt_data[(order) - 1u];                                                     \
+            } btn1;                                                                             \
+            struct scc_btnode_base *bt_links[];                                                 \
+        }                                                                                       \
+    )
 
 //? .. c:macro:: scc_btree_impl_layout(type, order)
 //?
@@ -282,19 +330,84 @@ struct scc_btree_base {
 //?         checked.
 #define scc_btree_impl_layout(type, order)                                                          \
     struct {                                                                                        \
-        unsigned short const bt_order;                                                              \
-        unsigned short const bt_dataoff;                                                            \
-        unsigned short const bt_linkoff;                                                            \
-        size_t bt_size;                                                                             \
-        struct scc_btnode_base *bt_root;                                                            \
-        scc_bcompare bt_compare;                                                                    \
-        struct scc_arena bt_arena;                                                                  \
-        unsigned char bt_dynalloc;                                                                  \
-        unsigned char bt_fwoff;                                                                     \
-        unsigned char bt_bkoff;                                                                     \
-        type bt_curr;                                                                               \
+        struct {                                                                                    \
+            struct {                                                                                \
+                unsigned short const bt_order;                                                      \
+                unsigned short const bt_dataoff;                                                    \
+                unsigned short const bt_linkoff;                                                    \
+                size_t bt_size;                                                                     \
+                struct scc_btnode_base *bt_root;                                                    \
+                scc_bcompare bt_compare;                                                            \
+                struct scc_arena bt_arena;                                                          \
+                unsigned char bt_dynalloc;                                                          \
+                unsigned char bt_fwoff;                                                             \
+                unsigned char bt_bkoff;                                                             \
+            } bt0;                                                                                  \
+            type bt_curr;                                                                           \
+        } bt1;                                                                                      \
         scc_btnode_impl_layout(type, order) bt_rootmem;                                             \
     }
+
+//? .. c:macro:: scc_btree_impl_curroff(type)
+//?
+//?     Compoute offset :ref:`bt_curr <type_bt_curr>`.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param type: The type of the elements to be stored in the node
+#define scc_btree_impl_curroff(type)                                                                \
+    sizeof(                                                                                         \
+        struct {                                                                                    \
+            struct {                                                                                \
+                unsigned short const bt_order;                                                      \
+                unsigned short const bt_dataoff;                                                    \
+                unsigned short const bt_linkoff;                                                    \
+                size_t bt_size;                                                                     \
+                struct scc_btnode_base *bt_root;                                                    \
+                scc_bcompare bt_compare;                                                            \
+                struct scc_arena bt_arena;                                                          \
+                unsigned char bt_dynalloc;                                                          \
+                unsigned char bt_fwoff;                                                             \
+                unsigned char bt_bkoff;                                                             \
+            } bt0;                                                                                  \
+            type bt_curr[];                                                                         \
+        }                                                                                           \
+    )
+
+//? .. c:macro:: scc_btree_impl_rootoff(type, order)
+//?
+//?     Compoute offset of automatic root node
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param type: The type of the elements to be stored in the node
+//?     :param order: The order to the B-tree
+#define scc_btree_impl_rootoff(type, order)                                                         \
+    sizeof(                                                                                         \
+        struct {                                                                                    \
+            struct {                                                                                \
+                struct {                                                                            \
+                    unsigned short const bt_order;                                                  \
+                    unsigned short const bt_dataoff;                                                \
+                    unsigned short const bt_linkoff;                                                \
+                    size_t bt_size;                                                                 \
+                    struct scc_btnode_base *bt_root;                                                \
+                    scc_bcompare bt_compare;                                                        \
+                    struct scc_arena bt_arena;                                                      \
+                    unsigned char bt_dynalloc;                                                      \
+                    unsigned char bt_fwoff;                                                         \
+                    unsigned char bt_bkoff;                                                         \
+                } bt0;                                                                              \
+                type bt_curr;                                                                       \
+            } bt1;                                                                                  \
+            scc_btnode_impl_layout(type, order) bt_rootmem[];                                       \
+        }                                                                                           \
+    )
+
 
 //? .. _scc_btree_impl_new:
 //? .. c:function:: void *scc_btree_impl_new(void *base, size_t coff, size_t rootoff)
@@ -397,14 +510,18 @@ inline void *scc_btree_impl_with_order_dyn(void *sbase, size_t basesz, size_t co
 //!               or NULL if the order is invalid
 #define scc_btree_with_order(type, compare, order)                                                  \
     scc_btree_impl_with_order(&(scc_btree_impl_layout(type, order)) {                               \
-            .bt_order = order,                                                                      \
-            .bt_dataoff = offsetof(scc_btnode_impl_layout(type, order), bt_data),                   \
-            .bt_linkoff = offsetof(scc_btnode_impl_layout(type, order), bt_links),                  \
-            .bt_arena = scc_arena_new(scc_btnode_impl_layout(type, order)),                         \
-            .bt_compare = compare                                                                   \
+            .bt1 = {                                                                                \
+                .bt0 = {                                                                            \
+                    .bt_order = order,                                                              \
+                    .bt_dataoff = scc_btnode_impl_dataoff(type),                                    \
+                    .bt_linkoff = scc_btnode_impl_linkoff(type, order),                             \
+                    .bt_arena = scc_arena_new(scc_btnode_impl_layout(type, order)),                 \
+                    .bt_compare = compare                                                           \
+                },                                                                                  \
+            },                                                                                      \
         },                                                                                          \
-        offsetof(scc_btree_impl_layout(type, order), bt_curr),                                      \
-        offsetof(scc_btree_impl_layout(type, order), bt_rootmem)                                    \
+        scc_btree_impl_curroff(type),                                                               \
+        scc_btree_impl_rootoff(type, order)                                                         \
     )
 
 //! .. _scc_btree_new:
@@ -430,14 +547,20 @@ inline void *scc_btree_impl_with_order_dyn(void *sbase, size_t basesz, size_t co
 //!     :returns: An opaque pointer to a B-tree allocated in the frame of the calling function
 #define scc_btree_new(type, compare)                                                                \
     scc_btree_impl_new(&(scc_btree_impl_layout(type, SCC_BTREE_DEFAULT_ORDER)) {                    \
-            .bt_order = SCC_BTREE_DEFAULT_ORDER,                                                    \
-            .bt_dataoff = offsetof(scc_btnode_impl_layout(type, SCC_BTREE_DEFAULT_ORDER), bt_data), \
-            .bt_linkoff = offsetof(scc_btnode_impl_layout(type, SCC_BTREE_DEFAULT_ORDER), bt_links),\
-            .bt_arena = scc_arena_new(scc_btnode_impl_layout(type, SCC_BTREE_DEFAULT_ORDER)),       \
-            .bt_compare = (compare)                                                                 \
+            .bt1 = {                                                                                \
+                .bt0 = {                                                                            \
+                    .bt_order = SCC_BTREE_DEFAULT_ORDER,                                            \
+                    .bt_dataoff = scc_btnode_impl_dataoff(type),                                    \
+                    .bt_linkoff = scc_btnode_impl_linkoff(type, SCC_BTREE_DEFAULT_ORDER),           \
+                    .bt_arena = scc_arena_new(                                                      \
+                        scc_btnode_impl_layout(type, SCC_BTREE_DEFAULT_ORDER)                       \
+                    ),                                                                              \
+                    .bt_compare = (compare)                                                         \
+                },                                                                                  \
+            },                                                                                      \
         },                                                                                          \
-        offsetof(scc_btree_impl_layout(type, SCC_BTREE_DEFAULT_ORDER), bt_curr),                    \
-        offsetof(scc_btree_impl_layout(type, SCC_BTREE_DEFAULT_ORDER), bt_rootmem)                  \
+        scc_btree_impl_curroff(type),                                                               \
+        scc_btree_impl_rootoff(type, SCC_BTREE_DEFAULT_ORDER)                                       \
     )
 
 //! .. _scc_btree_with_order_dyn:
@@ -454,15 +577,19 @@ inline void *scc_btree_impl_with_order_dyn(void *sbase, size_t basesz, size_t co
 //!               or ``NULL`` if either the order is invalid or if memory allocation failed
 #define scc_btree_with_order_dyn(type, compare, order)                                              \
     scc_btree_impl_with_order_dyn(&(scc_btree_impl_layout(type, order)) {                           \
-            .bt_order = (order),                                                                    \
-            .bt_dataoff = offsetof(scc_btnode_impl_layout(type, (order)), bt_data),                 \
-            .bt_linkoff = offsetof(scc_btnode_impl_layout(type, (order)), bt_links),                \
-            .bt_arena = scc_arena_new(scc_btnode_impl_layout(type, (order))),                       \
-            .bt_compare = (compare)                                                                 \
+            .bt1 = {                                                                                \
+                .bt0 = {                                                                            \
+                    .bt_order = (order),                                                            \
+                    .bt_dataoff = scc_btnode_impl_dataoff(type),                                    \
+                    .bt_linkoff = scc_btnode_impl_linkoff(type, order),                             \
+                    .bt_arena = scc_arena_new(scc_btnode_impl_layout(type, (order))),               \
+                    .bt_compare = (compare)                                                         \
+                },                                                                                  \
+            },                                                                                      \
         },                                                                                          \
         sizeof(scc_btree_impl_layout(type, order)),                                                 \
-        offsetof(scc_btree_impl_layout(type, order), bt_curr),                                      \
-        offsetof(scc_btree_impl_layout(type, order), bt_rootmem)                                    \
+        scc_btree_impl_curroff(type),                                                               \
+        scc_btree_impl_rootoff(type, order)                                                         \
     )
 
 //! .. _scc_btree_new_dyn
@@ -481,15 +608,21 @@ inline void *scc_btree_impl_with_order_dyn(void *sbase, size_t basesz, size_t co
 //!     :returns: An opaque pointer to a ``btree`` allocated on the heap, or ``NULL`` on allocation failure
 #define scc_btree_new_dyn(type, compare)                                                            \
     scc_btree_impl_new_dyn(&(scc_btree_impl_layout(type, SCC_BTREE_DEFAULT_ORDER)) {                \
-            .bt_order = SCC_BTREE_DEFAULT_ORDER,                                                    \
-            .bt_dataoff = offsetof(scc_btnode_impl_layout(type, SCC_BTREE_DEFAULT_ORDER), bt_data), \
-            .bt_linkoff = offsetof(scc_btnode_impl_layout(type, SCC_BTREE_DEFAULT_ORDER), bt_links),\
-            .bt_arena = scc_arena_new(scc_btnode_impl_layout(type, SCC_BTREE_DEFAULT_ORDER)),       \
-            .bt_compare = (compare)                                                                 \
+            .bt1 = {                                                                                \
+                .bt0 = {                                                                            \
+                    .bt_order = SCC_BTREE_DEFAULT_ORDER,                                            \
+                    .bt_dataoff = scc_btnode_impl_dataoff(type),                                    \
+                    .bt_linkoff = scc_btnode_impl_linkoff(type, SCC_BTREE_DEFAULT_ORDER),           \
+                    .bt_arena = scc_arena_new(                                                      \
+                        scc_btnode_impl_layout(type, SCC_BTREE_DEFAULT_ORDER)                       \
+                    ),                                                                              \
+                    .bt_compare = (compare)                                                         \
+                },                                                                                  \
+            },                                                                                      \
         },                                                                                          \
         sizeof(scc_btree_impl_layout(type, SCC_BTREE_DEFAULT_ORDER)),                               \
-        offsetof(scc_btree_impl_layout(type, SCC_BTREE_DEFAULT_ORDER), bt_curr),                    \
-        offsetof(scc_btree_impl_layout(type, SCC_BTREE_DEFAULT_ORDER), bt_rootmem)                  \
+        scc_btree_impl_curroff(type),                                                               \
+        scc_btree_impl_rootoff(type, SCC_BTREE_DEFAULT_ORDER)                                       \
     )
 
 //? .. c:function:: size_t scc_btree_impl_npad(void const *btree)
