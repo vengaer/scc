@@ -152,7 +152,7 @@ static bool scc_hashtab_emplace(void *tab, struct scc_hashtab_base *base, size_t
     return true;
 }
 
-//? .. c:function:: struct scc_hashtab_base *scc_hashtab_realloc(void *restrict *newtab, void const *tab, \
+//? .. c:function:: struct scc_hashtab_base *scc_hashtab_realloc(void *restrict *newtab, void const *tab, <dnl>
 //?                                                              struct scc_hashtab_base const *base, size_t elemsize, size_t cap)
 //?
 //?     Allocate a new hash table, fill in the fields of its base struct and

@@ -269,8 +269,8 @@ void *scc_vec_impl_new_dyn(size_t vecsz, size_t offset, size_t capacity);
     )
 
 //? .. _scc_vec_impl_from:
-//? .. c:function:: void *scc_vec_impl_from(\
-//?        void *restrict vec, void const *restrict data, \
+//? .. c:function:: void *scc_vec_impl_from(<dnl>
+//?        void *restrict vec, void const *restrict data, <dnl>
 //?        size_t size, size_t elemsize)
 //?
 //?     Initialize an vec with the given values and return
@@ -366,7 +366,7 @@ void *scc_vec_impl_from_dyn(size_t basecap, size_t offset, void const *data, siz
         sizeof(type)                                                        \
     )
 
-//? .. c:function:: _Bool scc_vec_impl_resize(\
+//? .. c:function:: _Bool scc_vec_impl_resize(<dnl>
 //?        void *vecaddr, size_t size, size_t elemsize)
 //?
 //?     Resize the given vector to the given size. Truncating or allocating
@@ -432,7 +432,7 @@ void scc_vec_impl_erase(void *vec, size_t index, size_t elemsize);
 #define scc_vec_erase(vec, index)                                       \
     scc_vec_impl_erase(vec, index, sizeof(*(vec)))
 
-//? .. c:function:: void scc_vec_impl_erase_range(\
+//? .. c:function:: void scc_vec_impl_erase_range(<dnl>
 //?        void *vec, size_t first, size_t end, size_t elemsize)
 //?
 //?     Erase elements in the range [first,end). Potential elements beyond
@@ -484,7 +484,7 @@ void scc_vec_impl_erase_range(void *vec, size_t first, size_t end, size_t elemsi
 //!         printf("The third element is %d\n", vec[2]);
 /* Defined implicitly */
 
-//? .. c:function:: _Bool scc_vec_impl_push_ensure_capacity(\
+//? .. c:function:: _Bool scc_vec_impl_push_ensure_capacity(<dnl>
 //?        void *vecaddr, size_t elemsize)
 //?
 //?     Ensure that the vec has a large enough capacity to be able to
@@ -525,7 +525,7 @@ _Bool scc_vec_impl_push_ensure_capacity(void *vecaddr, size_t elemsize);
     (scc_vec_impl_push_ensure_capacity(vecaddr, sizeof(**(vecaddr))) &&     \
     ((*(vecaddr))[scc_vec_impl_base(*(vecaddr))->sv_size++] = (value),1))
 
-//? .. c:function:: _Bool scc_vec_impl_reserve(\
+//? .. c:function:: _Bool scc_vec_impl_reserve(<dnl>
 //?        void *vecaddr, size_t capacity, size_t elemsize)
 //?
 //?     Reserve at least enough memory to store the requested number of elements

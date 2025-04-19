@@ -92,7 +92,7 @@ static inline void scc_btnode_flags_clear(struct scc_btnode_base *node) {
     node->bt_flags = 0u;
 }
 
-//? .. c:function:: struct scc_btnode_base *scc_btnode_links(\
+//? .. c:function:: struct scc_btnode_base *scc_btnode_links(<dnl>
 //?     struct scc_btree_base const *restrict base, struct scc_btnode_base *restrict node)
 //?
 //?     Compute address of the first element in the :ref:`bt_links <struct_scc_btnode_base_bt_links>` field
@@ -108,7 +108,7 @@ static inline struct scc_btnode_base **scc_btnode_links(struct scc_btree_base co
     return (void *)((unsigned char *)node + base->bt_linkoff);
 }
 
-//? .. c:function:: struct scc_btnode_base *scc_btnode_child(\
+//? .. c:function:: struct scc_btnode_base *scc_btnode_child(<dnl>
 //?        struct scc_btree_base const *restrict base, struct scc_btnode_base *restrict node, size_t index)
 //?
 //?     Compute address of the indexth child of the given node
@@ -141,8 +141,8 @@ static inline void *scc_btnode_data(struct scc_btree_base const *restrict base, 
     return (unsigned char *)node + base->bt_dataoff;
 }
 
-//? .. c:function:: void *scc_btnode_value(\
-//?     struct scc_btree_base const *restrict base, struct scc_btnode_base *restrict node, \
+//? .. c:function:: void *scc_btnode_value(<dnl>
+//?     struct scc_btree_base const *restrict base, struct scc_btnode_base *restrict node, <dnl>
 //?     size_t index, size_t elemsize)
 //?
 //?     Compute and return address of the indexth value in the given node
@@ -166,10 +166,10 @@ static inline void *scc_btnode_value(
 }
 
 //? .. _scc_btnode_lower_bound:
-//? .. c:function:: size_t scc_btnode_lower_bound(\
-//?        struct scc_btree_base const *base, \
-//?        struct scc_btnode_base *node, \
-//?        void const *restrict value, \
+//? .. c:function:: size_t scc_btnode_lower_bound(<dnl>
+//?        struct scc_btree_base const *base, <dnl>
+//?        struct scc_btnode_base *node, <dnl>
+//?        void const *restrict value, <dnl>
 //?        size_t elemsize)
 //?
 //?     Compute the lower bound given value in the supplied node.
@@ -196,7 +196,7 @@ static inline size_t scc_btnode_lower_bound(
     return scc_algo_lower_bound(value, scc_btnode_data(base, node), node->bt_nkeys, elemsize, base->bt_compare);
 }
 
-//? .. c:function:: size_t scc_btnode_emplace_leaf(\
+//? .. c:function:: size_t scc_btnode_emplace_leaf(<dnl>
 //?        struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, void *restrict value, size_t elemsize)
 //?
 //?     Insert the given value in the specified leaf node. The node must
@@ -228,8 +228,8 @@ static size_t scc_btnode_emplace_leaf(
     return bound;
 }
 
-//? .. c:function:: void scc_btnode_emplace(\
-//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, \
+//? .. c:function:: void scc_btnode_emplace(<dnl>
+//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, <dnl>
 //?     struct scc_btnode_base *restrict child, void *restrict value, size_t elemsize)
 //?
 //?     Insert the given value with accompanying child subtree in non-leaf node. The
@@ -259,10 +259,10 @@ static void scc_btnode_emplace(
     links[bound + 1u] = child;
 }
 
-//? .. c:function:: void scc_btree_new_root(\
-//?     struct scc_btree_base const *restrict base, \
-//?     struct scc_btnode_base *restrict node, \
-//?     struct scc_btnode_base *restrict left, \
+//? .. c:function:: void scc_btree_new_root(<dnl>
+//?     struct scc_btree_base const *restrict base, <dnl>
+//?     struct scc_btnode_base *restrict node, <dnl>
+//?     struct scc_btnode_base *restrict left, <dnl>
 //?     struct scc_btnode_base *restrict right)
 //?
 //?     Initialize the node parameter as if it were the new node of the
@@ -292,10 +292,10 @@ static inline void scc_btree_new_root(
     scc_btnode_flags_clear(node);
 }
 
-//? .. c:function:: int scc_btnode_find_linkindex(\
-//?     struct scc_btree_base const *restrict base, \
-//?     struct scc_btnode_base *restrict node, \
-//?     struct scc_btnode_base *restrict p, \
+//? .. c:function:: int scc_btnode_find_linkindex(<dnl>
+//?     struct scc_btree_base const *restrict base, <dnl>
+//?     struct scc_btnode_base *restrict node, <dnl>
+//?     struct scc_btnode_base *restrict p, <dnl>
 //?     size_t elemsize)
 //?
 //?     Find and return the index of the given node in the link
@@ -330,10 +330,10 @@ static inline size_t scc_btnode_find_linkindex(
     return base->bt_order;
 }
 
-//? .. c:function:: struct scc_btnode_base *scc_btnode_split_preemptive(\
-//?     struct scc_btree_base *restrict base, \
-//?     struct scc_btnode_base *restrict node, \
-//?     struct scc_btnode_base *p, \
+//? .. c:function:: struct scc_btnode_base *scc_btnode_split_preemptive(<dnl>
+//?     struct scc_btree_base *restrict base, <dnl>
+//?     struct scc_btnode_base *restrict node, <dnl>
+//?     struct scc_btnode_base *p, <dnl>
 //?     size_t elemsize)
 //?
 //?     Split the given node in two, moving values and links
@@ -404,9 +404,9 @@ static struct scc_btnode_base *scc_btnode_split_preemptive(
     return right;
 }
 
-//? .. c:function:: struct scc_btnode_base *scc_btnode_split_non_preemptive(\
-//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict base, \
-//?     struct scc_btnode_base *restrict child, struct scc_btnode_base *p, \
+//? .. c:function:: struct scc_btnode_base *scc_btnode_split_non_preemptive(<dnl>
+//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict base, <dnl>
+//?     struct scc_btnode_base *restrict child, struct scc_btnode_base *p, <dnl>
 //?     void *restrict value, size_t elemsize)
 //?
 //?     Split the given node in two, moving values as required. The supplied value is
@@ -655,9 +655,9 @@ epilogue:
     return success;
 }
 
-//? .. c:function:: void scc_btnode_rotate_right(\
-//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, \
-//?     struct scc_btnode_base *restrict sibling, struct scc_btnode_base *restrict p, \
+//? .. c:function:: void scc_btnode_rotate_right(<dnl>
+//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, <dnl>
+//?     struct scc_btnode_base *restrict sibling, struct scc_btnode_base *restrict p, <dnl>
 //?     size_t bound, size_t elemsize)
 //?
 //?     Rotate value from left sibling through parent and into the given node.
@@ -698,9 +698,9 @@ static void scc_btnode_rotate_right(
     nlinks[0] = subtree;
 }
 
-//? .. c:function:: void scc_btnode_rotate_left(\
-//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, \
-//?     struct scc_btnode_base *restrict sibling, struct scc_btnode_base *restrict p, \
+//? .. c:function:: void scc_btnode_rotate_left(<dnl>
+//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, <dnl>
+//?     struct scc_btnode_base *restrict sibling, struct scc_btnode_base *restrict p, <dnl>
 //?     size_t bound, size_t elemsize)
 //?
 //?     Rotate value from right sibling through parent and into the given node.
@@ -739,9 +739,9 @@ static void scc_btnode_rotate_left(
     scc_memmove(sslot, sslot + elemsize, sibling->bt_nkeys * elemsize);
 }
 
-//? .. c:function:: void scc_btnode_merge(\
-//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, \
-//?     struct scc_btnode_base *restrict sibling, struct scc_btnode_base *restrict p, \
+//? .. c:function:: void scc_btnode_merge(<dnl>
+//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, <dnl>
+//?     struct scc_btnode_base *restrict sibling, struct scc_btnode_base *restrict p, <dnl>
 //?     size_t bound, size_t elemsize)
 //?
 //?     Generic merging of the given node with its left sibling, leaving parent links untouched
@@ -797,9 +797,9 @@ static size_t scc_btnode_merge(
     return nmov;
 }
 
-//? .. c:function:: void scc_btnode_merge_left_non_preemptive(\
-//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, \
-//?     struct scc_btnode_base *restrict sibling, struct scc_btnode_base *restrict p, \
+//? .. c:function:: void scc_btnode_merge_left_non_preemptive(<dnl>
+//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, <dnl>
+//?     struct scc_btnode_base *restrict sibling, struct scc_btnode_base *restrict p, <dnl>
 //?     size_t bound, size_t elemsize)
 //?
 //?     Merge the given node with its left sibling
@@ -827,9 +827,9 @@ static inline void scc_btnode_merge_left_non_preemptive(
     scc_arena_try_free(&base->bt_arena, node);
 }
 
-//? .. c:function:: void scc_btnode_merge_left_preemptive(\
-//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, \
-//?     struct scc_btnode_base *restrict sibling, struct scc_btnode_base *restrict p, \
+//? .. c:function:: void scc_btnode_merge_left_preemptive(<dnl>
+//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, <dnl>
+//?     struct scc_btnode_base *restrict sibling, struct scc_btnode_base *restrict p, <dnl>
 //?     size_t bound, size_t elemsize)
 //?
 //?     Merge the given node with its left sibling, freeing the parent node
@@ -860,9 +860,9 @@ static inline void scc_btnode_merge_left_preemptive(
 }
 
 
-//? .. c:function:: void scc_btnode_merge_right_non_preemptive(\
-//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, \
-//?     struct scc_btnode_base *restrict sibling, struct scc_btnode_base *restrict p, \
+//? .. c:function:: void scc_btnode_merge_right_non_preemptive(<dnl>
+//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, <dnl>
+//?     struct scc_btnode_base *restrict sibling, struct scc_btnode_base *restrict p, <dnl>
 //?     size_t bound, size_t elemsize)
 //?
 //?     Merge the given node with its right sibling
@@ -894,9 +894,9 @@ static inline void scc_btnode_merge_right_non_preemptive(
     scc_arena_try_free(&base->bt_arena, sibling);
 }
 
-//? .. c:function:: void scc_btnode_merge_right_preemptive(\
-//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, \
-//?     struct scc_btnode_base *restrict sibling, struct scc_btnode_base *restrict p, \
+//? .. c:function:: void scc_btnode_merge_right_preemptive(<dnl>
+//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, <dnl>
+//?     struct scc_btnode_base *restrict sibling, struct scc_btnode_base *restrict p, <dnl>
 //?     size_t bound, size_t elemsize)
 //?
 //?     Merge the given node with its right sibling, freeing the parent node
@@ -926,8 +926,8 @@ static inline void scc_btnode_merge_right_preemptive(
     }
 }
 
-//? .. c:function:: void scc_btree_balance_preemptive(\
-//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict next, \
+//? .. c:function:: void scc_btree_balance_preemptive(<dnl>
+//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict next, <dnl>
 //?     struct scc_btnode_base *restrict curr, size_t bound, size_t elemsize)
 //?
 //?     Balance B-tree for preemptive removal
@@ -974,8 +974,8 @@ static struct scc_btnode_base *scc_btree_balance_preemptive(
     return sibling;
 }
 
-//? .. c:function:: void scc_btnode_remove_leaf(\
-//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, \
+//? .. c:function:: void scc_btnode_remove_leaf(<dnl>
+//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, <dnl>
 //?     size_t index, size_t elemsize)
 //?
 //?     Remove the value at the specified index from the given leaf node. The node must
@@ -1008,8 +1008,8 @@ static inline void scc_btnode_remove_leaf(
     scc_memmove(data, data + elemsize, nmov * elemsize);
 }
 
-//? .. c:function:: void scc_btnode_overwrite(\
-//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict curr, \
+//? .. c:function:: void scc_btnode_overwrite(<dnl>
+//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict curr, <dnl>
 //?     struct scc_btnode_base *restrict found, size_t fbound, size_t elemsize, _Bool predecessor)
 //?
 //?     Swap the in-order predecessor or successor with the element at index fbound in
@@ -1044,7 +1044,7 @@ static inline void scc_btnode_overwrite(
     }
 }
 
-//? .. c:function:: _Bool scc_btree_remove_preemptive(\
+//? .. c:function:: _Bool scc_btree_remove_preemptive(<dnl>
 //?     struct scc_btree_base *restrict base, void *restrict btree, size_t elemsize)
 //?
 //?     Find and remove the value stored in the :code:`bt_curr` field using preemptive
@@ -1141,8 +1141,8 @@ static _Bool scc_btree_remove_preemptive(struct scc_btree_base *restrict base, v
     return true;
 }
 
-//? .. c:function:: void scc_btree_balance_non_preemptive(\
-//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict curr, \
+//? .. c:function:: void scc_btree_balance_non_preemptive(<dnl>
+//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict curr, <dnl>
 //?     struct scc_btnode_base **restrict nodes, size_t *bounds, size_t elemsize)
 //?
 //?     Traverse the tree back towards the root, balancing as needed
@@ -1213,7 +1213,7 @@ static void scc_btree_balance_non_preemptive(
     }
 }
 
-//? .. c:function:: _Bool scc_btree_remove_non_preemptive(\
+//? .. c:function:: _Bool scc_btree_remove_non_preemptive(<dnl>
 //?     struct scc_btree_base *restrict base, void *restrict btree, size_t elemsize)
 //?
 //?     Find and remove the value stored in the :code:`bt_curr` field using non-preemptive

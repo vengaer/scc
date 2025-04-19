@@ -15,8 +15,8 @@ size_t scc_hashmap_impl_bkpad(void const *map);
 size_t scc_hashmap_capacity(void const *map);
 size_t scc_hashmap_size(void const *map);
 
-//? .. c:function:: void scc_hashmap_set_mdent(\
-//?        scc_hashmap_metatype *md, size_t index, \
+//? .. c:function:: void scc_hashmap_set_mdent(<dnl>
+//?        scc_hashmap_metatype *md, size_t index, <dnl>
 //?        scc_hashmap_metatype val, size_t capacity)
 //?
 //?     Set metadata entry at given index, duplicating low
@@ -173,9 +173,9 @@ bool scc_hashmap_emplace(void *map, struct scc_hashmap_base *base, size_t keysiz
     return duplicate;
 }
 
-//? .. c:function:: struct scc_hashmap_base *scc_hashmap_realloc(\
-//?        void *restrict *newmap, void const *map, \
-//?        struct scc_hashmap_base const *base, size_t keysize, \
+//? .. c:function:: struct scc_hashmap_base *scc_hashmap_realloc(<dnl>
+//?        void *restrict *newmap, void const *map, <dnl>
+//?        struct scc_hashmap_base const *base, size_t keysize, <dnl>
 //?        size_t valsize, size_t cap)
 //?
 //?     Allocate a new hash map, fill in the fields of its base and return
@@ -262,8 +262,8 @@ static struct scc_hashmap_base *scc_hashmap_realloc(
     return newbase;
 }
 
-//? .. c:function:: _Bool scc_hashmap_rehash(\
-//?        void **map, struct scc_hashmap_base *base, \
+//? .. c:function:: _Bool scc_hashmap_rehash(<dnl>
+//?        void **map, struct scc_hashmap_base *base, <dnl>
 //?        size_t keysize, size_t valsize, size_t cap)
 //?
 //?     Reallocate and rehash the hash map. On success, :c:texpr:`*map`

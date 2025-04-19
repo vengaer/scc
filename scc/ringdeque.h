@@ -199,7 +199,7 @@ struct scc_ringdeque_base {
     scc_ringdeque_impl_base_qual(deque,)
 
 //? .. _scc_ringdeque_impl_new:
-//? .. c:function:: void *scc_ringdeque_impl_new(struct scc_ringdeque_base *base, \
+//? .. c:function:: void *scc_ringdeque_impl_new(struct scc_ringdeque_base *base, <dnl>
 //?     size_t offset, size_t capacity)
 //?
 //?     Initialize a raw ringdeque at the given address and return a

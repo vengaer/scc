@@ -61,7 +61,7 @@ extern long long scc_arch_select(scc_hashtab_impl_probe_find)(
     unsigned long long hash
 );
 
-//? .. c:function:: unsigned long long scc_hashmap_impl_probe_insert(struct scc_hashmap_base const *base, \
+//? .. c:function:: unsigned long long scc_hashmap_impl_probe_insert(struct scc_hashmap_base const *base, <dnl>
 //?     void const *map, size_t elemsize, unsigned long long hash)
 //?
 //?     Architecture-dependent insertion probing, computing the slot to insert the
@@ -86,7 +86,7 @@ inline unsigned long long scc_hashmap_impl_probe_insert(
     return scc_arch_select(scc_hashmap_impl_probe_insert)(base, map, keysize, hash);
 }
 
-//? .. c:function:: long long scc_hashmap_impl_probe_find(struct scc_hashmap_base const *base, \
+//? .. c:function:: long long scc_hashmap_impl_probe_find(struct scc_hashmap_base const *base, <dnl>
 //?     void const *map, size_t elemsize, unsigned long long hash)
 //?
 //?     Architecture-specific find probing, looking for the key at ``map``.
@@ -110,7 +110,7 @@ inline long long scc_hashmap_impl_probe_find(
     return scc_arch_select(scc_hashmap_impl_probe_find)(base, map, keysize, hash);
 }
 
-//? .. c:function:: long long scc_hashtab_probe_insert(struct scc_hashtab_base const *base, \
+//? .. c:function:: long long scc_hashtab_probe_insert(struct scc_hashtab_base const *base, <dnl>
 //?     void const *tab, size_t elemsize, unsigned long long hash)
 //?
 //?     Architecture-specific insert probing, computing the slot to insert the element
@@ -135,7 +135,7 @@ inline long long scc_hashtab_impl_probe_insert(
     return scc_arch_select(scc_hashtab_impl_probe_insert)(base, tab, elemsize, hash);
 }
 
-//? .. c:function:: long long scc_hashtab_probe_find(struct scc_hashtab_base const *base, \
+//? .. c:function:: long long scc_hashtab_probe_find(struct scc_hashtab_base const *base, <dnl>
 //?     void const *tab, size_t elemsize, unsigned long long hash)
 //?
 //?     Architecture-specific find probing, looking for the element at ``tab``.

@@ -31,16 +31,16 @@ def extract_doc_lines(file, devel):
 
     return doc
 
-def write_rst(doc, outfile):
+def write_rst(complete, outfile):
     ''' Write to outfile, or stdout if no file was provided '''
     with FileWrHandle(outfile) if outfile is not None else StdoutWrHandle() as handle:
-        for line in doc:
-            handle.writeln(line)
+        handle.writeln(complete)
 
 def main(file, outfile, devel):
     ''' main '''
     doc = extract_doc_lines(file, devel)
-    write_rst(doc, outfile)
+    complete = '\n'.join(doc).replace('<dnl>\n', '')
+    write_rst(complete, outfile)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Convert documentation in headers to rst source')

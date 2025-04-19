@@ -51,7 +51,7 @@ static inline size_t scc_vec_calc_new_capacity(size_t current) {
     return current << 1u | 1u;
 }
 
-//? .. c:function:: struct scc_vec_base *scc_vec_alloc(\
+//? .. c:function:: struct scc_vec_base *scc_vec_alloc(<dnl>
 //?        size_t nbytes, size_t nelems, size_t npad)
 //?
 //?     Allocate and initialize an vec base struct

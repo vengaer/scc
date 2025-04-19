@@ -12,7 +12,7 @@ void scc_rbmap_clear(void *map);
 void scc_rbmap_free(void *map);
 void const *scc_rbmap_impl_iterstop(void const *map);
 
-//? .. c:function:: struct scc_rbnode_base *scc_rbmap_leftmost(\
+//? .. c:function:: struct scc_rbnode_base *scc_rbmap_leftmost(<dnl>
 //?     struct scc_rbnode_base *root)
 //?
 //?     Find the leftmost node in the subtree spanning from the given root
@@ -30,7 +30,7 @@ static inline struct scc_rbnode_base *scc_rbmap_leftmost(struct scc_rbnode_base 
     return root;
 }
 
-//? .. c:function:: struct scc_rbnode_base *scc_rbmap_rightmost(\
+//? .. c:function:: struct scc_rbnode_base *scc_rbmap_rightmost(<dnl>
 //?     struct scc_rbnode_base *root)
 //?
 //?     Find the rightmost node in the subtree spanning from the given root
@@ -48,8 +48,8 @@ static inline struct scc_rbnode_base *scc_rbmap_rightmost(struct scc_rbnode_base
     return root;
 }
 
-//? .. c:function:: void const *scc_rbmnode_key(\
-//?     struct scc_rbtree_base const *restrict base, \
+//? .. c:function:: void const *scc_rbmnode_key(<dnl>
+//?     struct scc_rbtree_base const *restrict base, <dnl>
 //?     void const *restrict node)
 //?
 //?     Compute and return const-qualified ponter to the key
@@ -69,8 +69,8 @@ static inline void const *scc_rbmnode_key(
     return scc_rbnode_value_qual(base, node, const);
 }
 
-//? .. c:function:: void *scc_rbmnode_value(\
-//?     struct scc_rbtree_base const *restrict base, \
+//? .. c:function:: void *scc_rbmnode_value(<dnl>
+//?     struct scc_rbtree_base const *restrict base, <dnl>
 //?     void const *restrict node, size_t valoff)
 //?
 //?     Compute and return ponter to the value stored in

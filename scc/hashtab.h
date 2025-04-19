@@ -386,7 +386,7 @@ struct scc_hashtab_base {
 //?     :param mdoff: Offset of :code:`ht_meta` relative the address of :c:expr`*base`
 void *scc_hashtab_impl_new(struct scc_hashtab_base *base, size_t coff, size_t mdoff);
 
-//? .. c:function:: void *scc_hashtab_impl_new_dyn(scc_hashtab_eq eq, scc_hashtab_hash hash, \
+//? .. c:function:: void *scc_hashtab_impl_new_dyn(scc_hashtab_eq eq, scc_hashtab_hash hash, <dnl>
 //?     size_t tabsz, size_t coff, size_t mdoff)
 //?
 //?     Like :ref:`scc_hashtab_impl_new <scc_hashtab_impl_new>` except for the

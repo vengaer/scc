@@ -58,7 +58,7 @@ static inline void scc_rbtree_set_bkoff(unsigned char *rbtree, unsigned char bko
     rbtree[-1] = bkoff;
 }
 
-//? .. c:function:: void scc_rbnode_set_bkoff(\
+//? .. c:function:: void scc_rbnode_set_bkoff(<dnl>
 //?     struct scc_rbtree_base const *restrict base, struct scc_rbnode_base *restrict node)
 //?
 //?     Set the :ref:`rn_bkoff <unsigned_char_rn_bkoff>` field of the given node
@@ -107,7 +107,7 @@ static inline void scc_rbnode_unset(struct scc_rbnode_base *node, enum scc_rbdir
     node->rn_flags &= ~(1 << dir);
 }
 
-//? .. c:function:: void scc_rbnode_thread_from(struct scc_rbnode_base *restrict dst, \
+//? .. c:function:: void scc_rbnode_thread_from(struct scc_rbnode_base *restrict dst, <dnl>
 //?     struct scc_rbnode_base const *restrict src, enum scc_rbdir dir)
 //?
 //?     Copy thread flag for the given direction from :code:`src` to :code:`dst`.
@@ -253,9 +253,9 @@ static inline void scc_rbnode_mkleaf(struct scc_rbnode_base *node) {
     node->rn_flags = SCC_RBLEAF;
 }
 
-//? .. c:function:: int scc_rbtree_compare(\
-//?     struct scc_rbtree_base const *restrict base, \
-//?     struct scc_rbnode_base const *restrict node, \
+//? .. c:function:: int scc_rbtree_compare(<dnl>
+//?     struct scc_rbtree_base const *restrict base, <dnl>
+//?     struct scc_rbnode_base const *restrict node, <dnl>
 //?     void const *restrict value)
 //?
 //?     Convenience wrapper for invoking :c:expr:`base->rb_compare` on the
@@ -325,8 +325,8 @@ static inline struct scc_rbnode_base *scc_rbtree_rotate_double(struct scc_rbnode
     return scc_rbtree_rotate_single(root, dir);
 }
 
-//? .. c:function:: void scc_rbtree_balance_insertion(\
-//?     struct scc_rbnode_base *n, struct scc_rbnode_base *p, \
+//? .. c:function:: void scc_rbtree_balance_insertion(<dnl>
+//?     struct scc_rbnode_base *n, struct scc_rbnode_base *p, <dnl>
 //?     struct scc_rbnode_base *gp, struct scc_rbnode_base *ggp)
 //?
 //?     Preemptively balance the section around n, p and gp for insertion.
@@ -371,8 +371,8 @@ static void scc_rbtree_balance_insertion(
     }
 }
 
-//? .. c:function:: struct scc_rbnode_base *scc_rbtree_balance_removal(\
-//?     struct scc_rbnode_base *n, struct scc_rbnode_base *p, \
+//? .. c:function:: struct scc_rbnode_base *scc_rbtree_balance_removal(<dnl>
+//?     struct scc_rbnode_base *n, struct scc_rbnode_base *p, <dnl>
 //?     struct scc_rbnode_base *gp, enum scc_rbdir dir)
 //?
 //?     Preemptively balance the section around n, p and gp for removal.
@@ -424,9 +424,9 @@ static struct scc_rbnode_base *scc_rbtree_balance_removal(
     return p;
 }
 
-//? .. c:function:: struct scc_rbnode_base *scc_rbnode_new(\
-//?     struct scc_rbtree_base *restrict base,\
-//?     void const *restrict value,\
+//? .. c:function:: struct scc_rbnode_base *scc_rbnode_new(<dnl>
+//?     struct scc_rbtree_base *restrict base,<dnl>
+//?     void const *restrict value,<dnl>
 //?     size_t elemsize)
 //?
 //?     Allocate and initialize a new rbnode
@@ -453,7 +453,7 @@ static inline struct scc_rbnode_base *scc_rbnode_new(
     return node;
 }
 
-//? .. c:function:: struct scc_rbnode_base const *scc_rbtree_leftmost(\
+//? .. c:function:: struct scc_rbnode_base const *scc_rbtree_leftmost(<dnl>
 //?     struct scc_rbnode_base const *root)
 //?
 //?     Find the leftmost node in the subtree spanning from the given root
@@ -471,7 +471,7 @@ static inline struct scc_rbnode_base const *scc_rbtree_leftmost(struct scc_rbnod
     return root;
 }
 
-//? .. c:function:: struct scc_rbnode_base const *scc_rbtree_rightmost(\
+//? .. c:function:: struct scc_rbnode_base const *scc_rbtree_rightmost(<dnl>
 //?     struct scc_rbnode_base const *root)
 //?
 //?     Find the rightmost node in the subtree spanning from the given root
@@ -589,7 +589,7 @@ static void *scc_rbtree_insert_nonempty(struct scc_rbtree_base *restrict base, v
     return handle;
 }
 
-//? .. c:function:: struct scc_rbtree_base *scc_rbtree_clone_base(\
+//? .. c:function:: struct scc_rbtree_base *scc_rbtree_clone_base(<dnl>
 //?     struct scc_rbtree_base const *obase, size_t elemsize, size_t basesz)
 //?
 //?     Allocate a new ``rbtree`` base structure based on the given ``obase`` and

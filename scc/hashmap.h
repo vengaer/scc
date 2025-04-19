@@ -529,7 +529,7 @@ struct scc_hashmap_base {
         }                                                                                   \
     )
 
-//? .. c:function:: void *scc_hashmap_impl_new(\
+//? .. c:function:: void *scc_hashmap_impl_new(<dnl>
 //?        struct scc_hashmap_base *base, size_t coff, size_t valoff, size_t keysize)
 //?
 //?     Initialize an empty hash map and return a handle to it.
@@ -547,7 +547,7 @@ struct scc_hashmap_base {
 //?     :returns: A handle to the initialized hash map
 void *scc_hashmap_impl_new(struct scc_hashmap_base *base, size_t coff, size_t valoff, size_t keysize);
 
-//? .. c:function:: void *scc_hashmap_impl_new_dyn(scc_hashmap_eq eq, scc_hashmap_hash hash, \
+//? .. c:function:: void *scc_hashmap_impl_new_dyn(scc_hashmap_eq eq, scc_hashmap_hash hash, <dnl>
 //?     size_t mapsize, size_t coff, size_t valoff, size_t keysize)
 //?
 //?     Like :ref:`scc_hashmap_impl_new <scc_hashtmap_impl_new>` except for the
@@ -786,7 +786,7 @@ void scc_hashmap_free(void *map);
  * size_t valsize
  *      Size of the value type
  */
-//? .. c:function:: _Bool scc_hashmap_impl_insert(\
+//? .. c:function:: _Bool scc_hashmap_impl_insert(<dnl>
 //?        void *mapaddr, size_t keysize, size_t valsize)
 //?
 //?     Attempt to insert the key-value pair in
