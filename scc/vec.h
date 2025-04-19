@@ -109,10 +109,12 @@ struct scc_vec_base {
 //?             dynamically, the buffer is treated as a flexible array member
 #define scc_vec_impl_layout(type)                                       \
     struct {                                                            \
-        size_t sv_size;                                                 \
-        size_t sv_capacity;                                             \
-        unsigned char sv_npad;                                          \
-        unsigned char sv_dynalloc;                                      \
+        struct {                                                        \
+            size_t sv_size;                                             \
+            size_t sv_capacity;                                         \
+            unsigned char sv_npad;                                      \
+            unsigned char sv_dynalloc;                                  \
+        } v0;                                                           \
         type sv_buffer[SCC_VEC_STATIC_CAPACITY];                        \
     }
 
@@ -172,8 +174,18 @@ struct scc_vec_base {
 //?                  be computed
 //?     :returns: Base-relative offset of the buffer field of
 //?               an vec instantiated for the given type
-#define scc_vec_impl_offset(type)                                        \
-    offsetof(scc_vec_impl_layout(type), sv_buffer)
+#define scc_vec_impl_offset(type)                                       \
+    sizeof(                                                             \
+        struct {                                                        \
+            struct {                                                    \
+                size_t sv_size;                                         \
+                size_t sv_capacity;                                     \
+                unsigned char sv_npad;                                  \
+                unsigned char sv_dynalloc;                              \
+            } v0;                                                       \
+            type sv_buffer[];                                           \
+        }                                                               \
+    )
 
 //? .. _scc_vec_impl_new:
 //? .. c:function:: void *scc_vec_impl_new(struct scc_vec_base *base, size_t offset, size_t capacity)
