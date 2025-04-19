@@ -12,6 +12,7 @@
 
 #include <stddef.h>
 
+//? .. _hashmap_impl_pair:
 //? .. c:macro:: scc_hashmap_impl_pair(keytype, valuetype)
 //?
 //?     Expands to a struct appropriate for storing pairs of
@@ -25,6 +26,19 @@
 //?     :param valuetype: The value type of the hashmap
 #define scc_hashmap_impl_pair(keytype, valuetype)                                       \
     struct { keytype hp_key; valuetype hp_val; }
+
+//? .. c:macro:: scc_hashmap_impl_pair_valoff(keytype, valuetype)
+//?
+//?     Compute offset of the value field in the :ref:`pair struct <hashmap_impl_pair>`.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param keytype: The key type of the hashmap
+//?     :param valuetype: The value type of the hashmap
+#define scc_hashmap_impl_pair_valoff(keytype, valuetype)                                \
+    scc_align(sizeof(keytype), scc_alignof(valuetype))
 
 //! .. c:macro:: scc_hashmap(keytype, valuetype)
 //!
@@ -381,27 +395,143 @@ struct scc_hashmap_base {
 //?             :code:`hm_meta` field are mirrored in the guard.
 #define scc_hashmap_impl_layout(keytype, valuetype)                                         \
     struct {                                                                                \
-        scc_hashmap_eq hm_eq;                                                               \
-        scc_hashmap_hash hm_hash;                                                           \
-        size_t hm_valoff;                                                                   \
-        size_t hm_mdoff;                                                                    \
-        size_t hm_size;                                                                     \
-        size_t hm_capacity;                                                                 \
-        size_t hm_pairsize;                                                                 \
-        SCC_HASHMAP_INJECT_PERFEVTS(hm_perf)                                                \
-        unsigned short hm_keyalign;                                                         \
-        unsigned short hm_valalign;                                                         \
-        unsigned char hm_dynalloc;                                                          \
-        unsigned char hm_valpad;                                                            \
-        unsigned char hm_fwoff;                                                             \
-        unsigned char hm_bkoff;                                                             \
-        scc_hashmap_impl_pair(keytype, valuetype) hm_curr;                                  \
-        keytype hm_keys[SCC_HASHMAP_STACKCAP];                                              \
-        valuetype hm_vals[SCC_HASHMAP_STACKCAP];                                            \
+        struct {                                                                            \
+            struct {                                                                        \
+                struct {                                                                    \
+                    scc_hashmap_eq hm_eq;                                                   \
+                    scc_hashmap_hash hm_hash;                                               \
+                    size_t hm_valoff;                                                       \
+                    size_t hm_mdoff;                                                        \
+                    size_t hm_size;                                                         \
+                    size_t hm_capacity;                                                     \
+                    size_t hm_pairsize;                                                     \
+                    SCC_HASHMAP_INJECT_PERFEVTS(hm_perf)                                    \
+                    unsigned short hm_keyalign;                                             \
+                    unsigned short hm_valalign;                                             \
+                    unsigned char hm_dynalloc;                                              \
+                    unsigned char hm_valpad;                                                \
+                    unsigned char hm_fwoff;                                                 \
+                    unsigned char hm_bkoff;                                                 \
+                } hm0;                                                                      \
+                scc_hashmap_impl_pair(keytype, valuetype) hm_curr;                          \
+                keytype hm_keys[SCC_HASHMAP_STACKCAP];                                      \
+            } hm1;                                                                          \
+            valuetype hm_vals[SCC_HASHMAP_STACKCAP];                                        \
+        } hm2;                                                                              \
         scc_hashmap_metatype hm_meta[SCC_HASHMAP_STACKCAP];                                 \
         scc_hashmap_metatype hm_guard[SCC_HASHMAP_GUARDSZ];                                 \
         SCC_CANARY_INJECT(SCC_HASHMAP_CANARYSZ)                                             \
     }
+
+//? .. c:macro:: scc_hashmap_impl_curroff(keytype, valuetype)
+//?
+//?     Compute offset of :ref:`hm_curr <scc_hashmap_impl_pair_hm_curr>`.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param keytype: Key type of the hash map
+//?     :param valuetype: Value type of the hash map
+#define scc_hashmap_impl_curroff(keytype, valuetype)                                        \
+    sizeof(                                                                                 \
+        struct {                                                                            \
+            struct {                                                                        \
+                scc_hashmap_eq hm_eq;                                                       \
+                scc_hashmap_hash hm_hash;                                                   \
+                size_t hm_valoff;                                                           \
+                size_t hm_mdoff;                                                            \
+                size_t hm_size;                                                             \
+                size_t hm_capacity;                                                         \
+                size_t hm_pairsize;                                                         \
+                SCC_HASHMAP_INJECT_PERFEVTS(hm_perf)                                        \
+                unsigned short hm_keyalign;                                                 \
+                unsigned short hm_valalign;                                                 \
+                unsigned char hm_dynalloc;                                                  \
+                unsigned char hm_valpad;                                                    \
+                unsigned char hm_fwoff;                                                     \
+                unsigned char hm_bkoff;                                                     \
+            } hm0;                                                                          \
+            scc_hashmap_impl_pair(keytype, valuetype) hm_curr[];                            \
+        }                                                                                   \
+    )
+
+//? .. c:macro:: scc_hashmap_impl_valoff(keytype, valuetype)
+//?
+//?     Compute offset of the value array.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param keytype: Key type of the hash map
+//?     :param valuetype: Value type of the hash map
+#define scc_hashmap_impl_valoff(keytype, valuetype)                                         \
+    sizeof(                                                                                 \
+        struct {                                                                            \
+            struct {                                                                        \
+                struct {                                                                    \
+                    scc_hashmap_eq hm_eq;                                                   \
+                    scc_hashmap_hash hm_hash;                                               \
+                    size_t hm_valoff;                                                       \
+                    size_t hm_mdoff;                                                        \
+                    size_t hm_size;                                                         \
+                    size_t hm_capacity;                                                     \
+                    size_t hm_pairsize;                                                     \
+                    SCC_HASHMAP_INJECT_PERFEVTS(hm_perf)                                    \
+                    unsigned short hm_keyalign;                                             \
+                    unsigned short hm_valalign;                                             \
+                    unsigned char hm_dynalloc;                                              \
+                    unsigned char hm_valpad;                                                \
+                    unsigned char hm_fwoff;                                                 \
+                    unsigned char hm_bkoff;                                                 \
+                } hm0;                                                                      \
+                scc_hashmap_impl_pair(keytype, valuetype) hm_curr;                          \
+                keytype hm_keys[SCC_HASHMAP_STACKCAP];                                      \
+            } hm1;                                                                          \
+            valuetype hm_vals[];                                                            \
+        }                                                                                   \
+    )
+
+//? .. c:macro:: scc_hashmap_impl_mdoff(keytype, valuetype)
+//?
+//?     Compute offset of the metadata array.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param keytype: Key type of the hash map
+//?     :param valuetype: Value type of the hash map
+#define scc_hashmap_impl_mdoff(keytype, valuetype)                                          \
+    sizeof(                                                                                 \
+        struct {                                                                            \
+            struct {                                                                        \
+                struct {                                                                    \
+                    struct {                                                                \
+                        scc_hashmap_eq hm_eq;                                               \
+                        scc_hashmap_hash hm_hash;                                           \
+                        size_t hm_valoff;                                                   \
+                        size_t hm_mdoff;                                                    \
+                        size_t hm_size;                                                     \
+                        size_t hm_capacity;                                                 \
+                        size_t hm_pairsize;                                                 \
+                        SCC_HASHMAP_INJECT_PERFEVTS(hm_perf)                                \
+                        unsigned short hm_keyalign;                                         \
+                        unsigned short hm_valalign;                                         \
+                        unsigned char hm_dynalloc;                                          \
+                        unsigned char hm_valpad;                                            \
+                        unsigned char hm_fwoff;                                             \
+                        unsigned char hm_bkoff;                                             \
+                    } hm0;                                                                  \
+                    scc_hashmap_impl_pair(keytype, valuetype) hm_curr;                      \
+                    keytype hm_keys[SCC_HASHMAP_STACKCAP];                                  \
+                } hm1;                                                                      \
+                valuetype hm_vals[SCC_HASHMAP_STACKCAP];                                    \
+            } hm2;                                                                          \
+            scc_hashmap_metatype hm_meta[];                                                 \
+        }                                                                                   \
+    )
 
 //? .. c:function:: void *scc_hashmap_impl_new(\
 //?        struct scc_hashmap_base *base, size_t coff, size_t valoff, size_t keysize)
@@ -480,17 +610,23 @@ void *scc_hashmap_impl_new_dyn(struct scc_hashmap_base const *sbase, size_t maps
 #define scc_hashmap_with_hash(keytype, valuetype, eq, hash)                                 \
     scc_hashmap_impl_new(                                                                   \
         (void *)&(scc_hashmap_impl_layout(keytype, valuetype)){                             \
-            .hm_eq = eq,                                                                    \
-            .hm_hash = hash,                                                                \
-            .hm_valoff = offsetof(scc_hashmap_impl_layout(keytype, valuetype), hm_vals),    \
-            .hm_mdoff = offsetof(scc_hashmap_impl_layout(keytype, valuetype), hm_meta),     \
-            .hm_capacity = SCC_HASHMAP_STACKCAP,                                            \
-            .hm_pairsize = sizeof(scc_hashmap_impl_pair(keytype, valuetype)),               \
-            .hm_keyalign = scc_alignof(keytype),                                            \
-            .hm_valalign = scc_alignof(valuetype)                                           \
+            .hm2 = {                                                                        \
+                .hm1 = {                                                                    \
+                    .hm0 = {                                                                \
+                        .hm_eq = eq,                                                        \
+                        .hm_hash = hash,                                                    \
+                        .hm_valoff = scc_hashmap_impl_valoff(keytype, valuetype),           \
+                        .hm_mdoff = scc_hashmap_impl_mdoff(keytype, valuetype),             \
+                        .hm_capacity = SCC_HASHMAP_STACKCAP,                                \
+                        .hm_pairsize = sizeof(scc_hashmap_impl_pair(keytype, valuetype)),   \
+                        .hm_keyalign = scc_alignof(keytype),                                \
+                        .hm_valalign = scc_alignof(valuetype)                               \
+                    },                                                                      \
+                },                                                                          \
+            },                                                                              \
         },                                                                                  \
-        offsetof(scc_hashmap_impl_layout(keytype, valuetype), hm_curr),                     \
-        offsetof(scc_hashmap_impl_pair(keytype, valuetype), hp_val),                        \
+        scc_hashmap_impl_curroff(keytype, valuetype),                                       \
+        scc_hashmap_impl_pair_valoff(keytype, valuetype),                                   \
         sizeof(keytype)                                                                     \
     )
 
@@ -516,16 +652,16 @@ void *scc_hashmap_impl_new_dyn(struct scc_hashmap_base const *sbase, size_t maps
         (void *)&(struct scc_hashmap_base){                                                 \
             .hm_eq = eq,                                                                    \
             .hm_hash = hash,                                                                \
-            .hm_valoff = offsetof(scc_hashmap_impl_layout(keytype, valuetype), hm_vals),    \
-            .hm_mdoff = offsetof(scc_hashmap_impl_layout(keytype, valuetype), hm_meta),     \
+            .hm_valoff = scc_hashmap_impl_valoff(keytype, valuetype),                       \
+            .hm_mdoff = scc_hashmap_impl_mdoff(keytype, valuetype),                         \
             .hm_capacity = SCC_HASHMAP_STACKCAP,                                            \
             .hm_pairsize = sizeof(scc_hashmap_impl_pair(keytype, valuetype)),               \
             .hm_keyalign = scc_alignof(keytype),                                            \
             .hm_valalign = scc_alignof(valuetype)                                           \
         },                                                                                  \
         sizeof(scc_hashmap_impl_layout(keytype, valuetype)),                                \
-        offsetof(scc_hashmap_impl_layout(keytype, valuetype), hm_curr),                     \
-        offsetof(scc_hashmap_impl_pair(keytype, valuetype), hp_val),                        \
+        scc_hashmap_impl_curroff(keytype, valuetype),                                       \
+        scc_hashmap_impl_pair_valoff(keytype, valuetype),                                   \
         sizeof(keytype)                                                                     \
     )
 
