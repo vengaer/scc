@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'scc'
-copyright = '2022, Vilhelm Engström'
+copyright = '2025, Vilhelm Engström'
 author = 'Vilhelm Engström'
 
 release = '0.1'
