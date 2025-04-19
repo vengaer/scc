@@ -11,7 +11,7 @@
     scc_container_qual(addr, type, member,)
 
 #define scc_alignof(type)                               \
-    offsetof(struct { unsigned char b; type e; }, e)
+    sizeof(struct { unsigned char b; type e[]; })
 
 #define scc_arrsize(addr)                               \
     (sizeof(addr) / sizeof((addr)[0]))
