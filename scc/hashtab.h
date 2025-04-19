@@ -455,7 +455,7 @@ void *scc_hashtab_impl_new_dyn(scc_hashtab_eq eq, scc_hashtab_hash hash, size_t 
         scc_hashtab_impl_metaoff(type)                                      \
     )
 
-//! .. _scc_hashtab_with_hash_dyn
+//! .. _scc_hashtab_with_hash_dyn:
 //! .. c:function:: void *scc_hashtab_with_hash_dyn(type, scc_hashtab_eq eq, scc_hashtab_hash hash)
 //!
 //!     Like :ref:`scc_hashtab_with_hash <scc_hashtab_with_hash>` except for
@@ -512,7 +512,7 @@ void *scc_hashtab_impl_new_dyn(scc_hashtab_eq eq, scc_hashtab_hash hash, size_t 
 #define scc_hashtab_new(type, eq)                                           \
     scc_hashtab_with_hash(type, eq, scc_hash_fnv1a)
 
-//! .. _scc_hashtab_new_dyn
+//! .. _scc_hashtab_new_dyn:
 //! .. c:function:: void *scc_hashtab_new_dyn(type, scc_hashtab_eq eq)
 //!
 //!     Like :ref:`scc_hashtab_new <scc_hashtab_new>` except for the hash

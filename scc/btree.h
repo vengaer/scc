@@ -427,7 +427,7 @@ struct scc_btree_base {
 //?     :returns: Address of a handle suitable for referring to the given B-tree
 void *scc_btree_impl_new(void *base, size_t coff, size_t rootoff);
 
-//? .. _scc_btree_impl_new_dyn
+//? .. _scc_btree_impl_new_dyn:
 //? .. c:function:: void *scc_btree_impl_new_dyn(void *sbase, size_t basesz, size_t coff, size_t rootoff)
 //?
 //?     Allocate a new ``btree`` on the heap and initialize it. Return the address of its
@@ -592,7 +592,7 @@ inline void *scc_btree_impl_with_order_dyn(void *sbase, size_t basesz, size_t co
         scc_btree_impl_rootoff(type, order)                                                         \
     )
 
-//! .. _scc_btree_new_dyn
+//! .. _scc_btree_new_dyn:
 //! .. c:function:: void *scc_btree_new_dyn(type, scc_bcompare compare)
 //!
 //!     Like :ref:`scc_btree_new <scc_btree_new>` except for the fact that the ``btree`` is allocated

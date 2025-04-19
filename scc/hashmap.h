@@ -630,7 +630,7 @@ void *scc_hashmap_impl_new_dyn(struct scc_hashmap_base const *sbase, size_t maps
         sizeof(keytype)                                                                     \
     )
 
-//! .. _scc_hashmap_with_hash_dyn
+//! .. _scc_hashmap_with_hash_dyn:
 //! .. c:function:: void *scc_hashmap_with_hash_dyn(keytype, valuetype, scc_hashmap_eq eq, scc_hashmap_hash hash)
 //!
 //!     Like :ref:`scc_hashmap_with_hash <scc_hashmap_with_hash>` except for
@@ -692,7 +692,7 @@ void *scc_hashmap_impl_new_dyn(struct scc_hashmap_base const *sbase, size_t maps
 #define scc_hashmap_new(keytype, valuetype, eq)                                            \
     scc_hashmap_with_hash(keytype, valuetype, eq, scc_hash_fnv1a)
 
-//! .. _scc_hashmap_new_dyn
+//! .. _scc_hashmap_new_dyn:
 //! .. c:function:: void *scc_hashmap_new_dyn(keytype, valuetype, scc_hashmap_eq eq)
 //!
 //!     Like :ref:`scc_hashmap_new <scc_hashmap_new>` except for the hash

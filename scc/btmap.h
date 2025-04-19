@@ -625,7 +625,7 @@ struct scc_btmap_base {
         scc_btmap_impl_rootoff(keytype, valuetype, order)                                                               \
     )
 
-//! .. _scc_btmap_new_dyn
+//! .. _scc_btmap_new_dyn:
 //! .. c:function:: void *scc_btmap_new_dyn(keytype, valuetype, scc_bcompare compare)
 //!
 //!     Like :ref:`scc_btmap_new <scc_btmap_new>` except for the fact that the ``btmap`` is allocated
