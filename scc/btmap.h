@@ -22,6 +22,19 @@
 #define scc_btmap_impl_pair(keytype, valuetype)                                                                 \
     struct { keytype btm_key; valuetype btm_value; }
 
+//? .. c:macro:: scc_btmap_impl_pair_valoff(keytype, valuetype)
+//?
+//?     Compute offset of value field in a generic pair.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param keytype: The key type of the hashmap
+//?     :param valuetype: The value type of the hashmap
+#define scc_btmap_impl_pair_valoff(keytype, valuetype)                                                          \
+    scc_align(sizeof(keytype), scc_alignof(valuetype))
+
 //! .. c:macro:: scc_btmap(keytype, valuetype)
 //!
 //!     Expands to an opaque pointer suitable for storing
@@ -227,12 +240,91 @@ struct scc_btmap_base {
 //?         the :c:expr:`btm_nkeys + 1u` first nodes are used.
 #define scc_btmnode_impl_layout(keytype, valuetype, order)                                                          \
     struct {                                                                                                        \
-        unsigned char btm_flags;                                                                                    \
-        unsigned short btm_nkeys;                                                                                   \
-        keytype btm_keys[(order) - 1u];                                                                             \
-        valuetype btm_vals[(order) - 1u];                                                                           \
+        struct {                                                                                                    \
+            struct {                                                                                                \
+                struct {                                                                                            \
+                    unsigned char btm_flags;                                                                        \
+                    unsigned short btm_nkeys;                                                                       \
+                } btmn0;                                                                                            \
+                keytype btm_keys[(order) - 1u];                                                                     \
+            } btmn1;                                                                                                \
+            valuetype btm_vals[(order) - 1u];                                                                       \
+        } btmn2;                                                                                                    \
         struct scc_btmnode_base *btm_links[order];                                                                  \
     }
+
+//? .. c:macro:: scc_btmnode_impl_keyoff(keytype)
+//?
+//?     Compute offset of the key array.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param keytype: The type of the keys stored in the node
+#define scc_btmnode_impl_keyoff(keytype)                                                                            \
+    sizeof(                                                                                                         \
+        struct {                                                                                                    \
+            struct {                                                                                                \
+                unsigned char btm_flags;                                                                            \
+                unsigned short btm_nkeys;                                                                           \
+            } btmn0;                                                                                                \
+            keytype btm_keys[];                                                                                     \
+        }                                                                                                           \
+    )
+
+//? .. c:macro:: scc_btmnode_impl_valoff(keytype)
+//?
+//?     Compute offset of the value array.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param keytype: The type of the keys stored in the node
+//?     :param valuetype: The type of the values to be stored in the node
+//?     :param order: The order to the ``btmap``
+#define scc_btmnode_impl_valoff(keytype, valuetype, order)                                                          \
+    sizeof(                                                                                                         \
+        struct {                                                                                                    \
+            struct {                                                                                                \
+                struct {                                                                                            \
+                    unsigned char btm_flags;                                                                        \
+                    unsigned short btm_nkeys;                                                                       \
+                } btmn0;                                                                                            \
+                keytype btm_keys[(order) - 1u];                                                                     \
+            } btmn1;                                                                                                \
+            valuetype btm_vals[];                                                                                   \
+        }                                                                                                           \
+    )
+
+//? .. c:macro:: scc_btmnode_impl_linkoff(keytype)
+//?
+//?     Compute offset of the link array
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param keytype: The type of the keys stored in the node
+//?     :param valuetype: The type of the values to be stored in the node
+//?     :param order: The order to the ``btmap``
+#define scc_btmnode_impl_linkoff(keytype, valuetype, order)                                                         \
+    sizeof(                                                                                                         \
+        struct {                                                                                                    \
+            struct {                                                                                                \
+                struct {                                                                                            \
+                    struct {                                                                                        \
+                        unsigned char btm_flags;                                                                    \
+                        unsigned short btm_Nkeys;                                                                   \
+                    } btmn0;                                                                                        \
+                    keytype btm_keys[(order) - 1u];                                                                 \
+                } btmn1;                                                                                            \
+                valuetype btm_vals[(order) - 1u];                                                                   \
+            } btmn2;                                                                                                \
+            struct scc_btmnode_base *btm_links[];                                                                   \
+        }                                                                                                           \
+    )
 
 //? .. c:macro:: scc_btmap_impl_layout(keytype, valuetype, order)
 //?
@@ -323,23 +415,98 @@ struct scc_btmap_base {
 //?         checked.
 #define scc_btmap_impl_layout(keytype, valuetype, order)                                                                \
     struct {                                                                                                            \
-        unsigned short const btm_order;                                                                                 \
-        unsigned short const btm_keyoff;                                                                                \
-        unsigned short const btm_valoff;                                                                                \
-        unsigned short const btm_linkoff;                                                                               \
-        unsigned short const btm_keysize;                                                                               \
-        unsigned short const btm_valsize;                                                                               \
-        size_t btm_size;                                                                                                \
-        struct scc_btmnode_base *btm_root;                                                                              \
-        scc_bcompare btm_compare;                                                                                       \
-        struct scc_arena btm_arena;                                                                                     \
-        unsigned char const btm_kvoff;                                                                                  \
-        unsigned char btm_dynalloc;                                                                                     \
-        unsigned char btm_fwoff;                                                                                        \
-        unsigned char btm_bkoff;                                                                                        \
-        scc_btmap_impl_pair(keytype, valuetype) btm_curr;                                                               \
+        struct {                                                                                                        \
+            struct {                                                                                                    \
+                unsigned short const btm_order;                                                                         \
+                unsigned short const btm_keyoff;                                                                        \
+                unsigned short const btm_valoff;                                                                        \
+                unsigned short const btm_linkoff;                                                                       \
+                unsigned short const btm_keysize;                                                                       \
+                unsigned short const btm_valsize;                                                                       \
+                size_t btm_size;                                                                                        \
+                struct scc_btmnode_base *btm_root;                                                                      \
+                scc_bcompare btm_compare;                                                                               \
+                struct scc_arena btm_arena;                                                                             \
+                unsigned char const btm_kvoff;                                                                          \
+                unsigned char btm_dynalloc;                                                                             \
+                unsigned char btm_fwoff;                                                                                \
+                unsigned char btm_bkoff;                                                                                \
+            } btm0;                                                                                                     \
+            scc_btmap_impl_pair(keytype, valuetype) btm_curr;                                                           \
+        } btm1;                                                                                                         \
         scc_btmnode_impl_layout(keytype, valuetype,order) btm_rootmem;                                                  \
     }
+
+//? .. c:macro:: scc_btmap_impl_curroff(keytype, valuetype, order)
+//?
+//?     Compute offset of :ref:`btm_curr <kvpair_btm_curr>`.
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param keytype: The type of the keys to be stored in the node
+//?     :param valuetype: The type of the values to be stored in the node
+//?     :param order: The order to the ``btmap``
+#define scc_btmap_impl_curroff(keytype, valuetype, order)                                                               \
+    sizeof(                                                                                                             \
+        struct {                                                                                                        \
+            struct {                                                                                                    \
+                unsigned short const btm_order;                                                                         \
+                unsigned short const btm_keyoff;                                                                        \
+                unsigned short const btm_valoff;                                                                        \
+                unsigned short const btm_linkoff;                                                                       \
+                unsigned short const btm_keysize;                                                                       \
+                unsigned short const btm_valsize;                                                                       \
+                size_t btm_size;                                                                                        \
+                struct scc_btmnode_base *btm_root;                                                                      \
+                scc_bcompare btm_compare;                                                                               \
+                struct scc_arena btm_arena;                                                                             \
+                unsigned char const btm_kvoff;                                                                          \
+                unsigned char btm_dynalloc;                                                                             \
+                unsigned char btm_fwoff;                                                                                \
+                unsigned char btm_bkoff;                                                                                \
+            } btmn0;                                                                                                    \
+            scc_btmap_impl_pair(keytype, valuetype) btm_curr[];                                                         \
+        }                                                                                                               \
+    )
+
+//? .. c:macro:: scc_btmap_impl_rootoff(keytype, valuetype, order)
+//?
+//?     Compute offset of automatic root node
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param keytype: The type of the keys to be stored in the node
+//?     :param valuetype: The type of the values to be stored in the node
+//?     :param order: The order to the ``btmap``
+#define scc_btmap_impl_rootoff(keytype, valuetype, order)                                                               \
+    sizeof(                                                                                                             \
+        struct {                                                                                                        \
+            struct {                                                                                                    \
+                struct {                                                                                                \
+                    unsigned short const btm_order;                                                                     \
+                    unsigned short const btm_keyoff;                                                                    \
+                    unsigned short const btm_valoff;                                                                    \
+                    unsigned short const btm_linkoff;                                                                   \
+                    unsigned short const btm_keysize;                                                                   \
+                    unsigned short const btm_valsize;                                                                   \
+                    size_t btm_size;                                                                                    \
+                    struct scc_btmnode_base *btm_root;                                                                  \
+                    scc_bcompare btm_compare;                                                                           \
+                    struct scc_arena btm_arena;                                                                         \
+                    unsigned char const btm_kvoff;                                                                      \
+                    unsigned char btm_dynalloc;                                                                         \
+                    unsigned char btm_fwoff;                                                                            \
+                    unsigned char btm_bkoff;                                                                            \
+                } btm0;                                                                                                 \
+                scc_btmap_impl_pair(keytype, valuetype) btm_curr;                                                       \
+            } btm1;                                                                                                     \
+            scc_btmnode_impl_layout(keytype, valuetype,order) btm_rootmem[];                                            \
+        }                                                                                                               \
+    )
 
 //! .. _scc_btmap_with_order:
 //! .. c:function:: void *scc_btmap_with_order(keytype, valuetype, scc_bcompare compare, unsigned order)
@@ -364,18 +531,22 @@ struct scc_btmap_base {
 //!               or ``NULL`` if the order is invalid
 #define scc_btmap_with_order(keytype, valuetype, compare, order)                                                        \
     scc_btmap_impl_with_order(&(scc_btmap_impl_layout(keytype, valuetype, order)) {                                     \
-            .btm_order = order,                                                                                         \
-            .btm_keyoff = offsetof(scc_btmnode_impl_layout(keytype, valuetype, order), btm_keys),                       \
-            .btm_valoff = offsetof(scc_btmnode_impl_layout(keytype, valuetype, order), btm_vals),                       \
-            .btm_linkoff = offsetof(scc_btmnode_impl_layout(keytype, valuetype, order), btm_links),                     \
-            .btm_keysize = sizeof(keytype),                                                                             \
-            .btm_valsize = sizeof(valuetype),                                                                           \
-            .btm_arena = scc_arena_new(scc_btmnode_impl_layout(keytype, valuetype, order)),                             \
-            .btm_compare = compare,                                                                                     \
-            .btm_kvoff = offsetof(scc_btmap_impl_pair(keytype, valuetype), btm_value)                                   \
+            .btm1 = {                                                                                                   \
+                .btm0 = {                                                                                               \
+                    .btm_order = order,                                                                                 \
+                    .btm_keyoff = scc_btmnode_impl_keyoff(keytype),                                                     \
+                    .btm_valoff = scc_btmnode_impl_valoff(keytype, valuetype, order),                                   \
+                    .btm_linkoff = scc_btmnode_impl_linkoff(keytype, valuetype, order),                                 \
+                    .btm_keysize = sizeof(keytype),                                                                     \
+                    .btm_valsize = sizeof(valuetype),                                                                   \
+                    .btm_arena = scc_arena_new(scc_btmnode_impl_layout(keytype, valuetype, order)),                     \
+                    .btm_compare = compare,                                                                             \
+                    .btm_kvoff = scc_btmap_impl_pair_valoff(keytype, valuetype)                                         \
+                },                                                                                                      \
+            },                                                                                                          \
         },                                                                                                              \
-        offsetof(scc_btmap_impl_layout(keytype, valuetype, order), btm_curr),                                           \
-        offsetof(scc_btmap_impl_layout(keytype, valuetype, order), btm_rootmem)                                         \
+        scc_btmap_impl_curroff(keytype, valuetype, order),                                                              \
+        scc_btmap_impl_rootoff(keytype, valuetype, order)                                                               \
     )
 
 //! .. _scc_btmap_new:
@@ -402,18 +573,22 @@ struct scc_btmap_base {
 //!     :returns: An opaque pointer to a ``btmap`` allocated in the frame of the calling function
 #define scc_btmap_new(keytype, valuetype, compare)                                                                      \
     scc_btmap_impl_new(&(scc_btmap_impl_layout(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER)) {                          \
-            .btm_order = SCC_BTMAP_DEFAULT_ORDER,                                                                       \
-            .btm_keyoff = offsetof(scc_btmnode_impl_layout(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER), btm_keys),     \
-            .btm_valoff = offsetof(scc_btmnode_impl_layout(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER), btm_vals),     \
-            .btm_linkoff = offsetof(scc_btmnode_impl_layout(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER), btm_links),   \
-            .btm_keysize = sizeof(keytype),                                                                             \
-            .btm_valsize = sizeof(valuetype),                                                                           \
-            .btm_arena = scc_arena_new(scc_btmnode_impl_layout(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER)),           \
-            .btm_compare = compare,                                                                                     \
-            .btm_kvoff = offsetof(scc_btmap_impl_pair(keytype, valuetype), btm_value)                                   \
+            .btm1 = {                                                                                                   \
+                .btm0 = {                                                                                               \
+                    .btm_order = SCC_BTMAP_DEFAULT_ORDER,                                                               \
+                    .btm_keyoff = scc_btmnode_impl_keyoff(keytype),                                                     \
+                    .btm_valoff = scc_btmnode_impl_valoff(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER),                 \
+                    .btm_linkoff = scc_btmnode_impl_linkoff(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER),               \
+                    .btm_keysize = sizeof(keytype),                                                                     \
+                    .btm_valsize = sizeof(valuetype),                                                                   \
+                    .btm_arena = scc_arena_new(scc_btmnode_impl_layout(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER)),   \
+                    .btm_compare = compare,                                                                             \
+                    .btm_kvoff = scc_btmap_impl_pair_valoff(keytype, valuetype)                                         \
+                },                                                                                                      \
+            },                                                                                                          \
         },                                                                                                              \
-        offsetof(scc_btmap_impl_layout(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER), btm_curr),                         \
-        offsetof(scc_btmap_impl_layout(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER), btm_rootmem)                       \
+        scc_btmap_impl_curroff(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER),                                            \
+        scc_btmap_impl_rootoff(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER)                                             \
     )
 
 //! .. _scc_btmap_with_order_dyn:
@@ -431,19 +606,23 @@ struct scc_btmap_base {
 //!               or ``NULL`` if either the order is invalid or if memory allocation failed
 #define scc_btmap_with_order_dyn(keytype, valuetype, compare, order)                                                    \
     scc_btmap_impl_with_order_dyn(&(scc_btmap_impl_layout(keytype, valuetype, order)) {                                 \
-            .btm_order = order,                                                                                         \
-            .btm_keyoff = offsetof(scc_btmnode_impl_layout(keytype, valuetype, order), btm_keys),                       \
-            .btm_valoff = offsetof(scc_btmnode_impl_layout(keytype, valuetype, order), btm_vals),                       \
-            .btm_linkoff = offsetof(scc_btmnode_impl_layout(keytype, valuetype, order), btm_links),                     \
-            .btm_keysize = sizeof(keytype),                                                                             \
-            .btm_valsize = sizeof(valuetype),                                                                           \
-            .btm_arena = scc_arena_new(scc_btmnode_impl_layout(keytype, valuetype, order)),                             \
-            .btm_compare = compare,                                                                                     \
-            .btm_kvoff = offsetof(scc_btmap_impl_pair(keytype, valuetype), btm_value)                                   \
+            .btm1 = {                                                                                                   \
+                .btm0 = {                                                                                               \
+                    .btm_order = order,                                                                                 \
+                    .btm_keyoff = scc_btmnode_impl_keyoff(keytype),                                                     \
+                    .btm_valoff = scc_btmnode_impl_valoff(keytype, valuetype, order),                                   \
+                    .btm_linkoff = scc_btmnode_impl_linkoff(keytype, valuetype, order),                                 \
+                    .btm_keysize = sizeof(keytype),                                                                     \
+                    .btm_valsize = sizeof(valuetype),                                                                   \
+                    .btm_arena = scc_arena_new(scc_btmnode_impl_layout(keytype, valuetype, order)),                     \
+                    .btm_compare = compare,                                                                             \
+                    .btm_kvoff = scc_btmap_impl_pair_valoff(keytype, valuetype)                                         \
+                },                                                                                                      \
+            },                                                                                                          \
         },                                                                                                              \
         sizeof(scc_btmap_impl_layout(keytype, valuetype, order)),                                                       \
-        offsetof(scc_btmap_impl_layout(keytype, valuetype, order), btm_curr),                                           \
-        offsetof(scc_btmap_impl_layout(keytype, valuetype, order), btm_rootmem)                                         \
+        scc_btmap_impl_curroff(keytype, valuetype, order),                                                              \
+        scc_btmap_impl_rootoff(keytype, valuetype, order)                                                               \
     )
 
 //! .. _scc_btmap_new_dyn
@@ -463,19 +642,23 @@ struct scc_btmap_base {
 //!     :returns: An opaque pointer to a ``btmap`` allocated on the heap, or ``NULL`` on allocation failure
 #define scc_btmap_new_dyn(keytype, valuetype, compare)                                                                  \
     scc_btmap_impl_new_dyn(&(scc_btmap_impl_layout(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER)) {                      \
-            .btm_order = SCC_BTMAP_DEFAULT_ORDER,                                                                       \
-            .btm_keyoff = offsetof(scc_btmnode_impl_layout(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER), btm_keys),     \
-            .btm_valoff = offsetof(scc_btmnode_impl_layout(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER), btm_vals),     \
-            .btm_linkoff = offsetof(scc_btmnode_impl_layout(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER), btm_links),   \
-            .btm_keysize = sizeof(keytype),                                                                             \
-            .btm_valsize = sizeof(valuetype),                                                                           \
-            .btm_arena = scc_arena_new(scc_btmnode_impl_layout(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER)),           \
-            .btm_compare = compare,                                                                                     \
-            .btm_kvoff = offsetof(scc_btmap_impl_pair(keytype, valuetype), btm_value)                                   \
+            .btm1 = {                                                                                                   \
+                .btm0 = {                                                                                               \
+                    .btm_order = SCC_BTMAP_DEFAULT_ORDER,                                                               \
+                    .btm_keyoff = scc_btmnode_impl_keyoff(keytype),                                                     \
+                    .btm_valoff = scc_btmnode_impl_valoff(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER),                 \
+                    .btm_linkoff = scc_btmnode_impl_linkoff(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER),               \
+                    .btm_keysize = sizeof(keytype),                                                                     \
+                    .btm_valsize = sizeof(valuetype),                                                                   \
+                    .btm_arena = scc_arena_new(scc_btmnode_impl_layout(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER)),   \
+                    .btm_compare = compare,                                                                             \
+                    .btm_kvoff = scc_btmap_impl_pair_valoff(keytype, valuetype)                                         \
+                },                                                                                                      \
+            },                                                                                                          \
         },                                                                                                              \
         sizeof(scc_btmap_impl_layout(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER)),                                     \
-        offsetof(scc_btmap_impl_layout(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER), btm_curr),                         \
-        offsetof(scc_btmap_impl_layout(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER), btm_rootmem)                       \
+        scc_btmap_impl_curroff(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER),                                            \
+        scc_btmap_impl_rootoff(keytype, valuetype, SCC_BTMAP_DEFAULT_ORDER)                                             \
     )
 
 //? .. _scc_btmap_impl_new:
