@@ -14,13 +14,18 @@ add_custom_target (.config.version.cmake.stamp
     DEPENDS .config.init.cmake.stamp
 )
 
+add_custom_target(.config.bitarch.cmake.stamp
+    COMMAND ${Python_EXECUTABLE} ${SCCONFIG} ${CONFOPTS} add SCC_BITARCH_$<IF:$<STREQUAL:${CMAKE_SIZEOF_VOID_P},8>,64,32> -C "System architecture"
+    DEPENDS .config.version.cmake.stamp
+)
+
 add_custom_target (.config.simd.cmake.stamp
     COMMAND ${Python_EXECUTABLE} ${SCCONFIG} ${CONFOPTS} add SCC_SIMD_ISA ${SCC_SIMD_ISA} -C "SIMD instruction set architecture"
     COMMAND ${Python_EXECUTABLE} ${SCCONFIG} ${CONFOPTS} add SCC_HWVEC_SIZE ${SCC_VECSIZE} -C "Size of hardware SIMD vectors"
-    DEPENDS .config.version.cmake.stamp
+    DEPENDS .config.bitarch.cmake.stamp
 )
 
 add_custom_target (config
     COMMAND ${Python_EXECUTABLE} ${SCCONFIG} ${CONFOPTS} commit
-    DEPENDS .config.$<IF:$<BOOL:${SCC_SIMD_SUPPORTED}>,simd,version>.cmake.stamp
+    DEPENDS .config.$<IF:$<BOOL:${SCC_SIMD_SUPPORTED}>,simd,bitarch>.cmake.stamp
 )

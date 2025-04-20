@@ -1,14 +1,15 @@
 ifdef __node
 
-config_header        := $(__node_path)/config.$(hext)
-__config_cache       := $(builddir)/.scconfig.cache
-__scconfig           := $(pyscripts)/scconfig.py
-__config_opts        := -g SCC_CONFIG_H -c $(__config_cache) -l $(builddir)/.scconfig.lock
+config_header           := $(__node_path)/config.$(hext)
+__config_cache          := $(builddir)/.scconfig.cache
+__scconfig              := $(pyscripts)/scconfig.py
+__config_opts           := -g SCC_CONFIG_H -c $(__config_cache) -l $(builddir)/.scconfig.lock
 
-__config_header_ver  := $(__node_builddir)/.config.ver.stamp
+__config_header_ver     := $(__node_builddir)/.config.ver.stamp
+__config_header_bitarch := $(__node_builddir)/.config.bitarch.stamp
 
-__scc_incdir         := $(__node_path)
-__public_headers     := $(addsuffix .h,btmap btree hashmap hashtab rbmap rbtree ringdeque stack vec)
+__scc_incdir            := $(__node_path)
+__public_headers        := $(addsuffix .h,btmap btree hashmap hashtab rbmap rbtree ringdeque stack vec)
 
 $(__config_header_init): $(wildcard $(__config_module)/*.$(pyext)) $(__all_mkfiles) | $(__node_builddir)
 	$(call echo-gen,$(notdir $(config_header)))
@@ -21,7 +22,11 @@ $(__config_header_ver): $(__config_header_init)
 	$(PYTHON) $(__scconfig) $(__config_opts) add SCC_VERSION_PATCH $(SCC_PATCH) -C "Library patch version"
 	$(TOUCH) $@
 
-$(config_header): $(__config_header_init) $(__config_header_ver) $(config_header_entries)
+$(__config_header_bitarch): $(__config_header_init)
+	$(PYTHON) $(__scconfig) $(__config_opts) add SCC_BITARCH_$(bitarch) -C "System architecture"
+	$(TOUCH) $@
+
+$(config_header): $(__config_header_init) $(__config_header_ver) $(config_header_entries) $(__config_header_bitarch)
 	$(PYTHON) $(__scconfig) $(__config_opts) commit
 
 __clean_config_header:
