@@ -32,21 +32,35 @@ file (GLOB SCC_C_SRC lib/*.c)
 
 include_directories (${CMAKE_CURRENT_SOURCE_DIR})
 
+file (GLOB SCC_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/scc/*.h)
+list (APPEND SCC_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/scc/config.h)
+list (REMOVE_DUPLICATES SCC_HEADERS)
+
 add_library (scc SHARED
     ${SCC_ASM_SRC}
     ${SCC_C_SRC}
+    ${SCC_HEADERS}
 )
 add_dependencies (scc config)
 
 add_library (scc_static STATIC
     ${SCC_ASM_SRC}
     ${SCC_C_SRC}
+    ${SCC_HEADERS}
 )
 add_dependencies (scc_static config)
-
 if (UNIX)
     set_target_properties (scc_static
         PROPERTIES
         OUTPUT_NAME scc
     )
 endif()
+
+install (
+    TARGETS scc scc_static
+    LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+)
+install (
+    FILES ${SCC_HEADERS}
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/scc
+)
