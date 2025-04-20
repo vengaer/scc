@@ -28,7 +28,7 @@ find_package(Python COMPONENTS Interpreter Development)
 
 include (cmake/config.cmake)
 
-FILE (GLOB SCC_C_SRC lib/*.c)
+file (GLOB SCC_C_SRC lib/*.c)
 
 include_directories (${CMAKE_CURRENT_SOURCE_DIR})
 
