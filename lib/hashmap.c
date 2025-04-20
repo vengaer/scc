@@ -151,7 +151,7 @@ static inline scc_hashmap_metatype *scc_hashmap_metadata(struct scc_hashmap_base
 //?     :param valsize: Size of the value type
 //?     :returns: :code:`true` if the key already existed in the map, otherwise :code:`false`
 bool scc_hashmap_emplace(void *map, struct scc_hashmap_base *base, size_t keysize, size_t valsize) {
-    unsigned long long hash = base->hm_hash(map, keysize);
+    scc_hash_type hash = base->hm_hash(map, keysize);
     unsigned long long index = scc_hashmap_impl_probe_insert(base, map, keysize, hash);
     bool duplicate = index & SCC_HASHMAP_DUPLICATE;
     index &= ~SCC_HASHMAP_DUPLICATE;
@@ -375,7 +375,7 @@ void *scc_hashmap_impl_find(void *map, size_t keysize, size_t valsize) {
         return 0;
     }
 
-    unsigned long long hash = base->hm_hash(map, keysize);
+    scc_hash_type hash = base->hm_hash(map, keysize);
     long long const index = scc_hashmap_impl_probe_find(base, map, keysize, hash);
     if(index == -1ll) {
         return 0;
@@ -393,7 +393,7 @@ bool scc_hashmap_impl_remove(void *map, size_t keysize) {
         return false;
     }
 
-    unsigned long long const hash = base->hm_hash(map, keysize);
+    scc_hash_type const hash = base->hm_hash(map, keysize);
     long long const index = scc_hashmap_impl_probe_find(base, map, keysize, hash);
     if(index == -1ll) {
         return false;

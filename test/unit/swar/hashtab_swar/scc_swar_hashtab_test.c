@@ -13,19 +13,19 @@ static bool eq(void const *left, void const *right) {
     return *(int const *)left == *(int const *)right;
 }
 
-static unsigned long long two(void const *data, size_t len) {
+static scc_hash_type two(void const *data, size_t len) {
     (void)data;
     (void)len;
     return 2u;
 }
 
-static unsigned long long seventeen(void const *data, size_t len) {
+static scc_hash_type seventeen(void const *data, size_t len) {
     (void)data;
     (void)len;
     return 17u;
 }
 
-static unsigned long long nineteen(void const *data, size_t len) {
+static scc_hash_type nineteen(void const *data, size_t len) {
     (void)data;
     (void)len;
     return 19u;
@@ -48,7 +48,7 @@ static void restore_simd(void) {
 #define restore_simd() (void)0
 #endif
 
-static unsigned long long ident(void const *data, size_t len) {
+static scc_hash_type ident(void const *data, size_t len) {
     (void)len;
     return *(int const *)data;
 }

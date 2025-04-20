@@ -21,7 +21,7 @@ static bool eq(void const *left, void const *right) {
     return *(int const *)left == *(int const *)right;
 }
 
-static unsigned long long ident(void const *data, size_t size) {
+static scc_hash_type ident(void const *data, size_t size) {
     (void)size;
     int d = *(int const *)data;
     TEST_ASSERT_GREATER_OR_EQUAL_INT32(0, d);

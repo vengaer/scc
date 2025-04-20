@@ -59,10 +59,10 @@ scc_static_assert(scc_bits_is_power_of_2(SCC_HASHTAB_STACKCAP));
 //!     Signature of the function used for equality comparisons.
 typedef _Bool(*scc_hashtab_eq)(void const *, void const *);
 
-//! .. c:type:: unsigned long long(*scc_hashtab_hash)(void const *, size_t)
+//! .. c:type:: scc_hash_type(*scc_hashtab_hash)(void const *, size_t)
 //!
 //!     Signature of the hash function used.
-typedef unsigned long long(*scc_hashtab_hash)(void const*, size_t);
+typedef scc_hash_type(*scc_hashtab_hash)(void const*, size_t);
 
 //? .. c:type:: unsigned char scc_hashtab_metatype
 //?

@@ -11,7 +11,7 @@ static bool streq(void const *l, void const *r) {
     return !strcmp(*(void *const *)l, *(void *const *)r);
 }
 
-static unsigned long long strhash(void const *data, size_t size) {
+static scc_hash_type strhash(void const *data, size_t size) {
     (void)size;
     return scc_hash_fnv1a(*(void *const *)data, strlen(*(void *const *)data));
 }

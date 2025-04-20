@@ -14,7 +14,7 @@ static bool eq(void const *left, void const *right) {
     return *(uint32_t const *)left == *(uint32_t const *)right;
 }
 
-static unsigned long long one(void const *data, size_t len) {
+static scc_hash_type one(void const *data, size_t len) {
     (void)data;
     (void)len;
     return 1u;
