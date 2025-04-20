@@ -14,15 +14,13 @@ RUN chown -R builder:builder /home/builder/scc                                  
                                      gcc                                                \
                                      gdb                                                \
                                      git                                                \
-                                     python{,-sphinx,-pip,-pylint}                      \
-                                     python-{pytest,aiofiles,pyelftools}                \
+                                     python{,-sphinx,-pylint}                           \
+                                     python-{pytest,aiofiles,pyelftools,pycparser}      \
+                                     python-sphinx_rtd_theme                            \
                                      llvm                                               \
                                      ruby                                               \
                                      cmake                                              \
                                      rust                                           &&  \
-    cargo install --path /home/builder/scc/submodules/conftool --root /usr/local    &&  \
-    pip install --no-cache setuptools                                                   \
-                           sphinx-rtd-theme                                             \
-                           pycparser
+    cargo install --path /home/builder/scc/submodules/conftool --root /usr/local
 
 USER builder
