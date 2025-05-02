@@ -784,7 +784,7 @@ static _Bool scc_btmap_insert_non_preemptive(struct scc_btmap_base *base, void *
             break;
         }
 
-        scc_stack_pop(stack);
+        (void)scc_stack_pop(stack);
     }
 
     if(!curr) {
@@ -1343,8 +1343,8 @@ static void scc_btmap_balance_non_preemptive(
             break;
         }
 
-        scc_stack_pop(nodes);
-        scc_stack_pop(bounds);
+        (void)scc_stack_pop(nodes);
+        (void)scc_stack_pop(bounds);
 
         if(bound) {
             sibling = scc_btmnode_child(base, curr, bound - 1u);
@@ -1580,7 +1580,7 @@ void *scc_btmap_clone(void const *btmap) {
         struct stage *s = &scc_stack_top(stack);
 
         if(s->index == s->old->btm_nkeys + 1u) {
-            scc_stack_pop(stack);
+            (void)scc_stack_pop(stack);
             continue;
         }
 
@@ -1603,7 +1603,7 @@ void *scc_btmap_clone(void const *btmap) {
             }
         }
         else {
-            scc_stack_pop(stack);
+            (void)scc_stack_pop(stack);
         }
 
         ++s->index;

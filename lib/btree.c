@@ -639,7 +639,7 @@ static _Bool scc_btree_insert_non_preemptive(struct scc_btree_base *base, void *
             break;
         }
 
-        scc_stack_pop(stack);
+        (void)scc_stack_pop(stack);
     }
 
     if(!curr) {
@@ -1181,8 +1181,8 @@ static void scc_btree_balance_non_preemptive(
             break;
         }
 
-        scc_stack_pop(nodes);
-        scc_stack_pop(bounds);
+        (void)scc_stack_pop(nodes);
+        (void)scc_stack_pop(bounds);
 
         if(bound) {
             sibling = scc_btnode_child(base, curr, bound - 1u);
@@ -1425,7 +1425,7 @@ void *scc_btree_impl_clone(void const *btree, size_t elemsize) {
         struct stage *s = &scc_stack_top(stack);
 
         if(s->index == s->old->bt_nkeys + 1u) {
-            scc_stack_pop(stack);
+            (void)scc_stack_pop(stack);
             continue;
         }
 
@@ -1448,7 +1448,7 @@ void *scc_btree_impl_clone(void const *btree, size_t elemsize) {
             }
         }
         else {
-            scc_stack_pop(stack);
+            (void)scc_stack_pop(stack);
         }
 
         ++s->index;

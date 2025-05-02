@@ -857,7 +857,7 @@ void *scc_rbtree_impl_clone(void const *rbtree, size_t elemsize) {
                 goto epilogue;
             }
         }
-        scc_ringdeque_pop_front(deque);
+        (void)scc_ringdeque_pop_front(deque);
     }
 
     ntree = (unsigned char *)nbase + basesz;
