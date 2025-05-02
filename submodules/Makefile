@@ -53,8 +53,13 @@ __clean_benchmark:
 	$(if $(wildcard $(benchmarkbuilddir)),$(CMAKE) --build $(benchmarkbuilddir) --target clean)
 	$(RM) $(RMFLAGS) $(benchmarkbuilddir)
 
-$(mullbuilddir)/$(__cmake_cache): $(submodules) | $(mullbuilddir)
-	$(CMAKE) -E chdir $(mullbuilddir) $(CMAKE) $(mulldir)
+$(__node_path)/.json.patch.stamp: $(wildcard $(__node_path)/patch/json11/*.patch) $(submodules) | $(mullbuilddir)
+	$(call echo-patch,json11)
+	cd $(mulldir)/vendor/json11 && git apply $(filter %.patch,$^)
+	touch $@
+
+$(mullbuilddir)/$(__cmake_cache): $(__node_path)/.json.patch.stamp | $(mullbuilddir)
+	$(CMAKE) -E chdir $(mullbuilddir) $(CMAKE) $(mulldir) -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
 $(mull_build_stamp): $(call reeval,cpu_cores,$(mull_build_stamp))
 $(mull_build_stamp): $(mullbuilddir)/$(__cmake_cache)

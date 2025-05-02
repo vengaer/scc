@@ -1,0 +1,24 @@
+From 82730eb391c597c6c828d2c251aa02718b874a71 Mon Sep 17 00:00:00 2001
+From: Vilhelm <vilhelm.engstrom@tuta.io>
+Date: Fri, 2 May 2025 18:57:28 +0200
+Subject: [PATCH] Add missing include
+
+---
+ json11.cpp | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/json11.cpp b/json11.cpp
+index 549463d..1683700 100644
+--- a/json11.cpp
++++ b/json11.cpp
+@@ -24,6 +24,7 @@
+ #include <cmath>
+ #include <cstdlib>
+ #include <cstdio>
++#include <cstdint>
+ #include <limits>
+ 
+ namespace json11 {
+-- 
+2.49.0
+

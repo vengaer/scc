@@ -14,5 +14,6 @@ echo-ln      = $(call echo-raw,LN,  $(1))
 echo-ar      = $(call echo-raw,AR,  $(1))
 echo-exec    = $(call echo-raw,EXEC,$(1))
 echo-mcompat = $(call echo-raw,MCOMPAT,$(1))
+echo-patch   = $(call echo-raw,PATCH,$(1))
 
 endif
