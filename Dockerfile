@@ -18,7 +18,6 @@ RUN chown -R builder:builder /home/builder/scc                                  
                                      python-{pytest,pyelftools,pycparser}               \
                                      python-sphinx_rtd_theme                            \
                                      python-typing_extensions                           \
-                                     python-fasteners                                   \
                                      llvm                                               \
                                      ruby                                               \
                                      cmake                                              \

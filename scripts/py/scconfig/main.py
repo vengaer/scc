@@ -1,14 +1,26 @@
 import argparse
+import contextlib
+import fcntl
 import functools
+import os
 
-from typing import Optional, Union
-
-import fasteners
+from typing import Generator, Optional, Union
 
 from .action import Action
 from .cache import Cache
 from .config import Config
 from .exceptions import InvalidAction
+
+
+@contextlib.contextmanager
+def _lock(file: str) -> Generator[None, None, None]:
+    os.makedirs(os.path.dirname(file), exist_ok=True)
+    with open(file, "w") as handle:
+        fcntl.flock(handle, fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(handle, fcntl.LOCK_UN)
 
 
 def _dispatch(
@@ -85,7 +97,7 @@ def main() -> None:
         'Used only if action is "add"',
     )
     args = parser.parse_args()
-    with fasteners.InterProcessLock(args.lockfile):
+    with _lock(args.lockfile):
         _dispatch(
             args.guard,
             args.cache,
