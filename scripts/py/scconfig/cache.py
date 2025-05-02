@@ -3,7 +3,6 @@ import json
 import pathlib
 
 from typing import Any, Dict, Iterator, MutableMapping, Union
-from typing_extensions import Literal
 
 
 class Cache(MutableMapping):
@@ -55,6 +54,6 @@ class Cache(MutableMapping):
     def __enter__(self) -> "Cache":
         return self
 
-    def __exit__(self, *args) -> Literal[False]:
+    def __exit__(self, *args) -> bool:
         self.save()
         return False

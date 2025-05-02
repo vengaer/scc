@@ -4,7 +4,6 @@ import logging
 import pathlib
 
 from typing import List, Optional, Union
-from typing_extensions import Literal
 
 from .action import Action
 from .cache import Cache
@@ -93,7 +92,7 @@ class Config:
     def __enter__(self) -> "Config":
         return self
 
-    def __exit__(self, *args) -> Literal[False]:
+    def __exit__(self, *args) -> bool:
         self.write()
         self._cache["hash"] = self._hash()
         return False
