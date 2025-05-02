@@ -1,5 +1,5 @@
-#ifndef HASH_H
-#define HASH_H
+#ifndef SCC_HASH_H
+#define SCC_HASH_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -63,4 +63,4 @@ inline scc_hash_type scc_hash_fnv1a(void const *data, size_t size) {
 }
 
 
-#endif /* HASH_H */
+#endif /* SCC_HASH_H */

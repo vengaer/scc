@@ -1,5 +1,5 @@
-#ifndef ARCH_H
-#define ARCH_H
+#ifndef SCC_ARCH_H
+#define SCC_ARCH_H
 
 #include "config.h"
 #include "pp_token.h"
@@ -159,4 +159,4 @@ inline long long scc_hashtab_impl_probe_find(
     return scc_arch_select(scc_hashtab_impl_probe_find)(base, tab, elemsize, hash);
 }
 
-#endif /* ARCH_H */
+#endif /* SCC_ARCH_H */

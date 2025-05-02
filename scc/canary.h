@@ -1,5 +1,5 @@
-#ifndef CANARY_H
-#define CANARY_H
+#ifndef SCC_CANARY_H
+#define SCC_CANARY_H
 
 #include "pp_token.h"
 
@@ -51,4 +51,4 @@ _Bool scc_canary_intact(unsigned char const *canary, size_t size);
 #endif
 
 
-#endif /* CANARY_H */
+#endif /* SCC_CANARY_H */

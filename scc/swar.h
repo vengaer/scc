@@ -1,5 +1,5 @@
-#ifndef SWAR_H
-#define SWAR_H
+#ifndef SCC_SWAR_H
+#define SCC_SWAR_H
 
 #include "bug.h"
 
@@ -76,4 +76,4 @@ inline scc_vectype const *scc_swar_align_load(unsigned char const *ldaddr) {
     return (void const *)(ldaddr + aligned - byte);
 }
 
-#endif /* SWAR_H */
+#endif /* SCC_SWAR_H */
