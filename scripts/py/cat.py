@@ -3,13 +3,11 @@
 import argparse
 import asyncio
 
-import aiofiles
-
 from wrhandle import FileWrHandle, StdoutWrHandle
 
 async def aread(index, file):
-    async with aiofiles.open(file, 'r') as handle:
-        return index, await handle.read()
+    with open(file, 'r') as handle:
+        return index, handle.read()
 
 async def cat(files, outfile):
     raw = await asyncio.gather(*(aread(i, f) for i, f in enumerate(set(files))))

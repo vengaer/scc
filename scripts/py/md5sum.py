@@ -5,8 +5,6 @@ import asyncio
 import hashlib
 import os
 
-import aiofiles
-
 _formats = {
     'default': lambda digest, file: f'{digest}  {file}',
     'make': lambda digest, file: f'{os.path.basename(file).replace(".", "")}_md5 := {digest}'
@@ -16,8 +14,8 @@ async def md5sum(mode, file, async_print, fmt):
     md5 = hashlib.md5()
     def update(chunk):
         md5.update(chunk if isinstance(chunk, bytes) else chunk.encode())
-    async with aiofiles.open(file, mode) as handle:
-        while chunk := await handle.read(8192):
+    with open(file, mode) as handle:
+        while chunk := handle.read(8192):
             update(chunk)
 
     digest = md5.hexdigest()
@@ -31,10 +29,10 @@ async def calc_and_print(binary, files, outfile, fmt):
     digests = await asyncio.gather(*(md5sum(mode, file, outfile is None, fmt) for file in files))
 
     if outfile is not None:
-        async with aiofiles.open(outfile, 'w') as handle:
+        with open(outfile, 'w') as handle:
             for file, digest in digests:
-                await handle.write(_formats[fmt](digest=digest, file=file))
-                await handle.write('\n')
+                handle.write(_formats[fmt](digest=digest, file=file))
+                handle.write('\n')
 
 async def main():
     parser = argparse.ArgumentParser('Compute md5sum of file')
