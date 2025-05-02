@@ -3,12 +3,14 @@ __Docker_mk := _
 
 include $(mkscripts)/echo.mk
 
-IMAGE         := scc/build
+DISTRO        ?= arch
+IMAGE         := scc/$(DISTRO)-build
+__dockerfile  := $(root)/docker/$(DISTRO)/Dockerfile
 __image_stamp := $(builddir)/.docker.image.stamp
 
-$(__image_stamp): $(root)/Dockerfile $(submodules) $(__all_mkfiles) | $(builddir)
+$(__image_stamp): $(__dockerfile) $(submodules) $(__all_mkfiles) | $(builddir)
 	$(call echo-gen,$(IMAGE))
-	docker build $(root) -t$(IMAGE) --network=host
+	docker build $(root) -t$(IMAGE) --network=host -f $(__dockerfile)
 	$(TOUCH) $@
 
 docker-image: $(__image_stamp)
