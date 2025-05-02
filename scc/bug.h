@@ -48,7 +48,7 @@
 #define scc_assert_probe_1_1() scc_assert_generic_probe()
 
 #define scc_static_assert_cond_only_1(cond)         \
-    extern unsigned char scc_pp_cat_expand(scc_static_assert_,__LINE__)[(!!(cond) << 1) - 1]
+    (void)((unsigned char[(!!(cond) << 1) - 1]){ 0 })
 
 #define scc_static_assert_cond_only_0(cond, msg)    \
     scc_static_assert_cond_only_1(cond)

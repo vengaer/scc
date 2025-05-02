@@ -58,7 +58,9 @@ typedef int(*scc_bcompare)(void const *, void const *);
 #define SCC_BTREE_DEFAULT_ORDER 6u
 #endif /* SCC_BTREE_DEFAULT_ORDER */
 
-scc_static_assert(SCC_BTREE_DEFAULT_ORDER > 2);
+#if SCC_BTREE_DEFAULT_ORDER <= 2
+#error Order must be at least 2
+#endif
 
 //? .. _scc_btnode_base:
 //? .. c:struct:: scc_btnode_base

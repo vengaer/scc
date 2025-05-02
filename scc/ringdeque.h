@@ -8,17 +8,19 @@
 #include <stddef.h>
 
 #ifndef SCC_RINGDEQUE_STATIC_CAPACITY
-//! .. c:enumerator:: SCC_RINGDEQUE_STATIC_CAPACITY
+//! .. c:macro:: SCC_RINGDEQUE_STATIC_CAPACITY
 //!
 //!     Capacity of the buffer used for small-size optimized
 //!     ringdeques. The value may be overridden by defining
 //!     it before including the header.
 //!
 //!     Must be a power of 2
-enum { SCC_RINGDEQUE_STATIC_CAPACITY = 32 };
+#define SCC_RINGDEQUE_STATIC_CAPACITY 32
 #endif
 
-scc_static_assert(scc_bits_is_power_of_2(SCC_RINGDEQUE_STATIC_CAPACITY));
+#if !scc_bits_is_power_of_2(SCC_RINGDEQUE_STATIC_CAPACITY)
+#error Stack capacity must be a power of 2
+#endif
 
 //! .. c:macro:: scc_ringdeque(type)
 //!

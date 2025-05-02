@@ -17,10 +17,12 @@
 //!
 //!         Must be greater than 0
 #ifndef SCC_VEC_STATIC_CAPACITY
-enum { SCC_VEC_STATIC_CAPACITY = 32 };
+#define SCC_VEC_STATIC_CAPACITY 32
 #endif
 
-scc_static_assert(SCC_VEC_STATIC_CAPACITY > 0);
+#if SCC_VEC_STATIC_CAPACITY <= 0
+#error Static capacity must be greater than 0
+#endif
 
 //! .. c:macro:: scc_vec(type)
 //!

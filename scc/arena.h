@@ -10,7 +10,9 @@
 #define SCC_ARENA_CHUNKSIZE 256u
 #endif
 
-scc_static_assert(SCC_ARENA_CHUNKSIZE > 0);
+#if SCC_ARENA_CHUNKSIZE <= 0
+#error Chunksize must be greater than 0
+#endif
 
 struct scc_arena {
     struct scc_chunk *ar_first;     /* First chunk */

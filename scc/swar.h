@@ -18,7 +18,9 @@ typedef unsigned long long scc_vectype;
 
 /* Standard mandates that UCHAR_MAX >= 255 meaning a byte must be
  * at least 8 bits */
-scc_static_assert(CHAR_BIT >= 8, "Non-conformant implementation");
+#if CHAR_BIT < 8
+#error Non-conformant implementation
+#endif
 
 //? .. c:function:: unsigned char scc_swar_read_byte(scc_vectype vec, unsigned i)
 //?

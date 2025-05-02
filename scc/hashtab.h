@@ -41,18 +41,23 @@
 #define SCC_HASHTAB_CANARYSZ 32u
 
 #ifndef SCC_HASHTAB_STACKCAP
-//! .. c:enumerator:: SCC_HASHTAB_STACKCAP
+//! .. c:macro:: SCC_HASHTAB_STACKCAP
 //!
 //!     Capacity of the buffer used for the hash table small-size
 //!     optimization. The value may be overridden by defining
 //!     it before including the header.
 //!
 //!     Must be a power of 2 and larger than or equal to 32
-enum { SCC_HASHTAB_STACKCAP = 32 };
+#define SCC_HASHTAB_STACKCAP 32
 #endif
 
-scc_static_assert(SCC_HASHTAB_STACKCAP >= 32);
-scc_static_assert(scc_bits_is_power_of_2(SCC_HASHTAB_STACKCAP));
+#if SCC_HASHTAB_STACKCAP < 32
+#error Stack capacity must be at least 32
+#endif
+
+#if !scc_bits_is_power_of_2(SCC_HASHTAB_STACKCAP)
+#error Stack capacity must be a power of 2
+#endif
 
 //! .. c:type:: _Bool(*scc_hashtab_eq)(void const *, void const *)
 //!

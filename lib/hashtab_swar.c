@@ -6,8 +6,6 @@
 #include <assert.h>
 #include <limits.h>
 
-scc_static_assert(sizeof(scc_vectype) < SCC_HASHTAB_STACKCAP);
-
 //? .. c:function:: scc_vectype scc_hashtab_gen_metamask(unsigned long long hash)
 //?
 //?     Broadcast high 7 bits of the hash to each byte in a vector. Set
@@ -29,6 +27,8 @@ long long scc_hashtab_impl_probe_find_swar(
     size_t elemsize,
     unsigned long long hash
 ) {
+    scc_static_assert(sizeof(scc_vectype) < SCC_HASHTAB_STACKCAP);
+
     /* 7 high bits of hash, packed */
     scc_vectype metamask = scc_hashtab_gen_metamask(hash);
     /* Metadata array */
