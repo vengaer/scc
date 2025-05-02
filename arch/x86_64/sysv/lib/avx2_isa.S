@@ -6,6 +6,7 @@ scc_simd_support:                                               # Used to cache 
     .long 2                                                     #  - 0 -> not supported
                                                                 #  - 1 -> supported
                                                                 #  - 2 -> unknown, call scc_impl_have_avx2 to set
+    .section .note.GNU-stack, "", @progbits
     .section .text
 
 # Check for avx2 support. The value is cached in scc_avx2_support
