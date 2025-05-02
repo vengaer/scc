@@ -1395,6 +1395,7 @@ void *scc_btree_impl_clone(void const *btree, size_t elemsize) {
     size_t basesz = (unsigned char const *)btree - (unsigned char const *)obase;
 
     size_t bytesz = basesz + elemsize;
+    scc_when_mutating(assert(bytesz > basesz));
 
     struct scc_btree_base *nbase = malloc(bytesz);
     if(!nbase) {
