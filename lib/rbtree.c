@@ -607,6 +607,7 @@ static void *scc_rbtree_insert_nonempty(struct scc_rbtree_base *restrict base, v
 //?               on failure
 static inline struct scc_rbtree_base *scc_rbtree_clone_base(struct scc_rbtree_base const *obase, size_t elemsize, size_t basesz) {
     size_t bytesz = basesz + elemsize;
+    scc_when_mutating(assert(bytesz > basesz));
 
     struct scc_rbtree_base *nbase = malloc(bytesz);
     if(!nbase) {
