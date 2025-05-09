@@ -73,6 +73,13 @@
             "help": "The time to run the fuzzer, in seconds"
         },
         {
+            "name": "CONFIG_FUZZ_SWAR",
+            "depends": ["CONFIG_FUZZ"],
+            "entrytype": "switch",
+            "default": "n",
+            "help": "Force fuzzer to use SWAR implemention"
+        },
+        {
             "name": "CONFIG_FUZZ_LENGTH",
             "depends": ["CONFIG_FUZZ"],
             "entrytype": "integer",

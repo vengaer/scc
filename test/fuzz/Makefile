@@ -90,6 +90,7 @@ CC                 := clang
 LD                 := clang
 CFLAGS             += $(fuzzflags) -DSCC_INTERCEPT_NULLSIZE_COPIES
 CPPFLAGS           := -I$(testdir) $(filter-out -DNDEBUG,$(CPPFLAGS)) -I$(__node_path)
+CPPFLAGS           += $(if $(SCC_FUZZ_SWAR),-DSCC_FUZZ_SWAR)
 LDFLAGS            += $(fuzzflags)
 
 $(call include-node,$(SCC_FUZZ_TARGET))

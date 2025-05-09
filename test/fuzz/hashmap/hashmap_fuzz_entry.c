@@ -36,6 +36,10 @@ static bool eq(void const *left, void const *right) {
 }
 
 int LLVMFuzzerTestOneInput(uint8_t const *data, size_t size) {
+#if defined SCC_FUZZ_SWAR && defined SCC_SIMD_ISA
+    extern int scc_simd_support;
+    scc_simd_support = 0;
+#endif
     size /= sizeof(uint32_t);
     if(!size) {
         return 0;
