@@ -54,7 +54,7 @@ long long scc_hashmap_impl_probe_find_swar(
     scc_vectype probe_end = curr ^ 0u;
 
     unsigned i;
-    for(i = slot_adj; i < sizeof(curr) && start + i < base->hm_capacity; ++i) {
+    for(i = slot_adj; i < sizeof(curr); ++i) {
         if(!scc_swar_read_byte(probe_end, i)) {
             return -1ll;
         }
@@ -139,7 +139,7 @@ unsigned long long scc_hashmap_impl_probe_insert_swar(
 
     unsigned long long empty_slot = ~0ull;
     unsigned i;
-    for(i = slot_adj; i < sizeof(curr) && start + i < base->hm_capacity; ++i) {
+    for(i = slot_adj; i < sizeof(curr); ++i) {
         if(empty_slot == ~0ull) {
             if(!scc_swar_read_byte(occ_match, i) && base->hm_eq(keys + (i + start) * keysize, handle)) {
                 empty_slot = (i + start) | SCC_HASHMAP_DUPLICATE;
@@ -164,7 +164,7 @@ unsigned long long scc_hashmap_impl_probe_insert_swar(
         occ_match = curr ^ metamask;
         probe_end = curr ^ 0u;
 
-        for(i = 0u; i < sizeof(curr) && slot + i < base->hm_capacity; ++i) {
+        for(i = 0u; i < sizeof(curr); ++i) {
             if(empty_slot == ~0ull) {
                 if(!scc_swar_read_byte(occ_match, i) && base->hm_eq(keys + (slot + i) * keysize, handle)) {
                     return (slot + i) | SCC_HASHMAP_DUPLICATE;
