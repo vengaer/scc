@@ -548,7 +548,7 @@ inline void *scc_btree_impl_with_order_dyn(void *sbase, size_t basesz, size_t co
 //!     :param compare: Pointer to the comparison function to use
 //!     :returns: An opaque pointer to a B-tree allocated in the frame of the calling function
 #define scc_btree_new(type, compare)                                                                \
-    scc_btree_impl_new(&(scc_btree_impl_layout(type, SCC_BTREE_DEFAULT_ORDER)) {                    \
+    (type *)scc_btree_impl_new(&(scc_btree_impl_layout(type, SCC_BTREE_DEFAULT_ORDER)) {            \
             .bt1 = {                                                                                \
                 .bt0 = {                                                                            \
                     .bt_order = SCC_BTREE_DEFAULT_ORDER,                                            \
@@ -609,7 +609,7 @@ inline void *scc_btree_impl_with_order_dyn(void *sbase, size_t basesz, size_t co
 //!     :param compare: Pointer to the comparison function to use
 //!     :returns: An opaque pointer to a ``btree`` allocated on the heap, or ``NULL`` on allocation failure
 #define scc_btree_new_dyn(type, compare)                                                            \
-    scc_btree_impl_new_dyn(&(scc_btree_impl_layout(type, SCC_BTREE_DEFAULT_ORDER)) {                \
+    (type *)scc_btree_impl_new_dyn(&(scc_btree_impl_layout(type, SCC_BTREE_DEFAULT_ORDER)) {        \
             .bt1 = {                                                                                \
                 .bt0 = {                                                                            \
                     .bt_order = SCC_BTREE_DEFAULT_ORDER,                                            \

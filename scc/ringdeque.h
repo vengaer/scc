@@ -245,7 +245,7 @@ void *scc_ringdeque_impl_new_dyn(size_t dequesz, size_t offset, size_t capacity)
 //!     :param type: The type to be stored in the ringdeque
 //!     :returns: A handle used for referring to the instantiated ringdeque
 #define scc_ringdeque_new(type)                                                 \
-    scc_ringdeque_impl_new(                                                     \
+    (type *)scc_ringdeque_impl_new(                                             \
         (void *)&(scc_ringdeque_impl_layout(type)) { 0 },                       \
         scc_ringdeque_impl_dataoff(type),                                       \
         SCC_RINGDEQUE_STATIC_CAPACITY                                           \
@@ -265,7 +265,7 @@ void *scc_ringdeque_impl_new_dyn(size_t dequesz, size_t offset, size_t capacity)
 //!     :returns: A handle used for referring to the instantiated ringdeque, or
 //!               ``NULL`` on allocation failure
 #define scc_ringdeque_new_dyn(type)                                             \
-    scc_ringdeque_impl_new_dyn(                                                 \
+    (type *)scc_ringdeque_impl_new_dyn(                                         \
         sizeof(scc_ringdeque_impl_layout(type)),                                \
         scc_ringdeque_impl_dataoff(type),                                       \
         SCC_RINGDEQUE_STATIC_CAPACITY                                           \

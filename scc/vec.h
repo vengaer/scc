@@ -244,7 +244,7 @@ void *scc_vec_impl_new_dyn(size_t vecsz, size_t offset, size_t capacity);
 //!     :param type: The type for which to instantiate the vector
 //!     :returns: A handle to the new vec
 #define scc_vec_new(type)                                                \
-    scc_vec_impl_new(                                                    \
+    (type *)scc_vec_impl_new(                                            \
         (void *)&(scc_vec_impl_layout(type)){ 0 },                       \
         scc_vec_impl_offset(type),                                       \
         SCC_VEC_STATIC_CAPACITY                                          \
@@ -264,7 +264,7 @@ void *scc_vec_impl_new_dyn(size_t vecsz, size_t offset, size_t capacity);
 //!     :param type: The type for which to instantiate the vector
 //!     :returns: A handle to the new vec
 #define scc_vec_new_dyn(type)                                            \
-    scc_vec_impl_new_dyn(                                                \
+    (type *)scc_vec_impl_new_dyn(                                        \
         sizeof(scc_vec_impl_layout(type)),                               \
         scc_vec_impl_offset(type),                                       \
         SCC_VEC_STATIC_CAPACITY                                          \

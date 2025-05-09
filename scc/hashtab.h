@@ -446,7 +446,7 @@ void *scc_hashtab_impl_new_dyn(scc_hashtab_eq eq, scc_hashtab_hash hash, size_t 
 //!         }
 //!         /* tab is no longer valid */
 #define scc_hashtab_with_hash(type, eq, hash)                               \
-    scc_hashtab_impl_new(                                                   \
+    (type *)scc_hashtab_impl_new(                                           \
         (void *)&(scc_hashtab_impl_layout(type)) {                          \
             .ht1 = {                                                        \
                 .ht0 = {                                                    \
@@ -477,7 +477,7 @@ void *scc_hashtab_impl_new_dyn(scc_hashtab_eq eq, scc_hashtab_hash hash, size_t 
 //!     :returns: Handle to a newly created hash table, or ``NULL`` on
 //!               allocation failure
 #define scc_hashtab_with_hash_dyn(type, eq, hash)                           \
-    scc_hashtab_impl_new_dyn(                                               \
+    (type *)scc_hashtab_impl_new_dyn(                                       \
         eq,                                                                 \
         hash,                                                               \
         SCC_HASHTAB_STACKCAP,                                               \

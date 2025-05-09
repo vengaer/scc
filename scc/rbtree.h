@@ -496,7 +496,7 @@ void *scc_rbtree_impl_new_dyn(size_t treesz, struct scc_arena *arena, scc_rbcomp
 //!     :param compare: Pointer to the comparison function to use
 //!     :returns: An opaque pointer to a rbtree allocated in the frame of the calling function
 #define scc_rbtree_new(type, compare)                                                       \
-    scc_rbtree_impl_new(                                                                    \
+    (type *)scc_rbtree_impl_new(                                                            \
         (void *)&(scc_rbtree_impl_layout(type)) {                                           \
             .rb0 = {                                                                        \
                 .rb_dataoff = scc_rbnode_impl_valoff(type),                                 \
@@ -522,7 +522,7 @@ void *scc_rbtree_impl_new_dyn(size_t treesz, struct scc_arena *arena, scc_rbcomp
 //!     :param compare: Pointer to the comparison function to use
 //!     :returns: An opaque pointer to a rbtree allocated in the frame of the calling function
 #define scc_rbtree_new_dyn(type, compare)                                                   \
-    scc_rbtree_impl_new_dyn(                                                                \
+    (type *)scc_rbtree_impl_new_dyn(                                                        \
         sizeof(scc_rbtree_impl_layout(type)),                                               \
         &scc_arena_new(scc_rbnode_impl_layout(type)),                                       \
         compare,                                                                            \
