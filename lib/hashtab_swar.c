@@ -55,6 +55,7 @@ long long scc_hashtab_impl_probe_find_swar(
 
     unsigned i;
     for(i = slot_adj; i < sizeof(curr) && start + i < base->ht_capacity; ++i) {
+        scc_when_mutating(assert(start + i < base->ht_capacity));
         if(!scc_swar_read_byte(probe_end, i)) {
             return -1ll;
         }
@@ -140,6 +141,7 @@ long long scc_hashtab_impl_probe_insert_swar(
     long long empty_slot = -1ll;
     unsigned i;
     for(i = slot_adj; i < sizeof(curr) && start + i < base->ht_capacity; ++i) {
+        scc_when_mutating(assert(start + i < base->ht_capacity));
         if(!scc_swar_read_byte(occ_match, i) && base->ht_eq(vals + (i + start) * elemsize, handle)) {
             /* Already in table */
             return -1ll;
