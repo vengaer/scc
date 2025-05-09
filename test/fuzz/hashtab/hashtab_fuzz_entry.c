@@ -59,7 +59,7 @@ int LLVMFuzzerTestOneInput(uint8_t const *data, size_t size) {
 
     uint32_t *it;
     dbg_pr("Data:\n");
-    dbg_pr_n(it, buf, size, "%#08" PRIx32 " ", *it);
+    dbg_pr_n(it, buf, size, "0x%08" PRIx32 " ", *it);
     dbg_pr("\n");
 
     scc_hashtab(uint32_t) tab = scc_hashtab_new(uint32_t, eq);
