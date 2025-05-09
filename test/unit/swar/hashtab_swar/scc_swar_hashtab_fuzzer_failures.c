@@ -73,3 +73,20 @@ void test_scc_swar_hashtab_fuzzer_failure0(void) {
 
     run_fuzzer_test(vals, scc_arrsize(vals));
 }
+
+void test_scc_swar_hashtab_fuzzer_failure1(void) {
+    static uint32_t vals[] = {
+        0xff0aff0a, 0x8e0382ff, 0x2dc0fd72, 0xffffff2e,
+        0xffffffff, 0xb198ffff, 0x32360e0e, 0xb1000000,
+        0xb1b1b1b1, 0xe3e3e3b1, 0x000000e3, 0x60000000,
+        0xffe3e3e3, 0x0e0ee1ff, 0x290a0a0e, 0x0e0eb129,
+        0x999999b1, 0x99993f99, 0x9999999d, 0x99996367,
+        0xffffff99, 0xfafafa04, 0xff2fffff, 0x002dc0fd,
+        0x82ff606d, 0xfd728e03, 0x002e2dc0, 0x0097606d,
+        0x0099fa00, 0xfafafafa, 0xdbdb3afa, 0x990dcadb,
+        0xdd999999, 0xe1dddddd, 0xe1e1e1e1, 0xdddddddd,
+        0xfc7effdd, 0xec8ef5c6, 0xd0d0d00e, 0x2a8001d0
+    };
+
+    run_fuzzer_test(vals, scc_arrsize(vals));
+}
