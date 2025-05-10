@@ -408,3 +408,20 @@ void test_scc_hashtab_clone(void) {
     scc_hashtab_free(tab);
     scc_hashtab_free(copy);
 }
+
+void test_scc_hashtab_foreach(void) {
+    scc_hashtab(int) tab = scc_hashtab_new(int, eq);
+    for (int i = 0; i < 13881; i += 17)
+        TEST_ASSERT_TRUE(scc_hashtab_insert(&tab, i));
+
+    bool found[13881 / 17 + 1] = { 0 };
+    TEST_ASSERT_EQUAL(scc_arrsize(found), scc_hashtab_size(tab));
+    int const *it;
+    scc_hashtab_foreach(it, tab)
+        found[*it / 17] = true;
+
+    scc_hashtab_free(tab);
+
+    for (unsigned i = 0u; i < scc_arrsize(found); ++i)
+        TEST_ASSERT_TRUE(found[i]);
+}
