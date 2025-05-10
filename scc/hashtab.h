@@ -836,4 +836,45 @@ void scc_hashtab_clear(void *tab);
 //!               the given one, or ``NULL`` on failure
 void *scc_hashtab_clone(void const *tab);
 
+//! .. c:macro:: scc_hashtab_foreach(iter, tab)
+//!
+//!     Iterator over the hash table
+//!
+//!     :param iter: An instance of a pointer to the type stored in the
+//!                  table. Used for referring to each element, in order.
+//!     :param tab: Handle to the table to iterate over
+#define scc_hashtab_foreach(iter, tab)                                      \
+    for ((iter) = scc_hashtab_impl_iter_begin(tab, sizeof(*(tab)));         \
+         (iter);                                                            \
+         (iter) = scc_hashtab_impl_iter_next(tab, sizeof(*(tab)), iter))
+
+//? .. c:function:: void const *scc_hashtab_impl_iter_begin(void *tab)
+//?
+//?     Get a pointer to the "first" element in the hash table
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param tab: The ``hashtab`` to iterate over
+//?     :param elemsize: Size of the elements in the table
+//?
+//?     :returns: A pointer to the first element
+void const *scc_hashtab_impl_iter_begin(void *tab, size_t elemsize);
+
+//? .. c:function:: void const *scc_hashtab_impl_iter_next(void const *tab, void const *iter)
+//?
+//?     Get a pointer to the next element in the table
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param tab: The table being iterated over
+//?     :param elemsize: Size of the elements in the table
+//?     :param iter: The current iterator
+//?
+//?     :return: A pointer to the next element
+void const *scc_hashtab_impl_iter_next(void *tab, size_t elemsize, void const *iter);
+
 #endif /* SCC_HASHTAB_H */

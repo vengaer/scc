@@ -273,6 +273,35 @@ static bool scc_hashtab_rehash(void **tab, struct scc_hashtab_base *base, size_t
     return true;
 }
 
+//? .. :c:function:: void const *scc_hashtab_impl_iter_next_occupied(<dnl>
+//?     void const *base, size_t start)
+//?
+//?     Obtain a pointer to the next occupied slot in the table
+//?
+//?     .. note::
+//?
+//?         Internal use only
+//?
+//?     :param base: The table base struct
+//?     :param start: Slot to start probing at
+//?
+//?     :return: A pointer to the next element, or NULL if there are no more
+static inline void const *scc_hashtab_impl_iter_next_occupied(
+    struct scc_hashtab_base *base,
+    void *tab,
+    size_t elemsize,
+    size_t start
+) {
+    scc_hashtab_metatype *md = scc_hashtab_metadata((struct scc_hashtab_base *)base);
+
+    for (size_t i = start; i < base->ht_capacity; ++i) {
+        if (md[i] & SCC_HASHTAB_OCCUPIED)
+            return (unsigned char const *)tab + (i + (size_t)1) * elemsize;
+    }
+
+    return 0;
+}
+
 bool scc_hashtab_impl_insert(void *tabaddr, size_t elemsize) {
     struct scc_hashtab_base *base = scc_hashtab_impl_base(*(void **)tabaddr);
     if(scc_hashtab_should_rehash(base)) {
@@ -408,4 +437,18 @@ void *scc_hashtab_clone(void const *tab) {
     scc_memcpy(nbase, obase, sz);
     nbase->ht_dynalloc = 1;
     return (unsigned char *)nbase + offsetof(struct scc_hashtab_base, ht_fwoff) + nbase->ht_fwoff + sizeof(nbase->ht_fwoff);
+}
+
+void const *scc_hashtab_impl_iter_begin(void *tab, size_t elemsize) {
+    struct scc_hashtab_base *base = scc_hashtab_impl_base(tab);
+    return scc_hashtab_impl_iter_next_occupied(base, tab, elemsize, 0u);
+}
+
+void const *scc_hashtab_impl_iter_next(void *tab, size_t elemsize, void const *iter) {
+    struct scc_hashtab_base *base = scc_hashtab_impl_base(tab);
+
+    ptrdiff_t pslot = (((unsigned char const *)iter) -
+        ((unsigned char const *)tab + elemsize)) / elemsize;
+    assert(pslot >= 0);
+    return scc_hashtab_impl_iter_next_occupied(base, tab, elemsize, (unsigned)pslot + 1u);
 }
