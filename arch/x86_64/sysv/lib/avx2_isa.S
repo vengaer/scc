@@ -42,9 +42,10 @@ scc_impl_have_avx2:
 
     xgetbv                                                      # Read XCR[%ecx]
 
-    testl   $0x03, %eax                                         # xmm and ymm state support
+    andl    $0x03, %eax                                         # xmm and ymm state support
+    subl    $0x03, %eax
 
-    jz      1f                                                  # Unsupported, scc_simd_support -> 0
+    jnz     1f                                                  # Unsupported, scc_simd_support -> 0
 
     movl    $0x01, %ecx                                         # Supported, scc_simd_support -> 1
 1:
