@@ -35,10 +35,11 @@ scc_impl_have_avx2:
     movl    $0x01, %eax                                         # Request version information
     cpuid
 
-    testl   $0xc000000, %ecx                                    # osxsave and avx feature flags
+    andl    $0xc000000, %ecx                                    # osxsave and avx feature flags
+    subl    $0xc000000, %ecx
 
     movl    $0x00, %ecx                                         # Prepare for XCR read, preserve ZF
-    jz      1f                                                  # Unsupported scc_simd_support -> 0
+    jnz     1f                                                  # Unsupported scc_simd_support -> 0
 
     xgetbv                                                      # Read XCR[%ecx]
 
