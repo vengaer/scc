@@ -11,3 +11,4 @@ rstext  := rst
 htmlext := html
 jsonext := json
 pyext   := py
+xmlext  := xml

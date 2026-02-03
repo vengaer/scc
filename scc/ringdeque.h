@@ -8,13 +8,14 @@
 #include <stddef.h>
 
 #ifndef SCC_RINGDEQUE_STATIC_CAPACITY
-//! .. c:macro:: SCC_RINGDEQUE_STATIC_CAPACITY
-//!
-//!     Capacity of the buffer used for small-size optimized
-//!     ringdeques. The value may be overridden by defining
-//!     it before including the header.
-//!
-//!     Must be a power of 2
+/**
+ * Default capacity of the stack buffer used for the small-size optimized deque.
+ *
+ * Users may override this value when using the library by providing a preprocessor
+ * definition with this name before including the header.
+ *
+ * \note Must be a power of 2
+ */
 #define SCC_RINGDEQUE_STATIC_CAPACITY 32
 #endif
 
@@ -22,51 +23,25 @@
 #error Stack capacity must be a power of 2
 #endif
 
-//! .. c:macro:: scc_ringdeque(type)
-//!
-//!     Expands to an opaque pointer suitable for storing
-//!     a handle to a ringdeque containing the specified type
-//!
-//!     :param type: The type to store in the ringdeque
+/**
+ * \verbatim embed:rst:leading-asterisk
+ * .. _scc_ringdeque:
+ * \endverbatim
+ *
+ * Expands to an opaque pointer suitable for referring to a
+ * ``deque`` storing instances of the the provided \a type.
+ *
+ * \param type Type of the values to be stored in the deque
+ *
+ * \verbatim embed:rst:leading-asterisk
+ * .. code-block:: c
+ *      :caption: Creating a ``deque`` holding ``int`` instances.
+ *
+ *      scc_ringdeque(int) deque;
+ * \endverbatim
+ */
 #define scc_ringdeque(type) type *
 
-//? .. _scc_ringdeque_base:
-//? .. c:struct:: scc_ringdeque_base
-//?
-//?     Base structure of the ringdeque. Never exposed directly
-//?     through the API. All public function operate on a fat
-//?     pointer to the :c:texpr:`rd_data` member.
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     .. _size_t_rd_size:
-//?     .. c:var:: size_t rd_size
-//?
-//?         Size of the ringdeque
-//?
-//?     .. _size_t_rd_capacity:
-//?     .. c:var:: size_t rd_capacity
-//?
-//?         Capacity of the ringdeque
-//?
-//?     .. _size_t_rd_begin:
-//?     .. c:var:: size_t rd_begin
-//?
-//?         Index of the first slot in the deque
-//?
-//?     .. _size_t_rd_end:
-//?     .. c:var:: size_t rd_end
-//?
-//?         Index of element beyond the last in the ringdeque.
-//?         C.f. C++'s end iterator
-//?
-//?     .. c:var:: unsigned char rd_buffer[]
-//?
-//?         FAM hiding details specific to the particular type
-//?         stored in the ringdeque. For details, see
-//?         :ref:`scc_ringdeque_impl_layout <scc_ringdeque_impl_layout>`
 struct scc_ringdeque_base {
     size_t rd_size;
     size_t rd_capacity;
@@ -75,55 +50,6 @@ struct scc_ringdeque_base {
     unsigned char rd_buffer[];
 };
 
-//? .. _scc_ringdeque_impl_layout:
-//? .. c:macro:: scc_ringdeque_impl_layout(type)
-//?
-//?     Actual layout of a ringdeque storing instances of the given
-//?     :c:texpr:`type`. The :c:texpr:`rd_capacity` through :c:texpr:`rd_end`
-//?     fields are identical to those of :ref:`scc_ringdeque_base <scc_ringdeque_base>`.
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param type: Type of the ringdeque
-//?
-//?     .. c:struct:: @layout
-//?
-//?         .. c:var:: size_t rd_size
-//?
-//?             See :ref:`rd_size <size_t_rd_size>`
-//?
-//?         .. c:var:: size_t rd_capacity
-//?
-//?             See :ref:`rd_capacity <size_t_rd_capacity>`
-//?
-//?         .. c:var:: size_t rd_begin
-//?
-//?             See :ref:`rd_begin <size_t_rd_begin>`
-//?
-//?         .. c:var:: size_t rd_end
-//?
-//?             See :ref:`rd_end <size_t_rd_end>`
-//?
-//?         .. c:var:: unsigned char rd_npad
-//?
-//?              Used for tracking potential padding bytes between :c:texpr:`rd_end`
-//?              and :c:texpr:`rd_data`
-//?
-//?         .. _unsigned_char_rd_dynalloc:
-//?         .. c:var:: unsigned char rd_dynalloc
-//?
-//?             Field tracking whether the ringdeque was allocated
-//?             dynamically or not
-//?
-//?         .. _type_rd_data:
-//?         .. c:var:: type rd_data[SCC_RINGDEQUE_STATIC_CAPACITY]
-//?
-//?             Small-size optimized buffer used for storing the
-//?             elements in the ringdeque. Should be capacity grow
-//?             to the point where the buffer is no longer sufficient,
-//?             the ringdeque is moved to the heap.
 #define scc_ringdeque_impl_layout(type)                                         \
     struct {                                                                    \
         struct {                                                                \
@@ -137,15 +63,6 @@ struct scc_ringdeque_base {
         type rd_data[SCC_RINGDEQUE_STATIC_CAPACITY];                            \
     }
 
-//? .. c:macro:: scc_ringdeque_impl_layout(type)
-//?
-//?     Compute offset of :ref:`rd_data <type_rd_data>`.
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param type: Type of the ringdeque
 #define scc_ringdeque_impl_dataoff(type)                                        \
     sizeof(                                                                     \
         struct {                                                                \
@@ -161,21 +78,6 @@ struct scc_ringdeque_base {
         }                                                                       \
     )
 
-//? .. c:macro:: scc_ringdeque_impl_base_qual(deque, qual)
-//?
-//?     Obtain qualified pointer to the
-//?     :ref:`struct scc_ringdeque_base <scc_ringdeque_base>` corresponding
-//?     to the given :c:texpr:`deque`.
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param deque: Handle to the ringdeque whose base address is to be obtained
-//?     :param qual: Optional qualifiers to apply to the pointer
-//?     :returns: Appropriately qualified address of the
-//?               :ref:`struct scc_ringdeque_base <scc_ringdeque_base>`
-//?               corresponding to :c:texpr:`deque`.
 #define scc_ringdeque_impl_base_qual(deque, qual)                               \
     scc_container_qual(                                                         \
         (unsigned char qual *)(deque) - scc_ringdeque_impl_npad(deque),         \
@@ -184,66 +86,29 @@ struct scc_ringdeque_base {
         qual                                                                    \
     )
 
-//? .. c:macro:: scc_ringdeque_impl_base(deque)
-//?
-//?     Obtain unqualified pointer to the
-//?     :ref:`struct scc_ringdeque_base <scc_ringdeque_base>` corresponding
-//?     to the given :c:texpr:`deque`.
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param deque: Handle to the ringdeque whose base address is to be obtained
-//?     :returns: Address of the :ref:`struct scc_ringdeque_base <scc_ringdeque_base>`
-//?               corresponding to the given :c:texpr:`deque`.
 #define scc_ringdeque_impl_base(deque)                                          \
     scc_ringdeque_impl_base_qual(deque,)
 
-//? .. _scc_ringdeque_impl_new:
-//? .. c:function:: void *scc_ringdeque_impl_new(struct scc_ringdeque_base *base, <dnl>
-//?     size_t offset, size_t capacity)
-//?
-//?     Initialize a raw ringdeque at the given address and return a
-//?     fat pointer to it.
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: Base address of the ringdeque to be initialized
-//?     :param offset: Offset of the :ref:`rd_data <type_rd_data>` member relative :c:texpr:`deque`
-//?     :param capacity: The capacity with which the ringdeque at :c:texpr:`deque` was allocated
-//?     :returns: Opaque handle suitable for referring to the initialized ``ringdeque``
 void *scc_ringdeque_impl_new(struct scc_ringdeque_base *base, size_t offset, size_t capacity);
 
-//? .. c:function:: void *scc_ringdeque_impl_new_dyn(size_t offset, size_t capacity)
-//?
-//?     Like :ref:`scc_ringdeque_impl_new <scc_ringdeque_impl_new>` except for the
-//?     deque being allocated on the heap
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param dequesz: Size of the deque
-//?     :param offset: Offset of the :ref:`rd_data <type_rd_data>` member relative :c:texpr:`deque`
-//?     :param capacity: The capacity with which the ringdeque at :c:texpr:`deque` was allocated
-//?     :returns: Opaque handle suitable for referring to the initialized ``ringdeque``,
-//?               or ``NULL`` on allocation failure
 void *scc_ringdeque_impl_new_dyn(size_t dequesz, size_t offset, size_t capacity);
 
-//! .. _scc_ringdeque_new:
-//! .. c:function:: void *scc_ringdeque_new(type)
-//!
-//!     Instantiate a ringdeque storing instances of the given :c:texpr:`type`. The
-//!     collection is constructed in the frame of the calling function. For more
-//!     information, see :ref:`Scope and Lifetimes <scope_and_lifetimes>`.
-//!
-//!     The function cannot fail.
-//!
-//!     :param type: The type to be stored in the ringdeque
-//!     :returns: A handle used for referring to the instantiated ringdeque
+/**
+ * \verbatim embed:rst:leading-asterisk
+ * .. _scc_ringdeque_new:
+ * \endverbatim
+ *
+ * Instantiate a ``deque`` storing instances of the provided \a type. The
+ * structure is constructred in the frame of the calling function. Refer to
+ * @verbatim embed:rst:inline :ref:`scc_ringdeque_new_dyn <scc_ringdeque_new_dyn>` @endverbatim
+ * for the counterpart allocating the structure on the heap.
+ *
+ * The macro cannot fail.
+ *
+ * \param type The type to be stored in the deque
+ *
+ * \return A handle to the constructed deque
+ */
 #define scc_ringdeque_new(type)                                                 \
     (type *)scc_ringdeque_impl_new(                                             \
         (void *)&(scc_ringdeque_impl_layout(type)) { 0 },                       \
@@ -251,19 +116,21 @@ void *scc_ringdeque_impl_new_dyn(size_t dequesz, size_t offset, size_t capacity)
         SCC_RINGDEQUE_STATIC_CAPACITY                                           \
     )
 
-//! .. c:function:: void *scc_ringdeque_new_dyn(type)
-//!
-//!     Lite :ref:`scc_ringdeque_new <scc_ringdeque_new>` except for the
-//!     ringdeque being allocated on the heap
-//!
-//!     .. note::
-//!
-//!         Unlinke ``scc_ringdeque_new``, ``scc_ringdeque_new_dyn`` may fail. The
-//!         returned pointer should always be checked against ``NULL``
-//!
-//!     :param type: The type to be stored in the ringdeque
-//!     :returns: A handle used for referring to the instantiated ringdeque, or
-//!               ``NULL`` on allocation failure
+/**
+ * \verbatim embed:rst:leading-asterisk
+ * .. _scc_ringdeque_new_dyn:
+ * \endverbatim
+ *
+ * Like @verbatim embed:rst:inline :ref:`scc_ringdeque_new <scc_ringdeque_new>` @endverbatim
+ * except for the ``_dyn`` version allocating the deque on the heap.
+ *
+ * \note    Unlike ``scc_ringdeque_new``, ``scc_ringdeque_new_dyn`` may fail. The returned
+ *          pointer should be checked against ``NULL``.
+ *
+ * \param type The type to be stored in the deque
+ *
+ * \return A handle through which the instantiated deque may be accessed, or ``NULL`` on failure.
+ */
 #define scc_ringdeque_new_dyn(type)                                             \
     (type *)scc_ringdeque_impl_new_dyn(                                         \
         sizeof(scc_ringdeque_impl_layout(type)),                                \
@@ -271,99 +138,58 @@ void *scc_ringdeque_impl_new_dyn(size_t dequesz, size_t offset, size_t capacity)
         SCC_RINGDEQUE_STATIC_CAPACITY                                           \
     )
 
-//! .. _scc_ringdeque_free:
-//! .. c:function:: void scc_ringdeque_free(void *deque)
-//!
-//!     Reclaim memory allocated for :c:texpr:`deque`. The parameter must
-//!     refer to a valid ringdeque returned by :ref:`scc_ringdeque_new <scc_ringdeque_new>`.
-//!
-//!     :param deque: Handle to the ringdeque to be freed
+/**
+ * \verbatim embed:rst:leading-asterisk
+ * .. _scc_ringdeque_free:
+ * \endverbatim
+ *
+ * Reclaim memory allocated for the provided ``deque``.
+ *
+ * The parameter must refer to a valid ``deque``.
+ *
+ * \param deque Handle referring to the deque to be deallocated
+ */
 void scc_ringdeque_free(void *deque);
 
-//? .. c:function:: size_t scc_ringdeque_impl_npad(void const *deque)
-//?
-//?     Read the number of padding bytes between the
-//?     :ref:`rd_data <type_rd_data>` field and the end of the
-//?     :ref:`struct scc_ringdeque_base <scc_ringdeque_base>`.
-//?
-//?     .. note::
-//?         Internal use only
-//?
-//?     :param deque: Handle to the deque in question
-//?     :returns: The number of padding bytes preceding the
-//?               :ref:`rd_data <type_rd_data>` field
 inline size_t scc_ringdeque_impl_npad(void const *deque) {
     return ((unsigned char const *)deque)[-2] + 2 * sizeof(unsigned char);
 }
 
-//! .. c:function:: size_t scc_ringdeque_capacity(void const *deque)
-//!
-//!     Obtain the capacity of the given ringdeque
-//!
-//!     :param deque: Handle to the ringdeque for which the capacity is to be queried
-//!     :returns: Capacity of the ringdeque corresponding to :c:texpr:`deque`
+/**
+ * Obtain the capacity of the provided ``deque``.
+ *
+ * \param Handle referring to the deque whose capacity is to be queried.
+ *
+ * \return Capacity of the provided deque
+ */
 inline size_t scc_ringdeque_capacity(void const *deque) {
     return scc_ringdeque_impl_base_qual(deque, const)->rd_capacity;
 }
 
-//! .. c:function:: size_t scc_ringdeque_size(void const *deque)
-//!
-//!     Obtain the size of the given ringdeque
-//!
-//!     :param deque: Handle to the ringdeque for which the size is to be queried
-//!     :returns: Size of the ringdeque correspondign to :c:texpr:`deque`
+/**
+ * Obtain the size of the provided ``deque``.
+ *
+ * \param deque Handle referring to the deque whose size is to be queried.
+ *
+ * \return Size of the provided deque
+ */
 inline size_t scc_ringdeque_size(void const *deque) {
     return scc_ringdeque_impl_base_qual(deque, const)->rd_size;
 }
 
-//! .. c:function:: _Bool scc_ringdeque_empty(void const *deque)
-//!
-//!     Check whether the given ringdeque is empty
-//!
-//!     :param deque: Handle to the ringdeque in question
-//!     :returns: Value indicating whether the ringdeque is empty
-//!     :retval true: The ringdeque is empty
-//!     :retval false: The ringdeque contains at least one element
+/**
+ * Check whether the given deque is empty.
+ *
+ * \param deque The deque in question
+ *
+ * \return ``true`` if the provided deque is empty, otherwise ``false``
+ */
 inline _Bool scc_ringdeque_empty(void const *deque) {
     return !scc_ringdeque_size(deque);
 }
 
-//? .. c:function:: _Bool scc_ringdeque_impl_prepare_push(void *dequeaddr, size_t elemsize)
-//?
-//?     Ensure that the capacity of the ringdeque at :c:texpr:`*(void **)dequeaddr` is
-//?     large enough that at least one more element can be pushed to the back of the
-//?     collection.
-//?
-//?     If the capacity of the ringdeque is not sufficient at the time of the call,
-//?     the entire collection is reallocated.
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param dequeaddr: Address of the handle used to refer to the ringdeque
-//?     :param elemsize: Size of the elements stored in the ringdeque, in bytes
-//?     :returns: A :code:`_Bool` indicating whether the ringdeque capacity
-//?               is sufficiently large
-//?     :retval true: The ringdeque is already sufficiently large to accomodate another
-//?                   push. Should this be the case, :c:texpr:`*(void **)dequeaddr`
-//?                   is not modified.
-//?     :retval true: The ringdeque was successfully reallocated to accomodate the
-//?                   pending push. :c:texpr:`*(void **)dequeaddr` is updated accordingly.
-//?     :retval false: Allocation failure when resizing
 _Bool scc_ringdeque_impl_prepare_push(void *dequeaddr, size_t elemsize);
 
-//? .. c:function:: size_t scc_ringdeque_impl_push_back_index(void *deque)
-//?
-//?     Obtain the index of the slot just beyond the last in the given ringdeque
-//?     and move :ref:`rd_end <size_t_rd_end>` forward.
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param deque: Handle to the ringdeque in question
-//?     :returns: The index of the slot just beyond the last one in the ringdeque
 inline size_t scc_ringdeque_impl_push_back_index(void *deque) {
     struct scc_ringdeque_base *base = scc_ringdeque_impl_base(deque);
     size_t index = base->rd_end;
@@ -372,38 +198,26 @@ inline size_t scc_ringdeque_impl_push_back_index(void *deque) {
     return index;
 }
 
-//! .. c:function:: _Bool scc_ringdeque_push_back(void *dequeaddr, type value)
-//!
-//!     Push :c:texpr:`value` to the back of the ringdeque, reallocating the
-//!     collection if needed.
-//!
-//!     Any pointers into the ringdeque obtained prior to the call should be treated
-//!     as invalid once the function has returned.
-//!
-//!     :param dequeaddr: Address of the handle to the ringdeque in question. Should
-//!                       the ringdeque have to be reallocated, :c:texpr:`*(void **)dequeaddr`
-//!                       is updated accordingly.
-//!     :param value: Value to push to the back of the ringdeque. Must be
-//!                   implicitly convertible to the type the ringdeque was
-//!                   instantiated for.
-//!     :returns: A :code:`_Bool` indicating whether the push was successful
-//!     :retval true: The push succeeded
-//!     :retval false: Memory allocation failure
+/**
+ * \verbatim embed:rst:leading-asterisk
+ * .. _scc_ringdeque_push_back:
+ * \endverbatim
+ *
+ * Push a value to the back of the provided ``deque``.
+ *
+ * The structure is reallocated as required. Thus, pointers into the deque obtained prior to the
+ * call must be treated as invalid once the function returns.
+ *
+ * \param dequeaddr Address of the handle referring to the deque.
+ * \param ... The value to push to the deque. Must refer to a single instance of the type stored in
+ *            the deque.
+ *
+ * \return ``true`` on success, ``false`` on failure.
+ */
 #define scc_ringdeque_push_back(dequeaddr, ...)                                 \
     (scc_ringdeque_impl_prepare_push(dequeaddr, sizeof(**(dequeaddr))) &&       \
     (((*(dequeaddr))[scc_ringdeque_impl_push_back_index(*(dequeaddr))] = __VA_ARGS__),1))
 
-//? .. c:function:: size_t scc_ringdeque_impl_push_front_index(void *deque)
-//?
-//?     Obtain the index of the slot just before the first in the given
-//?     ringdeque and move the :ref:`rd_begin <size_t_rd_begin>` backward.
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param deque: Handle to the ringdeque in question
-//?     :returns: The index of the slot just before the first one in the ringdeque
 inline size_t scc_ringdeque_impl_push_front_index(void *deque) {
     struct scc_ringdeque_base *base = scc_ringdeque_impl_base(deque);
     base->rd_begin = (base->rd_begin - 1u) & (base->rd_capacity - 1u);
@@ -411,38 +225,26 @@ inline size_t scc_ringdeque_impl_push_front_index(void *deque) {
     return base->rd_begin;
 }
 
-//! .. c:function:: _Bool scc_ringdeque_push_front(void *dequeaddr, type value)
-//!
-//!     Push :c:texpr:`value` to the front of the ringdeque, reallocating the
-//!     collection if necessary
-//!
-//!     Any pointers into the ringdeque obtained prior to the call should be treated
-//!     as invalid once the function has returned.
-//!
-//!     :param dequeaddr: Address of the handle to the ringdeque in question. Should
-//!                       the ringdeque have to be reallocated, :c:texpr:`*(void **)dequeaddr`
-//!                       is updated accordingly.
-//!     :param value: Value to push to the front of the ringdeque. Must be
-//!                   implicitly convertible to the type the ringdeque was
-//!                   instantiated for.
-//!     :returns: A :code:`_Bool` indicating whether the push was successful
-//!     :retval true: The push succeeded
-//!     :retval false: Memory allocation failure
+/**
+ * \verbatim embed:rst:leading-asterisk
+ * .. _scc_ringdeque_push_front:
+ * \endverbatim
+ *
+ * Push the provided value to the front of the deque.
+ *
+ * The structure is reallocated as required. Pointers referring to either the deque
+ * itself or values stored therein are invalidated by calls to the function.
+ *
+ * \param dequeaddr Address of the handle referring to the deque.
+ * \param ... The value to push to the deque. Must refer to a single instance of the type stored in
+ *            the deque.
+ *
+ * \return ``true`` on success, ``false`` on failure.
+ */
 #define scc_ringdeque_push_front(dequeaddr, ...)                                \
     (scc_ringdeque_impl_prepare_push(dequeaddr, sizeof(**(dequeaddr))) &&       \
     ((*(dequeaddr))[scc_ringdeque_impl_push_front_index(*(dequeaddr))] = __VA_ARGS__),1)
 
-//? .. c:function:: size_t scc_ringdeque_impl_pop_back_index(void *deque)
-//?
-//?     Pop the last element from the ringdeque and return its index in
-//?     the ring buffer
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param deque: Handle ot the ringdeque in question
-//?     :returns: The index of the just poped element
 inline size_t scc_ringdeque_impl_pop_back_index(void *deque) {
     struct scc_ringdeque_base *base = scc_ringdeque_impl_base(deque);
     base->rd_end = (base->rd_end - 1u) & (base->rd_capacity - 1u);
@@ -450,31 +252,26 @@ inline size_t scc_ringdeque_impl_pop_back_index(void *deque) {
     return base->rd_end;
 }
 
-//! .. c:function:: type scc_ringdeque_pop_back(void *deque)
-//!
-//!     Pop and return the last element in the ringdeque. No bounds checking
-//!     is performed.
-//!
-//!     Due to implementation details, compilers may warn about
-//!     unused result of the expression unless the poped value is
-//!     either assigned to an lvalue or casted to :c:expr:`void`.
-//!
-//!     :param deque: Handle to the ringdeque in question
-//!     :returns: The element just poped
+/**
+ * \verbatim embed:rst:leading-asterisk
+ * .. _scc_ringdeque_pop_back:
+ * \endverbatim
+ *
+ * Pop and return the last element in the deque.
+ *
+ * No bounds checking is performed.
+ *
+ * \note Due to implementation details, compilers may warn about
+ * the result of the expressing being unused unless the poped value
+ * is either assigned to an lvalue or cated to ``void``.
+ *
+ * \param deque Handle referring to the deque
+ *
+ * \return The element stored at the end of the deque
+ */
 #define scc_ringdeque_pop_back(deque)                                           \
     (deque)[scc_ringdeque_impl_pop_back_index(deque)]
 
-//? .. c:function:: size_t scc_ringdeque_impl_pop_front_index(void *deque)
-//?
-//?     Pop the first element from the ringdeque and return its index in
-//?     the ring buffer.
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param deque: Handle to the ringdeque
-//?     :returns: Index of the poped element
 inline size_t scc_ringdeque_impl_pop_front_index(void *deque) {
     struct scc_ringdeque_base *base = scc_ringdeque_impl_base(deque);
     size_t index = base->rd_begin;
@@ -483,63 +280,70 @@ inline size_t scc_ringdeque_impl_pop_front_index(void *deque) {
     return index;
 }
 
-//! .. c:function:: type scc_ringdeque_pop_front(void *deque)
-//!
-//!     Pop and return the first element in the ringdeque. No bounds
-//!     checking is performed.
-//!
-//!     Due to implementation details, compilers may warn about
-//!     unused result of the expression unless the poped value is
-//!     either assigned to an lvalue or casted to :c:expr:`void`.
-//!
-//!     :param deque: Handle to the ringdeque
-//!     :returns: The element just poped
+/**
+ * Pop and return the first element stored in the deque.
+ *
+ * Bounds are not checked.
+ *
+ * \note Due to implementation details, compilers may warn about
+ * the result of the expressing being unused unless the poped value
+ * is either assigned to an lvalue or cated to ``void``.
+ *
+ *
+ * \see @verbatim embed:rst:inline :ref:`scc_ringdeque_pop_back <scc_ringdeque_pop_back>` @endverbatim
+ *
+ * \param deque Handle to the deque
+ *
+ * \return The first element stored in the deque
+ */
 #define scc_ringdeque_pop_front(deque)                                          \
     (deque)[scc_ringdeque_impl_pop_front_index(deque)]
 
-//? .. c:function:: size_t scc_ringdeque_impl_back_index(void const *deque)
-//?
-//?     Compute and return the index of the last element in the given
-//?     ringdeque
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param deque: Ringdeque handle
-//?     :returns: Index of the last element in the ringdeque
 inline size_t scc_ringdeque_impl_back_index(void const *deque) {
     struct scc_ringdeque_base const *base = scc_ringdeque_impl_base_qual(deque, const);
     return (base->rd_end - 1u) & (base->rd_capacity - 1u);
 }
 
-//! .. c:function:: type scc_ringdeque_back(void *deque)
-//!
-//!     Expands to an lvalue with the value of the last element
-//!     in the ringdeque. No bounds checking is performed, meaning
-//!     this must never be called on an empty ringdeque.
-//!
-//!     :param deque: Handle to the ringdeque
-//!     :returns: The last element in the ringdeque
+/**
+ * Expands to the lvalue stored at the very end of the deque
+ *
+ * \note No bounds checking is performed, make sure the deque contains
+ * at least one value.
+ *
+ * \verbatim embed:rst:leading-asterisk
+ *
+ * .. literalinclude:: /../examples/deque/modify_back.c
+ *      :caption: Modify the value at the end of the deque
+ *      :start-after: scc_ringdeque_new
+ *      :end-at: scc_ringdeque_back(deque) == 88
+ *      :language: c
+ *
+ * \endverbatim
+ *
+ * \param deque Handle referring to the deque
+ *
+ * \return The last element of the deque
+ */
 #define scc_ringdeque_back(deque)                                               \
     (deque)[scc_ringdeque_impl_back_index(deque)]
 
-//! .. c:function:: type scc_ringdeque_front(void *deque)
-//!
-//!     Expands to an lvalue with the value of the first element
-//!     in the ringdeque. No bounds cheking is performed, meaning
-//!     this must never be called on an empty ringdeque.
-//!
-//!     :param deque: Ringdeque handle
-//!     :returns: The first element in the ringdeque
+/**
+ * Expands to the lvalue stored at the front of the deque.
+ *
+ * No bounds checking is performed. Do not call on an empty deque.
+ *
+ * \param deque The deque
+ *
+ * \return The value stored at the front of the deque
+ */
 #define scc_ringdeque_front(deque)                                              \
     (deque)[scc_ringdeque_impl_base_qual(deque, const)->rd_begin]
 
-//! .. c:function:: void scc_ringdeque_clear(void *deque)
-//!
-//!     Clear the given ringdeque
-//!
-//!     :param deque: Ringdeque handle
+/**
+ * Clear the provided deque
+ *
+ * \param deque The deque to clear
+ */
 inline void scc_ringdeque_clear(void *deque) {
     struct scc_ringdeque_base *base = scc_ringdeque_impl_base(deque);
     base->rd_size = 0u;
@@ -547,82 +351,46 @@ inline void scc_ringdeque_clear(void *deque) {
     base->rd_end = 0u;
 }
 
-//? .. c:function:: _Bool scc_ringdeque_impl_reserve(void *dequeaddr, size_t capacity, size_t elemsize)
-//?
-//?     Reserve enough memory for storing at least :c:expr:`capacity` elements. See
-//?     :ref:`scc_ringdeque_reserve <scc_ringdeque_reserve>` for details.
-//?
-//?     :param dequeaddr: Address of the ringdeque handle
-//?     :param capacity: Requested capacity
-//?     :param elemsize: Size of each element stored in the ringdeque
-//?     :returns: A :code:`_Bool` indicating whether the request was fulfilled
-//?     :retval true: The ringdeque capacity was already sufficiently large
-//?     :retval true: The ringdeque was successfully reallocated to satisfy the request
-//?     :retval false: Reallocation failed
 _Bool scc_ringdeque_impl_reserve(void *dequeaddr, size_t capacity, size_t elemsize);
 
-//! .. _scc_ringdeque_reserve:
-//! .. c:function:: _Bool scc_ringdeque_reserve(void *dequeaddr, size_t capacity)
-//!
-//!     Reserve enough memory that at least :c:expr:`capacity` elements
-//!     can be stored in the given ringdeque. The actually allocated
-//!     capacity may exceed the requested one.
-//!
-//!     If the ringdeque has to be reallocated, :c:expr:`*(void **)dequeaddr` is
-//!     updated to refer to the new ringdeque. If reallocation fails,
-//!     :c:expr:`*(void **)dequeaddr` is left unchanged and the ringdeque must
-//!     still be passed to :ref:`scc_ringdeque_free <scc_ringdeque_free>`.
-//!
-//!     :param dequeaddr: Address of the ringdeque handle
-//!     :param capacity: Requested capacity
-//!     :returns: A :code:`_Bool` indicating whether the request was fulfilled
-//!     :retval true: The ringdeque capacity was already sufficiently large
-//!     :retval true: The ringdeque was successfully reallocated to satisfy the request
-//!     :retval false: Reallocation failed
+/**
+ * Rserve enough memory that at least ``capacity`` elements can be
+ * stored in the provided deque.
+ *
+ * The actually allocated capacity may exceed the requested one. All pointers to the
+ * deque, or elements therein, save for the one whose address is passed to the
+ * macro are invalidated.
+ *
+ * \param dequeaddr Address of the handle referring to the deque
+ * \param capacity Desired capacity
+ *
+ * \return ``true`` on success, otherwise ``false``
+ */
 #define scc_ringdeque_reserve(dequeaddr, capacity)                              \
     scc_ringdeque_impl_reserve(dequeaddr, capacity, sizeof(**(dequeaddr)))
 
-//? .. c:function:: void *scc_ringdeque_impl_clone(void const *deque, size_t elemsize)
-//?
-//?     Internal clone function
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param deque: ``ringdeque`` handle
-//?     :param elemsize: Size of the elements in the deque
-//?     :return: Heap address of a newly allocated ``ringdeque``
 void *scc_ringdeque_impl_clone(void const *deque, size_t elemsize);
 
-//! .. c:function:: void *scc_ringdeque_clone(void const *deque)
-//!
-//!     Clone the given ``ringdeque``, yielding a new instance with the same size and elements.
-//!     The new deque is allocated on the heap
-//!
-//!     :param deque: The ``ringdeque`` instance to clone
-//!     :returns: A new ``ringdeque`` instance containing the same values as the
-//!               supplied parameter, or ``NULL`` on failure
-//!
-//!     .. code-block:: C
-//!         :caption: Clone a ``ringdeque``
-//!
-//!         scc_ringdeque(int) deque = scc_ringdeque_new(int);
-//!
-//!         for(int i = 0; i < 32; ++i) {
-//!             assert(scc_ringdeque_push_back(&deque, i));
-//!         }
-//!
-//!         /* Create an exact copy of the rbtree */
-//!         scc_ringdeque(int) copy = scc_ringdeque_clone(deque);
-//!
-//!         assert(scc_ringdeque_size(deque) == scc_ringdeque_size(copy));
-//!
-//!         /* Use instances... */
-//!
-//!         scc_ringdeque_free(deque);
-//!         /* Free the copy */
-//!         scc_ringdeque_free(copy);
+/**
+ * Clone the provided deque.
+ *
+ * \verbatim embed:rst:leading-asterisk
+ *
+ * .. literalinclude:: /../examples/deque/clone.c
+ *      :caption: Copy a deque
+ *      :start-after: main(void)
+ *      :end-at: scc_ringdeque_free(copy)
+ *      :language: c
+ *
+ * \endverbatim
+ *
+ * The returned instance is of the same size and contains copies of all the elements stored
+ * in the original deque.
+ *
+ * \param deque The deque to clone
+ *
+ * \return A dynamically allocated copy of the provided deque, or ``NULL`` on failure.
+ */
 #define scc_ringdeque_clone(deque)                                              \
     scc_ringdeque_impl_clone(deque, sizeof(*(deque)))
 

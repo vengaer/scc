@@ -1,54 +1,28 @@
 ifdef __node
 
-SPHINX   := sphinx-build
+doxydir      := $(builddir)/docs/doxygen
+doxyxml      := $(doxydir)/xml
+dirs         += $(doxyxml)
 
-__conf       := $(__node_path)/conf.$(pyext)
-__docdir     := $(__node_path)
-__docgen     := $(patsubst %.$(hext),$(__node_builddir)/%_$(hext).$(rstext),$(notdir $(__public_headers))) \
-                $(patsubst %.$(cext),$(__node_builddir)/%_$(cext).$(rstext),$(notdir $(wildcard $(patsubst %.$(hext),%.$(cext),$(addprefix $(__scc_srcdir)/,$(notdir $(__public_headers)))))))
-__docs       := $(call wildcard-artifacts,$(__node_path),$(rstext),$(htmlext)) \
-                $(patsubst %.$(rstext),%.$(htmlext),$(__docgen))
-sccdoc       := $(pyscripts)/sccdoc.$(pyext)
-confdoc      := $(pyscripts)/confdoc.$(pyext)
-__node_src   := $(wildcard $(__node_path)/*.$(rstext)) $(__docgen)
-__all_rstsrc += $(__node_builddir)/conftool_spec.$(rstext)
+docdir       := $(__node_path)
+doxyfile     := $(docdir)/Doxyfile
 
-.SECONDARY: $(__docgen)
+DOXYGEN      ?= doxygen
+SPHINX_BUILD ?= sphinx-build
 
-$(call include-node,btree)
-$(call include-node,btmap)
-$(call include-node,building)
-$(call include-node,configuration)
-$(call include-node,design)
-$(call include-node,hashmap)
-$(call include-node,hashtab)
-$(call include-node,rbmap)
-$(call include-node,rbtree)
-$(call include-node,stack)
-$(call include-node,vec)
+rstsrc       := $(wildcard $(__node_path)/*.rst)
 
-$(__docs)&: $(__node_src) $(__all_rstsrc) $(__docgen) $(__conf) | $(__node_builddir)
-	$(call echo-gen,docs)
-	$(SPHINX) -b html $(__docdir) $(dir $@)
-	$(TOUCH) $(__docs)
+$(call include-node,reference)
 
-$(__node_builddir)/%_$(hext).$(rstext): $(__scc_incdir)/%.$(hext) $(sccdoc) $(CONFIG) $(__all_mkfiles) | $(__node_builddir)
+$(doxyxml)/index.$(xmlext): $(doxyfile) $(__public_headers) | $(doxyxml)
 	$(call echo-gen,$(notdir $@))
-	$(PYTHON) $(sccdoc) $< -o $@ $(if $(__devel_docs),-d)
+	$(DOXYGEN) -q $(doxyfile)
 
-$(__node_builddir)/%_$(cext).$(rstext): $(__scc_srcdir)/%.$(cext) $(sccdoc) $(CONFIG) $(__all_mkfiles) | $(__node_builddir)
+$(__node_builddir)/index.html: $(rstsrc) $(doxyxml)/index.$(xmlext)
 	$(call echo-gen,$(notdir $@))
-	$(PYTHON) $(sccdoc) $< -o $@ $(if $(__devel_docs),-d)
+	$(SPHINX_BUILD) -b html $(docdir) $(dir $@)
 
-$(__node_builddir)/conftool_spec.$(rstext): $(__conftool_spec) $(confdoc) $(__all_mkfiles) | $(__node_builddir)
-	$(call echo-gen,$(notdir $@))
-	$(PYTHON) $(confdoc) -s $< -o $@
-
-docs: $(__docs)
-
-docshow: $(call require,docshow,BROWSER)
-docshow: $(__node_builddir)/index.$(htmlext) docs
-	$(BROWSER) $<
+docs: $(__node_builddir)/index.html
 
 else
 # Recurse to top level

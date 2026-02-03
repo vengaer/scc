@@ -46,16 +46,14 @@ int main(void) {
 
     /* Size queried with scc_vec_size */
     assert(scc_vec_size(vec) == 2u);
-    /* Individual elements accessed as if
-     * normal array */
+    /* Individual elements accessed as if normal array */
     assert(vec[0] == 1);
 
     /* Pop the last value and check size */
     assert(scc_vec_pop(vec) == 2);
     assert(scc_vec_size(vec) == 1u);
 
-    /* Values may be overwritten using
-     * normal indexing */
+    /* Values may be overwritten using normal indexing */
     vec[0] = 7;
     assert(vec[0] == 7);
 
@@ -66,9 +64,8 @@ int main(void) {
 
     /* Iterate over and print every element */
     int *iter;
-    scc_vec_foreach(iter, vec) {
+    scc_vec_foreach(iter, vec)
         printf("%d\n", *iter);
-    }
 
     int const expected[] = { 7, 1, 2, 3 };
     assert(!memcmp(vec, expected, sizeof(expected)));

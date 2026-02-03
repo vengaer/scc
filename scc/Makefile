@@ -9,7 +9,7 @@ __config_header_ver     := $(__node_builddir)/.config.ver.stamp
 __config_header_bitarch := $(__node_builddir)/.config.bitarch.stamp
 
 __scc_incdir            := $(__node_path)
-__public_headers        := $(addsuffix .h,btmap btree hashmap hashtab rbmap rbtree ringdeque stack vec)
+__public_headers        := $(addprefix $(__node_path)/,$(addsuffix .h,btmap btree hashmap hashtab rbmap rbtree ringdeque stack vec))
 
 $(__config_header_init): $(wildcard $(__config_module)/*.$(pyext)) $(__all_mkfiles) | $(__node_builddir)
 	$(call echo-gen,$(notdir $(config_header)))

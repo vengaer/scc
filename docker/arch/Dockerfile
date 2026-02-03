@@ -16,10 +16,11 @@ RUN chown -R builder:builder /home/builder/scc                                  
                                      git                                                \
                                      python{,-sphinx,-pylint}                           \
                                      python-{pytest,pyelftools,pycparser}               \
-                                     python-sphinx_rtd_theme                            \
+                                     python-{sphinx_rtd_theme,breathe}                  \
                                      llvm                                               \
                                      ruby                                               \
                                      cmake                                              \
+                                     doxygen                                            \
                                      rust                                           &&  \
     cargo install --path /home/builder/scc/submodules/conftool --root /usr/local
 

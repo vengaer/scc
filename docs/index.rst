@@ -3,6 +3,8 @@ Welcome to scc's documentation!
 
 .. default-domain:: C
 
+
+
 .. code-block:: c
 
     #include <scc/btmap.h>
@@ -23,11 +25,6 @@ Welcome to scc's documentation!
 
 .. toctree::
     :includehidden:
-    :maxdepth: 2
+    :maxdepth: 1
 
-    collections
-    design/index
-    lifetime
-    configuration/index
-    building/index
-    tldr
+    reference/index

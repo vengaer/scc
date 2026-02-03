@@ -14,46 +14,55 @@ typedef uint_fast64_t scc_hash_type;
 typedef int_fast64_t scc_hash_stype;
 #endif
 
-//! .. c:function:: scc_hash_type scc_hash_fnv1a_32(void const *data, size_t size)
-//!
-//!     32-bit Fowler-Noll-Vo hash
-//!
-//!     :param data: Address of the data to be hashed. The data
-//!                  is treated as a consecutive array of bytes.
-//!                  Potential padding in structs must therefore
-//!                  be explicitly initialized to avoid erratic
-//!                  hashing behavior.
-//!     :param size: The size of the data to be hashed, in bytes
-//!     :returns: The 32-bit alternative Fowler-Noll-Vo hash of the given :c:texpr:`data`
+/**
+ * \verbatim embed:rst:leading-asterisk
+ *  .. _scc_hash_fnv1a_32:
+ * \endverbatim
+ *
+ * 32-bit alternative Fowler-Noll-Vo hash function.
+ *
+ * \param data Pointer to the data to be hashed. The data is treated as a consecutive
+ *             array of bytes. Potential padding in structs must therefore
+ *             be explicitly initialized to avoid erratic hashing behavior.
+ * \param size Number of bytes at the address referred to by \a data to hash
+ *
+ * \return Computed 32-bit hash
+ */
 uint_fast32_t scc_hash_fnv1a_32(void const *data, size_t size);
 
-//! .. c:function:: scc_hash_type scc_hash_fnv1a_64(void const *data, size_t size)
-//!
-//!     64-bit Fowler-Noll-Vo hash
-//!
-//!     :param data: Address of the data to be hashed. The data
-//!                  is treated as a consecutive array of bytes.
-//!                  Potential padding in structs must therefore
-//!                  be explicitly initialized to avoid erratic
-//!                  hashing behavior.
-//!     :param size: The size of the data to be hashed, in bytes
-//!     :returns: The 64-bit alternative Fowler-Noll-Vo hash of the given :c:texpr:`data`
+/**
+ * \verbatim embed:rst:leading-asterisk
+ *  .. _scc_hash_fnv1a_64:
+ * \endverbatim
+ *
+ *
+ * 64-bit alternative Fowler-Noll-Vo hash function.
+ *
+ * \param data Pointer to the data to be hashed. The data is treated as a consecutive
+ *             array of bytes. Potential padding in structs must therefore
+ *             be explicitly initialized to avoid erratic hashing behavior.
+ * \param size Number of bytes at the address referred to by \a data to hash
+ *
+ * \return Computed 64-bit hash
+ */
 uint_fast64_t scc_hash_fnv1a_64(void const *data, size_t size);
 
-//! .. _scc_hash_fnv1a:
-//! .. c:function:: scc_hash_type scc_hash_fnv1a(void const *data, size_t size)
-//!
-//!     Simple `alternative Fowler-Noll-Vo hash
-//!     <https://en.wikipedia.org/wiki/Fowler-Noll-Vo_hash_function#FNV-1a_hash>`_
-//!     implementation.
-//!
-//!     :param data: Address of the data to be hashed. The data
-//!                  is treated as a consecutive array of bytes.
-//!                  Potential padding in structs must therefore
-//!                  be explicitly initialized to avoid erratic
-//!                  hashing behavior.
-//!     :param size: The size of the data to be hashed, in bytes
-//!     :returns: The alternative Fowler-Noll-Vo hash of the given :c:texpr:`data`
+/**
+ * \verbatim embed:rst:leading-asterisk
+ *  .. _scc_hash_fnv1a:
+ * \endverbatim
+ *
+ * Architecture-dependent Fowler-Noll-Vo hash function. On 32-bit architectures, the call
+ * resolves to @verbatim embed:rst:inline :ref:`scc_hash_fnv1a_32 <scc_hash_fnv1a_32>` @endverbatim, otherwise
+ * @verbatim embed:rst:inline :ref:`scc_hash_fnv1a_64 <scc_hash_fnv1a_64>` @endverbatim
+ *
+ * \param data Pointer to the data to be hashed. The data is treated as a consecutive
+ *             array of bytes. Potential padding in structs must therefore
+ *             be explicitly initialized to avoid erratic hashing behavior.
+ * \param size Number of bytes at the address referred to by \a data to hash
+ *
+ * \return Computed hash
+ */
 inline scc_hash_type scc_hash_fnv1a(void const *data, size_t size) {
 #ifdef SCC_BITARCH_32
     return scc_hash_fnv1a_32(data, size);
