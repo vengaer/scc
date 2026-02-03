@@ -15,6 +15,8 @@ size_t scc_deque_impl_pop_back_index(void *deque);
 size_t scc_deque_impl_pop_front_index(void *deque);
 size_t scc_deque_impl_back_index(void const *deque);
 void scc_deque_clear(void *deque);
+void *scc_deque_impl_iter_start(void *deque, size_t elemsize);
+void *scc_deque_impl_iter_end(void *deque, size_t elemsize);
 
 //? .. c:function:: bool scc_deque_get_dynalloc(void const *deque)
 //?
@@ -195,4 +197,12 @@ void *scc_deque_impl_clone(void const *deque, size_t elemsize) {
     unsigned char *ndeque = (unsigned char *)nbase + basesz;
     scc_deque_set_dynalloc(ndeque);
     return ndeque;
+}
+
+void *scc_deque_impl_iter_next(void *it, void *deque, size_t elemsize) {
+    struct scc_deque_base const *base = scc_deque_impl_base_qual(deque, const);
+    size_t off = (unsigned char const *)it - (unsigned char const *)deque;
+    off /= elemsize;
+    off = (off + 1u) & (base->rd_capacity - 1u);
+    return (unsigned char *)deque + off * elemsize;
 }

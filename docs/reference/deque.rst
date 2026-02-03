@@ -12,6 +12,8 @@ Type Declaration
 
 .. doxygendefine:: scc_deque
 
+.. doxygendefine:: scc_deque_iter
+
 Configuration
 -------------
 
@@ -66,3 +68,8 @@ Copying
 -------
 
 .. doxygendefine:: scc_deque_clone
+
+Iteration
+---------
+
+.. doxygendefine:: scc_deque_foreach

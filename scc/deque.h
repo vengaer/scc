@@ -42,6 +42,18 @@
  */
 #define scc_deque(type) type *
 
+/**
+ * \verbatim embed:rst:leading-asterisk
+ * .. _scc_deque_iter:
+ * \endverbatim
+ *
+ * Expands to a pointer suitable for iterating over a deque
+ * storing instances of \a type
+ *
+ * \param type The type stored in the deque
+ */
+#define scc_deque_iter(type) type *
+
 struct scc_deque_base {
     size_t rd_size;
     size_t rd_capacity;
@@ -393,5 +405,35 @@ void *scc_deque_impl_clone(void const *deque, size_t elemsize);
  */
 #define scc_deque_clone(deque)                                                  \
     scc_deque_impl_clone(deque, sizeof(*(deque)))
+
+inline void *scc_deque_impl_iter_start(void *deque, size_t elemsize) {
+    struct scc_deque_base const *base = scc_deque_impl_base_qual(deque, const);
+    unsigned char *p = deque;
+    return p + elemsize * base->rd_begin;
+}
+
+inline void *scc_deque_impl_iter_end(void *deque, size_t elemsize) {
+    struct scc_deque_base const *base = scc_deque_impl_base_qual(deque, const);
+    unsigned char *p = deque;
+    return p + elemsize * base->rd_end;
+}
+
+void *scc_deque_impl_iter_next(void *it, void *deque, size_t elemsize);
+
+/**
+ * Iterate over elements in the deque
+ *
+ * Expands to a loop executed once for each element in the deque
+ *
+ * \param iter Iterator, should be an instance expanded from
+ *      @verbatim embed:rst:inline scc_deque_iter @endverbatim
+ * \param deque Deque handle
+ */
+#define scc_deque_foreach(iter, deque)                                          \
+    for (void const *deque_iterend =                                            \
+        ((void)((iter) = scc_deque_impl_iter_start(deque, sizeof(*(deque)))),   \
+            scc_deque_impl_iter_end(deque, sizeof(*(deque))));                  \
+         (iter) != deque_iterend;                                               \
+         (iter) = scc_deque_impl_iter_next(iter, deque, sizeof(*(deque))))
 
 #endif /* SCC_DEQUE_H */
