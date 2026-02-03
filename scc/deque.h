@@ -425,8 +425,18 @@ void *scc_deque_impl_iter_next(void *it, void *deque, size_t elemsize);
  *
  * Expands to a loop executed once for each element in the deque
  *
+ * \verbatim embed:rst:leading-asterisk
+ *
+ * .. literalinclude:: /../examples/deque/iteration.c
+ *      :caption: Copy a deque
+ *      :start-at: Push 32 values
+ *      :end-at: printf
+ *      :language: c
+ *
+ * \endverbatim
+ *
  * \param iter Iterator, should be an instance expanded from
- *      @verbatim embed:rst:inline scc_deque_iter @endverbatim
+ *      @verbatim embed:rst:inline :ref:`scc_deque_iter <scc_deque_iter>` @endverbatim
  * \param deque Deque handle
  */
 #define scc_deque_foreach(iter, deque)                                          \
