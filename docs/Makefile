@@ -6,6 +6,7 @@ dirs         += $(doxyxml)
 
 docdir       := $(__node_path)
 doxyfile     := $(docdir)/Doxyfile
+sphinxconf   := $(docdir)/conf.$(pyext)
 
 DOXYGEN      ?= doxygen
 SPHINX_BUILD ?= sphinx-build
@@ -14,7 +15,7 @@ rstsrc       := $(wildcard $(__node_path)/*.rst)
 
 $(call include-node,reference)
 
-$(doxyxml)/index.$(xmlext): $(doxyfile) $(__public_headers) | $(doxyxml)
+$(doxyxml)/index.$(xmlext): $(doxyfile) $(sphinxconf) $(__public_headers) | $(doxyxml)
 	$(call echo-gen,$(notdir $@))
 	$(DOXYGEN) -q $(doxyfile)
 
