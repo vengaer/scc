@@ -4,6 +4,6 @@ excludePaths:
   - lib/arena.c
   - lib/rbtree.c
   - lib/vec.c
-  - lib/ringdeque.c
+  - lib/deque.c
   - scc/rbtree.h
-  - scc/ringdeque.h
+  - scc/deque.h

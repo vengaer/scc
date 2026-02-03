@@ -3,5 +3,5 @@ excludePaths:
   - test/*
   - lib/vec.c
   - lib/arena.c
-  - lib/ringdeque.c
-  - scc/ringdeque.h
+  - lib/deque.c
+  - scc/deque.h

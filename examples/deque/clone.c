@@ -1,6 +1,6 @@
 /* Copy a deque */
 
-#include <scc/ringdeque.h>
+#include <scc/deque.h>
 
 #include <assert.h>
 #include <stdio.h>
@@ -11,29 +11,29 @@
 
 int main(void) {
     /* Create the original deque */
-    scc_ringdeque(int) deque = scc_ringdeque_new(int);
+    scc_deque(int) deque = scc_deque_new(int);
 
     /* Push 32 values */
     for (int i = 0; i < 32; ++i)
-        assert(scc_ringdeque_push_back(&deque, i * 2));
+        assert(scc_deque_push_back(&deque, i * 2));
 
     /* Original contains 32 values */
-    printf("Size after pushing: %zu\n", scc_ringdeque_size(deque));
+    printf("Size after pushing: %zu\n", scc_deque_size(deque));
 
     /* Create a copy */
-    scc_ringdeque(int) copy = scc_ringdeque_clone(deque);
+    scc_deque(int) copy = scc_deque_clone(deque);
 
     /* NULL is returned on failure */
     assert(copy);
 
     /* Copy contains 32 values */
-    printf("Size of copy: %zu\n", scc_ringdeque_size(copy));
+    printf("Size of copy: %zu\n", scc_deque_size(copy));
 
     /* Free the original instance */
-    scc_ringdeque_free(deque);
+    scc_deque_free(deque);
 
     /* Free the copy */
-    scc_ringdeque_free(copy);
+    scc_deque_free(copy);
 }
 
 /* ============= OUTPUT =============== */

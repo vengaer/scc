@@ -1,6 +1,6 @@
+#include <scc/deque.h>
 #include <scc/mem.h>
 #include <scc/rbtree.h>
-#include <scc/ringdeque.h>
 
 #include <assert.h>
 #include <limits.h>
@@ -814,13 +814,13 @@ void *scc_rbtree_impl_clone(void const *rbtree, size_t elemsize) {
         enum scc_rbdir dir;
     };
 
-    scc_ringdeque(struct stage) deque = scc_ringdeque_new(struct stage);
-    if(!scc_ringdeque_reserve(&deque, nbase->rb_size)) {
+    scc_deque(struct stage) deque = scc_deque_new(struct stage);
+    if(!scc_deque_reserve(&deque, nbase->rb_size)) {
         goto epilogue;
     }
 
 #define push_stage(o, p, d)                             \
-    scc_ringdeque_push_back(&deque, (struct stage) {    \
+    scc_deque_push_back(&deque, (struct stage) {        \
         .old = scc_rbnode_link(o, d),                   \
         .new = &scc_rbnode_link(p, d),                  \
         .parent = p,                                    \
@@ -837,8 +837,8 @@ void *scc_rbtree_impl_clone(void const *rbtree, size_t elemsize) {
     }
 
     struct scc_rbnode_base *n;
-    while(!scc_ringdeque_empty(deque)) {
-        struct stage *s = &scc_ringdeque_front(deque);
+    while(!scc_deque_empty(deque)) {
+        struct stage *s = &scc_deque_front(deque);
 
         n = scc_arena_alloc(&nbase->rb_arena);
         assert(n);
@@ -858,13 +858,13 @@ void *scc_rbtree_impl_clone(void const *rbtree, size_t elemsize) {
                 goto epilogue;
             }
         }
-        (void)scc_ringdeque_pop_front(deque);
+        (void)scc_deque_pop_front(deque);
     }
 
     ntree = (unsigned char *)nbase + basesz;
 
 epilogue:
-    scc_ringdeque_free(deque);
+    scc_deque_free(deque);
     if(!ntree) {
         free(nbase);
     }

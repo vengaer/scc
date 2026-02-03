@@ -1,6 +1,6 @@
 /* Modify the value at the end of the deque */
 
-#include <scc/ringdeque.h>
+#include <scc/deque.h>
 
 #include <assert.h>
 #include <stdio.h>
@@ -11,37 +11,37 @@
 
 int main(void) {
     /* Create a deque */
-    scc_ringdeque(int) deque = scc_ringdeque_new(int);
+    scc_deque(int) deque = scc_deque_new(int);
 
     /* Push three values to it */
-    assert(scc_ringdeque_push_back(&deque, 1));
-    assert(scc_ringdeque_push_back(&deque, 2));
-    assert(scc_ringdeque_push_back(&deque, 3));
+    assert(scc_deque_push_back(&deque, 1));
+    assert(scc_deque_push_back(&deque, 2));
+    assert(scc_deque_push_back(&deque, 3));
 
     /* The value at the end should be 3 */
-    assert(scc_ringdeque_back(deque) == 3);
-    printf("Value at the end is %d\n", scc_ringdeque_back(deque));
+    assert(scc_deque_back(deque) == 3);
+    printf("Value at the end is %d\n", scc_deque_back(deque));
 
     /* Get a pointer to the last element
      *
      * N.B. pushing a value to the deque may
      * invalidate this pointer
      */
-    int const *p = &scc_ringdeque_back(deque);
+    int const *p = &scc_deque_back(deque);
 
     /* Modify the value at the end */
-    scc_ringdeque_back(deque) = 88;
+    scc_deque_back(deque) = 88;
 
     /* The value at the end has now changed */
-    printf("Updated value at the end is %d\n", scc_ringdeque_back(deque));
-    assert(scc_ringdeque_back(deque) == 88);
+    printf("Updated value at the end is %d\n", scc_deque_back(deque));
+    assert(scc_deque_back(deque) == 88);
 
     /* The pointer refers to the just-changed value */
     assert(*p == 88);
     printf("Dereferenced pointer is %d\n", *p);
 
     /* Free the instance */
-    scc_ringdeque_free(deque);
+    scc_deque_free(deque);
 }
 
 /* ============= OUTPUT =============== */

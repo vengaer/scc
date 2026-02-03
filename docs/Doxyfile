@@ -993,12 +993,12 @@ WARN_LOGFILE           =
 
 INPUT                  = scc/btmap.h \
                          scc/btree.h \
+                         scc/deque.h \
                          scc/hash.h \
                          scc/hashmap.h \
                          scc/hashtab.h \
                          scc/rbmap.h \
                          scc/rbtree.h \
-                         scc/ringdeque.h \
                          scc/stack.h \
                          scc/vec.h
 

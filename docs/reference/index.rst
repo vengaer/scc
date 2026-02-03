@@ -7,11 +7,11 @@ API Reference
 
     btmap
     btree
+    deque
     hash
     hashmap
     hashtab
     rbmap
     rbtree
-    ringdeque
     stack
     vec
