@@ -27,4 +27,5 @@ Welcome to scc's documentation!
     :includehidden:
     :maxdepth: 2
 
+    build
     reference/index
