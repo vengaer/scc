@@ -6,7 +6,7 @@ option (SCC_SIMD "SIMD support" ON)
 
 scc_version (SCC_VERSION_MAJOR SCC_VERSION_MINOR SCC_VERSION_PATCH)
 
-project (SCC
+project (scc
     VERSION ${SCC_VERSION_MAJOR}.${SCC_VERSION_MINOR}.${SCC_VERSION_PATCH}
     DESCRIPTION "Generic data collections for C"
     LANGUAGES C ASM
