@@ -27,7 +27,7 @@ _ldlib_path = _builddir
 _litbuild.mkdir(parents=True, exist_ok=True)
 
 config.substitutions.append(('%cc', 'clang'))
-config.substitutions.append(('%filecheck', _filecheck))
+config.substitutions.append(('%filecheck', str(_filecheck)))
 config.substitutions.append(('%dynamic', f'{_cflags} {_cppflags} {_ldflags} {_ldlibs}'))
 config.substitutions.append(('%static', f'{_cflags} {_cppflags} {_libscc_a}'))
 
