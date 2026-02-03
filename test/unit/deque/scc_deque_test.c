@@ -190,3 +190,30 @@ void test_scc_deque_clone(void) {
     scc_deque_free(deque);
     scc_deque_free(copy);
 }
+
+void test_scc_deque_foreach(void) {
+    scc_deque(unsigned) deque = scc_deque_new(unsigned);
+
+    for (unsigned i = 0u; i < 33u; ++i)
+        TEST_ASSERT_TRUE(scc_deque_push_back(&deque, i * 2u));
+
+    scc_deque_iter(unsigned) it;
+    unsigned exp = 0u;
+    scc_deque_foreach(it, deque) {
+        TEST_ASSERT_EQUAL_UINT32(*it, exp);
+        exp += 2u;
+    }
+
+    scc_deque_free(deque);
+}
+
+void test_scc_deque_foreach_empty(void) {
+    scc_deque(unsigned) deque = scc_deque_new(unsigned);
+
+    scc_deque_iter(unsigned) it;
+    scc_deque_foreach(it, deque) {
+        TEST_ASSERT_FALSE(1);
+    }
+
+    scc_deque_free(deque);
+}
