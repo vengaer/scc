@@ -61,15 +61,15 @@ struct scc_chunk {
 void scc_arena_release(struct scc_arena *arena);
 
 #define scc_arena_foreach_chunk(iter, arena)                        \
-    for(iter = arena->ar_first; iter; iter = iter->ch_next)
+    for (iter = arena->ar_first; iter; iter = iter->ch_next)
 
 #define scc_arena_foreach_chunk_safe(iter, hare, arena)             \
-    for(iter = arena->ar_first, hare = iter ? iter->ch_next : 0;    \
+    for (iter = arena->ar_first, hare = iter ? iter->ch_next : 0;    \
         iter;                                                       \
         iter = hare, hare = hare ? hare->ch_next : 0)
 
 #define scc_arena_foreach_chunk_lagging(iter, tortoise, arena)      \
-    for(iter = arena->ar_first, tortoise = 0;                       \
+    for (iter = arena->ar_first, tortoise = 0;                       \
         iter;                                                       \
         tortoise = iter, iter = iter->ch_next)
 

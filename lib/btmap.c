@@ -257,7 +257,7 @@ static inline void scc_btmap_new_root(
 //?     :param value: Value that is probed for
 //?     :returns: The lower bound of :code:`value` in the key array of :code:`node`.
 static inline size_t scc_btmnode_lower_bound(struct scc_btmap_base const *base, struct scc_btmnode_base *node, void const *restrict value) {
-    if(!node->btm_nkeys) {
+    if (!node->btm_nkeys) {
         return 0u;
     }
     return scc_algo_lower_bound_eq(value, scc_btmnode_keys(base, node), node->btm_nkeys, base->btm_keysize, base->btm_compare);
@@ -335,7 +335,7 @@ static void scc_btmnode_emplace_leaf(struct scc_btmap_base *restrict base, struc
     size_t keyoff = bound * base->btm_keysize;
     size_t valoff = bound * base->btm_valsize;
 
-    if(bound < node->btm_nkeys) {
+    if (bound < node->btm_nkeys) {
         scc_memmove(keys + keyoff + base->btm_keysize, keys + keyoff, (node->btm_nkeys - bound) * base->btm_keysize);
         scc_memmove(vals + valoff + base->btm_valsize, vals + valoff, (node->btm_nkeys - bound) * base->btm_valsize);
     }
@@ -384,7 +384,7 @@ static void scc_btmnode_emplace(
     size_t keyoff = bound * base->btm_keysize;
     size_t valoff = bound * base->btm_valsize;
 
-    if(bound < node->btm_nkeys) {
+    if (bound < node->btm_nkeys) {
         scc_memmove(keys + keyoff + base->btm_keysize, keys + keyoff, (node->btm_nkeys - bound) * base->btm_keysize);
         scc_memmove(vals + valoff + base->btm_valsize, vals + valoff, (node->btm_nkeys - bound) * base->btm_valsize);
     }
@@ -394,7 +394,7 @@ static void scc_btmnode_emplace(
     ++node->btm_nkeys;
 
     struct scc_btmnode_base **links = scc_btmnode_links(base, node);
-    if(bound < node->btm_nkeys - 1u) {
+    if (bound < node->btm_nkeys - 1u) {
         scc_memmove(links + bound + 2u, links + bound + 1u, (node->btm_nkeys - bound - 1u) * sizeof(*links));
     }
     links[bound + 1u] = child;
@@ -454,13 +454,13 @@ static struct scc_btmnode_base *scc_btmnode_split_preemptive(
     struct scc_btmnode_base *p
 ) {
     struct scc_btmnode_base *right = scc_arena_alloc(&base->btm_arena);
-    if(!right) {
+    if (!right) {
         return 0;
     }
 
-    if(!p) {
+    if (!p) {
         p = scc_arena_alloc(&base->btm_arena);
-        if(!p) {
+        if (!p) {
             scc_arena_free(&base->btm_arena, right);
             return 0;
         }
@@ -484,7 +484,7 @@ static struct scc_btmnode_base *scc_btmnode_split_preemptive(
 
     scc_memcpy(rkeys, lkeys + (node->btm_nkeys + 1u) * base->btm_keysize, right->btm_nkeys * base->btm_keysize);
     scc_memcpy(rvals, lvals + (node->btm_nkeys + 1u) * base->btm_valsize, right->btm_nkeys * base->btm_valsize);
-    if(!scc_btmnode_is_leaf(node)) {
+    if (!scc_btmnode_is_leaf(node)) {
         scc_memcpy(rlinks, llinks + node->btm_nkeys + 1, (node->btm_nkeys + 1u) * sizeof(*rlinks));
     }
 
@@ -494,7 +494,7 @@ static struct scc_btmnode_base *scc_btmnode_split_preemptive(
     unsigned char *pkeys = scc_btmnode_keys(base, p);
     unsigned char *pvals = scc_btmnode_vals(base, p);
     struct scc_btmnode_base **plinks = scc_btmnode_links(base, p);
-    if(bound < p->btm_nkeys) {
+    if (bound < p->btm_nkeys) {
         scc_memmove(pkeys + (bound + 1u) * base->btm_keysize, pkeys + bound * base->btm_keysize, (p->btm_nkeys - bound) * base->btm_keysize);
         scc_memmove(pvals + (bound + 1u) * base->btm_valsize, pvals + bound * base->btm_valsize, (p->btm_nkeys - bound) * base->btm_valsize);
         scc_memmove(plinks + bound + 1u, plinks + bound, (p->btm_nkeys - bound + 1u) * sizeof(*plinks));
@@ -538,12 +538,12 @@ static struct scc_btmnode_base *scc_btmnode_split_non_preemptive(
     void *restrict value
 ) {
     struct scc_btmnode_base *right = scc_arena_alloc(&base->btm_arena);
-    if(!right) {
+    if (!right) {
         return 0;
     }
-    if(!p) {
+    if (!p) {
         p = scc_arena_alloc(&base->btm_arena);
-        if(!p) {
+        if (!p) {
             scc_arena_free(&base->btm_arena, right);
             return 0;
         }
@@ -572,13 +572,13 @@ static struct scc_btmnode_base *scc_btmnode_split_non_preemptive(
     void *nkey = scc_btmnode_key(base, right, right->btm_nkeys);
     void *nval = scc_btmnode_value(base, right, right->btm_nkeys);
 
-    if(bound < node->btm_nkeys) {
+    if (bound < node->btm_nkeys) {
         scc_memcpy(nkey, lkeys + (node->btm_nkeys - 1u) * base->btm_keysize, base->btm_keysize);
         scc_memcpy(nval, lvals + (node->btm_nkeys - 1u) * base->btm_valsize, base->btm_valsize);
         size_t nmov = node->btm_nkeys - bound - 1u;
         unsigned char *fkey = scc_btmnode_key(base, node, bound);
         unsigned char *fval = scc_btmnode_value(base, node, bound);
-        if(nmov) {
+        if (nmov) {
             assert(nmov < base->btm_order);
             scc_memmove(fkey + base->btm_keysize, fkey, nmov * base->btm_keysize);
             scc_memmove(fval + base->btm_valsize, fval, nmov * base->btm_valsize);
@@ -588,20 +588,20 @@ static struct scc_btmnode_base *scc_btmnode_split_non_preemptive(
         scc_memcpy(rkeys, lkeys + node->btm_nkeys * base->btm_keysize, right->btm_nkeys * base->btm_keysize);
         scc_memcpy(rvals, lvals + node->btm_nkeys * base->btm_valsize, right->btm_nkeys * base->btm_valsize);
 
-        if(!scc_btmnode_is_leaf(node)) {
+        if (!scc_btmnode_is_leaf(node)) {
             scc_memcpy(rlinks, llinks + node->btm_nkeys, (right->btm_nkeys + 1u) * sizeof(*rlinks));
-            if(nmov) {
+            if (nmov) {
                 scc_memmove(llinks + bound + 2u, llinks + bound + 1u, (node->btm_nkeys - bound) * sizeof(*llinks));
             }
             llinks[bound + 1u] = child;
         }
     }
-    else if(bound == node->btm_nkeys) {
+    else if (bound == node->btm_nkeys) {
         scc_memcpy(nkey, key, base->btm_keysize);
         scc_memcpy(nval, value, base->btm_valsize);
         scc_memcpy(rkeys, lkeys + node->btm_nkeys * base->btm_keysize, right->btm_nkeys * base->btm_keysize);
         scc_memcpy(rvals, lvals + node->btm_nkeys * base->btm_valsize, right->btm_nkeys * base->btm_valsize);
-        if(!scc_btmnode_is_leaf(node)) {
+        if (!scc_btmnode_is_leaf(node)) {
             *rlinks = child;
             scc_memcpy(rlinks + 1u, llinks + node->btm_nkeys + 1u, right->btm_nkeys * sizeof(*rlinks));
         }
@@ -615,7 +615,7 @@ static struct scc_btmnode_base *scc_btmnode_split_non_preemptive(
         sval += base->btm_valsize;
 
         size_t nbef = bound - node->btm_nkeys - 1u;
-        if(nbef) {
+        if (nbef) {
             size_t nkbytes = nbef * base->btm_keysize;
             size_t nvbytes = nbef * base->btm_valsize;
             scc_memcpy(rkeys, skey, nkbytes);
@@ -632,16 +632,16 @@ static struct scc_btmnode_base *scc_btmnode_split_non_preemptive(
         scc_memcpy(rvals, value, base->btm_valsize);
 
         size_t naft = (node->btm_nkeys << 1u) - bound;
-        if(naft) {
+        if (naft) {
             scc_memcpy(rkeys + base->btm_keysize, skey, naft * base->btm_keysize);
             scc_memcpy(rvals + base->btm_valsize, sval, naft * base->btm_valsize);
         }
 
-        if(!scc_btmnode_is_leaf(node)) {
+        if (!scc_btmnode_is_leaf(node)) {
             ++nbef;
             scc_memcpy(rlinks, llinks + node->btm_nkeys + 1u, nbef * sizeof(*rlinks));
             rlinks[nbef++] = child;
-            if(naft) {
+            if (naft) {
                 scc_memcpy(rlinks + nbef, llinks + node->btm_nkeys + nbef, naft * sizeof(*rlinks));
             }
         }
@@ -669,25 +669,25 @@ static _Bool scc_btmap_insert_preemptive(struct scc_btmap_base *base, void *btma
 
     struct scc_btmnode_base *right;
     size_t bound;
-    while(1) {
+    while (1) {
         bound = scc_btmnode_lower_bound(base, curr, *(void **)btmapaddr);
-        if(scc_btmnode_keyeq(bound)) {
+        if (scc_btmnode_keyeq(bound)) {
             scc_btmnode_replace_value(base, curr, *(void **)btmapaddr, bound & BOUND_MASK);
             return true;
         }
         bound &= BOUND_MASK;
 
-        if(scc_btmnode_full(base, curr)) {
+        if (scc_btmnode_full(base, curr)) {
             right = scc_btmnode_split_preemptive(base, curr, p);
-            if(!right) {
+            if (!right) {
                 return false;
             }
 
-            if(bound > curr->btm_nkeys) {
+            if (bound > curr->btm_nkeys) {
                 curr = right;
             }
         }
-        if(scc_btmnode_is_leaf(curr)) {
+        if (scc_btmnode_is_leaf(curr)) {
             break;
         }
 
@@ -726,8 +726,8 @@ static _Bool scc_btmap_insert_non_preemptive(struct scc_btmap_base *base, void *
 
     size_t bound;
     struct scc_btmnode_base *curr = base->btm_root;
-    while(1) {
-        if(scc_btmnode_full(base, curr)) {
+    while (1) {
+        if (scc_btmnode_full(base, curr)) {
             ++req_allocs;
         }
         else {
@@ -735,17 +735,17 @@ static _Bool scc_btmap_insert_non_preemptive(struct scc_btmap_base *base, void *
         }
 
         bound = scc_btmnode_lower_bound(base, curr, *(void **)btmapaddr);
-        if(scc_btmnode_keyeq(bound)) {
+        if (scc_btmnode_keyeq(bound)) {
             scc_btmnode_replace_value(base, curr, *(void **)btmapaddr, bound & BOUND_MASK);
             inserted = true;
             goto epilogue;
         }
 
-        if(scc_btmnode_is_leaf(curr)) {
+        if (scc_btmnode_is_leaf(curr)) {
             break;
         }
 
-        if(!scc_stack_push(&stack, curr)) {
+        if (!scc_stack_push(&stack, curr)) {
             goto epilogue;
         }
 
@@ -753,7 +753,7 @@ static _Bool scc_btmap_insert_non_preemptive(struct scc_btmap_base *base, void *
         curr = scc_btmnode_child(base, curr, bound);
     }
 
-    if(!scc_btmnode_full(base, curr)) {
+    if (!scc_btmnode_full(base, curr)) {
         scc_btmnode_emplace_leaf(base, curr, *(void **)btmapaddr);
         inserted = true;
         goto epilogue;
@@ -762,7 +762,7 @@ static _Bool scc_btmap_insert_non_preemptive(struct scc_btmap_base *base, void *
     assert(req_allocs);
     /* Make sure map can't end up in invalid state due to
      * allocation failures */
-    if(!scc_arena_reserve(&base->btm_arena, req_allocs)) {
+    if (!scc_arena_reserve(&base->btm_arena, req_allocs)) {
         goto epilogue;
     }
 
@@ -770,7 +770,7 @@ static _Bool scc_btmap_insert_non_preemptive(struct scc_btmap_base *base, void *
     struct scc_btmnode_base *right = 0;
     void *key = *(void **)btmapaddr;
     void *value = (unsigned char *)key + base->btm_kvoff;
-    while(1) {
+    while (1) {
         p = scc_stack_top(stack);
 
         right = scc_btmnode_split_non_preemptive(base, curr, right, p, key, value);
@@ -780,14 +780,14 @@ static _Bool scc_btmap_insert_non_preemptive(struct scc_btmap_base *base, void *
         value = scc_btmnode_value(base, right, right->btm_nkeys);
 
         curr = p;
-        if(!curr || !scc_btmnode_full(base, curr)) {
+        if (!curr || !scc_btmnode_full(base, curr)) {
             break;
         }
 
         (void)scc_stack_pop(stack);
     }
 
-    if(!curr) {
+    if (!curr) {
         curr = base->btm_root;
     }
 
@@ -832,7 +832,7 @@ static void scc_btmnode_rotate_right(
     unsigned char *skeyslot = scc_btmnode_key(base, sibling, sibling->btm_nkeys - 1u);
     unsigned char *svalslot = scc_btmnode_value(base, sibling, sibling->btm_nkeys - 1u);
 
-    if(node->btm_nkeys) {
+    if (node->btm_nkeys) {
         scc_memmove(nkeys + base->btm_keysize, nkeys, node->btm_nkeys * base->btm_keysize);
         scc_memmove(nvals + base->btm_valsize, nvals, node->btm_nkeys * base->btm_valsize);
     }
@@ -932,7 +932,7 @@ static inline void scc_btmnode_overwrite(
     scc_memcpy(scc_btmnode_key(base, found, fbound), key, base->btm_keysize);
     scc_memcpy(scc_btmnode_value(base, found, fbound), value, base->btm_valsize);
     --leaf->btm_nkeys;
-    if(!predecessor) {
+    if (!predecessor) {
         scc_memmove(key, key + base->btm_keysize, leaf->btm_nkeys * base->btm_keysize);
         scc_memmove(value, value + base->btm_valsize, leaf->btm_nkeys * base->btm_valsize);
     }
@@ -976,7 +976,7 @@ static size_t scc_btmnode_merge(
     scc_memcpy(skeyslot, pkeyslot, base->btm_keysize);
     scc_memcpy(svalslot, pvalslot, base->btm_valsize);
 
-    if(node->btm_nkeys) {
+    if (node->btm_nkeys) {
         /* Keys and values from node to left sibling */
         scc_memcpy(skeyslot + base->btm_keysize, nkeys, node->btm_nkeys * base->btm_keysize);
         scc_memcpy(svalslot + base->btm_valsize, nvals, node->btm_nkeys * base->btm_valsize);
@@ -985,7 +985,7 @@ static size_t scc_btmnode_merge(
     struct scc_btmnode_base **nlinks = scc_btmnode_links(base, node);
     struct scc_btmnode_base **slinks = scc_btmnode_links(base, sibling);
 
-    if(!scc_btmnode_is_leaf(node)) {
+    if (!scc_btmnode_is_leaf(node)) {
         assert(!scc_btmnode_is_leaf(sibling));
         scc_memcpy(slinks + sibling->btm_nkeys + 1u, nlinks, (node->btm_nkeys + 1u) * sizeof(*slinks));
     }
@@ -994,13 +994,13 @@ static size_t scc_btmnode_merge(
     assert(sibling->btm_nkeys < base->btm_order);
 
     size_t nmov = p->btm_nkeys - bound - 1u;
-    if(nmov) {
+    if (nmov) {
         scc_memmove(pkeyslot, pkeyslot + base->btm_keysize, nmov * base->btm_keysize);
         scc_memmove(pvalslot, pvalslot + base->btm_valsize, nmov * base->btm_valsize);
     }
-    if(!--p->btm_nkeys) {
+    if (!--p->btm_nkeys) {
         assert(!scc_bits_is_even(base->btm_order) || p == base->btm_root);
-        if(scc_bits_is_even(base->btm_order)) {
+        if (scc_bits_is_even(base->btm_order)) {
             base->btm_root = sibling;
         }
     }
@@ -1061,7 +1061,7 @@ static inline void scc_btmnode_merge_left_preemptive(
     size_t bound
 ) {
     scc_btmnode_merge_left_non_preemptive(base, node, sibling, p, bound);
-    if(!p->btm_nkeys) {
+    if (!p->btm_nkeys) {
         scc_arena_try_free(&base->btm_arena, p);
     }
 }
@@ -1090,7 +1090,7 @@ static inline void scc_btmnode_merge_right_non_preemptive(
     size_t bound
 ) {
     size_t nmov = scc_btmnode_merge(base, sibling, node, p, bound);
-    if(nmov) {
+    if (nmov) {
         assert(p->btm_nkeys);
         struct scc_btmnode_base **plinks = scc_btmnode_links(base, p);
         scc_memmove(plinks + bound + 1u, plinks + bound + 2u, nmov * sizeof(*plinks));
@@ -1122,7 +1122,7 @@ static inline void scc_btmnode_merge_right_preemptive(
     size_t bound
 ) {
     scc_btmnode_merge_right_non_preemptive(base, node, sibling, p, bound);
-    if(!p->btm_nkeys) {
+    if (!p->btm_nkeys) {
         scc_arena_try_free(&base->btm_arena, p);
     }
 }
@@ -1150,17 +1150,17 @@ static struct scc_btmnode_base *scc_btmap_balance_preemptive(
     size_t const borrow_lim = base->btm_order >> 1u;
 
     struct scc_btmnode_base *sibling = 0;
-    if(bound) {
+    if (bound) {
         sibling = scc_btmnode_child(base, curr, bound - 1u);
-        if(sibling->btm_nkeys >= borrow_lim) {
+        if (sibling->btm_nkeys >= borrow_lim) {
             scc_btmnode_rotate_right(base, next, sibling, curr, bound);
             return next;
         }
     }
 
-    if(bound < curr->btm_nkeys) {
+    if (bound < curr->btm_nkeys) {
         sibling = scc_btmnode_child(base, curr, bound + 1u);
-        if(sibling->btm_nkeys >= borrow_lim) {
+        if (sibling->btm_nkeys >= borrow_lim) {
             scc_btmnode_rotate_left(base, next, sibling, curr, bound);
         }
         else {
@@ -1193,7 +1193,7 @@ static inline void scc_btmnode_remove_leaf(struct scc_btmap_base *restrict base,
 
     size_t nmov = node->btm_nkeys - n - 1u;
     --node->btm_nkeys;
-    if(!nmov) {
+    if (!nmov) {
         return;
     }
 
@@ -1231,11 +1231,11 @@ static _Bool scc_btmap_remove_preemptive(struct scc_btmap_base *restrict base, v
     unsigned char *key;
     struct scc_btmnode_base *next;
 
-    while(1) {
-        if(!found) {
+    while (1) {
+        if (!found) {
             bound = scc_btmnode_lower_bound(base, curr, btmap);
         }
-        else if(found == curr) {
+        else if (found == curr) {
             bound = fbound;
         }
         else {
@@ -1245,18 +1245,18 @@ static _Bool scc_btmap_remove_preemptive(struct scc_btmap_base *restrict base, v
         next = scc_btmnode_child(base, curr, bound & BOUND_MASK);
         key = scc_btmnode_key(base, curr, bound & BOUND_MASK);
 
-        if(!found && scc_btmnode_keyeq(bound)) {
+        if (!found && scc_btmnode_keyeq(bound)) {
             bound &= BOUND_MASK;
             fbound = bound;
             found = curr;
-            if(scc_btmnode_is_leaf(curr)) {
+            if (scc_btmnode_is_leaf(curr)) {
                 break;
             }
 
-            if(next->btm_nkeys < borrow_lim) {
+            if (next->btm_nkeys < borrow_lim) {
                 assert(bound < curr->btm_nkeys);
                 struct scc_btmnode_base *right = scc_btmnode_child(base, curr, bound + 1u);
-                if(right->btm_nkeys >= borrow_lim) {
+                if (right->btm_nkeys >= borrow_lim) {
                     next = right;
                     swap_pred = false;
                 }
@@ -1269,16 +1269,16 @@ static _Bool scc_btmap_remove_preemptive(struct scc_btmap_base *restrict base, v
                 }
             }
         }
-        else if(scc_btmnode_is_leaf(curr)) {
+        else if (scc_btmnode_is_leaf(curr)) {
             break;
         }
-        else if(next->btm_nkeys < borrow_lim) {
+        else if (next->btm_nkeys < borrow_lim) {
             next = scc_btmap_balance_preemptive(base, next, curr, bound);
             /* Found key may be rotated into next node when balancing. If it is,
              * the key is always in the next node */
-            if(curr == found) {
+            if (curr == found) {
                 key = scc_btmnode_key(base, found, fbound);
-                if(found->btm_nkeys <= fbound || base->btm_compare(key, btmap)) {
+                if (found->btm_nkeys <= fbound || base->btm_compare(key, btmap)) {
                     found = next;
                     fbound = scc_btmnode_lower_bound(base, found, btmap);
                     assert(scc_btmnode_keyeq(fbound));
@@ -1290,11 +1290,11 @@ static _Bool scc_btmap_remove_preemptive(struct scc_btmap_base *restrict base, v
         curr = next;
     }
 
-    if(!found) {
+    if (!found) {
         return false;
     }
 
-    if(scc_btmnode_is_leaf(found)) {
+    if (scc_btmnode_is_leaf(found)) {
         scc_btmnode_remove_leaf(base, found, fbound);
     }
     else {
@@ -1334,29 +1334,29 @@ static void scc_btmap_balance_non_preemptive(
     struct scc_btmnode_base *child;
     size_t bound;
 
-    while(1) {
+    while (1) {
         child = curr;
         curr = scc_stack_top(nodes);
         bound = scc_stack_top(bounds);
 
-        if(!curr || child->btm_nkeys >= borrow_lim - 1u) {
+        if (!curr || child->btm_nkeys >= borrow_lim - 1u) {
             break;
         }
 
         (void)scc_stack_pop(nodes);
         (void)scc_stack_pop(bounds);
 
-        if(bound) {
+        if (bound) {
             sibling = scc_btmnode_child(base, curr, bound - 1u);
-            if(sibling->btm_nkeys >= borrow_lim) {
+            if (sibling->btm_nkeys >= borrow_lim) {
                 scc_btmnode_rotate_right(base, child, sibling ,curr, bound);
                 continue;
             }
         }
 
-        if(bound < curr->btm_nkeys) {
+        if (bound < curr->btm_nkeys) {
             sibling = scc_btmnode_child(base, curr, bound + 1u);
-            if(sibling->btm_nkeys >= borrow_lim) {
+            if (sibling->btm_nkeys >= borrow_lim) {
                 scc_btmnode_rotate_left(base, child, sibling, curr, bound);
                 continue;
             }
@@ -1368,7 +1368,7 @@ static void scc_btmap_balance_non_preemptive(
         scc_btmnode_merge_left_non_preemptive(base, child, sibling, curr, bound);
     }
 
-    if(!base->btm_root->btm_nkeys) {
+    if (!base->btm_root->btm_nkeys) {
         child = *scc_btmnode_links(base, base->btm_root);
         scc_arena_try_free(&base->btm_arena, base->btm_root);
         base->btm_root = child;
@@ -1404,14 +1404,14 @@ static _Bool scc_btmap_remove_non_preemptive(struct scc_btmap_base *restrict bas
     struct scc_btmnode_base *next;
 
     /* Root has parent NULL */
-    if(!scc_stack_push(&nodes, 0) || !scc_stack_push(&bounds, 0)) {
+    if (!scc_stack_push(&nodes, 0) || !scc_stack_push(&bounds, 0)) {
         goto epilogue;
     }
 
     _Bool keyeq = false;
 
-    while(1) {
-        if(!found) {
+    while (1) {
+        if (!found) {
             bound = scc_btmnode_lower_bound(base, curr, btmap);
             keyeq = scc_btmnode_keyeq(bound);
             bound &= BOUND_MASK;
@@ -1422,33 +1422,33 @@ static _Bool scc_btmap_remove_non_preemptive(struct scc_btmap_base *restrict bas
 
         next = scc_btmnode_child(base, curr, bound);
 
-        if(keyeq) {
+        if (keyeq) {
             assert(!found);
             found = curr;
             fbound = bound;
             keyeq = false;
         }
 
-        if(scc_btmnode_is_leaf(curr)) {
+        if (scc_btmnode_is_leaf(curr)) {
             break;
         }
 
-        if(!scc_stack_push(&nodes, curr) || !scc_stack_push(&bounds, bound)) {
+        if (!scc_stack_push(&nodes, curr) || !scc_stack_push(&bounds, bound)) {
             goto epilogue;
         }
         curr = next;
     }
 
-    if(!found) {
+    if (!found) {
         goto epilogue;
     }
 
-    if(scc_btmnode_is_leaf(found)) {
+    if (scc_btmnode_is_leaf(found)) {
         scc_btmnode_remove_leaf(base, found, fbound);
     }
     --base->btm_size;
 
-    if(base->btm_size) {
+    if (base->btm_size) {
         scc_btmap_balance_non_preemptive(base, curr, nodes, bounds);
     }
 
@@ -1470,7 +1470,7 @@ epilogue:
 //?     :param base: Base address of the ``btmap``
 static inline void scc_btmap_impl_free(struct scc_btmap_base *base) {
     scc_arena_release(&base->btm_arena);
-    if(base->btm_dynalloc) {
+    if (base->btm_dynalloc) {
         free(base);
     }
 }
@@ -1489,7 +1489,7 @@ void *scc_btmap_impl_new(void *base, size_t coff, size_t rootoff) {
 
 void *scc_btmap_impl_new_dyn(void *sbase, size_t basesz, size_t coff, size_t rootoff) {
     struct scc_btmap_base *base = malloc(basesz);
-    if(!base) {
+    if (!base) {
         return 0;
     }
 
@@ -1505,7 +1505,7 @@ void scc_btmap_free(void *btmap) {
 
 _Bool scc_btmap_impl_insert(void *btmapaddr) {
     struct scc_btmap_base *base = scc_btmap_impl_base(*(void **)btmapaddr);
-    if(scc_bits_is_even(base->btm_order)) {
+    if (scc_bits_is_even(base->btm_order)) {
         return scc_btmap_insert_preemptive(base, btmapaddr);
     }
     return scc_btmap_insert_non_preemptive(base, btmapaddr);
@@ -1517,13 +1517,13 @@ void *scc_btmap_impl_find(void *btmap) {
     struct scc_btmnode_base *curr = base->btm_root;
 
     size_t bound;
-    while(1) {
+    while (1) {
         bound = scc_btmnode_lower_bound(base, curr, btmap);
-        if(scc_btmnode_keyeq(bound)) {
+        if (scc_btmnode_keyeq(bound)) {
             return scc_btmnode_value(base, curr, bound & BOUND_MASK);
         }
 
-        if(scc_btmnode_is_leaf(curr)) {
+        if (scc_btmnode_is_leaf(curr)) {
             break;
         }
 
@@ -1535,7 +1535,7 @@ void *scc_btmap_impl_find(void *btmap) {
 
 _Bool scc_btmap_impl_remove(void *btmap) {
     struct scc_btmap_base *base = scc_btmap_impl_base(btmap);
-    if(scc_bits_is_even(base->btm_order)) {
+    if (scc_bits_is_even(base->btm_order)) {
         return scc_btmap_remove_preemptive(base, btmap);
     }
     return scc_btmap_remove_non_preemptive(base, btmap);
@@ -1552,12 +1552,12 @@ void *scc_btmap_clone(void const *btmap) {
     scc_when_mutating(assert(bytesz > basesz));
 
     struct scc_btmap_base *nbase = malloc(bytesz);
-    if(!nbase) {
+    if (!nbase) {
         return 0;
     }
     scc_memcpy(nbase, obase, basesz);
     nbase->btm_arena = scc_arena_clone(&obase->btm_arena);
-    if(!scc_arena_reserve(&nbase->btm_arena, obase->btm_size)) {
+    if (!scc_arena_reserve(&nbase->btm_arena, obase->btm_size)) {
         free(nbase);
         return 0;
     }
@@ -1572,19 +1572,19 @@ void *scc_btmap_clone(void const *btmap) {
     void *nbtmap = 0;
 
     scc_stack(struct stage) stack = scc_stack_new(struct stage);
-    if(!scc_stack_push(&stack, (struct stage){ .old = obase->btm_root, .new = &nbase->btm_root  })) {
+    if (!scc_stack_push(&stack, (struct stage){ .old = obase->btm_root, .new = &nbase->btm_root  })) {
         goto epilogue;
     }
 
-    while(!scc_stack_empty(stack)) {
+    while (!scc_stack_empty(stack)) {
         struct stage *s = &scc_stack_top(stack);
 
-        if(s->index == s->old->btm_nkeys + 1u) {
+        if (s->index == s->old->btm_nkeys + 1u) {
             (void)scc_stack_pop(stack);
             continue;
         }
 
-        if(!s->index) {
+        if (!s->index) {
             assert(s->new);
             *s->new = scc_arena_alloc(&nbase->btm_arena);
             assert(*s->new);
@@ -1593,12 +1593,12 @@ void *scc_btmap_clone(void const *btmap) {
             scc_memcpy(*s->new, s->old, nbase->btm_linkoff);
         }
 
-        if(!scc_btmnode_is_leaf(s->old)) {
+        if (!scc_btmnode_is_leaf(s->old)) {
             struct scc_btmnode_base **olinks = scc_btmnode_links(obase, s->old);
             assert(s->new);
             assert(*s->new);
             struct scc_btmnode_base **nlinks = scc_btmnode_links(nbase, *s->new);
-            if(!scc_stack_push(&stack, (struct stage){ .old = olinks[s->index], .new = &nlinks[s->index] })) {
+            if (!scc_stack_push(&stack, (struct stage){ .old = olinks[s->index], .new = &nlinks[s->index] })) {
                 goto epilogue;
             }
         }
@@ -1612,7 +1612,7 @@ void *scc_btmap_clone(void const *btmap) {
     nbtmap = (unsigned char *)nbase + offsetof(struct scc_btmap_base, btm_fwoff) + nbase->btm_fwoff + sizeof(nbase->btm_fwoff);
 epilogue:
     scc_stack_free(stack);
-    if(!nbtmap) {
+    if (!nbtmap) {
         scc_btmap_impl_free(nbase);
     }
 

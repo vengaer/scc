@@ -381,7 +381,7 @@ inline void const *scc_rbmap_impl_iterstop(void const *map) {
  * \param map Handle identifying the ``rbmap``
  */
 #define scc_rbmap_foreach(iter, map)                                                        \
-    for(void const *scc_pp_cat_expand(scc_rbmap_end_,__LINE__) =                            \
+    for (void const *scc_pp_cat_expand(scc_rbmap_end_,__LINE__) =                            \
             ((iter) = scc_rbmap_impl_leftmost_pair(map),                                    \
                 scc_rbmap_impl_iterstop(map));                                              \
         (iter) != scc_pp_cat_expand(scc_rbmap_end_,__LINE__);                               \
@@ -397,7 +397,7 @@ inline void const *scc_rbmap_impl_iterstop(void const *map) {
  * \param map Handle identifying the ``rbmap``
  */
 #define scc_rbmap_foreach_reversed(iter, rbmap)                                             \
-    for(void const *scc_pp_cat_expand(scc_rbmap_end_,__LINE__) =                            \
+    for (void const *scc_pp_cat_expand(scc_rbmap_end_,__LINE__) =                            \
             (iter = scc_rbmap_impl_rightmost_pair(rbmap),                                   \
                 scc_rbmap_impl_iterstop(rbmap));                                            \
         iter != scc_pp_cat_expand(scc_rbmap_end_,__LINE__);                                 \

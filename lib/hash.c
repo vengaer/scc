@@ -7,7 +7,7 @@ uint_fast32_t scc_hash_fnv1a_32(void const *data, size_t size) {
 #define SCC_FNV_PRIME UINT32_C(0x01000193)
     uint_fast32_t hash = SCC_FNV_OFFSET_BASIS;
     unsigned char const *dptr = data;
-    for(size_t i = 0; i < size; ++i) {
+    for (size_t i = 0; i < size; ++i) {
         hash ^= dptr[i];
         hash *= SCC_FNV_PRIME;
     }
@@ -22,7 +22,7 @@ uint_fast64_t scc_hash_fnv1a_64(void const *data, size_t size) {
 
     uint_fast64_t hash = SCC_FNV_OFFSET_BASIS;
     unsigned char const *dptr = data;
-    for(size_t i = 0; i < size; ++i) {
+    for (size_t i = 0; i < size; ++i) {
         hash ^= dptr[i];
         hash *= SCC_FNV_PRIME;
     }

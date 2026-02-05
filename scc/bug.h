@@ -57,7 +57,7 @@
 #define scc_when_mutating(...)                      \
     do {                                            \
         __VA_ARGS__;                                \
-    } while(0)
+    } while (0)
 #else
 #define scc_when_mutating(...) (void)0
 #endif

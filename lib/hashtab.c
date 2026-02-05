@@ -32,7 +32,7 @@ size_t scc_hashtab_impl_bkpad(void const *tab);
 //?     :param capacity: Table capacity at the time of the call
 static inline void scc_hashtab_set_mdent(scc_hashtab_metatype *md, size_t index, scc_hashtab_metatype val, size_t capacity) {
     md[index] = val;
-    if(index < SCC_HASHTAB_GUARDSZ) {
+    if (index < SCC_HASHTAB_GUARDSZ) {
         md[index + capacity] = val;
     }
 }
@@ -137,7 +137,7 @@ static bool scc_hashtab_emplace(void *tab, struct scc_hashtab_base *base, size_t
 
     SCC_ON_PERFTRACK(++base->ht_perf.ev_n_hash);
 
-    if(index == -1ll) {
+    if (index == -1ll) {
         return false;
     }
 
@@ -210,7 +210,7 @@ static struct scc_hashtab_base *scc_hashtab_realloc(
      * Ignore clang tidy complaining about struct scc_hashtab_base being
      * larger than unsigned char */
     struct scc_hashtab_base *newbase = calloc(size, sizeof(unsigned char)); /* NOLINT */
-    if(!newbase) {
+    if (!newbase) {
         return 0;
     }
 
@@ -249,15 +249,15 @@ static struct scc_hashtab_base *scc_hashtab_realloc(
 static bool scc_hashtab_rehash(void **tab, struct scc_hashtab_base *base, size_t elemsize, size_t cap) {
     void *newtab;
     struct scc_hashtab_base *newbase = scc_hashtab_realloc(&newtab, *tab, base, elemsize, cap);
-    if(!newbase) {
+    if (!newbase) {
         return false;
     }
 
     scc_hashtab_metatype *md = scc_hashtab_metadata(base);
 
-    for(size_t i = 0u; base->ht_size; ++i) {
+    for (size_t i = 0u; base->ht_size; ++i) {
         assert(i < base->ht_capacity);
-        if(md[i] & SCC_HASHTAB_OCCUPIED) {
+        if (md[i] & SCC_HASHTAB_OCCUPIED) {
             memcpy(newtab, (unsigned char *)*(void **)tab + (i + 1u) * elemsize, elemsize);
             scc_bug_on(!scc_hashtab_emplace(newtab, newbase, elemsize));
             --base->ht_size;
@@ -304,16 +304,16 @@ static inline void const *scc_hashtab_impl_iter_next_occupied(
 
 bool scc_hashtab_impl_insert(void *tabaddr, size_t elemsize) {
     struct scc_hashtab_base *base = scc_hashtab_impl_base(*(void **)tabaddr);
-    if(scc_hashtab_should_rehash(base)) {
+    if (scc_hashtab_should_rehash(base)) {
         size_t const newcap = scc_hashtab_sizeup(base);
-        if(!scc_hashtab_rehash(tabaddr, base, elemsize, newcap)) {
+        if (!scc_hashtab_rehash(tabaddr, base, elemsize, newcap)) {
             return false;
         }
 
         /* Table has been reallocated */
         base = scc_hashtab_impl_base(*(void **)tabaddr);
     }
-    if(!scc_hashtab_emplace(*(void **)tabaddr, base, elemsize)) {
+    if (!scc_hashtab_emplace(*(void **)tabaddr, base, elemsize)) {
         return false;
     }
 
@@ -324,12 +324,12 @@ bool scc_hashtab_impl_insert(void *tabaddr, size_t elemsize) {
 
 void const *scc_hashtab_impl_find(void const *tab, size_t elemsize) {
     struct scc_hashtab_base const *base = scc_hashtab_impl_base_qual(tab, const);
-    if(!base->ht_size) {
+    if (!base->ht_size) {
         return 0;
     }
     scc_hash_type const hash = base->ht_hash(tab, elemsize);
     long long const index = scc_hashtab_impl_probe_find(base, tab, elemsize, hash);
-    if(index == -1ll) {
+    if (index == -1ll) {
         return 0;
     }
     assert(base->ht_size);
@@ -355,7 +355,7 @@ void *scc_hashtab_impl_new(struct scc_hashtab_base *base, size_t coff, size_t md
 
 void *scc_hashtab_impl_new_dyn(scc_hashtab_eq eq, scc_hashtab_hash hash, size_t cap, size_t tabsz, size_t coff, size_t mdoff) {
     struct scc_hashtab_base *base = calloc(tabsz, sizeof(unsigned char));
-    if(!base) {
+    if (!base) {
         return 0;
     }
 
@@ -369,23 +369,23 @@ void *scc_hashtab_impl_new_dyn(scc_hashtab_eq eq, scc_hashtab_hash hash, size_t 
 
 void scc_hashtab_free(void *tab) {
     struct scc_hashtab_base *base = scc_hashtab_impl_base(tab);
-    if(base->ht_dynalloc) {
+    if (base->ht_dynalloc) {
         free(base);
     }
 }
 
 bool scc_hashtab_impl_reserve(void *tabaddr, size_t capacity, size_t elemsize) {
     struct scc_hashtab_base *base = scc_hashtab_impl_base(*(void **)tabaddr);
-    if(capacity <= base->ht_capacity) {
+    if (capacity <= base->ht_capacity) {
         return true;
     }
-    if(!scc_bits_is_power_of_2(capacity)) {
+    if (!scc_bits_is_power_of_2(capacity)) {
         unsigned n;
-        for(n = 0u; capacity; capacity >>= 1u, ++n);
+        for (n = 0u; capacity; capacity >>= 1u, ++n);
         capacity = 1u << n;
     }
     assert(scc_bits_is_power_of_2(capacity));
-    if(!scc_hashtab_rehash(tabaddr, base, elemsize, capacity)) {
+    if (!scc_hashtab_rehash(tabaddr, base, elemsize, capacity)) {
         return false;
     }
 
@@ -394,14 +394,14 @@ bool scc_hashtab_impl_reserve(void *tabaddr, size_t capacity, size_t elemsize) {
 
 bool scc_hashtab_impl_remove(void *tab, size_t elemsize) {
     struct scc_hashtab_base *base = scc_hashtab_impl_base(tab);
-    if(!base->ht_size) {
+    if (!base->ht_size) {
         return false;
     }
 
     scc_hash_type const hash = base->ht_hash(tab, elemsize);
 
     long long const index = scc_hashtab_impl_probe_find(base, tab, elemsize, hash);
-    if(index == -1ll) {
+    if (index == -1ll) {
         return false;
     }
 
@@ -431,7 +431,7 @@ void *scc_hashtab_clone(void const *tab) {
     sz += SCC_HASHTAB_CANARYSZ;
 #endif
     struct scc_hashtab_base *nbase = malloc(sz);
-    if(!nbase) {
+    if (!nbase) {
         return 0;
     }
     scc_memcpy(nbase, obase, sz);

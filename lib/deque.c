@@ -80,7 +80,7 @@ static inline size_t scc_deque_bytesize(size_t capacity, size_t elemsize, size_t
 static struct scc_deque_base *scc_deque_alloc(size_t capacity, size_t size, size_t elemsize, size_t npad) {
     size_t const nbytes = scc_deque_bytesize(capacity, elemsize, npad);
     struct scc_deque_base *base = malloc(nbytes);
-    if(!base) {
+    if (!base) {
         return 0;
     }
     assert((unsigned char *)base + nbytes == &base->rd_buffer[npad] + capacity * elemsize);
@@ -110,7 +110,7 @@ static bool scc_deque_grow(void **dequeaddr, size_t newcap, size_t elemsize) {
     size_t const npad = scc_deque_impl_npad(*dequeaddr);
     struct scc_deque_base *prev = scc_deque_impl_base(*dequeaddr);
     struct scc_deque_base *base = scc_deque_alloc(newcap, prev->rd_size, elemsize, npad);
-    if(!base) {
+    if (!base) {
         return false;
     }
 
@@ -120,13 +120,13 @@ static bool scc_deque_grow(void **dequeaddr, size_t newcap, size_t elemsize) {
     size_t first = befwrap * elemsize;
     unsigned char *firstsrc = (unsigned char *)*dequeaddr + prev->rd_begin * elemsize;
     scc_memcpy(data, firstsrc, first);
-    if(prev->rd_begin) {
+    if (prev->rd_begin) {
         scc_memcpy(data + first, *dequeaddr, (prev->rd_size - befwrap) * elemsize);
     }
     base->rd_begin = 0;
     base->rd_end = base->rd_size;
 
-    if(scc_deque_get_dynalloc(*dequeaddr)) {
+    if (scc_deque_get_dynalloc(*dequeaddr)) {
         free(prev);
     }
 
@@ -143,7 +143,7 @@ void *scc_deque_impl_new(struct scc_deque_base *base, size_t offset, size_t capa
 
 void *scc_deque_impl_new_dyn(size_t dequesz, size_t offset, size_t capacity) {
     struct scc_deque_base *base = calloc(dequesz, sizeof(unsigned char));
-    if(!base) {
+    if (!base) {
         return 0;
     }
 
@@ -153,14 +153,14 @@ void *scc_deque_impl_new_dyn(size_t dequesz, size_t offset, size_t capacity) {
 }
 
 void scc_deque_free(void *deque) {
-    if(scc_deque_get_dynalloc(deque)) {
+    if (scc_deque_get_dynalloc(deque)) {
         free(scc_deque_impl_base(deque));
     }
 }
 
 bool scc_deque_impl_prepare_push(void *dequeaddr, size_t elemsize) {
     struct scc_deque_base *base = scc_deque_impl_base(*(void **)dequeaddr);
-    if(base->rd_size < base->rd_capacity) {
+    if (base->rd_size < base->rd_capacity) {
         return true;
     }
     size_t newcap = base->rd_capacity << 1u;
@@ -169,12 +169,12 @@ bool scc_deque_impl_prepare_push(void *dequeaddr, size_t elemsize) {
 
 bool scc_deque_impl_reserve(void *dequeaddr, size_t capacity, size_t elemsize) {
     struct scc_deque_base *base = scc_deque_impl_base(*(void **)dequeaddr);
-    if(base->rd_capacity >= capacity) {
+    if (base->rd_capacity >= capacity) {
         return true;
     }
-    if(!scc_bits_is_power_of_2(capacity)) {
+    if (!scc_bits_is_power_of_2(capacity)) {
         unsigned shifts;
-        for(shifts = 0u; capacity; capacity >>= 1u, ++shifts);
+        for (shifts = 0u; capacity; capacity >>= 1u, ++shifts);
         capacity = 1u << shifts;
     }
 
@@ -188,7 +188,7 @@ void *scc_deque_impl_clone(void const *deque, size_t elemsize) {
     size_t const bytesz = obase->rd_capacity * elemsize + basesz;
     scc_when_mutating(assert(bytesz > obase->rd_capacity * elemsize));
     struct scc_deque_base *nbase = malloc(bytesz);
-    if(!nbase) {
+    if (!nbase) {
         return 0;
     }
 

@@ -37,7 +37,7 @@ static inline void scc_hashmap_set_mdent(
     size_t capacity
 ) {
     md[index] = val;
-    if(index < SCC_HASHMAP_GUARDSZ) {
+    if (index < SCC_HASHMAP_GUARDSZ) {
         md[index + capacity] = val;
     }
 }
@@ -238,7 +238,7 @@ static struct scc_hashmap_base *scc_hashmap_realloc(
     /* Allocate new map, ignore clang tidy being scared by scc_hashmap_base being
      * larger than unsigned char */
     struct scc_hashmap_base *newbase = calloc(size, sizeof(unsigned char)); /* NOLINT */
-    if(!newbase) {
+    if (!newbase) {
         return 0;
     }
 
@@ -289,7 +289,7 @@ static bool scc_hashmap_rehash(
 ) {
     void *newmap;
     struct scc_hashmap_base *newbase = scc_hashmap_realloc(&newmap, *map, base, keysize, valsize, cap);
-    if(!newbase) {
+    if (!newbase) {
         return false;
     }
 
@@ -298,9 +298,9 @@ static bool scc_hashmap_rehash(
     unsigned char *keybase = (unsigned char *)*(void **)map + base->hm_pairsize;
     unsigned char *valbase = scc_hashmap_vals(base);
 
-    for(size_t i = 0u; base->hm_size; ++i) {
+    for (size_t i = 0u; base->hm_size; ++i) {
         assert(i < base->hm_capacity);
-        if(md[i] & SCC_HASHMAP_OCCUPIED) {
+        if (md[i] & SCC_HASHMAP_OCCUPIED) {
             /* Copy key */
             memcpy(newmap, keybase + i * keysize, keysize);
             /* Copy value */
@@ -334,7 +334,7 @@ void *scc_hashmap_impl_new(struct scc_hashmap_base *base, size_t coff, size_t va
 
 void *scc_hashmap_impl_new_dyn(struct scc_hashmap_base const *sbase, size_t mapsize, size_t coff, size_t valoff, size_t keysize) {
     struct scc_hashmap_base *base = calloc(mapsize, sizeof(unsigned char));
-    if(!base) {
+    if (!base) {
         return 0;
     }
 
@@ -347,23 +347,23 @@ void *scc_hashmap_impl_new_dyn(struct scc_hashmap_base const *sbase, size_t maps
 
 void scc_hashmap_free(void *map) {
     struct scc_hashmap_base *base = scc_hashmap_impl_base(map);
-    if(base->hm_dynalloc) {
+    if (base->hm_dynalloc) {
         free(base);
     }
 }
 
 bool scc_hashmap_impl_insert(void *mapaddr, size_t keysize, size_t valsize) {
     struct scc_hashmap_base *base = scc_hashmap_impl_base(*(void **)mapaddr);
-    if(scc_hashmap_should_rehash(base)) {
+    if (scc_hashmap_should_rehash(base)) {
         size_t const newcap = scc_hashmap_sizeup(base);
-        if(!scc_hashmap_rehash(mapaddr, base, keysize, valsize, newcap)) {
+        if (!scc_hashmap_rehash(mapaddr, base, keysize, valsize, newcap)) {
             return false;
         }
 
         /* Map has been reallocated */
         base = scc_hashmap_impl_base(*(void **)mapaddr);
     }
-    if(!scc_hashmap_emplace(*(void **)mapaddr, base, keysize, valsize)) {
+    if (!scc_hashmap_emplace(*(void **)mapaddr, base, keysize, valsize)) {
         ++base->hm_size;
     }
     return true;
@@ -371,13 +371,13 @@ bool scc_hashmap_impl_insert(void *mapaddr, size_t keysize, size_t valsize) {
 
 void *scc_hashmap_impl_find(void *map, size_t keysize, size_t valsize) {
     struct scc_hashmap_base *base = scc_hashmap_impl_base(map);
-    if(!base->hm_size) {
+    if (!base->hm_size) {
         return 0;
     }
 
     scc_hash_type hash = base->hm_hash(map, keysize);
     long long const index = scc_hashmap_impl_probe_find(base, map, keysize, hash);
-    if(index == -1ll) {
+    if (index == -1ll) {
         return 0;
     }
     assert(base->hm_size);
@@ -389,13 +389,13 @@ void *scc_hashmap_impl_find(void *map, size_t keysize, size_t valsize) {
 
 bool scc_hashmap_impl_remove(void *map, size_t keysize) {
     struct scc_hashmap_base *base = scc_hashmap_impl_base(map);
-    if(!base->hm_size) {
+    if (!base->hm_size) {
         return false;
     }
 
     scc_hash_type const hash = base->hm_hash(map, keysize);
     long long const index = scc_hashmap_impl_probe_find(base, map, keysize, hash);
-    if(index == -1ll) {
+    if (index == -1ll) {
         return false;
     }
 
@@ -425,7 +425,7 @@ void *scc_hashmap_clone(void const *map) {
     sz += SCC_HASHMAP_CANARYSZ;
 #endif
     struct scc_hashmap_base *nbase = malloc(sz);
-    if(!nbase) {
+    if (!nbase) {
         return 0;
     }
     scc_memcpy(nbase, obase, sz);

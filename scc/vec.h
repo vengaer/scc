@@ -429,7 +429,7 @@ void *scc_vec_impl_clone(void const *vec, size_t elemsize);
  * \endverbatim
  */
 #define scc_vec_foreach_by(iter, vec, by)                               \
-    for(void const *scc_pp_cat_expand(scc_vec_end,__LINE__) =           \
+    for (void const *scc_pp_cat_expand(scc_vec_end,__LINE__) =           \
             ((iter) = (vec), &(vec)[scc_vec_size(vec)]);                \
         (void const *)(iter) < scc_pp_cat_expand(scc_vec_end,__LINE__); \
         (iter) += (by))
@@ -444,6 +444,6 @@ void *scc_vec_impl_clone(void const *vec, size_t elemsize);
  * \param by The stride to iterate with
  */
 #define scc_vec_foreach_reversed_by(iter, vec, by)                      \
-    for((iter) = &(vec)[scc_vec_size(vec) - 1u]; (iter) >= (vec); (iter) -= (by))
+    for ((iter) = &(vec)[scc_vec_size(vec) - 1u]; (iter) >= (vec); (iter) -= (by))
 
 #endif /* SCC_VEC_H */

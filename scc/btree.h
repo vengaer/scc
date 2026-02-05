@@ -191,7 +191,7 @@ void *scc_btree_impl_new_dyn(void *sbase, size_t basesz, size_t coff, size_t roo
 
 inline void *scc_btree_impl_with_order(void *base, size_t coff, size_t rootoff) {
     unsigned order = ((struct scc_btree_base *)base)->bt_order;
-    if(order < 3u) {
+    if (order < 3u) {
         return 0;
     }
     return scc_btree_impl_new(base, coff, rootoff);
@@ -199,7 +199,7 @@ inline void *scc_btree_impl_with_order(void *base, size_t coff, size_t rootoff) 
 
 inline void *scc_btree_impl_with_order_dyn(void *sbase, size_t basesz, size_t coff, size_t rootoff) {
     unsigned order = ((struct scc_btree_base *)sbase)->bt_order;
-    if(order < 3u) {
+    if (order < 3u) {
         return 0;
     }
     return scc_btree_impl_new_dyn(sbase, basesz, coff, rootoff);

@@ -51,7 +51,7 @@ inline unsigned char scc_swar_read_byte(scc_vectype vec, unsigned i) {
 inline scc_vectype scc_swar_bcast(unsigned char byte) {
     /* Cannot assume sizeof(scc_vectype) */
     scc_vectype mask = 0u;
-    for(unsigned i = 0u; i < sizeof(mask); ++i) {
+    for (unsigned i = 0u; i < sizeof(mask); ++i) {
         scc_when_mutating(assert(i < sizeof(mask)));
         mask = (mask << CHAR_BIT) | 0x01u;
     }

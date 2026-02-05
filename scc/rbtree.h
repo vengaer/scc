@@ -436,7 +436,7 @@ void *scc_rbtree_impl_clone(void const *rbtree, size_t elemsize);
  * \param rbmap Handle identifying the ``rbtree``
  */
 #define scc_rbtree_foreach(iter, rbtree)                                                    \
-    for(void const *scc_pp_cat_expand(scc_rbtree_end_,__LINE__) =                           \
+    for (void const *scc_pp_cat_expand(scc_rbtree_end_,__LINE__) =                           \
             (iter = scc_rbtree_impl_leftmost_value(rbtree),                                 \
                 scc_rbtree_impl_iterstop(rbtree));                                          \
         iter != scc_pp_cat_expand(scc_rbtree_end_,__LINE__);                                \
@@ -452,7 +452,7 @@ void *scc_rbtree_impl_clone(void const *rbtree, size_t elemsize);
  * \param rbtree Handle identifying the ``rbtree``
  */
 #define scc_rbtree_foreach_reversed(iter, rbtree)                                           \
-    for(void const *scc_pp_cat_expand(scc_rbtree_end_,__LINE__) =                           \
+    for (void const *scc_pp_cat_expand(scc_rbtree_end_,__LINE__) =                           \
             (iter = scc_rbtree_impl_rightmost_value(rbtree),                                \
                 scc_rbtree_impl_iterstop(rbtree));                                          \
         iter != scc_pp_cat_expand(scc_rbtree_end_,__LINE__);                                \
