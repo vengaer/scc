@@ -14,9 +14,14 @@ add_custom_target (.config.version.cmake.stamp
     DEPENDS .config.init.cmake.stamp
 )
 
+add_custom_target(.config.libm.cmake.stamp
+    COMMAND ${Python3_EXECUTABLE} ${SCCONFIG} ${CONFOPTS} add SCC_HAVE_LIBM -C "Linked against libm"
+    DEPENDS .config.version.cmake.stamp
+)
+
 add_custom_target(.config.bitarch.cmake.stamp
     COMMAND ${Python3_EXECUTABLE} ${SCCONFIG} ${CONFOPTS} add SCC_BITARCH_$<IF:$<STREQUAL:${CMAKE_SIZEOF_VOID_P},8>,64,32> -C "System architecture"
-    DEPENDS .config.version.cmake.stamp
+    DEPENDS .config.$<IF:$<BOOL:${SCC_HAVE_LIBM}>,libm,version>.cmake.stamp
 )
 
 add_custom_target (.config.simd.cmake.stamp

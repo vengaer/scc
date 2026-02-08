@@ -48,6 +48,11 @@ CPPFLAGS         += $(if $(call is-set,$(CONFIG_PERFEVENTS)),-DSCC_PERFEVTS)
 CPPFLAGS         += $(if $(call is-set,$(CONFIG_FUZZ_DEBUG)),-DSCC_FUZZ_DEBUG)
 CPPFLAGS         += $(if $(call is-set,$(CONFIG_BENCHMARK_STD)),-DSCC_BENCHMARK_STD)
 
+# Libs
+
+LDLIBS           += $(if $(call is-set,$(CONFIG_MATHDEP)),-lm)
+__have_libm      := $(call is-set,$(CONFIG_MATHDEP))
+
 # Fuzzing
 SCC_FUZZ_TARGET  := $(CONFIG_FUZZ_TARGET)
 SCC_FUZZTIME     := $(CONFIG_FUZZ_TIME)

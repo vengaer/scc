@@ -56,7 +56,7 @@ CXXFLAGS     := -std=c++17 -c -MD -MP -Wall -Wextra -Wpedantic $(__debug_info)
 CPPFLAGS     += -I$(root) -DNDEBUG
 
 LDFLAGS      := -fPIC
-LDLIBS       :=
+LDLIBS       +=
 ARFLAGS      := -rcs
 
 sover        := $(SCC_MAJOR).$(SCC_MINOR).$(SCC_PATCH)

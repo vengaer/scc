@@ -141,6 +141,13 @@
             "entrytype": "switch",
             "default": "n",
             "help": "Set to enable -Werror"
+        },
+        {
+            "name": "CONFIG_MATHDEP",
+            "depends": [],
+            "entrytype": "switch",
+            "default": "y",
+            "help": "Allow libm dependency"
         }
     ]
 }
