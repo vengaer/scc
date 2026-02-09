@@ -5,6 +5,12 @@
 #include <stdint.h>
 
 #include <scc/config.h>
+#include <scc/murmur32.h>
+#include <scc/murmur64.h>
+
+struct scc_digest128 {
+    unsigned char digest[128u >> 3u];
+};
 
 #ifdef SCC_BITARCH_32
 typedef uint_fast32_t scc_hash_type;
@@ -68,6 +74,25 @@ inline scc_hash_type scc_hash_fnv1a(void const *data, size_t size) {
     return scc_hash_fnv1a_32(data, size);
 #else
     return scc_hash_fnv1a_64(data, size);
+#endif
+}
+
+
+/**
+ * 128-bit murmur3 hash
+ *
+ * \param digest Structure to store the 128 bit digest in.
+ * \param data Data to calculate the hash over.
+ * \param size Number of bytes to calculate the hash over.
+ * \param seed Seed to pass to the implementation
+ */
+inline void scc_hash_murmur128(struct scc_digest128 *digest, void const *data,
+        size_t size, uint_fast32_t seed)
+{
+#ifdef SCC_BITARCH_32
+    scc_murmur32_128(digest, data, size, seed);
+#else
+    scc_murmur64_128(digest, data, size, seed);
 #endif
 }
 

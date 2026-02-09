@@ -1,6 +1,8 @@
 #include <scc/hash.h>
 
 scc_hash_type scc_hash_fnv1a(void const *data, size_t size);
+void scc_hash_murmur128(struct scc_digest128 *digest, void const *data,
+        size_t size, uint_fast32_t seed);
 
 uint_fast32_t scc_hash_fnv1a_32(void const *data, size_t size) {
 #define SCC_FNV_OFFSET_BASIS UINT32_C(0x811c9dc5)

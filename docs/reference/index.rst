@@ -5,6 +5,7 @@ API Reference
     :includehidden:
     :maxdepth: 1
 
+    bloom
     btmap
     btree
     deque
