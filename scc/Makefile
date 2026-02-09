@@ -11,7 +11,7 @@ __config_header_libm    := $(__node_builddir)/.config.libm.stamp
 __config_header_types   := $(__node_builddir)/.config.types.stamp
 
 __scc_incdir            := $(__node_path)
-__public_headers        := $(addprefix $(__node_path)/,$(addsuffix .h,btmap btree hashmap hashtab rbmap rbtree deque stack vec))
+__public_headers        := $(addprefix $(__node_path)/,$(addsuffix .h,bloom btmap btree hashmap hashtab rbmap rbtree deque stack vec))
 
 $(__config_header_init): $(wildcard $(__config_module)/*.$(pyext)) $(__all_mkfiles) | $(__node_builddir)
 	$(call echo-gen,$(notdir $(config_header)))

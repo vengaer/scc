@@ -206,6 +206,10 @@ inline size_t scc_bloom_impl_npad(void const *flt) {
     scc_bloom_impl_base_qual(flt,)
 
 /**
+ * \verbatim embed:rst:leading-asterisk
+ * .. _scc_bloom_free:
+ * \endverbatim
+ *
  * Reclaim memory allocated for the given bloom filter.
  *
  * Used regardless of which method was used to create the
@@ -281,6 +285,23 @@ inline size_t scc_bloom_nhashes(void const *flt) {
 
 size_t scc_bloom_impl_size(void const *flt, size_t elemsize);
 #endif /* SCC_HAVE_LIBM */
+
+/**
+ * Clone the provided bloom filter.
+ *
+ * The copy is allocated dynamically and completely separate from the
+ * original. Both need to be passed to
+ * @verbatim embed:rst:inline :ref:`scc_bloom_free <scc_bloom_free>` @endverbatim
+ * once no longer required.
+ *
+ * \param flt The filter to copy
+ *
+ * \return A handle to the copy, or ``NULL`` on failure.
+ */
+#define scc_bloom_clone(flt)                                                \
+    scc_bloom_impl_clone(flt, sizeof(*(flt)))
+
+void *scc_bloom_impl_clone(void const *flt, size_t elemsize);
 
 #endif  /* SCC_HAVE_UINT32_T || SCC_HAVE_UINT64_T */
 

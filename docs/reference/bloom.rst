@@ -48,3 +48,8 @@ Queries
 .. doxygenfunction:: scc_bloom_capacity
 
 .. doxygenfunction:: scc_bloom_nhashes
+
+Copying
+-------
+
+.. doxygendefine:: scc_bloom_clone

@@ -7,6 +7,7 @@
 #endif
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 
 #if defined SCC_HAVE_UINT32_T || defined SCC_HAVE_UINT64_T
 
@@ -151,5 +152,19 @@ size_t scc_bloom_impl_size(void const *flt, size_t elemsize) {
     return sz < 0.0 ? 0u : (size_t)sz;
 }
 #endif /* SCC_HAVE_LIBM */
+
+void *scc_bloom_impl_clone(void const *flt, size_t elemsize) {
+    struct scc_bloom_base const *obase = scc_bloom_impl_base_qual(flt, const);
+    size_t offset = (unsigned char const *)flt - (unsigned char const *)obase;
+    unsigned nbytes = obase->bm_nbits >> 3u;
+    size_t sz = offset + elemsize + nbytes;
+    unsigned char *tmp = scc_bloom_impl_with_hash_dyn(sz, offset,
+                            obase->bm_nbits, obase->bm_nhashes, obase->bm_hash);
+    if (!tmp)
+        return 0;
+    memcpy((unsigned char *)tmp + elemsize,
+        (unsigned char const *)flt + elemsize, nbytes);
+    return tmp;
+}
 
 #endif /* SCC_HAVE_UINT32_T || SCC_HAVE_UINT64_T */
