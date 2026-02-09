@@ -17,6 +17,7 @@ to /usr/local, the installed files are ordered as follows
     │       ├── arch.h
     │       ├── arena.h
     │       ├── bits.h
+    │       ├── bloom.h
     │       ├── btmap.h
     │       ├── btree.h
     │       ├── bug.h
