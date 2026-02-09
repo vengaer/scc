@@ -272,6 +272,10 @@ inline size_t scc_bloom_nhashes(void const *flt) {
 
 #ifdef SCC_HAVE_LIBM
 /**
+ * \verbatim embed:rst:leading-asterisk
+ * .. _scc_bloom_size:
+ * \endverbatim
+ *
  * Return the approximate number of elements present in the set.
  *
  * \note Available only if the library was linked against libm.
