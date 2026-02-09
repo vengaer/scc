@@ -14,6 +14,8 @@
 #define SCC_MURMUR32_C3 UINT32_C(0x38b34ae5)
 #define SCC_MURMUR32_C4 UINT32_C(0xa1e38b93)
 
+#ifdef SCC_HAVE_UINT32_T
+
 static inline uint_fast32_t scc_rol32(uint32_t value, uint_fast8_t by) {
     return (value << by) | (value >> (32u - by));
 }
@@ -204,3 +206,5 @@ void scc_murmur32_128(struct scc_digest128 *digest, void const *data,
     scc_static_assert(sizeof(digest->digest) == sizeof(hs));
     memcpy(digest->digest, hs, sizeof(hs));
 }
+
+#endif /* SCC_HAVE_UINT32_T */

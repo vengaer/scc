@@ -78,6 +78,7 @@ inline scc_hash_type scc_hash_fnv1a(void const *data, size_t size) {
 }
 
 
+#if defined SCC_HAVE_UINT32_T || defined SCC_HAVE_UINT64_t
 /**
  * 128-bit murmur3 hash
  *
@@ -89,12 +90,14 @@ inline scc_hash_type scc_hash_fnv1a(void const *data, size_t size) {
 inline void scc_hash_murmur128(struct scc_digest128 *digest, void const *data,
         size_t size, uint_fast32_t seed)
 {
-#ifdef SCC_BITARCH_32
-    scc_murmur32_128(digest, data, size, seed);
-#else
+#if defined SCC_HAVE_UINT64_t && defined SCC_BITARCH_64
     scc_murmur64_128(digest, data, size, seed);
+#else
+    scc_murmur32_128(digest, data, size, seed);
 #endif
 }
+
+#endif
 
 
 #endif /* SCC_HASH_H */

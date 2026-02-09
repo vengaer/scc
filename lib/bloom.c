@@ -8,6 +8,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#if defined SCC_HAVE_UINT32_T || defined SCC_HAVE_UINT64_T
+
 size_t scc_bloom_impl_npad(void const *flt);
 size_t scc_bloom_capacity(void const *flt);
 size_t scc_bloom_nhashes(void const *flt);
@@ -138,4 +140,6 @@ size_t scc_bloom_impl_size(void const *flt, size_t elemsize) {
     double sz = round(-1.0 * m / k * log(1.0 - x / m));
     return sz < 0.0 ? 0u : (size_t)sz;
 }
-#endif
+#endif /* SCC_HAVE_LIBM */
+
+#endif /* SCC_HAVE_UINT32_T || SCC_HAVE_UINT64_T */

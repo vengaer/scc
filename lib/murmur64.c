@@ -8,10 +8,10 @@
 #include <assert.h>
 #include <string.h>
 
-#ifdef SCC_BITARCH_64
-
 #define SCC_MURMUR64_C1 UINT64_C(0x87c37b91114253d5)
 #define SCC_MURMUR64_C2 UINT64_C(0x4cf5ad432745937f)
+
+#ifdef SCC_HAVE_UINT64_T
 
 static inline uint_fast64_t scc_rol64(uint64_t value, uint_fast8_t by) {
     return (value << by) | (value >> (64u - by));
@@ -153,4 +153,4 @@ void scc_murmur64_128(struct scc_digest128 *digest, void const *data,
     memcpy(digest->digest, hs, sizeof(hs));
 }
 
-#endif
+#endif /* SCC_HAVE_UINT64_T */

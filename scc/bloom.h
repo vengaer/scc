@@ -8,6 +8,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#if defined SCC_HAVE_UINT32_T || defined SCC_HAVE_UINT64_T
+
 /**
  * Expands to an opaque pointer suitable for referring to a
  * bloom filter containing instance of the provided \a type.
@@ -226,6 +228,8 @@ inline size_t scc_bloom_nhashes(void const *flt) {
     scc_bloom_impl_size(flt, sizeof(*flt))
 
 size_t scc_bloom_impl_size(void const *flt, size_t elemsize);
-#endif
+#endif /* SCC_HAVE_LIBM */
+
+#endif  /* SCC_HAVE_UINT32_T || SCC_HAVE_UINT64_T */
 
 #endif /* SCC_BLOOM_H */
