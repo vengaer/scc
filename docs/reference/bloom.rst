@@ -4,7 +4,7 @@
 =============
 
 
-``scc_bloom`` implements a `bloom filter`_ using 5 `MurmurHash`_-based hash functions.
+``scc_bloom`` implements a `bloom filter`_ using `MurmurHash`_-based hash functions.
 
 .. _MurmurHash: https://en.wikipedia.org/wiki/MurmurHash
 
