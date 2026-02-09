@@ -7,7 +7,7 @@ archinfo    := $(__node_builddir)/archinfo.$(mkext)
 
 $(archinfo): $(archscript) | $(__node_builddir)
 	$(call echo-gen,$(notdir $@))
-	$(PYTHON) $< -o $@
+	$(PYTHON) $< -o $@ $(CC)
 
 ifneq ($(call not,$(__skip_arch)),)
   -include $(archinfo)

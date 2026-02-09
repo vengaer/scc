@@ -24,13 +24,23 @@ add_custom_target(.config.bitarch.cmake.stamp
     DEPENDS .config.$<IF:$<BOOL:${SCC_HAVE_LIBM}>,libm,version>.cmake.stamp
 )
 
+add_custom_target(.config.u32.cmake.stamp
+    COMMAND ${Python3_EXECUTABLE} ${SCCONFIG} ${CONFOPTS} add SCC_$<IF:$<BOOL:${HAVE_UINT32_T}>,HAVE,NO>_UINT32_T -C "Have uint32_t?"
+    DEPENDS .config.bitarch.cmake.stamp
+)
+
+add_custom_target(.config.u64.cmake.stamp
+    COMMAND ${Python3_EXECUTABLE} ${SCCONFIG} ${CONFOPTS} add SCC_$<IF:$<BOOL:${HAVE_UINT64_T}>,HAVE,NO>_UINT64_T -C "Have uint64_t?"
+    DEPENDS .config.u32.cmake.stamp
+)
+
 add_custom_target (.config.simd.cmake.stamp
     COMMAND ${Python3_EXECUTABLE} ${SCCONFIG} ${CONFOPTS} add SCC_SIMD_ISA ${SCC_SIMD_ISA} -C "SIMD instruction set architecture"
     COMMAND ${Python3_EXECUTABLE} ${SCCONFIG} ${CONFOPTS} add SCC_HWVEC_SIZE ${SCC_VECSIZE} -C "Size of hardware SIMD vectors"
-    DEPENDS .config.bitarch.cmake.stamp
+    DEPENDS .config.u64.cmake.stamp
 )
 
 add_custom_target (config
     COMMAND ${Python3_EXECUTABLE} ${SCCONFIG} ${CONFOPTS} commit
-    DEPENDS .config.$<IF:$<BOOL:${SCC_SIMD_SUPPORTED}>,simd,bitarch>.cmake.stamp
+    DEPENDS .config.$<IF:$<BOOL:${SCC_SIMD_SUPPORTED}>,simd,u64>.cmake.stamp
 )

@@ -8,6 +8,7 @@ __config_opts           := -g SCC_CONFIG_H -c $(__config_cache) -l $(builddir)/.
 __config_header_ver     := $(__node_builddir)/.config.ver.stamp
 __config_header_bitarch := $(__node_builddir)/.config.bitarch.stamp
 __config_header_libm    := $(__node_builddir)/.config.libm.stamp
+__config_header_types   := $(__node_builddir)/.config.types.stamp
 
 __scc_incdir            := $(__node_path)
 __public_headers        := $(addprefix $(__node_path)/,$(addsuffix .h,btmap btree hashmap hashtab rbmap rbtree deque stack vec))
@@ -31,7 +32,12 @@ $(__config_header_bitarch): $(__config_header_init)
 	$(PYTHON) $(__scconfig) $(__config_opts) add SCC_BITARCH_$(bitarch) -C "System architecture"
 	$(TOUCH) $@
 
-$(config_header): $(__config_header_init) $(__config_header_ver) $(config_header_entries) $(__config_header_bitarch) $(__config_header_libm)
+$(__config_header_types): $(__config_header_init)
+	$(PYTHON) $(__scconfig) $(__config_opts) add SCC_$(if $(u32_available),HAVE,NO)_UINT32_T -C "Have uint32_t?"
+	$(PYTHON) $(__scconfig) $(__config_opts) add SCC_$(if $(u64_available),HAVE,NO)_UINT64_T -C "Have uint64_t?"
+	$(TOUCH) $@
+
+$(config_header): $(__config_header_init) $(__config_header_ver) $(config_header_entries) $(__config_header_bitarch) $(__config_header_libm) $(__config_header_types)
 	$(PYTHON) $(__scconfig) $(__config_opts) commit
 
 __clean_config_header:

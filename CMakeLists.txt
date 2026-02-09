@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 include (cmake/version.cmake)
 include (CheckFunctionExists)
+include (CheckTypeSize)
 
 option (SCC_SIMD "SIMD support" ON)
 option (SCC_NO_LIBM "Disallow linking against libm" OFF)
@@ -21,6 +22,9 @@ endif()
 set (CMAKE_C_STANDARD_REQUIRED ON)
 set (CMAKE_C_EXTENSIONS OFF)
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+check_type_size(uint32_t HAVE_UINT32_T)
+check_type_size(uint64_t HAVE_UINT64_T)
 
 if (SCC_SIMD)
     add_subdirectory (arch)
