@@ -8,6 +8,11 @@
 #include <scc/murmur32.h>
 #include <scc/murmur64.h>
 
+/**
+ * 128 bit digest.
+ *
+ * Contains only a 16 byte array named digest.
+ */
 struct scc_digest128 {
     unsigned char digest[128u >> 3u];
 };

@@ -1,6 +1,25 @@
 #include <scc/bloom.h>
 
+#include <stdint.h>
+#include <stddef.h>
+
 #include <unity.h>
+
+static void murmur_wrapper(struct scc_digest128 *digest, void const *data,
+                size_t sz, uint_fast32_t seed) {
+    scc_hash_murmur128(digest, data, sz, seed);
+}
+
+void test_alternate_allocation(void) {
+    scc_bloom(unsigned) flt = scc_bloom_new_dyn(unsigned, 128u, 8u);
+    scc_bloom_free(flt);
+
+    flt = scc_bloom_with_hash(unsigned, 128u, 8u, murmur_wrapper);
+    scc_bloom_free(flt);
+
+    flt = scc_bloom_with_hash_dyn(unsigned, 128u, 8u, murmur_wrapper);
+    scc_bloom_free(flt);
+}
 
 void test_simple_insertion_and_lookup(void) {
     scc_bloom(unsigned) flt = scc_bloom_new(unsigned, 128u, 8u);

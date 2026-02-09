@@ -29,6 +29,10 @@
 #define scc_bloom(type) type *
 
 /**
+ * \verbatim embed:rst:leading-asterisk
+ * .. _scc_bloom_hash:
+ * \endverbatim
+ *
  * Signature of the function used to hash values in a bloom filter
  */
 typedef void(*scc_bloom_hash)(struct scc_digest128 *, void const *, size_t, uint_fast32_t);
@@ -97,7 +101,7 @@ struct scc_bloom_base {
  */
 #define scc_bloom_new(type, m, k)                                       \
     (type *)scc_bloom_impl_new(                                         \
-        (void *)&(scc_bloom_impl_layout(type, m)) { 0 },                 \
+        (void *)&(scc_bloom_impl_layout(type, m)) { 0 },                \
         scc_bloom_impl_offset(type),                                    \
         (m),                                                            \
         (k)                                                             \
@@ -106,6 +110,30 @@ struct scc_bloom_base {
 void *scc_bloom_impl_new(struct scc_bloom_base *base, size_t offset,
         unsigned m, unsigned k);
 
+/**
+ * Like @verbatim embed:rst:inline :ref:`scc_bloom_new <scc_bloom_new>` @endverbatim
+ * but with support for a custom hash function.
+ *
+ * \param type The type of the instances to be tracked in the filter.
+ * \param m Size of the filter, in bits. Must be an integer constant expression.
+ * \param k Number of hash functions to use.
+ * \param hash Pointer to hash function to use. Should be compatible with the
+ *        the @verbatim embed:rst:inline :ref:`scc_bloom_hash <scc_bloom_hash>` @endverbatim
+ *        typedef.
+ *
+ * \return A handle to an instantiated filter
+ */
+#define scc_bloom_with_hash(type, m, k, hash)                           \
+    (type *)scc_bloom_impl_with_hash(                                   \
+        (void *)&(scc_bloom_impl_layout(type, m)) { 0 },                \
+        scc_bloom_impl_offset(type),                                    \
+        (m),                                                            \
+        (k),                                                            \
+        (hash)                                                          \
+    )
+
+void *scc_bloom_impl_with_hash(struct scc_bloom_base *base, size_t offset,
+        unsigned m, unsigned k, scc_bloom_hash hash);
 
 /**
  * \verbatim embed:rst:leading-asterisk
@@ -137,6 +165,30 @@ void *scc_bloom_impl_new(struct scc_bloom_base *base, size_t offset,
 
 void *scc_bloom_impl_new_dyn(size_t size, size_t offset, unsigned m,
         unsigned k);
+
+/**
+ * Like @verbatim embed:rst:inline :ref:scc_bloom_new_dyn <scc_bloom_new_dyn>` @endverbatim
+ *
+ * \param type The type of the instances to be tracked in the filter.
+ * \param m Size of the filter, in bits. Must be an integer constant expression.
+ * \param k Number of hash functions to use.
+ * \param hash Pointer to hash function to use. Should be compatible with the
+ *        the @verbatim embed:rst:inline :ref:`scc_bloom_hash <scc_bloom_hash>` @endverbatim
+ *        typedef.
+ *
+ * \return A handle to an instantiated filter, or ``NULL`` on failure.
+ */
+#define scc_bloom_with_hash_dyn(type, m, k, hash)                       \
+    (type *)scc_bloom_impl_with_hash_dyn(                               \
+        sizeof(scc_bloom_impl_layout(type, m)),                         \
+        scc_bloom_impl_offset(type),                                    \
+        (m),                                                            \
+        (k),                                                            \
+        (hash)                                                          \
+    )
+
+void *scc_bloom_impl_with_hash_dyn(size_t size, size_t offset, unsigned m,
+        unsigned k, scc_bloom_hash hash);
 
 inline size_t scc_bloom_impl_npad(void const *flt) {
     return ((unsigned char const *)flt)[-2] + (sizeof(unsigned char) << 1u);

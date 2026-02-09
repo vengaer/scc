@@ -17,12 +17,18 @@ Type Declarations
 
 .. doxygentypedef:: scc_bloom_hash
 
+.. doxygenstruct:: scc_digest128
+
 Initialization
 --------------
 
 .. doxygendefine:: scc_bloom_new
 
 .. doxygendefine:: scc_bloom_new_dyn
+
+.. doxygendefine:: scc_bloom_with_hash
+
+.. doxygendefine:: scc_bloom_with_hash_dyn
 
 Destruction
 -----------

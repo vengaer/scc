@@ -18,8 +18,9 @@ static inline bool scc_bloom_is_allocd(void const *flt) {
     return ((unsigned char const *)flt)[-1];
 }
 
-void *scc_bloom_impl_new(struct scc_bloom_base *base, size_t offset, unsigned m, unsigned k) {
-    base->bm_hash = scc_hash_murmur128;
+void *scc_bloom_impl_with_hash(struct scc_bloom_base *base, size_t offset,
+        unsigned m, unsigned k, scc_bloom_hash hash) {
+    base->bm_hash = hash;
     base->bm_nbits = m ? ((m + 7u) & ~7u) : 8u;
     base->bm_nhashes = k ? k : 4u;
 
@@ -29,14 +30,23 @@ void *scc_bloom_impl_new(struct scc_bloom_base *base, size_t offset, unsigned m,
     return tmp;
 }
 
-void *scc_bloom_impl_new_dyn(size_t size, size_t offset, unsigned m, unsigned k) {
+void *scc_bloom_impl_new(struct scc_bloom_base *base, size_t offset, unsigned m, unsigned k) {
+    return scc_bloom_impl_with_hash(base, offset, m, k, scc_hash_murmur128);
+}
+
+void *scc_bloom_impl_with_hash_dyn(size_t size, size_t offset, unsigned m,
+        unsigned k, scc_bloom_hash hash) {
     struct scc_bloom_base *base = calloc(1u, size);
     if (!base)
-        return NULL;
+        return 0;
 
-    unsigned char *tmp = scc_bloom_impl_new(base, offset, m, k);
+    unsigned char *tmp = scc_bloom_impl_with_hash(base, offset, m, k, hash);
     tmp[-1] = 1;
     return tmp;
+}
+
+void *scc_bloom_impl_new_dyn(size_t size, size_t offset, unsigned m, unsigned k) {
+    return scc_bloom_impl_with_hash_dyn(size, offset, m, k, scc_hash_murmur128);
 }
 
 void scc_bloom_free(void *flt) {
