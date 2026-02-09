@@ -80,3 +80,34 @@ void test_k_lookup(void) {
     TEST_ASSERT_EQUAL_UINT64(88u, scc_bloom_nhashes(flt));
     scc_bloom_free(flt);
 }
+
+void test_cloning(void) {
+    scc_bloom(unsigned) original = scc_bloom_new(unsigned, 32u, 4u);
+    scc_bloom_insert(&original, 32u);
+    scc_bloom_insert(&original, 78u);
+    scc_bloom_insert(&original, 265u);
+    scc_bloom_insert(&original, 2300u);
+
+    TEST_ASSERT_TRUE(scc_bloom_test(original, 32u));
+    TEST_ASSERT_TRUE(scc_bloom_test(original, 78u));
+    TEST_ASSERT_TRUE(scc_bloom_test(original, 265u));
+    TEST_ASSERT_TRUE(scc_bloom_test(original, 2300u));
+
+    TEST_ASSERT_FALSE(scc_bloom_test(original, 1993u));
+    TEST_ASSERT_FALSE(scc_bloom_test(original, 3u));
+
+    scc_bloom(unsigned) copy = scc_bloom_clone(original);
+    TEST_ASSERT_TRUE(!!copy);
+
+    scc_bloom_free(original);
+
+    TEST_ASSERT_TRUE(scc_bloom_test(copy, 32u));
+    TEST_ASSERT_TRUE(scc_bloom_test(copy, 78u));
+    TEST_ASSERT_TRUE(scc_bloom_test(copy, 265u));
+    TEST_ASSERT_TRUE(scc_bloom_test(copy, 2300u));
+
+    TEST_ASSERT_FALSE(scc_bloom_test(copy, 1993u));
+    TEST_ASSERT_FALSE(scc_bloom_test(copy, 3u));
+
+    scc_bloom_free(copy);
+}
