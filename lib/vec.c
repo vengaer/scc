@@ -14,36 +14,10 @@ bool scc_vec_empty(void const *vec);
 void scc_vec_clear(void *vec);
 bool scc_vec_is_allocd(void const *vec);
 
-//? .. c:function:: size_t scc_vec_bytesize(size_t capacity, size_t elemsize, size_t npad)
-//?
-//?     Compute the size in bytes that an vec with the given capacity, element size
-//?     and number of padding bytes would have.
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param capacity: The capacity of the hypothetical vec
-//?     :param elemsize: The size of the elements in the hypothetical vec
-//?     :param npad: The number of padding bytes between
-//?                  :ref:`sv_dynalloc <unsigned_char_sv_dynalloc>` and
-//?                  :ref:`sv_buffer <type_sv_buffer>` in the hypothetical vec
-//?     :returns: The size of the hypothetical vec, in bytes
 static inline size_t scc_vec_bytesize(size_t capacity, size_t elemsize, size_t npad) {
     return capacity * elemsize + sizeof(struct scc_vec_base) + npad;
 }
 
-//? .. size_t scc_vec_calc_new_capacity(size_t current)
-//?
-//?     Calculate capacity after next size increase of an vec
-//?     with the given capacity.
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param current: Current capacity of the vec
-//?     :returns: The size the vec would have after the next sizeup
 static inline size_t scc_vec_calc_new_capacity(size_t current) {
     if (current > SCC_VEC_MAX_CAPACITY_INCREASE) {
         return current + SCC_VEC_MAX_CAPACITY_INCREASE;
@@ -51,23 +25,6 @@ static inline size_t scc_vec_calc_new_capacity(size_t current) {
     return current << 1u | 1u;
 }
 
-//? .. c:function:: struct scc_vec_base *scc_vec_alloc(<dnl>
-//?        size_t nbytes, size_t nelems, size_t npad)
-//?
-//?     Allocate and initialize an vec base struct
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param nbytes: Number of bytes to allocate
-//?     :param nelems: Number of elements that are to be inserted
-//?                    by calling function
-//?     :param npad: Number of padding bytes between the
-//?                  :ref:`sv_dynalloc <unsigned_char_sv_dynalloc>`
-//?                  and :ref:`sv_buffer <type_sv_buffer>` fields
-//?                  in the vec.
-//?     :returns: Pointer to a newly allocated vec
 static struct scc_vec_base *scc_vec_alloc(size_t nbytes, size_t nelems, size_t npad) {
     struct scc_vec_base *v = malloc(nbytes);
     if (!v) {
@@ -79,17 +36,6 @@ static struct scc_vec_base *scc_vec_alloc(size_t nbytes, size_t nelems, size_t n
     return v;
 }
 
-//? .. c:function:: _Bool scc_vec_grow(void *restrict *vec, size_t capacity, size_t elemsize)
-//?
-//?     Reallocate the vec with increased capacity
-//?
-//?     :param vec: Address of the handle to the vec to be reallocated
-//?     :param cpacity: Desired capacity of the vec
-//?     :param elemsize: Size of the elements in the vec
-//?     :returns: A :code:`_Bool` indicating whether the capacity of the vec was
-//?               successfully increased
-//?     :retval true: The vec was successfully reallocated
-//?     :retval false: Memory allocation failure
 static bool scc_vec_grow(void *restrict *vec, size_t capacity, size_t elemsize) {
     struct scc_vec_base *v;
     size_t const npad = scc_vec_impl_npad(*vec);

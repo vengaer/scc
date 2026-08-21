@@ -12,17 +12,6 @@ void scc_rbmap_clear(void *map);
 void scc_rbmap_free(void *map);
 void const *scc_rbmap_impl_iterstop(void const *map);
 
-//? .. c:function:: struct scc_rbnode_base *scc_rbmap_leftmost(<dnl>
-//?     struct scc_rbnode_base *root)
-//?
-//?     Find the leftmost node in the subtree spanning from the given root
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param root: The root of the subtree
-//?     :returns:    Address of the leftmost node in the subtree
 static inline struct scc_rbnode_base *scc_rbmap_leftmost(struct scc_rbnode_base *root) {
     while (!scc_rbnode_thread(root, scc_rbdir_left)) {
         root = root->rn_left;
@@ -30,17 +19,6 @@ static inline struct scc_rbnode_base *scc_rbmap_leftmost(struct scc_rbnode_base 
     return root;
 }
 
-//? .. c:function:: struct scc_rbnode_base *scc_rbmap_rightmost(<dnl>
-//?     struct scc_rbnode_base *root)
-//?
-//?     Find the rightmost node in the subtree spanning from the given root
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param root: The root of the subtree
-//?     :returns:    Address of the rightmost node in the subtree
 static inline struct scc_rbnode_base *scc_rbmap_rightmost(struct scc_rbnode_base *root) {
     while (!scc_rbnode_thread(root, scc_rbdir_right)) {
         root = root->rn_right;
@@ -48,20 +26,6 @@ static inline struct scc_rbnode_base *scc_rbmap_rightmost(struct scc_rbnode_base
     return root;
 }
 
-//? .. c:function:: void const *scc_rbmnode_key(<dnl>
-//?     struct scc_rbtree_base const *restrict base, <dnl>
-//?     void const *restrict node)
-//?
-//?     Compute and return const-qualified ponter to the key
-//?     stored in the given node
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: Base address of the rbmap
-//?     :param node: Base address of the node whose key is to be found
-//?     :returns:    Address of the key stored in the node
 static inline void const *scc_rbmnode_key(
     struct scc_rbtree_base const *restrict base,
     void const *restrict node
@@ -69,20 +33,6 @@ static inline void const *scc_rbmnode_key(
     return scc_rbnode_value_qual(base, node, const);
 }
 
-//? .. c:function:: void *scc_rbmnode_value(<dnl>
-//?     struct scc_rbtree_base const *restrict base, <dnl>
-//?     void const *restrict node, size_t valoff)
-//?
-//?     Compute and return ponter to the value stored in
-//?     the given node
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base:   Base address of the rbmap
-//?     :param node:   Base address of the node whose value is to be found
-//?     :param valoff: Offset of the value in the internal :ref:`pair struct <scc_rbmap_impl_pair>`
 static inline void *scc_rbmnode_value(
     struct scc_rbtree_base const *restrict base,
     void *restrict node,

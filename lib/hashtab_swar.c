@@ -6,17 +6,6 @@
 #include <assert.h>
 #include <limits.h>
 
-//? .. c:function:: scc_vectype scc_hashtab_gen_metamask(unsigned long long hash)
-//?
-//?     Broadcast high 7 bits of the hash to each byte in a vector. Set
-//?     the high bit to ease comparison with ``hashtab`` meta entries
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param hash: The hash of the element
-//?     :returns: A vector where each byte contains 0x80 | <7 MSB of hash>
 static inline scc_vectype scc_hashtab_gen_metamask(unsigned long long hash) {
     return scc_swar_bcast(0x80u | (hash >> (sizeof(scc_vectype) * CHAR_BIT - (CHAR_BIT - 1u))));
 }

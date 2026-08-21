@@ -15,147 +15,43 @@ size_t scc_btree_impl_npad(void const *btree);
 size_t scc_btree_order(void const *btree);
 size_t scc_btree_size(void const *btree);
 
-//? .. c:enumerator:: SCC_BTREE_FLAG_LEAF
-//?
-//?     Bit indicating that a node is leaf
 enum { SCC_BTREE_FLAG_LEAF = 0x01 };
 
-//? .. c:function:: void scc_btree_set_bkoff(void *btree, unsigned char bkoff)
-//?
-//?     Set the :ref:`bt_bkoff <unsigned_char_bt_bkoff>` field of the B-tree
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param btree: B-tree handle
-//?     :param bkoff: The value to set the :code:`bt_bkoff` field to
 static inline void scc_btree_set_bkoff(void *btree, unsigned char bkoff) {
     ((unsigned char *)btree)[-1] = bkoff;
 }
 
-//? .. c:function:: void scc_btree_root_init(struct scc_btree_base *base, void *root)
-//?
-//?     Initialize the root node of the B-tree whose base address is given.
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: Base address of the B-tree
-//?     :param root: Address of the root node
 static inline void scc_btree_root_init(struct scc_btree_base *base, void *root) {
     base->bt_root = root;
     base->bt_root->bt_flags |= SCC_BTREE_FLAG_LEAF;
 }
 
-//? .. c:function:: void scc_btnode_full(struct scc_btree_base const *base, struct scc_btnode_base const *node)
-//?
-//?     Determine whether the given node is full or not
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: Base address of the btree
-//?     :param node: The node to check
-//?     :returns: :code:`true` if the node is full, otherwise :code:`false`
 static inline _Bool scc_btnode_full(struct scc_btree_base const *base, struct scc_btnode_base const *node) {
     assert(node->bt_nkeys < base->bt_order);
     return node->bt_nkeys == base->bt_order - 1u;
 }
 
-//? .. c:function:: _Bool scc_btnode_is_leaf(struct scc_btnode_base const *node)
-//?
-//?     Determine if the given node is a leaf
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param node: Pointer to the node to check
-//?     :returns: :code:`true` is the node is a leaf, otherwise :code:`false`.
 static inline _Bool scc_btnode_is_leaf(struct scc_btnode_base const *node) {
     return node->bt_flags & SCC_BTREE_FLAG_LEAF;
 }
 
-//? .. c:function:: void scc_btnode_flags_clear(struct scc_btnode_base *node)
-//?
-//?     Clear the flags of the given node
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param node: Base address of the node
 static inline void scc_btnode_flags_clear(struct scc_btnode_base *node) {
     node->bt_flags = 0u;
 }
 
-//? .. c:function:: struct scc_btnode_base *scc_btnode_links(<dnl>
-//?     struct scc_btree_base const *restrict base, struct scc_btnode_base *restrict node)
-//?
-//?     Compute address of the first element in the :ref:`bt_links <struct_scc_btnode_base_bt_links>` field
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: B-tree base address
-//?     :param node: Node base address
-//?     :returns: Address of the first element in the :code:`bt_links` field of the given node
 static inline struct scc_btnode_base **scc_btnode_links(struct scc_btree_base const *restrict base, struct scc_btnode_base *restrict node) {
     return (void *)((unsigned char *)node + base->bt_linkoff);
 }
 
-//? .. c:function:: struct scc_btnode_base *scc_btnode_child(<dnl>
-//?        struct scc_btree_base const *restrict base, struct scc_btnode_base *restrict node, size_t index)
-//?
-//?     Compute address of the indexth child of the given node
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: Base address of the owning B-tree
-//?     :param node: Address of the current node
-//?     :param index: Index of the child to be returned
-//?     :returns: Address of the indexth child of the given node
 static inline struct scc_btnode_base *scc_btnode_child(struct scc_btree_base const *restrict base, struct scc_btnode_base *restrict node, size_t index) {
     return scc_btnode_links(base, node)[index];
 }
 
 
-//? .. c:function:: void *scc_btnode_data(struct scc_btree_base const *restrict base, struct scc_btnode_base *restrict node)
-//?
-//?     Compute address of the data array of the given node
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: B-tree base address
-//?     :param node: Node base address
-//?     :returns: Address of the data array in the given node
 static inline void *scc_btnode_data(struct scc_btree_base const *restrict base, struct scc_btnode_base *restrict node) {
     return (unsigned char *)node + base->bt_dataoff;
 }
 
-//? .. c:function:: void *scc_btnode_value(<dnl>
-//?     struct scc_btree_base const *restrict base, struct scc_btnode_base *restrict node, <dnl>
-//?     size_t index, size_t elemsize)
-//?
-//?     Compute and return address of the indexth value in the given node
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: B-tree base address
-//?     :param node: Node base address
-//?     :param index: Index of the child whose address is to be computed
-//?     :param elemsize: Size of the elements in the tree
-//?     :returns: Address of the indexth child of the given node
 static inline void *scc_btnode_value(
     struct scc_btree_base const *restrict base,
     struct scc_btnode_base *restrict node,
@@ -165,28 +61,6 @@ static inline void *scc_btnode_value(
     return (unsigned char *)scc_btnode_data(base, node) + index * elemsize;
 }
 
-//? .. _scc_btnode_lower_bound:
-//? .. c:function:: size_t scc_btnode_lower_bound(<dnl>
-//?        struct scc_btree_base const *base, <dnl>
-//?        struct scc_btnode_base *node, <dnl>
-//?        void const *restrict value, <dnl>
-//?        size_t elemsize)
-//?
-//?     Compute the lower bound given value in the supplied node.
-//?
-//?     .. seealso::
-//?
-//?         :ref:`scc_algo_lower_bound`.
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: Base address of the B-tree
-//?     :param node: Address of the node currently searched
-//?     :param value: Value that is probed for
-//?     :param elemsize: Size of each element in the node
-//?     :returns: The lower bound of :code:`value` in the element array of :code:`node`.
 static inline size_t scc_btnode_lower_bound(
     struct scc_btree_base const *base,
     struct scc_btnode_base *node,
@@ -196,21 +70,6 @@ static inline size_t scc_btnode_lower_bound(
     return scc_algo_lower_bound(value, scc_btnode_data(base, node), node->bt_nkeys, elemsize, base->bt_compare);
 }
 
-//? .. c:function:: size_t scc_btnode_emplace_leaf(<dnl>
-//?        struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, void *restrict value, size_t elemsize)
-//?
-//?     Insert the given value in the specified leaf node. The node must
-//?     have at least one vacant slot
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: B-tree base address
-//?     :param node: Node base address
-//?     :param value: Address of the value to insert
-//?     :param elemsize: Size of the elements in the node
-//?     :returns: The lower bound of the newly inserted element
 static size_t scc_btnode_emplace_leaf(
     struct scc_btree_base *restrict base,
     struct scc_btnode_base *restrict node,
@@ -228,22 +87,6 @@ static size_t scc_btnode_emplace_leaf(
     return bound;
 }
 
-//? .. c:function:: void scc_btnode_emplace(<dnl>
-//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, <dnl>
-//?     struct scc_btnode_base *restrict child, void *restrict value, size_t elemsize)
-//?
-//?     Insert the given value with accompanying child subtree in non-leaf node. The
-//?     given node must have at least one vacant slot
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: B-tree base address
-//?     :param node: The node to insert the value in
-//?     :param child: Root of the subtree to insert
-//?     :param value: The value to insert
-//?     :param elemsize: Size of the elements in the B-tree
 static void scc_btnode_emplace(
     struct scc_btree_base *restrict base,
     struct scc_btnode_base *restrict node,
@@ -259,26 +102,6 @@ static void scc_btnode_emplace(
     links[bound + 1u] = child;
 }
 
-//? .. c:function:: void scc_btree_new_root(<dnl>
-//?     struct scc_btree_base const *restrict base, <dnl>
-//?     struct scc_btnode_base *restrict node, <dnl>
-//?     struct scc_btnode_base *restrict left, <dnl>
-//?     struct scc_btnode_base *restrict right)
-//?
-//?     Initialize the node parameter as if it were the new node of the
-//?     given B-tree.
-//?
-//?     As splitting the previous root always yields a new root with a
-//?     single value, the new root always has exactly two links.
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: Base address of the B-tree
-//?     :param node: The node to be prepared as new root
-//?     :param left: Root of the left subtree
-//?     :param right: Root of the right subtree
 static inline void scc_btree_new_root(
     struct scc_btree_base const *restrict base,
     struct scc_btnode_base *restrict node,
@@ -292,25 +115,6 @@ static inline void scc_btree_new_root(
     scc_btnode_flags_clear(node);
 }
 
-//? .. c:function:: int scc_btnode_find_linkindex(<dnl>
-//?     struct scc_btree_base const *restrict base, <dnl>
-//?     struct scc_btnode_base *restrict node, <dnl>
-//?     struct scc_btnode_base *restrict p, <dnl>
-//?     size_t elemsize)
-//?
-//?     Find and return the index of the given node in the link
-//?     array of p.
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: B-tree base address
-//?     :param node: Base address of the node to be searched for
-//?     :param p: Base address of the parent node whose link array is to be searched
-//?     :param elemsize: Size of the elements in the node
-//?     :returns: Index of :code:`node` in the link array of :code:`p`, or :code:`base->bt_order` if
-//?               the node is not found in the array
 static inline size_t scc_btnode_find_linkindex(
     struct scc_btree_base const *restrict base,
     struct scc_btnode_base *restrict node,
@@ -330,28 +134,6 @@ static inline size_t scc_btnode_find_linkindex(
     return base->bt_order;
 }
 
-//? .. c:function:: struct scc_btnode_base *scc_btnode_split_preemptive(<dnl>
-//?     struct scc_btree_base *restrict base, <dnl>
-//?     struct scc_btnode_base *restrict node, <dnl>
-//?     struct scc_btnode_base *p, <dnl>
-//?     size_t elemsize)
-//?
-//?     Split the given node in two, moving values and links
-//?     as required. The given node is kept as the left child
-//?     of p to avoid unnecessary writes.
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: Base address of the B-tree
-//?     :param node: Base address of the node to split
-//?     :param p: Pointer to node's parent. Should node be the
-//?               root, this pointer is NULL and a new root
-//?               is allocated from the arena
-//?     :param elemsize: Size of the elements in the B-tree
-//?     :returns: Address of the new node allocated for the split, or
-//?               :code:`NULL` on allocation failure
 static struct scc_btnode_base *scc_btnode_split_preemptive(
     struct scc_btree_base *restrict base,
     struct scc_btnode_base *restrict node,
@@ -404,28 +186,6 @@ static struct scc_btnode_base *scc_btnode_split_preemptive(
     return right;
 }
 
-//? .. c:function:: struct scc_btnode_base *scc_btnode_split_non_preemptive(<dnl>
-//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict base, <dnl>
-//?     struct scc_btnode_base *restrict child, struct scc_btnode_base *p, <dnl>
-//?     void *restrict value, size_t elemsize)
-//?
-//?     Split the given node in two, moving values as required. The supplied value is
-//?     treated as if inserted at its appropriate position before the split. The middlemost
-//?     value to be moved to the parent node is written to the first vacant
-//?     slot in the newly allocated right node's data array.
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: B-tree base address
-//?     :param node: The node to split
-//?     :param child: Child link to insert
-//?     :param p: Parent of the given node, or NULL if :c:texpr:`node == base->bt_root`
-//?     :param value: The value that were to be written to the node, causing the split
-//?     :param elemsize: Size of the elements in the tree
-//?     :returns: Address of the new node allocated for the split, or
-//?               :code:`NULL` on allocation failure
 static struct scc_btnode_base *scc_btnode_split_non_preemptive(
     struct scc_btree_base *restrict base,
     struct scc_btnode_base *restrict node,
@@ -517,19 +277,6 @@ static struct scc_btnode_base *scc_btnode_split_non_preemptive(
     return right;
 }
 
-//? .. c:function:: _Bool scc_btree_insert_preemptive(struct scc_btree_base *base, void *btreeaddr, size_t elemsize)
-//?
-//?     Insert the element in :c:texpr:`*(void **)btreeaddr` using :ref:`preemptive splitting <preemptive_split>`.
-//?     The order of the given tree must be even lest the B-tree invariants be violated.
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: Base address of the B-tree
-//?     :param btreeaddr: Address of the B-tree handle
-//?     :param elemsize: Size of the elements in the tree
-//?     :returns: :code:`true` if the value was successfully inserted, otherwise :code:`false`.
 static _Bool scc_btree_insert_preemptive(struct scc_btree_base *base, void *btreeaddr, size_t elemsize) {
     struct scc_btnode_base *curr = base->bt_root;
     struct scc_btnode_base *p = 0;
@@ -562,19 +309,6 @@ static _Bool scc_btree_insert_preemptive(struct scc_btree_base *base, void *btre
     return true;
 }
 
-//? .. c:function:: _Bool scc_btree_insert_non_preemptive(struct scc_btree_base *base, void *btreeaddr, size_t elemsize)
-//?
-//?     Insert the element in :c:texpr:`*(void **)btreeaddr` using :ref:`non-preemptive splitting <non_preemptive_split>`.
-//?     Called only for trees whose order is odd
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: Base address of the B-tree
-//?     :param btreeaddr: Address of the B-tree handle
-//?     :param elemsize: Size of the elements in the tree
-//?     :returns: :code:`true` if the value was successfully inserted, otherwise :code:`false`.
 static _Bool scc_btree_insert_non_preemptive(struct scc_btree_base *base, void *btreeaddr, size_t elemsize) {
     bool success = false;
     scc_stack(struct scc_btnode_base *) stack = scc_stack_new(struct scc_btnode_base *);
@@ -655,23 +389,6 @@ epilogue:
     return success;
 }
 
-//? .. c:function:: void scc_btnode_rotate_right(<dnl>
-//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, <dnl>
-//?     struct scc_btnode_base *restrict sibling, struct scc_btnode_base *restrict p, <dnl>
-//?     size_t bound, size_t elemsize)
-//?
-//?     Rotate value from left sibling through parent and into the given node.
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: B-tree base address
-//?     :param node: Base address of node to be rotated into
-//?     :param sibling: Base address of the left sibling of :code:`node`
-//?     :param p: Base address of the parent node of :code:`node` and :code:`sibling`
-//?     :param bound: The index of :code:`node` in :code:`p`'s link array
-//?     :param elemsize: Size of the elements in the B-tree
 static void scc_btnode_rotate_right(
     struct scc_btree_base *restrict base,
     struct scc_btnode_base *restrict node,
@@ -698,23 +415,6 @@ static void scc_btnode_rotate_right(
     nlinks[0] = subtree;
 }
 
-//? .. c:function:: void scc_btnode_rotate_left(<dnl>
-//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, <dnl>
-//?     struct scc_btnode_base *restrict sibling, struct scc_btnode_base *restrict p, <dnl>
-//?     size_t bound, size_t elemsize)
-//?
-//?     Rotate value from right sibling through parent and into the given node.
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: B-tree base address
-//?     :param node: Base address of node to be rotated into
-//?     :param sibling: Base address of the right sibling of :code:`node`
-//?     :param p: Base address of the parent node of :code:`node` and :code:`sibling`
-//?     :param bound: The index of :code:`node` in :code:`p`'s link array
-//?     :param elemsize: Size of the elements in the B-tree
 static void scc_btnode_rotate_left(
     struct scc_btree_base *restrict base,
     struct scc_btnode_base *restrict node,
@@ -739,24 +439,6 @@ static void scc_btnode_rotate_left(
     scc_memmove(sslot, sslot + elemsize, sibling->bt_nkeys * elemsize);
 }
 
-//? .. c:function:: void scc_btnode_merge(<dnl>
-//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, <dnl>
-//?     struct scc_btnode_base *restrict sibling, struct scc_btnode_base *restrict p, <dnl>
-//?     size_t bound, size_t elemsize)
-//?
-//?     Generic merging of the given node with its left sibling, leaving parent links untouched
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: B-tree base address
-//?     :param node: Base address of the node to be rotated into
-//?     :param sibling: Base address of the left sibling of :code:`node`
-//?     :param p: Base address of the parent node of :code:`node` and :code:`sibling`
-//?     :param bound: The index of :code:`node` in :code:`p`'s link array
-//?     :param elemsize: Size of the elements in the B-tree
-//?     :returns: Number of links that were moved left in :code:`p`'s link array
 static size_t scc_btnode_merge(
     struct scc_btree_base *restrict base,
     struct scc_btnode_base *restrict node,
@@ -797,23 +479,6 @@ static size_t scc_btnode_merge(
     return nmov;
 }
 
-//? .. c:function:: void scc_btnode_merge_left_non_preemptive(<dnl>
-//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, <dnl>
-//?     struct scc_btnode_base *restrict sibling, struct scc_btnode_base *restrict p, <dnl>
-//?     size_t bound, size_t elemsize)
-//?
-//?     Merge the given node with its left sibling
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: B-tree base address
-//?     :param node: Base address of node to be rotated into
-//?     :param sibling: Base address of the left sibling of :code:`node`
-//?     :param p: Base address of the parent node of :code:`node` and :code:`sibling`
-//?     :param bound: The index of :code:`node` in :code:`p`'s link array
-//?     :param elemsize: Size of the elements in the B-tree
 static inline void scc_btnode_merge_left_non_preemptive(
     struct scc_btree_base *restrict base,
     struct scc_btnode_base *restrict node,
@@ -827,24 +492,6 @@ static inline void scc_btnode_merge_left_non_preemptive(
     scc_arena_try_free(&base->bt_arena, node);
 }
 
-//? .. c:function:: void scc_btnode_merge_left_preemptive(<dnl>
-//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, <dnl>
-//?     struct scc_btnode_base *restrict sibling, struct scc_btnode_base *restrict p, <dnl>
-//?     size_t bound, size_t elemsize)
-//?
-//?     Merge the given node with its left sibling, freeing the parent node
-//?     if required
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: B-tree base address
-//?     :param node: Base address of the node to be rotated into
-//?     :param sibling: Base address of the left sibling of :code:`node`
-//?     :param p: Base address of the parent node of :code:`node` and :code:`sibling`
-//?     :param bound: The index of :code:`node` in :code:`p`'s link array
-//?     :param elemsize: Size of the elements in the B-tree
 static inline void scc_btnode_merge_left_preemptive(
     struct scc_btree_base *restrict base,
     struct scc_btnode_base *restrict node,
@@ -860,23 +507,6 @@ static inline void scc_btnode_merge_left_preemptive(
 }
 
 
-//? .. c:function:: void scc_btnode_merge_right_non_preemptive(<dnl>
-//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, <dnl>
-//?     struct scc_btnode_base *restrict sibling, struct scc_btnode_base *restrict p, <dnl>
-//?     size_t bound, size_t elemsize)
-//?
-//?     Merge the given node with its right sibling
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: B-tree base address
-//?     :param node: Base address of node to be rotated into
-//?     :param sibling: Base address of the right sibling of :code:`node`
-//?     :param p: Base address of the parent node of :code:`node` and :code:`sibling`
-//?     :param bound: The index of :code:`node` in :code:`p`'s link array
-//?     :param elemsize: Size of the elements in the B-tree
 static inline void scc_btnode_merge_right_non_preemptive(
     struct scc_btree_base *restrict base,
     struct scc_btnode_base *restrict node,
@@ -894,24 +524,6 @@ static inline void scc_btnode_merge_right_non_preemptive(
     scc_arena_try_free(&base->bt_arena, sibling);
 }
 
-//? .. c:function:: void scc_btnode_merge_right_preemptive(<dnl>
-//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, <dnl>
-//?     struct scc_btnode_base *restrict sibling, struct scc_btnode_base *restrict p, <dnl>
-//?     size_t bound, size_t elemsize)
-//?
-//?     Merge the given node with its right sibling, freeing the parent node
-//?     as required
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: B-tree base address
-//?     :param node: Base address of node to be rotated into
-//?     :param sibling: Base address of the right sibling of :code:`node`
-//?     :param p: Base address of the parent node of :code:`node` and :code:`sibling`
-//?     :param bound: The index of :code:`node` in :code:`p`'s link array
-//?     :param elemsize: Size of the elements in the B-tree
 static inline void scc_btnode_merge_right_preemptive(
     struct scc_btree_base *restrict base,
     struct scc_btnode_base *restrict node,
@@ -926,21 +538,6 @@ static inline void scc_btnode_merge_right_preemptive(
     }
 }
 
-//? .. c:function:: void scc_btree_balance_preemptive(<dnl>
-//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict next, <dnl>
-//?     struct scc_btnode_base *restrict curr, size_t bound, size_t elemsize)
-//?
-//?     Balance B-tree for preemptive removal
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: B-tree base address
-//?     :param next: The next node to traverse
-//?     :param curr: The current node being traversed. Parent of next
-//?     :param bound: Index of :code:`next` in the link array of :code:`curr`
-//?     :param elemsize: Size of the elements in the B-tree
 static struct scc_btnode_base *scc_btree_balance_preemptive(
     struct scc_btree_base *restrict base,
     struct scc_btnode_base *restrict next,
@@ -974,21 +571,6 @@ static struct scc_btnode_base *scc_btree_balance_preemptive(
     return sibling;
 }
 
-//? .. c:function:: void scc_btnode_remove_leaf(<dnl>
-//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict node, <dnl>
-//?     size_t index, size_t elemsize)
-//?
-//?     Remove the value at the specified index from the given leaf node. The node must
-//?     contains at least 2 keys
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: B-tree base address
-//?     :param node: Leaf node from which the value is to be removed
-//?     :param index: Index of the value to be removed
-//?     :param elemsize: Size of the elements in the tree
 static inline void scc_btnode_remove_leaf(
     struct scc_btree_base *restrict base,
     struct scc_btnode_base *restrict node,
@@ -1008,25 +590,6 @@ static inline void scc_btnode_remove_leaf(
     scc_memmove(data, data + elemsize, nmov * elemsize);
 }
 
-//? .. c:function:: void scc_btnode_overwrite(<dnl>
-//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict curr, <dnl>
-//?     struct scc_btnode_base *restrict found, size_t fbound, size_t elemsize, _Bool predecessor)
-//?
-//?     Swap the in-order predecessor or successor with the element at index fbound in
-//?     the found node
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: B-tree base address
-//?     :param leaf: Leaf node to copy the predecessor or successor from
-//?     :param found: Internal node whose value should be overwritten
-//?     :param fbound: Lower bound of the value to be overwritten in the internal node
-//?     :param elemsize: Size of the elements in the tree
-//?     :param predecessor: :code:`true` if the value is to be overwritten with the
-//?                         in-order predecessor. If :code:`false`, the value is
-//?                         overwritten with the in-order successor
 static inline void scc_btnode_overwrite(
     struct scc_btree_base *restrict base,
     struct scc_btnode_base *restrict leaf,
@@ -1044,21 +607,6 @@ static inline void scc_btnode_overwrite(
     }
 }
 
-//? .. c:function:: _Bool scc_btree_remove_preemptive(<dnl>
-//?     struct scc_btree_base *restrict base, void *restrict btree, size_t elemsize)
-//?
-//?     Find and remove the value stored in the :code:`bt_curr` field using preemptive
-//?     merging
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: B-tree base address
-//?     :param btree: B-tree handle
-//?     :param elemsize: Size of the elements in the tree
-//?     :returns: :code:`true` if the value was removed, :code:`false` if the value
-//?               wasn't found
 static _Bool scc_btree_remove_preemptive(struct scc_btree_base *restrict base, void *restrict btree, size_t elemsize) {
     size_t const borrow_lim = base->bt_order >> 1u;
     _Bool swap_pred = true;
@@ -1141,23 +689,6 @@ static _Bool scc_btree_remove_preemptive(struct scc_btree_base *restrict base, v
     return true;
 }
 
-//? .. c:function:: void scc_btree_balance_non_preemptive(<dnl>
-//?     struct scc_btree_base *restrict base, struct scc_btnode_base *restrict curr, <dnl>
-//?     struct scc_btnode_base **restrict nodes, size_t *bounds, size_t elemsize)
-//?
-//?     Traverse the tree back towards the root, balancing as needed
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: B-tree base address
-//?     :param curr: Leaf node in which to start the traversal
-//?     :param nodes: Stack of nodes traversed while finding the leaf
-//?     :param bounds: Stack of bounds computed while finding the leaf. The
-//?                    nth bound in the stack is the index of the link in the
-//?                    nth node to obtain the n+1th node
-//?     :param elemsize: Size of the elements in the B-tree
 static void scc_btree_balance_non_preemptive(
     struct scc_btree_base *restrict base,
     struct scc_btnode_base *restrict curr,
@@ -1213,21 +744,6 @@ static void scc_btree_balance_non_preemptive(
     }
 }
 
-//? .. c:function:: _Bool scc_btree_remove_non_preemptive(<dnl>
-//?     struct scc_btree_base *restrict base, void *restrict btree, size_t elemsize)
-//?
-//?     Find and remove the value stored in the :code:`bt_curr` field using non-preemptive
-//?     merging
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: B-tree base address
-//?     :param btree: B-tree handle
-//?     :param elemsize: Size of the elements in the tree
-//?     :returns: :code:`true` if the value was removed, :code:`false` if the value
-//?               wasn't found
 static _Bool scc_btree_remove_non_preemptive(struct scc_btree_base *restrict base, void *restrict btree, size_t elemsize) {
     bool success = false;
 
@@ -1302,15 +818,6 @@ epilogue:
     return success;
 }
 
-//? .. c:function:: scc_btree_impl_free(struct scc_btree_base *base)
-//?
-//?     Free any memory allocated for the given ``btree`` base
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: Base address of the ``btree`` to free
 static inline void scc_btree_impl_free(struct scc_btree_base *base) {
     scc_arena_release(&base->bt_arena);
     if (base->bt_dynalloc) {

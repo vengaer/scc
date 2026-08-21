@@ -18,65 +18,18 @@ void scc_deque_clear(void *deque);
 void *scc_deque_impl_iter_start(void *deque, size_t elemsize);
 void *scc_deque_impl_iter_end(void *deque, size_t elemsize);
 
-//? .. c:function:: bool scc_deque_get_dynalloc(void const *deque)
-//?
-//?     Read the :ref:`rd_dynalloc <unsigned_char_rd_dynalloc>` field
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param deque: Handle to the deque in question
-//?     :returns: Value of the :code:`rd_dynalloc` field
 static inline bool scc_deque_get_dynalloc(void const *deque) {
     return ((unsigned char const *)deque)[-1];
 }
 
-//? .. c:function:: void scc_deque_set_dynalloc(void *deque)
-//?
-//?     Set the :ref:`rd_dynalloc <unsigned_char_rd_dynalloc>` field to 1
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param deque: Handle to the deque
 static inline void scc_deque_set_dynalloc(void *deque) {
     ((unsigned char *)deque)[-1] = 1;
 }
 
-//? .. c:function:: size_t scc_deque_bytesize(size_t capacity, size_t elemsize, size_t npad)
-//?
-//?     Calculate the size a deque with the given capacity, elemenet size
-//?     and number of paddign bytes would have
-//?
-//?     .. note::
-//?         Internal use only
-//?
-//?     :param capacity: The would-be capacity of the deque
-//?     :param elemsize: The would-be element size of the deque
-//?     :param npad: The would-be number of padding bytes between :ref:`rd_dynalloc <unsigned_char_rd_dynalloc>`
-//?                  and :ref:`rd_data <type_rd_data>`
 static inline size_t scc_deque_bytesize(size_t capacity, size_t elemsize, size_t npad) {
     return capacity * elemsize + sizeof(struct scc_deque_base) + npad;
 }
 
-//? .. c:function:: struct scc_deque_base *scc_deque_alloc(size_t capacity, size_t size, size_t elemsize, size_t npad)
-//?
-//?     Allocate and partially initialize a :ref:`struct scc_deque_base <scc_deque_base>`
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param capacity: The capacity of the deque to be allocated
-//?     :param size: The numbes of elements to be written to the newly allocated deque
-//?     :param elemsize: The size of each element in the deque
-//?     :param npad: The number of padding bytes between :ref:`rd_dynalloc <unsigned_char_rd_dynalloc>`
-//?                  and :ref:`rd_data <type_rd_data>`.
-//?     :returns: Address of an newly allocated :ref:`struct scc_deque_base <scc_deque_base>`
-//?     :retval NULL: On memory allocation failure
-//?     :retval Valid address: On successfull allocation
 static struct scc_deque_base *scc_deque_alloc(size_t capacity, size_t size, size_t elemsize, size_t npad) {
     size_t const nbytes = scc_deque_bytesize(capacity, elemsize, npad);
     struct scc_deque_base *base = malloc(nbytes);
@@ -91,21 +44,6 @@ static struct scc_deque_base *scc_deque_alloc(size_t capacity, size_t size, size
     return base;
 }
 
-//? .. c:function:: bool scc_deque_grow(void **dequeaddr, size_t newcap, size_t elemsize)
-//?
-//?     Reallocate the deque with increased capacity. The elements are repositioned
-//?     such that :ref:`rd_begin <size_t_rd_begin>` is 0.
-//?
-//?     .. note::
-//?         Internal use only
-//?
-//?     :param dequeaddr: Address of the handle to the original deque
-//?     :param newcap: The capacity of the deque to be allocated
-//?     :param elemsize: Size of each element stored in the deque
-//?     :returns: A :code:`_Bool` indicating whether the deque could be reallocated
-//?     :retval NULL: Memory allocation failure
-//?     :retval Valid address: The deque was successfully reallocated, :c:texpr:`*(void **)dequeaddr`
-//?                            is updated accordingly
 static bool scc_deque_grow(void **dequeaddr, size_t newcap, size_t elemsize) {
     size_t const npad = scc_deque_impl_npad(*dequeaddr);
     struct scc_deque_base *prev = scc_deque_impl_base(*dequeaddr);

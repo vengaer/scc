@@ -15,21 +15,6 @@ size_t scc_hashmap_impl_bkpad(void const *map);
 size_t scc_hashmap_capacity(void const *map);
 size_t scc_hashmap_size(void const *map);
 
-//? .. c:function:: void scc_hashmap_set_mdent(<dnl>
-//?        scc_hashmap_metatype *md, size_t index, <dnl>
-//?        scc_hashmap_metatype val, size_t capacity)
-//?
-//?     Set metadata entry at given index, duplicating low
-//?     entries in the guard.
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param md: Address of the first element in the metadata array
-//?     :param index: The index at which the entry is to be set
-//?     :param val: Value to write to the given index
-//?     :param capacity: Map capacity for calculating guard offset
 static inline void scc_hashmap_set_mdent(
     scc_hashmap_metatype *md,
     size_t index,
@@ -42,19 +27,6 @@ static inline void scc_hashmap_set_mdent(
     }
 }
 
-//? .. c:function:: unsigned char scc_hashmap_calcpad(size_t coff)
-//?
-//?     Calculate the number of padding bytes between
-//?     :ref:`hm_fwoff <unsigned_char_hm_fwoff>` and
-//?     :ref:`hm_curr <scc_hashmap_impl_pair_hm_curr>`.
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param coff: Base-relative offset of :code:`hm_curr`
-//?     :returns: Number of padding bytes between :code:`hm_fwoff`
-//?               and :code:`hm_curr`.
 static inline unsigned char scc_hashmap_calcpad(size_t coff) {
     size_t const fwoff = coff -
         offsetof(struct scc_hashmap_base, hm_fwoff) -
@@ -63,30 +35,10 @@ static inline unsigned char scc_hashmap_calcpad(size_t coff) {
     return fwoff;
 }
 
-//? .. c:function:: void scc_hashmap_set_bkoff(void *map, unsigned char bkoff)
-//?
-//?     Set the :ref:`hm_bkoff <unsigned_char_hm_bkoff>` field in the map.
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param map: Hash map handle
-//?     :param bkoff: Value to write
 static inline void scc_hashmap_set_bkoff(void *map, unsigned char bkoff) {
     ((unsigned char *)map)[-1] = bkoff;
 }
 
-//? .. c:function:: _Bool scc_hashmap_should_rehash(struct scc_hashmap_base const *base)
-//?
-//?     Check whether the load factor is high enough to require a rehash
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: Address of the hash map base
-//?     :returns: :code:`true` if the map shoud be rehashed, otherwise :code:`false`.
 static inline bool scc_hashmap_should_rehash(struct scc_hashmap_base const *base) {
     /* Rehash at 87.5% */
     return base->hm_size > (base->hm_capacity >> 1u) +
@@ -94,62 +46,18 @@ static inline bool scc_hashmap_should_rehash(struct scc_hashmap_base const *base
                            (base->hm_capacity >> 3u);
 }
 
-//? .. c:function:: size_t scc_hashmap_sizeup(struct scc_hashmap_base const *base)
-//?
-//?     Compute capacity after resize for the given hash map
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: Address of the base struct of the hash map
-//?     :returns: Capacity the given map would have after the next rehash
 static inline size_t scc_hashmap_sizeup(struct scc_hashmap_base const *base) {
     return base->hm_capacity << 1u;
 }
 
-//? .. c:function:: void *scc_hashmap_vals(struct scc_hashmap_base *base)
-//?
-//?     Obtain address of the value address in the map
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: Base address of the map
-//?     :returns: Address of the value array of the hash map
 static inline void *scc_hashmap_vals(struct scc_hashmap_base *base) {
     return (unsigned char *)base + base->hm_valoff;
 }
 
-//? .. c:function:: scc_hashmap_metatype *scc_hashmap_metadata(struct scc_hashmap_base *base)
-//?
-//?     Obtain address of the metadata array in the map
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param base: Base address of the map
-//?     :returns: Address of the metadata array of the hash map
 static inline scc_hashmap_metatype *scc_hashmap_metadata(struct scc_hashmap_base *base) {
     return (void *)((unsigned char *)base + base->hm_mdoff);
 }
 
-//? .. c:function:: _Bool scc_hashmap_emplace(void *map, struct scc_hashmap_base *base, size_t keysize, size_t valsize)
-//?
-//?     Emplace the given key-value pair in the map. Return :code:`true` if the
-//?     key already existed in the map. The value is inserted regardless.
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param map: Hash map handle
-//?     :param base: Base address of the map
-//?     :param keysize: Size of the key type
-//?     :param valsize: Size of the value type
-//?     :returns: :code:`true` if the key already existed in the map, otherwise :code:`false`
 bool scc_hashmap_emplace(void *map, struct scc_hashmap_base *base, size_t keysize, size_t valsize) {
     scc_hash_type hash = base->hm_hash(map, keysize);
     unsigned long long index = scc_hashmap_impl_probe_insert(base, map, keysize, hash);
@@ -173,27 +81,6 @@ bool scc_hashmap_emplace(void *map, struct scc_hashmap_base *base, size_t keysiz
     return duplicate;
 }
 
-//? .. c:function:: struct scc_hashmap_base *scc_hashmap_realloc(<dnl>
-//?        void *restrict *newmap, void const *map, <dnl>
-//?        struct scc_hashmap_base const *base, size_t keysize, <dnl>
-//?        size_t valsize, size_t cap)
-//?
-//?     Allocate a new hash map, fill in the fields of its base and return
-//?     the address of the latter.
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param newmap: Address of a new handle to be used for referring to
-//?                    the soon-to-be newly allocated map
-//?     :param map: Handle to the original map
-//?     :param base: Base address of the original map
-//?     :param keysize: Size of the key type
-//?     :param valsize: Size of the value type
-//?     :cap: Capacity of the new map
-//?     :returns: Base address of a newly allocated hash map, or :code:`NULL`
-//?               on allocation failure.
 static struct scc_hashmap_base *scc_hashmap_realloc(
     void *restrict *newmap,
     void const *map,
@@ -262,24 +149,6 @@ static struct scc_hashmap_base *scc_hashmap_realloc(
     return newbase;
 }
 
-//? .. c:function:: _Bool scc_hashmap_rehash(<dnl>
-//?        void **map, struct scc_hashmap_base *base, <dnl>
-//?        size_t keysize, size_t valsize, size_t cap)
-//?
-//?     Reallocate and rehash the hash map. On success, :c:texpr:`*map`
-//?     is updated to refer to the new map and :code:`true` is
-//?     returned. On failure, :c:texpr:`*map` is left unchanged.
-//?
-//?     .. note::
-//?
-//?         Internal use only
-//?
-//?     :param map: Address of the map handle
-//?     :param base: Base address of the hash map
-//?     :param keysize: Size of the key type
-//?     :param valsize: Size of the value type
-//?     :param cap: Capacity of the new map
-//?     :returns: :code:`true` on successful rehashing, :code:`false` otherwise
 static bool scc_hashmap_rehash(
     void **map,
     struct scc_hashmap_base *base,
