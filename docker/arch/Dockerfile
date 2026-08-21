@@ -16,7 +16,7 @@ RUN chown -R builder:builder /home/builder/scc                                  
                                      git                                                \
                                      python{,-sphinx,-pylint}                           \
                                      python-{pytest,pyelftools,pycparser}               \
-                                     python-{sphinx_rtd_theme,breathe}                  \
+                                     python-{sphinx_rtd_theme}                          \
                                      llvm                                               \
                                      ruby                                               \
                                      cmake                                              \

@@ -75,7 +75,6 @@ $(call include-node,scc)
 $(call include-node,submodules)
 $(call include-node,lib)
 $(call include-node,test)
-$(call include-node,docs)
 $(call include-node,benchmark)
 
 $(dirs):
@@ -105,9 +104,6 @@ clean:
 
 .PHONY: distclean
 distclean: clean
-
-.PHONY: docs
-docs:
 
 tags: FORCE
 	$(call echo-gen,$@)
