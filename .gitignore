@@ -9,6 +9,8 @@ crash-*
 slow-unit-*
 scc/config.h
 
+.venv
+
 submodules/*.stamp
 
 test/fuzz/corpora/btmap/*
