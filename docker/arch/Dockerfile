@@ -14,6 +14,7 @@ RUN chown -R builder:builder /home/builder/scc                                  
                                      gcc                                                \
                                      gdb                                                \
                                      git                                                \
+                                     pdf2svg                                            \
                                      python{,-sphinx,-pylint}                           \
                                      python-{pytest,pyelftools,pycparser}               \
                                      python-{sphinx_rtd_theme}                          \
@@ -21,6 +22,7 @@ RUN chown -R builder:builder /home/builder/scc                                  
                                      ruby                                               \
                                      cmake                                              \
                                      doxygen                                            \
+                                     texlive                                            \
                                      rust                                           &&  \
     cargo install --path /home/builder/scc/submodules/conftool --root /usr/local
 
