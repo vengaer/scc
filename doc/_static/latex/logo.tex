@@ -1,0 +1,28 @@
+\documentclass[%
+    crop,tikz,convert={%
+        outext=.svg,command=\unexpanded{pdf2svg \infile\space\outfile}%
+    },multi=false%
+]{standalone}[]
+
+\usepackage{uncial}
+\usepackage[T1]{fontenc}
+
+\usetikzlibrary{calc}
+
+\makeatletter
+\begin{document}
+    \begin{tikzpicture}
+        \node[circle,draw=black,fill=white] (root) at (0, 0) {};
+
+        \node[circle,draw=black,fill=white] (lchild) at ($(root.south) - (0.75, 0.25)$) {};
+
+        \node (rchild) at ($(root.south) + (0.25, -0.4)$) {\unclfamily\Large{}C};
+        \node (rrchild) at ($(rchild.south) - (0.5, 0.25)$) {\unclfamily\Large{}S};
+        \node (rlchild) at ($(rchild.south) + (0.5, -0.25)$) {\unclfamily\Large{}C};
+
+        \draw (root) -- (lchild);
+        \draw (root) -- (rchild);
+        \draw (rchild) -- (rlchild);
+        \draw (rchild) -- (rrchild);
+    \end{tikzpicture}
+\end{document}
