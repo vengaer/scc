@@ -30,3 +30,8 @@ test/fuzz/corpora/svec/*
 !test/fuzz/corpora/rbmap/corpus_*
 !test/fuzz/corpora/rbtree/corpus_*
 !test/fuzz/corpora/svec/corpus_*
+
+*.aux
+*.log
+*.pdf
+*.svg
