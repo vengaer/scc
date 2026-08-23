@@ -35,3 +35,4 @@ test/fuzz/corpora/svec/*
 *.log
 *.pdf
 *.svg
+!/doc/_static/images/logo.svg
