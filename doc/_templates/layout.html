@@ -1,0 +1,21 @@
+{% extends "!layout.html" %}
+{% block document %}
+  {{ super() }}
+{% endblock %}
+{% block menu %}
+  <div data-nosnippet>
+    {{ super() }}
+    {% if reference_links %}
+    <div class="toctree-wrapper compound">
+      <p class="caption"><span class="caption-text">References:</span></p>
+      <ul>
+        {% for title, url in reference_links.items() %}
+        <li class="toctree-l1">
+          <a class="reference internal" href="{{ url }}">{{ title }}</a>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  </div>
+{% endblock %}
