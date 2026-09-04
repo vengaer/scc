@@ -1,8 +1,8 @@
 #include "avx2_trampoline.h"
 #include "hash_find_probe.h"
 
-    .section .note.GNU-stack, "", @progbits
-    .section .text
+.section .note.GNU-stack, "", @progbits
+.section .text
 
 # Probe for value in hash table
 #

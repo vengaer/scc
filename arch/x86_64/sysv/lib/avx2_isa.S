@@ -1,4 +1,4 @@
-    .section .data
+.section .data
 
 .globl scc_simd_support
     .align 4
@@ -6,8 +6,8 @@ scc_simd_support:                                               # Used to cache 
     .long 2                                                     #  - 0 -> not supported
                                                                 #  - 1 -> supported
                                                                 #  - 2 -> unknown, call scc_impl_have_avx2 to set
-    .section .note.GNU-stack, "", @progbits
-    .section .text
+.section .note.GNU-stack, "", @progbits
+.section .text
 
 # Check for avx2 support. The value is cached in scc_avx2_support
 # upon query. Intended for use with the avx2_trampoline macro.

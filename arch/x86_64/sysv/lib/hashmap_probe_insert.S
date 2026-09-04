@@ -1,8 +1,8 @@
 #include "avx2_trampoline.h"
 #include "hash_insert_probe.h"
 
-    .section .note.GNU-stack, "", @progbits
-    .section .text
+.section .note.GNU-stack, "", @progbits
+.section .text
 
 # Probe for empty slot to insert in. The hash map is
 # assumed to have at least two vacant slots.
