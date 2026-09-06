@@ -1,0 +1,45 @@
+# Copyright (c) 2026 Vilhelm Engström
+# Copyright (c) 2018-2026 The Zephyr project and its contributors
+#
+# SPDX-License-Identifier: Apache-2.0
+
+BasedOnStyle: LLVM
+AlignConsecutiveMacros: AcrossComments
+AllowShortBlocksOnASingleLine: Never
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortEnumsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+BitFieldColonSpacing: After
+BreakBeforeBraces: Linux
+ColumnLimit: 100
+ForEachMacros:
+  - scc_arena_foreach_chunk
+  - scc_dequeue_foreach
+  - scc_hashtab_foreach
+  - scc_rbmap_foreach
+  - scc_rbmap_foreach_reversed
+  - scc_rbtree_foreach
+  - scc_rbtree_foreach_reversed
+  - scc_vec_foreach
+  - scc_vec_foreach_by
+  - scc_vec_foreach_reversed
+  - scc_vec_foreach_reversed_by
+IncludeCategories:
+  - Regex: '^".*\.h"$'
+    Priority: 0
+  - Regex: '^\<scc/.*\.h\>$'
+    Priority: 1
+  - Regex: '^<(assert|complex|ctype|errno|fenv|float|inttypes|limits|locale|math|setjmp|signal|stdarg|stdbool|stddef|stdint|stdio|stdlib|string|tgmath|time|wchar|wctype)\.h>$'
+    Priority: 2
+  - Regex: '.*'
+    Priority: 3
+IndentCaseLabels: false
+IndentWidth: 4
+InsertBraces: false
+InsertNewlineAtEOF: true
+SpaceBeforeParens: ControlStatementsExceptControlMacros
+SortIncludes:
+  Enabled: true
+UseTab: Never
