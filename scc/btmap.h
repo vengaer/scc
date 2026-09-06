@@ -1,9 +1,9 @@
 #ifndef SCC_BTMAP_H
 #define SCC_BTMAP_H
 
-#include "arena.h"
-#include "btree.h"
-#include "mem.h"
+#include <scc/arena.h>
+#include <scc/btree.h>
+#include <scc/mem.h>
 
 #include <stddef.h>
 

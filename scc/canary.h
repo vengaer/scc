@@ -1,7 +1,7 @@
 #ifndef SCC_CANARY_H
 #define SCC_CANARY_H
 
-#include "pp_token.h"
+#include <scc/pp_token.h>
 
 #include <stddef.h>
 

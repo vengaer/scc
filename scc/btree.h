@@ -1,10 +1,10 @@
 #ifndef SCC_BTREE_H
 #define SCC_BTREE_H
 
-#include "arena.h"
-#include "bits.h"
-#include "bug.h"
-#include "mem.h"
+#include <scc/arena.h>
+#include <scc/bits.h>
+#include <scc/bug.h>
+#include <scc/mem.h>
 
 #include <stddef.h>
 

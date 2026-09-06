@@ -1,14 +1,14 @@
 #ifndef SCC_HASHMAP_H
 #define SCC_HASHMAP_H
 
-#include "arch.h"
-#include "bits.h"
-#include "bug.h"
-#include "canary.h"
-#include "config.h"
-#include "hash.h"
-#include "mem.h"
-#include "perf.h"
+#include <scc/arch.h>
+#include <scc/bits.h>
+#include <scc/bug.h>
+#include <scc/canary.h>
+#include <scc/config.h>
+#include <scc/hash.h>
+#include <scc/mem.h>
+#include <scc/perf.h>
 
 #include <stddef.h>
 

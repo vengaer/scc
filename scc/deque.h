@@ -1,9 +1,9 @@
 #ifndef SCC_DEQUE_H
 #define SCC_DEQUE_H
 
-#include "bits.h"
-#include "bug.h"
-#include "mem.h"
+#include <scc/bits.h>
+#include <scc/bug.h>
+#include <scc/mem.h>
 
 #include <stddef.h>
 

@@ -1,8 +1,8 @@
 #ifndef SCC_ARENA_H
 #define SCC_ARENA_H
 
-#include "bug.h"
-#include "mem.h"
+#include <scc/bug.h>
+#include <scc/mem.h>
 
 #include <stddef.h>
 

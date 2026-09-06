@@ -1,9 +1,9 @@
 #ifndef SCC_VEC_H
 #define SCC_VEC_H
 
-#include "bug.h"
-#include "mem.h"
-#include "pp_token.h"
+#include <scc/bug.h>
+#include <scc/mem.h>
+#include <scc/pp_token.h>
 
 #include <stddef.h>
 

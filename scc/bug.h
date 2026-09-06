@@ -3,7 +3,7 @@
 
 #include <assert.h>
 
-#include "pp_token.h"
+#include <scc/pp_token.h>
 
 #ifdef NDEBUG
 #define scc_bug_on(expr) (void)(expr)

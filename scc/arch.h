@@ -1,8 +1,8 @@
 #ifndef SCC_ARCH_H
 #define SCC_ARCH_H
 
-#include "config.h"
-#include "pp_token.h"
+#include <scc/config.h>
+#include <scc/pp_token.h>
 
 #include <stddef.h>
 

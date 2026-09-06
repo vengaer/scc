@@ -1,7 +1,7 @@
 #ifndef SCC_SWAR_H
 #define SCC_SWAR_H
 
-#include "bug.h"
+#include <scc/bug.h>
 
 #include <assert.h>
 #include <limits.h>
