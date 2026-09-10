@@ -1,3 +1,4 @@
+/* 64 bit murmur3 hash. Original available at
  * https://github.com/aappleby/smhasher */
 
 #include <scc/bug.h>
