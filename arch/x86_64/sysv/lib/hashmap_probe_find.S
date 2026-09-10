@@ -1,3 +1,9 @@
+#
+# Copyright (c) 2023 Vilhelm Engström
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
 #include "avx2_trampoline.h"
 #include "hash_find_probe.h"
 

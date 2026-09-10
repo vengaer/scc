@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2026 Vilhelm Engström
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #include <scc/deque.h>
 
 #include <assert.h>

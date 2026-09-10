@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2023 Vilhelm Engström
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef SCC_SWAR_H
 #define SCC_SWAR_H
 

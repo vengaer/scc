@@ -1,3 +1,9 @@
+#
+# Copyright (c) 2023 Vilhelm Engström
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
 #ifndef HASH_FIND_PROBE_H
 #define HASH_FIND_PROBE_H
 

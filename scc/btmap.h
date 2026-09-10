@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2022 Vilhelm Engström
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef SCC_BTMAP_H
 #define SCC_BTMAP_H
 

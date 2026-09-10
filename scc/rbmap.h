@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2022 Vilhelm Engström
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef SCC_RBMAP_H
 #define SCC_RBMAP_H
 

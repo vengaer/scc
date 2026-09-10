@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2023 Vilhelm Engström
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #include <scc/arch.h>
 #include <scc/bug.h>
 #include <scc/hashmap.h>

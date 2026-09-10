@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2026 Vilhelm Engström
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef SCC_BLOOM_H
 #define SCC_BLOOM_H
 

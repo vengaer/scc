@@ -1,3 +1,9 @@
+#
+# Copyright (c) 2023 Vilhelm Engström
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
 #ifndef AVX2_TRAMPOLINE_H
 #define AVX2_TRAMPOLINE_H
 

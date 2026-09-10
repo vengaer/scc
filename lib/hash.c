@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2023 Vilhelm Engström
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #include <scc/hash.h>
 
 scc_hash_type scc_hash_fnv1a(void const *data, size_t size);

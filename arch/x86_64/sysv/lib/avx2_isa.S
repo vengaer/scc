@@ -1,3 +1,9 @@
+#
+# Copyright (c) 2023 Vilhelm Engström
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
 .section .data
 
 .globl scc_simd_support
