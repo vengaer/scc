@@ -18,36 +18,36 @@ void scc_rbmap_clear(void *map);
 void scc_rbmap_free(void *map);
 void const *scc_rbmap_impl_iterstop(void const *map);
 
-static inline struct scc_rbnode_base *scc_rbmap_leftmost(struct scc_rbnode_base *root) {
+static inline struct scc_rbnode_base *scc_rbmap_leftmost(struct scc_rbnode_base *root)
+{
     while (!scc_rbnode_thread(root, scc_rbdir_left)) {
         root = root->rn_left;
     }
     return root;
 }
 
-static inline struct scc_rbnode_base *scc_rbmap_rightmost(struct scc_rbnode_base *root) {
+static inline struct scc_rbnode_base *scc_rbmap_rightmost(struct scc_rbnode_base *root)
+{
     while (!scc_rbnode_thread(root, scc_rbdir_right)) {
         root = root->rn_right;
     }
     return root;
 }
 
-static inline void const *scc_rbmnode_key(
-    struct scc_rbtree_base const *restrict base,
-    void const *restrict node
-) {
+static inline void const *scc_rbmnode_key(struct scc_rbtree_base const *restrict base,
+                                          void const *restrict node)
+{
     return scc_rbnode_value_qual(base, node, const);
 }
 
-static inline void *scc_rbmnode_value(
-    struct scc_rbtree_base const *restrict base,
-    void *restrict node,
-    size_t valoff
-) {
+static inline void *scc_rbmnode_value(struct scc_rbtree_base const *restrict base,
+                                      void *restrict node, size_t valoff)
+{
     return (unsigned char *)scc_rbnode_value(base, node) + valoff;
 }
 
-_Bool scc_rbmap_impl_insert(void *rbmapaddr, size_t elemsize, size_t valoff) {
+_Bool scc_rbmap_impl_insert(void *rbmapaddr, size_t elemsize, size_t valoff)
+{
     unsigned char *addr = scc_rbtree_impl_generic_insert(rbmapaddr, elemsize);
     if (!addr) {
         return false;
@@ -63,7 +63,8 @@ _Bool scc_rbmap_impl_insert(void *rbmapaddr, size_t elemsize, size_t valoff) {
     return true;
 }
 
-void *scc_rbmap_impl_find(void *map, size_t valoff) {
+void *scc_rbmap_impl_find(void *map, size_t valoff)
+{
     struct scc_rbtree_base *base = scc_rbtree_impl_base(map);
     struct scc_rbnode_base *p = (void *)&base->rb_sentinel;
     struct scc_rbnode_base *n = base->rb_root;
@@ -85,19 +86,22 @@ void *scc_rbmap_impl_find(void *map, size_t valoff) {
     return 0;
 }
 
-void *scc_rbmap_impl_leftmost_pair(void *map) {
+void *scc_rbmap_impl_leftmost_pair(void *map)
+{
     struct scc_rbtree_base *base = scc_rbtree_impl_base(map);
     struct scc_rbnode_base *leftmost = scc_rbmap_leftmost(base->rb_root);
     return scc_rbnode_value(base, leftmost);
 }
 
-void *scc_rbmap_impl_rightmost_pair(void *map) {
+void *scc_rbmap_impl_rightmost_pair(void *map)
+{
     struct scc_rbtree_base *base = scc_rbtree_impl_base(map);
     struct scc_rbnode_base *rightmost = scc_rbmap_rightmost(base->rb_root);
     return scc_rbnode_value(base, rightmost);
 }
 
-void *scc_rbmap_impl_successor(void *iter) {
+void *scc_rbmap_impl_successor(void *iter)
+{
     struct scc_rbnode_base *node = scc_rbnode_impl_base(iter);
     size_t const offset = (unsigned char const *)iter - (unsigned char const *)node;
     if (scc_rbnode_thread(node, scc_rbdir_right)) {
@@ -110,7 +114,8 @@ void *scc_rbmap_impl_successor(void *iter) {
     return (unsigned char *)node + offset;
 }
 
-void *scc_rbmap_impl_predecessor(void *iter) {
+void *scc_rbmap_impl_predecessor(void *iter)
+{
     struct scc_rbnode_base *node = scc_rbnode_impl_base(iter);
     size_t const offset = (unsigned char const *)iter - (unsigned char const *)node;
     if (scc_rbnode_thread(node, scc_rbdir_left)) {
