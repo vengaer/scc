@@ -24,19 +24,24 @@ void scc_deque_clear(void *deque);
 void *scc_deque_impl_iter_start(void *deque, size_t elemsize);
 void *scc_deque_impl_iter_end(void *deque, size_t elemsize);
 
-static inline bool scc_deque_get_dynalloc(void const *deque) {
+static inline bool scc_deque_get_dynalloc(void const *deque)
+{
     return ((unsigned char const *)deque)[-1];
 }
 
-static inline void scc_deque_set_dynalloc(void *deque) {
+static inline void scc_deque_set_dynalloc(void *deque)
+{
     ((unsigned char *)deque)[-1] = 1;
 }
 
-static inline size_t scc_deque_bytesize(size_t capacity, size_t elemsize, size_t npad) {
+static inline size_t scc_deque_bytesize(size_t capacity, size_t elemsize, size_t npad)
+{
     return capacity * elemsize + sizeof(struct scc_deque_base) + npad;
 }
 
-static struct scc_deque_base *scc_deque_alloc(size_t capacity, size_t size, size_t elemsize, size_t npad) {
+static struct scc_deque_base *scc_deque_alloc(size_t capacity, size_t size, size_t elemsize,
+                                              size_t npad)
+{
     size_t const nbytes = scc_deque_bytesize(capacity, elemsize, npad);
     struct scc_deque_base *base = malloc(nbytes);
     if (!base) {
@@ -50,7 +55,8 @@ static struct scc_deque_base *scc_deque_alloc(size_t capacity, size_t size, size
     return base;
 }
 
-static bool scc_deque_grow(void **dequeaddr, size_t newcap, size_t elemsize) {
+static bool scc_deque_grow(void **dequeaddr, size_t newcap, size_t elemsize)
+{
     size_t const npad = scc_deque_impl_npad(*dequeaddr);
     struct scc_deque_base *prev = scc_deque_impl_base(*dequeaddr);
     struct scc_deque_base *base = scc_deque_alloc(newcap, prev->rd_size, elemsize, npad);
@@ -78,14 +84,16 @@ static bool scc_deque_grow(void **dequeaddr, size_t newcap, size_t elemsize) {
     return true;
 }
 
-void *scc_deque_impl_new(struct scc_deque_base *base, size_t offset, size_t capacity) {
+void *scc_deque_impl_new(struct scc_deque_base *base, size_t offset, size_t capacity)
+{
     base->rd_capacity = capacity;
     unsigned char *handle = (unsigned char *)base + offset;
     handle[-2] = offset - sizeof(*base) - 2 * sizeof(*handle);
     return handle;
 }
 
-void *scc_deque_impl_new_dyn(size_t dequesz, size_t offset, size_t capacity) {
+void *scc_deque_impl_new_dyn(size_t dequesz, size_t offset, size_t capacity)
+{
     struct scc_deque_base *base = calloc(dequesz, sizeof(unsigned char));
     if (!base) {
         return 0;
@@ -96,13 +104,15 @@ void *scc_deque_impl_new_dyn(size_t dequesz, size_t offset, size_t capacity) {
     return deque;
 }
 
-void scc_deque_free(void *deque) {
+void scc_deque_free(void *deque)
+{
     if (scc_deque_get_dynalloc(deque)) {
         free(scc_deque_impl_base(deque));
     }
 }
 
-bool scc_deque_impl_prepare_push(void *dequeaddr, size_t elemsize) {
+bool scc_deque_impl_prepare_push(void *dequeaddr, size_t elemsize)
+{
     struct scc_deque_base *base = scc_deque_impl_base(*(void **)dequeaddr);
     if (base->rd_size < base->rd_capacity) {
         return true;
@@ -111,14 +121,16 @@ bool scc_deque_impl_prepare_push(void *dequeaddr, size_t elemsize) {
     return scc_deque_grow(dequeaddr, newcap, elemsize);
 }
 
-bool scc_deque_impl_reserve(void *dequeaddr, size_t capacity, size_t elemsize) {
+bool scc_deque_impl_reserve(void *dequeaddr, size_t capacity, size_t elemsize)
+{
     struct scc_deque_base *base = scc_deque_impl_base(*(void **)dequeaddr);
     if (base->rd_capacity >= capacity) {
         return true;
     }
     if (!scc_bits_is_power_of_2(capacity)) {
         unsigned shifts;
-        for (shifts = 0u; capacity; capacity >>= 1u, ++shifts);
+        for (shifts = 0u; capacity; capacity >>= 1u, ++shifts)
+            ;
         capacity = 1u << shifts;
     }
 
@@ -126,7 +138,8 @@ bool scc_deque_impl_reserve(void *dequeaddr, size_t capacity, size_t elemsize) {
     return scc_deque_grow(dequeaddr, capacity, elemsize);
 }
 
-void *scc_deque_impl_clone(void const *deque, size_t elemsize) {
+void *scc_deque_impl_clone(void const *deque, size_t elemsize)
+{
     struct scc_deque_base const *obase = scc_deque_impl_base_qual(deque, const);
     size_t const basesz = (unsigned char const *)deque - (unsigned char const *)obase;
     size_t const bytesz = obase->rd_capacity * elemsize + basesz;
@@ -143,7 +156,8 @@ void *scc_deque_impl_clone(void const *deque, size_t elemsize) {
     return ndeque;
 }
 
-void *scc_deque_impl_iter_next(void *it, void *deque, size_t elemsize) {
+void *scc_deque_impl_iter_next(void *it, void *deque, size_t elemsize)
+{
     struct scc_deque_base const *base = scc_deque_impl_base_qual(deque, const);
     size_t off = (unsigned char const *)it - (unsigned char const *)deque;
     off /= elemsize;
