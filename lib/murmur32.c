@@ -21,11 +21,13 @@
 
 #ifdef SCC_HAVE_UINT32_T
 
-static inline uint_fast32_t scc_rol32(uint32_t value, uint_fast8_t by) {
+static inline uint_fast32_t scc_rol32(uint32_t value, uint_fast8_t by)
+{
     return (value << by) | (value >> (32u - by));
 }
 
-static inline uint_fast32_t scc_fmix32(uint32_t h) {
+static inline uint_fast32_t scc_fmix32(uint32_t h)
+{
     h ^= h >> 16u;
     h *= UINT32_C(0x85ebca6b);
     h ^= h >> 13u;
@@ -35,7 +37,8 @@ static inline uint_fast32_t scc_fmix32(uint32_t h) {
 }
 
 static inline void scc_murmur32_128_main_calc(uint32_t hs[static restrict 4u],
-                    uint32_t ks[static restrict 4u]) {
+                                              uint32_t ks[static restrict 4u])
+{
     ks[0u] *= SCC_MURMUR32_C1;
     ks[0u] = scc_rol32(ks[0u], 15u);
     ks[0u] *= SCC_MURMUR32_C2;
@@ -78,7 +81,8 @@ static inline void scc_murmur32_128_main_calc(uint32_t hs[static restrict 4u],
 }
 
 static inline void scc_murmur32_128_unaligned_main(uint32_t hs[static restrict 4u],
-                    void const *restrict data, size_t size) {
+                                                   void const *restrict data, size_t size)
+{
     unsigned long res = (unsigned long)data & (scc_alignof(uint32_t) - 1u);
     uint32_t tmp = UINT32_C(0);
     memcpy((unsigned char *)&tmp + sizeof(uint32_t) - res, data, res);
@@ -108,7 +112,8 @@ static inline void scc_murmur32_128_unaligned_main(uint32_t hs[static restrict 4
 }
 
 static inline void scc_murmur32_128_aligned_main(uint32_t hs[static restrict 4u],
-                    void const *restrict data, size_t size) {
+                                                 void const *restrict data, size_t size)
+{
     uint32_t const *p32 = data;
     uint32_t ks[4u];
     for (unsigned i = 0u; i < size >> 4u; ++i) {
@@ -121,15 +126,18 @@ static inline void scc_murmur32_128_aligned_main(uint32_t hs[static restrict 4u]
 }
 
 static inline void scc_murmur32_128_residual(uint32_t hs[static restrict 4u],
-                    void const *restrict data, size_t size) {
+                                             void const *restrict data, size_t size)
+{
     unsigned char const *p = data;
     p += size & ~15u;
 
-    uint32_t ks[4u] = { 0 };
+    uint32_t ks[4u] = {0};
 
     switch (size & 15u) {
-    case 15u: ks[3u] ^= p[14u] << 16u;
-    case 14u: ks[3u] ^= p[13u] << 8u;
+    case 15u:
+        ks[3u] ^= p[14u] << 16u;
+    case 14u:
+        ks[3u] ^= p[13u] << 8u;
     case 13u:
         ks[3u] ^= p[12u];
         ks[3u] *= SCC_MURMUR32_C4;
@@ -137,9 +145,12 @@ static inline void scc_murmur32_128_residual(uint32_t hs[static restrict 4u],
         ks[3u] *= SCC_MURMUR32_C1;
         hs[3u] ^= ks[3u];
         /* fallthrough */
-    case 12u: ks[2u] ^= p[11u] << 24u;
-    case 11u: ks[2u] ^= p[10u] << 16u;
-    case 10u: ks[2u] ^= p[9u] << 8u;
+    case 12u:
+        ks[2u] ^= p[11u] << 24u;
+    case 11u:
+        ks[2u] ^= p[10u] << 16u;
+    case 10u:
+        ks[2u] ^= p[9u] << 8u;
     case 9u:
         ks[2u] ^= p[8u];
         ks[2u] *= SCC_MURMUR32_C3;
@@ -147,9 +158,12 @@ static inline void scc_murmur32_128_residual(uint32_t hs[static restrict 4u],
         ks[2u] *= SCC_MURMUR32_C4;
         hs[2u] ^= ks[2u];
         /* fallthrough */
-    case 8u: ks[1u] ^= p[7u] << 24u;
-    case 7u: ks[1u] ^= p[6u] << 16u;
-    case 6u: ks[1u] ^= p[5u] << 8u;
+    case 8u:
+        ks[1u] ^= p[7u] << 24u;
+    case 7u:
+        ks[1u] ^= p[6u] << 16u;
+    case 6u:
+        ks[1u] ^= p[5u] << 8u;
     case 5u:
         ks[1u] ^= p[4u];
         ks[1u] *= SCC_MURMUR32_C2;
@@ -157,9 +171,12 @@ static inline void scc_murmur32_128_residual(uint32_t hs[static restrict 4u],
         ks[1u] *= SCC_MURMUR32_C3;
         hs[1u] ^= ks[1u];
         /* fallthrough */
-    case 4u: ks[0u] ^= p[3u] << 24u;
-    case 3u: ks[0u] ^= p[2u] << 16u;
-    case 2u: ks[0u] ^= p[1u] << 8u;
+    case 4u:
+        ks[0u] ^= p[3u] << 24u;
+    case 3u:
+        ks[0u] ^= p[2u] << 16u;
+    case 2u:
+        ks[0u] ^= p[1u] << 8u;
     case 1u:
         ks[0u] ^= p[0u];
         ks[0u] *= SCC_MURMUR32_C1;
@@ -170,11 +187,12 @@ static inline void scc_murmur32_128_residual(uint32_t hs[static restrict 4u],
     }
 }
 
-void scc_murmur32_128(struct scc_digest128 *digest, void const *data,
-        size_t size, uint_fast32_t seed) {
-    uint32_t hs[] = { seed, seed, seed, seed };
+void scc_murmur32_128(struct scc_digest128 *digest, void const *data, size_t size,
+                      uint_fast32_t seed)
+{
+    uint32_t hs[] = {seed, seed, seed, seed};
 
-   if ((unsigned long)data & (scc_alignof(uint32_t) - 1u))
+    if ((unsigned long)data & (scc_alignof(uint32_t) - 1u))
         scc_murmur32_128_unaligned_main(hs, data, size);
     else
         scc_murmur32_128_aligned_main(hs, data, size);
