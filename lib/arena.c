@@ -12,7 +12,8 @@
 
 void scc_arena_reset(struct scc_arena *arena);
 
-static struct scc_chunk *scc_chunk_new(size_t chunksize, size_t elemsize, size_t baseoff) {
+static struct scc_chunk *scc_chunk_new(size_t chunksize, size_t elemsize, size_t baseoff)
+{
     size_t const size = chunksize * elemsize + baseoff;
     struct scc_chunk *chunk = malloc(size);
     if (!chunk) {
@@ -28,20 +29,24 @@ static struct scc_chunk *scc_chunk_new(size_t chunksize, size_t elemsize, size_t
     return chunk;
 }
 
-static inline bool scc_chunk_contains_addr(struct scc_chunk const *chunk, void const *addr) {
+static inline bool scc_chunk_contains_addr(struct scc_chunk const *chunk, void const *addr)
+{
     return addr <= (void const *)((unsigned char const *)chunk + chunk->ch_end) &&
            (void const *)chunk < addr;
 }
 
-void scc_arena_release(struct scc_arena *arena) {
+void scc_arena_release(struct scc_arena *arena)
+{
     struct scc_chunk *iter;
     struct scc_chunk *hare;
-    scc_arena_foreach_chunk_safe(iter, hare, arena) {
+    scc_arena_foreach_chunk_safe(iter, hare, arena)
+    {
         free(iter);
     }
 }
 
-void *scc_arena_alloc(struct scc_arena *arena) {
+void *scc_arena_alloc(struct scc_arena *arena)
+{
     size_t const chunksize = arena->ar_chunksize;
     size_t const elemsize = arena->ar_elemsize;
     size_t const baseoff = arena->ar_baseoff;
@@ -75,8 +80,11 @@ void *scc_arena_alloc(struct scc_arena *arena) {
     return (unsigned char *)chunk + chunk->ch_offset;
 }
 
-_Bool scc_arena_reserve(struct scc_arena *arena, size_t nelems) {
-    if (arena->ar_current && arena->ar_current->ch_end - arena->ar_current->ch_offset >= nelems * arena->ar_elemsize) {
+_Bool scc_arena_reserve(struct scc_arena *arena, size_t nelems)
+{
+    if (arena->ar_current &&
+        arena->ar_current->ch_end - arena->ar_current->ch_offset >= nelems * arena->ar_elemsize)
+    {
         /* Enough space in chunk */
         return true;
     }
@@ -105,10 +113,12 @@ _Bool scc_arena_reserve(struct scc_arena *arena, size_t nelems) {
     return true;
 }
 
-_Bool scc_arena_try_free(struct scc_arena *restrict arena, void const *restrict addr) {
+_Bool scc_arena_try_free(struct scc_arena *restrict arena, void const *restrict addr)
+{
     struct scc_chunk *iter;
     struct scc_chunk *tortoise;
-    scc_arena_foreach_chunk_lagging(iter, tortoise, arena) {
+    scc_arena_foreach_chunk_lagging(iter, tortoise, arena)
+    {
         if (scc_chunk_contains_addr(iter, addr)) {
             break;
         }
@@ -133,6 +143,7 @@ _Bool scc_arena_try_free(struct scc_arena *restrict arena, void const *restrict 
     return true;
 }
 
-void scc_arena_free(struct scc_arena *restrict arena, void const *restrict addr) {
+void scc_arena_free(struct scc_arena *restrict arena, void const *restrict addr)
+{
     scc_bug_on(!scc_arena_try_free(arena, addr));
 }
