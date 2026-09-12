@@ -13,58 +13,66 @@
 #include <stdlib.h>
 #include <string.h>
 
-enum { SCC_HASHMAP_OCCUPIED = 0x80 };
-enum { SCC_HASHMAP_VACATED = 0x7f };
-enum { SCC_HASHMAP_HASHSHIFT = 57 };
+enum {
+    SCC_HASHMAP_OCCUPIED = 0x80
+};
+enum {
+    SCC_HASHMAP_VACATED = 0x7f
+};
+enum {
+    SCC_HASHMAP_HASHSHIFT = 57
+};
 
 size_t scc_hashmap_impl_bkpad(void const *map);
 size_t scc_hashmap_capacity(void const *map);
 size_t scc_hashmap_size(void const *map);
 
-static inline void scc_hashmap_set_mdent(
-    scc_hashmap_metatype *md,
-    size_t index,
-    scc_hashmap_metatype val,
-    size_t capacity
-) {
+static inline void scc_hashmap_set_mdent(scc_hashmap_metatype *md, size_t index,
+                                         scc_hashmap_metatype val, size_t capacity)
+{
     md[index] = val;
     if (index < SCC_HASHMAP_GUARDSZ) {
         md[index + capacity] = val;
     }
 }
 
-static inline unsigned char scc_hashmap_calcpad(size_t coff) {
-    size_t const fwoff = coff -
-        offsetof(struct scc_hashmap_base, hm_fwoff) -
-        sizeof(((struct scc_hashmap_base *)0)->hm_fwoff);
+static inline unsigned char scc_hashmap_calcpad(size_t coff)
+{
+    size_t const fwoff = coff - offsetof(struct scc_hashmap_base, hm_fwoff) -
+                         sizeof(((struct scc_hashmap_base *)0)->hm_fwoff);
     assert(fwoff <= UCHAR_MAX);
     return fwoff;
 }
 
-static inline void scc_hashmap_set_bkoff(void *map, unsigned char bkoff) {
+static inline void scc_hashmap_set_bkoff(void *map, unsigned char bkoff)
+{
     ((unsigned char *)map)[-1] = bkoff;
 }
 
-static inline bool scc_hashmap_should_rehash(struct scc_hashmap_base const *base) {
+static inline bool scc_hashmap_should_rehash(struct scc_hashmap_base const *base)
+{
     /* Rehash at 87.5% */
-    return base->hm_size > (base->hm_capacity >> 1u) +
-                           (base->hm_capacity >> 2u) +
-                           (base->hm_capacity >> 3u);
+    return base->hm_size >
+           (base->hm_capacity >> 1u) + (base->hm_capacity >> 2u) + (base->hm_capacity >> 3u);
 }
 
-static inline size_t scc_hashmap_sizeup(struct scc_hashmap_base const *base) {
+static inline size_t scc_hashmap_sizeup(struct scc_hashmap_base const *base)
+{
     return base->hm_capacity << 1u;
 }
 
-static inline void *scc_hashmap_vals(struct scc_hashmap_base *base) {
+static inline void *scc_hashmap_vals(struct scc_hashmap_base *base)
+{
     return (unsigned char *)base + base->hm_valoff;
 }
 
-static inline scc_hashmap_metatype *scc_hashmap_metadata(struct scc_hashmap_base *base) {
+static inline scc_hashmap_metatype *scc_hashmap_metadata(struct scc_hashmap_base *base)
+{
     return (void *)((unsigned char *)base + base->hm_mdoff);
 }
 
-bool scc_hashmap_emplace(void *map, struct scc_hashmap_base *base, size_t keysize, size_t valsize) {
+bool scc_hashmap_emplace(void *map, struct scc_hashmap_base *base, size_t keysize, size_t valsize)
+{
     scc_hash_type hash = base->hm_hash(map, keysize);
     unsigned long long index = scc_hashmap_impl_probe_insert(base, map, keysize, hash);
     bool duplicate = index & SCC_HASHMAP_DUPLICATE;
@@ -81,20 +89,17 @@ bool scc_hashmap_emplace(void *map, struct scc_hashmap_base *base, size_t keysiz
     void const *src = (unsigned char *)map + keysize + base->hm_valpad;
     memcpy(dst, src, valsize);
 
-    scc_hashmap_metatype ent = (scc_hashmap_metatype)(SCC_HASHMAP_OCCUPIED | (hash >> SCC_HASHMAP_HASHSHIFT));
+    scc_hashmap_metatype ent =
+        (scc_hashmap_metatype)(SCC_HASHMAP_OCCUPIED | (hash >> SCC_HASHMAP_HASHSHIFT));
     scc_hashmap_metatype *md = scc_hashmap_metadata(base);
     scc_hashmap_set_mdent(md, index, ent, base->hm_capacity);
     return duplicate;
 }
 
-static struct scc_hashmap_base *scc_hashmap_realloc(
-    void *restrict *newmap,
-    void const *map,
-    struct scc_hashmap_base const *base,
-    size_t keysize,
-    size_t valsize,
-    size_t cap
-) {
+static struct scc_hashmap_base *scc_hashmap_realloc(void *restrict *newmap, void const *map,
+                                                    struct scc_hashmap_base const *base,
+                                                    size_t keysize, size_t valsize, size_t cap)
+{
     assert(scc_bits_is_power_of_2(cap));
 
     /* Size of map up to and including hm_curr */
@@ -155,15 +160,12 @@ static struct scc_hashmap_base *scc_hashmap_realloc(
     return newbase;
 }
 
-static bool scc_hashmap_rehash(
-    void **map,
-    struct scc_hashmap_base *base,
-    size_t keysize,
-    size_t valsize,
-    size_t cap
-) {
+static bool scc_hashmap_rehash(void **map, struct scc_hashmap_base *base, size_t keysize,
+                               size_t valsize, size_t cap)
+{
     void *newmap;
-    struct scc_hashmap_base *newbase = scc_hashmap_realloc(&newmap, *map, base, keysize, valsize, cap);
+    struct scc_hashmap_base *newbase =
+        scc_hashmap_realloc(&newmap, *map, base, keysize, valsize, cap);
     if (!newbase) {
         return false;
     }
@@ -179,7 +181,8 @@ static bool scc_hashmap_rehash(
             /* Copy key */
             memcpy(newmap, keybase + i * keysize, keysize);
             /* Copy value */
-            memcpy((unsigned char *)newmap + keysize + base->hm_valpad, valbase + i * valsize, valsize);
+            memcpy((unsigned char *)newmap + keysize + base->hm_valpad, valbase + i * valsize,
+                   valsize);
             (void)scc_hashmap_emplace(newmap, newbase, keysize, valsize);
             --base->hm_size;
         }
@@ -194,9 +197,13 @@ static bool scc_hashmap_rehash(
     return true;
 }
 
-void *scc_hashmap_impl_new(struct scc_hashmap_base *base, size_t coff, size_t valoff, size_t keysize) {
+void *scc_hashmap_impl_new(struct scc_hashmap_base *base, size_t coff, size_t valoff,
+                           size_t keysize)
+{
     scc_static_assert(sizeof(scc_hashmap_metatype) == 1u);
-    scc_canary_init((unsigned char *)base + base->hm_mdoff + base->hm_capacity + SCC_HASHMAP_GUARDSZ, SCC_HASHMAP_CANARYSZ);
+    scc_canary_init((unsigned char *)base + base->hm_mdoff + base->hm_capacity +
+                        SCC_HASHMAP_GUARDSZ,
+                    SCC_HASHMAP_CANARYSZ);
 
     size_t const valpad = valoff - keysize;
     assert(valpad <= UCHAR_MAX);
@@ -207,7 +214,9 @@ void *scc_hashmap_impl_new(struct scc_hashmap_base *base, size_t coff, size_t va
     return map;
 }
 
-void *scc_hashmap_impl_new_dyn(struct scc_hashmap_base const *sbase, size_t mapsize, size_t coff, size_t valoff, size_t keysize) {
+void *scc_hashmap_impl_new_dyn(struct scc_hashmap_base const *sbase, size_t mapsize, size_t coff,
+                               size_t valoff, size_t keysize)
+{
     struct scc_hashmap_base *base = calloc(mapsize, sizeof(unsigned char));
     if (!base) {
         return 0;
@@ -220,14 +229,16 @@ void *scc_hashmap_impl_new_dyn(struct scc_hashmap_base const *sbase, size_t maps
     return map;
 }
 
-void scc_hashmap_free(void *map) {
+void scc_hashmap_free(void *map)
+{
     struct scc_hashmap_base *base = scc_hashmap_impl_base(map);
     if (base->hm_dynalloc) {
         free(base);
     }
 }
 
-bool scc_hashmap_impl_insert(void *mapaddr, size_t keysize, size_t valsize) {
+bool scc_hashmap_impl_insert(void *mapaddr, size_t keysize, size_t valsize)
+{
     struct scc_hashmap_base *base = scc_hashmap_impl_base(*(void **)mapaddr);
     if (scc_hashmap_should_rehash(base)) {
         size_t const newcap = scc_hashmap_sizeup(base);
@@ -244,7 +255,8 @@ bool scc_hashmap_impl_insert(void *mapaddr, size_t keysize, size_t valsize) {
     return true;
 }
 
-void *scc_hashmap_impl_find(void *map, size_t keysize, size_t valsize) {
+void *scc_hashmap_impl_find(void *map, size_t keysize, size_t valsize)
+{
     struct scc_hashmap_base *base = scc_hashmap_impl_base(map);
     if (!base->hm_size) {
         return 0;
@@ -262,7 +274,8 @@ void *scc_hashmap_impl_find(void *map, size_t keysize, size_t valsize) {
     return (void *)(valbase + index * valsize);
 }
 
-bool scc_hashmap_impl_remove(void *map, size_t keysize) {
+bool scc_hashmap_impl_remove(void *map, size_t keysize)
+{
     struct scc_hashmap_base *base = scc_hashmap_impl_base(map);
     if (!base->hm_size) {
         return false;
@@ -283,7 +296,8 @@ bool scc_hashmap_impl_remove(void *map, size_t keysize) {
     return true;
 }
 
-void scc_hashmap_clear(void *map) {
+void scc_hashmap_clear(void *map)
+{
     struct scc_hashmap_base *base = scc_hashmap_impl_base(map);
     scc_hashmap_metatype *md = scc_hashmap_metadata(base);
     scc_static_assert(sizeof(*md) == 1u);
@@ -291,7 +305,8 @@ void scc_hashmap_clear(void *map) {
     base->hm_size = 0u;
 }
 
-void *scc_hashmap_clone(void const *map) {
+void *scc_hashmap_clone(void const *map)
+{
     struct scc_hashmap_base const *obase = scc_hashmap_impl_base_qual(map, const);
     scc_static_assert(sizeof(scc_hashmap_metatype) == 1);
     size_t sz = obase->hm_mdoff + obase->hm_capacity + SCC_HASHMAP_GUARDSZ;
@@ -305,5 +320,6 @@ void *scc_hashmap_clone(void const *map) {
     }
     scc_memcpy(nbase, obase, sz);
     nbase->hm_dynalloc = 1;
-    return (unsigned char *)nbase + offsetof(struct scc_hashmap_base, hm_fwoff) + nbase->hm_fwoff + sizeof(nbase->hm_fwoff);
+    return (unsigned char *)nbase + offsetof(struct scc_hashmap_base, hm_fwoff) + nbase->hm_fwoff +
+           sizeof(nbase->hm_fwoff);
 }
