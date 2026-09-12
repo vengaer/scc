@@ -11,7 +11,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-enum { SCC_VEC_MAX_CAPACITY_INCREASE = 4096 };
+enum {
+    SCC_VEC_MAX_CAPACITY_INCREASE = 4096
+};
 
 size_t scc_vec_impl_npad(void const *vec);
 size_t scc_vec_size(void const *vec);
@@ -20,18 +22,21 @@ bool scc_vec_empty(void const *vec);
 void scc_vec_clear(void *vec);
 bool scc_vec_is_allocd(void const *vec);
 
-static inline size_t scc_vec_bytesize(size_t capacity, size_t elemsize, size_t npad) {
+static inline size_t scc_vec_bytesize(size_t capacity, size_t elemsize, size_t npad)
+{
     return capacity * elemsize + sizeof(struct scc_vec_base) + npad;
 }
 
-static inline size_t scc_vec_calc_new_capacity(size_t current) {
+static inline size_t scc_vec_calc_new_capacity(size_t current)
+{
     if (current > SCC_VEC_MAX_CAPACITY_INCREASE) {
         return current + SCC_VEC_MAX_CAPACITY_INCREASE;
     }
     return current << 1u | 1u;
 }
 
-static struct scc_vec_base *scc_vec_alloc(size_t nbytes, size_t nelems, size_t npad) {
+static struct scc_vec_base *scc_vec_alloc(size_t nbytes, size_t nelems, size_t npad)
+{
     struct scc_vec_base *v = malloc(nbytes);
     if (!v) {
         return 0;
@@ -42,7 +47,8 @@ static struct scc_vec_base *scc_vec_alloc(size_t nbytes, size_t nelems, size_t n
     return v;
 }
 
-static bool scc_vec_grow(void *restrict *vec, size_t capacity, size_t elemsize) {
+static bool scc_vec_grow(void *restrict *vec, size_t capacity, size_t elemsize)
+{
     struct scc_vec_base *v;
     size_t const npad = scc_vec_impl_npad(*vec);
     size_t const nbytes = scc_vec_bytesize(capacity, elemsize, npad);
@@ -66,14 +72,16 @@ static bool scc_vec_grow(void *restrict *vec, size_t capacity, size_t elemsize) 
     return true;
 }
 
-void *scc_vec_impl_new(struct scc_vec_base *base, size_t offset, size_t capacity) {
+void *scc_vec_impl_new(struct scc_vec_base *base, size_t offset, size_t capacity)
+{
     base->sv_capacity = capacity;
     unsigned char *vec = (unsigned char *)base + offset;
     vec[-2] = offset - sizeof(*base) - 2 * sizeof(*vec);
     return vec;
 }
 
-void *scc_vec_impl_new_dyn(size_t vecsz, size_t offset, size_t capacity) {
+void *scc_vec_impl_new_dyn(size_t vecsz, size_t offset, size_t capacity)
+{
     struct scc_vec_base *base = calloc(vecsz, sizeof(unsigned char));
     if (!base) {
         return 0;
@@ -84,7 +92,8 @@ void *scc_vec_impl_new_dyn(size_t vecsz, size_t offset, size_t capacity) {
     return vec;
 }
 
-void *scc_vec_impl_from(void *restrict vec, void const *restrict data, size_t size, size_t elemsize) {
+void *scc_vec_impl_from(void *restrict vec, void const *restrict data, size_t size, size_t elemsize)
+{
     if (size > scc_vec_capacity(vec) && !scc_vec_grow(&vec, size, elemsize)) {
         return 0;
     }
@@ -93,7 +102,9 @@ void *scc_vec_impl_from(void *restrict vec, void const *restrict data, size_t si
     return vec;
 }
 
-void *scc_vec_impl_from_dyn(size_t basecap, size_t offset, void const *data, size_t size, size_t elemsize) {
+void *scc_vec_impl_from_dyn(size_t basecap, size_t offset, void const *data, size_t size,
+                            size_t elemsize)
+{
     size_t vecsz = offset + basecap * elemsize;
     if (basecap < size) {
         scc_when_mutating(assert(basecap < size));
@@ -112,7 +123,8 @@ void *scc_vec_impl_from_dyn(size_t basecap, size_t offset, void const *data, siz
     return vec;
 }
 
-bool scc_vec_impl_resize(void *vecaddr, size_t size, size_t elemsize) {
+bool scc_vec_impl_resize(void *vecaddr, size_t size, size_t elemsize)
+{
     size_t const currsize = scc_vec_size(*(void **)vecaddr);
 
     if (!size) {
@@ -136,7 +148,8 @@ bool scc_vec_impl_resize(void *vecaddr, size_t size, size_t elemsize) {
     return true;
 }
 
-void scc_vec_impl_erase(void *vec, size_t index, size_t elemsize) {
+void scc_vec_impl_erase(void *vec, size_t index, size_t elemsize)
+{
     --scc_vec_impl_base(vec)->sv_size;
     if (index == scc_vec_size(vec)) {
         /* Last element */
@@ -147,7 +160,8 @@ void scc_vec_impl_erase(void *vec, size_t index, size_t elemsize) {
     memmove(dstaddr, dstaddr + elemsize, nbytes);
 }
 
-void scc_vec_impl_erase_range(void *vec, size_t first, size_t end, size_t elemsize) {
+void scc_vec_impl_erase_range(void *vec, size_t first, size_t end, size_t elemsize)
+{
     if (end <= first) {
         return;
     }
@@ -167,7 +181,8 @@ void scc_vec_impl_erase_range(void *vec, size_t first, size_t end, size_t elemsi
     memmove(dstaddr, srcaddr, nbytes);
 }
 
-bool scc_vec_impl_push_ensure_capacity(void *vec, size_t elemsize) {
+bool scc_vec_impl_push_ensure_capacity(void *vec, size_t elemsize)
+{
     size_t const capacity = scc_vec_capacity(*(void **)vec);
     if (scc_vec_size(*(void **)vec) < capacity) {
         return true;
@@ -175,20 +190,23 @@ bool scc_vec_impl_push_ensure_capacity(void *vec, size_t elemsize) {
     return scc_vec_grow(vec, scc_vec_calc_new_capacity(capacity), elemsize);
 }
 
-bool scc_vec_impl_reserve(void *vec, size_t capacity, size_t elemsize) {
+bool scc_vec_impl_reserve(void *vec, size_t capacity, size_t elemsize)
+{
     if (capacity <= scc_vec_capacity(*(void **)vec)) {
         return true;
     }
     return scc_vec_grow(vec, capacity, elemsize);
 }
 
-void scc_vec_free(void *vec) {
+void scc_vec_free(void *vec)
+{
     if (scc_vec_is_allocd(vec)) {
         free(scc_vec_impl_base(vec));
     }
 }
 
-void *scc_vec_impl_clone(void const *vec, size_t elemsize) {
+void *scc_vec_impl_clone(void const *vec, size_t elemsize)
+{
     struct scc_vec_base const *obase = scc_vec_impl_base_qual(vec, const);
     size_t basesz = (unsigned char const *)vec - (unsigned char const *)obase;
     size_t bytesz = basesz + obase->sv_capacity * elemsize;
